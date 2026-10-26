@@ -29,7 +29,9 @@ from services.email_service import (
 
 
 SEED_CATALOG: List[Dict[str, Any]] = [
-    # --- CHÓ CẢNH ---
+    # =========================================================================
+    # 1. ĐẦY ĐỦ 20 GIỐNG CHÓ CẢNH THUẦN CHỦNG (TRÊN MEGA-MENU)
+    # =========================================================================
     {
         "sku": "DOG-PET-001",
         "name": "Chó Schnauzer Tiêu Muối Thuần Chủng (2.5 tháng)",
@@ -61,7 +63,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "price": 7900000,
         "stock": 2,
         "image_url": "https://images.unsplash.com/photo-1612536057832-2ff7ead58194?auto=format&fit=crop&w=700&q=80",
-        "description": "Corgi mông trái tim thuần chủng, khung xương to, chân lùn đáng yêu, tính cách vui vẻ hoạt bát, bảo hành sức khỏe 30 ngày.",
+        "description": "Corgi mông trái tim thuần chủng, khung xương to, chân lùn đáng yêu, tính cách vui vẻ hoạt bát, bảo hành sức khỏe 15 ngày.",
     },
     {
         "sku": "DOG-PET-004",
@@ -96,7 +98,164 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "image_url": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=700&q=80",
         "description": "Shiba Inu mặt bánh bao hay cười, tính cách sạch sẽ, trung thành, đầy đủ giấy tờ tiêm chủng.",
     },
-    # --- MÈO CẢNH ---
+    {
+        "sku": "DOG-PET-007",
+        "name": "Chó Chihuahua Mini Lông Ngắn Màu Kem (2 tháng)",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Chihuahua",
+        "price": 4200000,
+        "stock": 3,
+        "image_url": "https://images.unsplash.com/photo-1605897472359-85e4b94d685d?auto=format&fit=crop&w=700&q=80",
+        "description": "Chihuahua kích thước nhỏ nhắn, lanh lợi, cực kỳ quấn chủ và thích hợp nuôi trong căn hộ chung cư.",
+    },
+    {
+        "sku": "DOG-PET-008",
+        "name": "Chó Labrador Retriever Màu Vàng Hoàng Kim",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Labrador",
+        "price": 5800000,
+        "stock": 3,
+        "image_url": "https://images.unsplash.com/photo-1591160690555-5debfba289f0?auto=format&fit=crop&w=700&q=80",
+        "description": "Labrador thông minh top đầu thế giới, hiền hòa, dễ huấn luyện và rất trung thành với gia đình.",
+    },
+    {
+        "sku": "DOG-PET-009",
+        "name": "Chó Alaska Malamute Giant Nâu Đỏ (2.5 tháng)",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Alaska",
+        "price": 8500000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1568572933382-74d440642117?auto=format&fit=crop&w=700&q=80",
+        "description": "Bé Alaska khung xương to khỏe, lông dày 2 lớp, tính cách hiền lành, quấn người và ăn uống rất tốt.",
+    },
+    {
+        "sku": "DOG-PET-010",
+        "name": "Chó Husky Sibir Mắt Xanh Màu Xám Trắng",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Husky",
+        "price": 7500000,
+        "stock": 3,
+        "image_url": "https://images.unsplash.com/photo-1605568427561-40dd23c2acea?auto=format&fit=crop&w=700&q=80",
+        "description": "Husky đôi mắt xanh băng giá cực đẹp, biểu cảm hài hước đáng yêu, đã tiêm đủ 2 mũi phòng bệnh.",
+    },
+    {
+        "sku": "DOG-PET-011",
+        "name": "Chó Akita Inu Thuần Chủng Nhật Bản",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Akita",
+        "price": 12500000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=700&q=80",
+        "description": "Quốc khuyển Nhật Bản nổi tiếng trung thành, dáng đứng uy vệ, khỏe mạnh và điềm đạm.",
+    },
+    {
+        "sku": "DOG-PET-012",
+        "name": "Chó Samoyed Trắng Tuyết Nụ Cười Thiên Thần",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Samoyed",
+        "price": 8800000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1529472119196-cb724127a98e?auto=format&fit=crop&w=700&q=80",
+        "description": "Samoyed bộ lông trắng muốt như mây, khuôn mặt luôn tươi cười, thân thiện và dịu dàng.",
+    },
+    {
+        "sku": "DOG-PET-013",
+        "name": "Chó Chow Chow Sư Tử Xù Màu Vàng Kem",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Chow Chow",
+        "price": 9200000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=700&q=80",
+        "description": "Bé Chow Chow dáng gấu mũm mĩm, bờm lông xù quanh cổ như sư tử nhỏ cực kỳ ngộ nghĩnh.",
+    },
+    {
+        "sku": "DOG-PET-014",
+        "name": "Chó Pug Mặt Xệ Màu Vàng Kim (2 tháng tuổi)",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Pug Mặt Xệ",
+        "price": 4500000,
+        "stock": 4,
+        "image_url": "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=700&q=80",
+        "description": "Pug mặt xệ mắt tròn xoe biểu cảm đáng yêu, lông ngắn dễ chăm sóc, ăn khỏe và rất hiền.",
+    },
+    {
+        "sku": "DOG-PET-015",
+        "name": "Chó Bull Pháp (French Bulldog) Màu Bò Sữa",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Bull Pháp",
+        "price": 8200000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1583512603805-3cc6b41f3edb?auto=format&fit=crop&w=700&q=80",
+        "description": "Bull Pháp tai dơi cơ bắp săn chắc, tính tình vui nhộn, ít sủa, rất hợp nuôi trong gia đình.",
+    },
+    {
+        "sku": "DOG-PET-016",
+        "name": "Chó Phú Quốc Xoáy Lưng Thuần Chủng",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Phú Quốc",
+        "price": 4600000,
+        "stock": 3,
+        "image_url": "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?auto=format&fit=crop&w=700&q=80",
+        "description": "Chó Phú Quốc xoáy kiếm rõ nét, chân màng vịt, cực kỳ khôn ngoan, khỏe mạnh và trung thành.",
+    },
+    {
+        "sku": "DOG-PET-017",
+        "name": "Chó Becgie Đức (German Shepherd) Lưng Gù",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Becgie Đức",
+        "price": 6800000,
+        "stock": 3,
+        "image_url": "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?auto=format&fit=crop&w=700&q=80",
+        "description": "Becgie Đức chuẩn phả hệ, thần kinh tốt, thông minh tuyệt vời trong việc canh gác và bảo vệ chủ.",
+    },
+    {
+        "sku": "DOG-PET-018",
+        "name": "Chó Beagle Săn Thỏ Tam Thể (Tricolor)",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Beagle",
+        "price": 5500000,
+        "stock": 3,
+        "image_url": "https://images.unsplash.com/photo-1505628346881-b72b27e84530?auto=format&fit=crop&w=700&q=80",
+        "description": "Beagle tai cụp dài, bộ lông 3 màu bóng mượt, tính cách năng động, hòa đồng với mọi người.",
+    },
+    {
+        "sku": "DOG-PET-019",
+        "name": "Chó Bichon Frise Trắng Bông Xù (2.5 tháng)",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Bichon Frise",
+        "price": 6900000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?auto=format&fit=crop&w=700&q=80",
+        "description": "Bichon Frise đầu tròn như kẹo bông gòn trắng tinh khôi, không hôi, không rụng lông.",
+    },
+    {
+        "sku": "DOG-PET-020",
+        "name": "Chó Lạp Xưởng (Dachshund) Chân Ngắn Màu Nâu Đỏ",
+        "category": "Chó cảnh",
+        "pet_type": "Chó",
+        "breed": "Chó Lạp Xưởng",
+        "price": 4300000,
+        "stock": 3,
+        "image_url": "https://images.unsplash.com/photo-1612195583950-b8fd34c87093?auto=format&fit=crop&w=700&q=80",
+        "description": "Bé Lạp Xưởng thân dài chân ngắn ngộ nghĩnh, thông minh, lanh lợi và cực kỳ tình cảm.",
+    },
+
+    # =========================================================================
+    # 2. ĐẦY ĐỦ 12 GIỐNG MÈO CẢNH THUẦN CHỦNG (TRÊN MEGA-MENU)
+    # =========================================================================
     {
         "sku": "CAT-PET-001",
         "name": "Mèo Anh Lông Ngắn Màu Xám Xanh (British Shorthair)",
@@ -141,7 +300,98 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "image_url": "https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&w=700&q=80",
         "description": "Giống mèo công chúa Ragdoll bộ lông dài mềm mại và đôi mắt xanh biếc, hiền lành và dịu dàng.",
     },
-    # --- THỨC ĂN, VỆ SINH, PHỤ KIỆN, ĐỒ CHƠI, Y TẾ ---
+    {
+        "sku": "CAT-PET-005",
+        "name": "Mèo Anh Lông Dài (ALD) Màu Trắng Tuyết Mắt Xanh",
+        "category": "Mèo cảnh",
+        "pet_type": "Mèo",
+        "breed": "Mèo Anh Lông Dài (ALD)",
+        "price": 5200000,
+        "stock": 3,
+        "image_url": "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=700&q=80",
+        "description": "Mèo Anh Lông Dài bộ lông bông xù quý phái, tính cách nhẹ nhàng, quấn chủ và đã tiêm phòng đầy đủ.",
+    },
+    {
+        "sku": "CAT-PET-006",
+        "name": "Mèo Ba Tư (Persian) Mặt Tịt Lông Dài Màu Vàng Kem",
+        "category": "Mèo cảnh",
+        "pet_type": "Mèo",
+        "breed": "Mèo Ba Tư (Persian)",
+        "price": 5800000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=700&q=80",
+        "description": "Mèo Ba Tư khuôn mặt bầu bĩnh đáng yêu, tính tình hiền lành, thích nằm lòng chủ vuốt ve.",
+    },
+    {
+        "sku": "CAT-PET-007",
+        "name": "Mèo Bengal Vân Báo Đốm Hoang Dã",
+        "category": "Mèo cảnh",
+        "pet_type": "Mèo",
+        "breed": "Mèo Bengal",
+        "price": 8900000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=700&q=80",
+        "description": "Mèo Bengal sở hữu bộ lông hoa hồng vân báo rừng cực chất, thông minh, nhanh nhẹn và khỏe mạnh.",
+    },
+    {
+        "sku": "CAT-PET-008",
+        "name": "Mèo Rừng Na Uy Khổng Lồ Maine Coon",
+        "category": "Mèo cảnh",
+        "pet_type": "Mèo",
+        "breed": "Mèo Maine Coon",
+        "price": 11500000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1561948955-570b270e7c36?auto=format&fit=crop&w=700&q=80",
+        "description": "Giống mèo khổng lồ Maine Coon với chùm lông tai linh miêu oai vệ nhưng tính cách cực kỳ ngọt ngào.",
+    },
+    {
+        "sku": "CAT-PET-009",
+        "name": "Mèo Xiêm (Siamese) Hoàng Gia Mắt Xanh Sapphire",
+        "category": "Mèo cảnh",
+        "pet_type": "Mèo",
+        "breed": "Mèo Xiêm (Siamese)",
+        "price": 3800000,
+        "stock": 3,
+        "image_url": "https://images.unsplash.com/photo-1513245543132-31f507417b26?auto=format&fit=crop&w=700&q=80",
+        "description": "Mèo Xiêm điểm màu tai và mặt đặc trưng, thông minh, lanh lợi và cực kỳ gắn bó với chủ nhân.",
+    },
+    {
+        "sku": "CAT-PET-010",
+        "name": "Mèo Nga Mắt Xanh (Russian Blue) Lông Nhung Xám Bạc",
+        "category": "Mèo cảnh",
+        "pet_type": "Mèo",
+        "breed": "Mèo Nga Mắt Xanh",
+        "price": 6400000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1511044568932-338cba0ad803?auto=format&fit=crop&w=700&q=80",
+        "description": "Bộ lông xám ánh bạc mịn như nhung cùng đôi mắt xanh lục bảo quyến rũ, sạch sẽ và ít rụng lông.",
+    },
+    {
+        "sku": "CAT-PET-011",
+        "name": "Mèo Sphynx Không Lông Ai Cập Cá Tính",
+        "category": "Mèo cảnh",
+        "pet_type": "Mèo",
+        "breed": "Mèo Sphynx Không Lông",
+        "price": 13500000,
+        "stock": 2,
+        "image_url": "https://images.unsplash.com/photo-1548802673-380ab8ebc7b7?auto=format&fit=crop&w=700&q=80",
+        "description": "Mèo Sphynx hoàn toàn không rụng lông, da ấm áp, cực kỳ thông minh và thân thiện với người dị ứng lông.",
+    },
+    {
+        "sku": "CAT-PET-012",
+        "name": "Mèo Mỹ Lông Ngắn (American Shorthair) Vân Tabby Bạc",
+        "category": "Mèo cảnh",
+        "pet_type": "Mèo",
+        "breed": "Mèo Mỹ Lông Ngắn",
+        "price": 4900000,
+        "stock": 3,
+        "image_url": "https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?auto=format&fit=crop&w=700&q=80",
+        "description": "Mèo Mỹ Lông Ngắn vân xoáy cổ điển sắc nét, sức đề kháng cao, dễ ăn và rất giỏi bắt chuột.",
+    },
+
+    # =========================================================================
+    # 3. THỨC ĂN, VỆ SINH, PHỤ KIỆN, ĐỒ CHƠI & Y TẾ CHO CHÓ MÈO
+    # =========================================================================
     {
         "sku": "CAT-FD-001",
         "name": "Hạt Royal Canin Indoor 27 Cho Mèo (2kg)",
@@ -274,7 +524,7 @@ def init_db_and_seed() -> None:
         if "image_url" not in prod_cols:
             db.execute("ALTER TABLE products ADD COLUMN image_url TEXT DEFAULT ''")
 
-    # Đồng bộ hoặc bổ sung các sản phẩm/thú cưng mẫu nếu chưa có hoặc chưa có ảnh
+    # Tự động đồng bộ các sản phẩm/thú cưng từ SEED_CATALOG sang Database (khi người dùng sửa ảnh/tên/giá trong SEED_CATALOG)
     existing_by_sku = {p.sku: p for p in Product.iter_all()}
     for item in SEED_CATALOG:
         sku = item["sku"]
@@ -283,10 +533,10 @@ def init_db_and_seed() -> None:
         else:
             existing = existing_by_sku[sku]
             changed = False
-            if not getattr(existing, "image_url", ""):
+            if item.get("image_url") and getattr(existing, "image_url", "") != item["image_url"]:
                 existing.image_url = item["image_url"]
                 changed = True
-            if not getattr(existing, "breed", "") and item.get("breed"):
+            if item.get("breed") and getattr(existing, "breed", "") != item["breed"]:
                 existing.breed = item["breed"]
                 changed = True
             if changed:
