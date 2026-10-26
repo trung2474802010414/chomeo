@@ -5,7 +5,8 @@ và CLO4 (Sử dụng thành thạo thư viện Python: urllib, json, xml.etree.
 """
 
 import json
-from typing import Any, Dict, List
+import time
+from typing import Any, Dict, List, Tuple
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -14,6 +15,10 @@ import xml.etree.ElementTree as ET
 
 from core.orm import ValidationError
 from models.product import Product
+
+# Bộ nhớ đệm (In-Memory Cache) cho kết quả gọi API qua urllib để trang tải tức thì (< 5ms)
+_BREED_API_CACHE: Dict[Tuple[str, str], Tuple[float, List[Dict[str, Any]], str]] = {}
+_CACHE_TTL_SECONDS = 900.0  # Lưu cache 15 phút
 
 # Dữ liệu dự phòng khi máy tính chấm bài không kết nối Internet
 FALLBACK_BREEDS: Dict[str, List[Dict[str, str]]] = {
@@ -118,16 +123,29 @@ def fetch_pet_breeds_via_urllib(
     source_mode = "Internet Live API (urllib.request)"
     raw_breeds: List[Dict[str, Any]] = []
 
-    try:
-        req = urllib.request.Request(endpoint, headers=headers, method="GET")
-        with urllib.request.urlopen(req, timeout=4.5) as response:
-            raw_json = response.read().decode("utf-8")
-            parsed = json.loads(raw_json)
-            if isinstance(parsed, list):
-                raw_breeds = parsed
-    except Exception as exc:
-        source_mode = f"Chế độ Offline Dự phòng ({type(exc).__name__})"
-        raw_breeds = FALLBACK_BREEDS[species_key]
+    cache_key = (species_key, effective_key)
+    now_ts = time.time()
+    cached_entry = _BREED_API_CACHE.get(cache_key)
+
+    if cached_entry and (now_ts - cached_entry[0]) < _CACHE_TTL_SECONDS:
+        raw_breeds = cached_entry[1]
+        source_mode = cached_entry[2]
+    else:
+        try:
+            req = urllib.request.Request(endpoint, headers=headers, method="GET")
+            with urllib.request.urlopen(req, timeout=1.5) as response:
+                raw_json = response.read().decode("utf-8")
+                parsed = json.loads(raw_json)
+                if isinstance(parsed, list) and parsed:
+                    raw_breeds = parsed
+                    _BREED_API_CACHE[cache_key] = (now_ts, raw_breeds, source_mode)
+                else:
+                    raw_breeds = FALLBACK_BREEDS[species_key]
+        except Exception as exc:
+            source_mode = f"Chế độ Offline Dự phòng ({type(exc).__name__})"
+            raw_breeds = FALLBACK_BREEDS[species_key]
+            # Lưu cache ngắn 60 giây khi đang mất mạng để tránh chờ timeout liên tục
+            _BREED_API_CACHE[cache_key] = (now_ts - _CACHE_TTL_SECONDS + 60.0, raw_breeds, source_mode)
 
     # Dùng List Comprehension chuẩn hóa cấu trúc dữ liệu từng giống thú cưng
     normalized = [

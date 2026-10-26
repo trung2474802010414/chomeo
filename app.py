@@ -87,15 +87,19 @@ def get_session_cart() -> Dict[str, int]:
 
 
 def build_cart_view_data() -> Tuple[List[Dict[str, Any]], float, int]:
-    """Chuyển giỏ hàng trong session thành danh sách chi tiết sản phẩm + tổng tiền."""
+    """Chuyển giỏ hàng trong session thành danh sách chi tiết sản phẩm + tổng tiền (chỉ mở 1 kết nối DB duy nhất)."""
     cart_map = get_session_cart()
+    if not cart_map:
+        return [], 0.0, 0
+
     items: List[Dict[str, Any]] = []
     total_amount = 0.0
     total_count = 0
 
+    product_by_id = {p.id: p for p in Product.iter_all()}
     for pid_str, qty in list(cart_map.items()):
         try:
-            prod = Product.get_by_id(int(pid_str))
+            prod = product_by_id.get(int(pid_str))
         except ValueError:
             prod = None
         if not prod or qty <= 0:
@@ -123,7 +127,8 @@ def build_cart_view_data() -> Tuple[List[Dict[str, Any]], float, int]:
 @app.context_processor
 def inject_global_template_vars() -> Dict[str, Any]:
     """Tự động truyền số lượng món trong giỏ hàng, trạng thái Admin và danh sách Giống chó/mèo vào mọi template Jinja2."""
-    _, _, count = build_cart_view_data()
+    cart_map = get_session_cart()
+    count = sum(max(0, int(v)) for v in cart_map.values() if isinstance(v, (int, str)) and str(v).isdigit())
     return {
         "cart_count": count,
         "is_admin": bool(session.get("admin_logged_in")),
@@ -156,8 +161,9 @@ def admin_required(view_func: Callable) -> Callable:
 @app.route("/")
 def home_page():
     """Trang chủ: Banner, Sản phẩm nổi bật và Tra cứu nhanh Đơn hàng / Lịch hẹn."""
-    stats = compute_dashboard_stats()
-    featured_page = query_products(page=1, page_size=6)
+    all_prods = [p.to_dict() for p in Product.iter_all(order_by="id DESC")]
+    featured_products = all_prods[:6]
+    stats = {"total_products": len(all_prods)}
     lookup_phone = request.args.get("lookup_phone", "").strip()
     lookup_result = None
 
@@ -174,7 +180,7 @@ def home_page():
         "home.html",
         active_page="home",
         stats=stats,
-        featured_products=featured_page["items"],
+        featured_products=featured_products,
         lookup_phone=lookup_phone,
         lookup_result=lookup_result,
     )
@@ -318,14 +324,12 @@ def spa_page():
         else:
             flash("Vui lòng kiểm tra lại các thông tin báo đỏ trên biểu mẫu.", "error")
 
-    recent_bookings = [b.to_dict() for b in list(SpaBooking.iter_all())[:8]]
     return render_template(
         "spa.html",
         active_page="spa",
         form=form,
         spa_services=SPA_SERVICES,
         default_date=default_date,
-        recent_bookings=recent_bookings,
     )
 
 
@@ -595,10 +599,10 @@ def admin_page():
         end_date = today_str
 
     stats = compute_dashboard_stats(start_date=start_date, end_date=end_date)
-    products = [p.to_dict() for p in Product.iter_all(order_by="id DESC")]
-    bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")]
-    orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")]
-    email_logs = [e.to_dict() for e in EmailLog.iter_all(order_by="id DESC")]
+    products = [p.to_dict() for p in Product.iter_all(order_by="id DESC")] if admin_tab == "products" else []
+    bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")] if admin_tab == "bookings" else []
+    orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")] if admin_tab == "orders" else []
+    email_logs = [e.to_dict() for e in EmailLog.iter_all(order_by="id DESC")] if admin_tab == "emails" else []
     xml_preview = export_products_to_xml() if admin_tab == "import_export" else ""
 
     return render_template(
@@ -817,7 +821,7 @@ def flask_api_bridge(subpath: str):
 def run_server(host: str = "127.0.0.1", port: int = 8000) -> None:
     init_db_and_seed()
     print(f"=== Flask Server Meow & Woof Pet Shop đang chạy tại: http://{host}:{port} ===")
-    app.run(host=host, port=port, debug=False)
+    app.run(host=host, port=port, debug=False, threaded=True)
 
 
 if __name__ == "__main__":
