@@ -334,6 +334,32 @@ def compute_dashboard_stats() -> Dict[str, Any]:
     # 5. Generator Expression tính doanh thu từ đơn hàng & dịch vụ Spa (không tính lịch đã hủy)
     order_revenue = sum(o.total_amount for o in orders)
     spa_revenue = sum(b.total_price for b in bookings if b.status != "Đã hủy")
+    net_revenue = order_revenue + spa_revenue
+
+    active_bookings = [b for b in bookings if b.status != "Đã hủy"]
+    pending_bookings_count = sum(1 for b in bookings if b.status in ("Chờ xác nhận", "Đã xác nhận"))
+    cancelled_bookings_count = sum(1 for b in bookings if b.status == "Đã hủy")
+    total_transactions = len(orders) + len(active_bookings)
+    avg_order_value = round(net_revenue / total_transactions, 0) if total_transactions > 0 else 0
+    total_items_sold = sum(item.get("quantity", 0) for o in orders for item in o.items)
+
+    # Tổng hợp danh sách khách hàng thân thiết bằng Dict
+    customers_map: Dict[str, Dict[str, Any]] = {}
+    for o in orders:
+        c = customers_map.setdefault(
+            o.phone,
+            {"name": o.customer_name, "phone": o.phone, "email": o.email, "orders_count": 0, "bookings_count": 0, "total_spent": 0.0},
+        )
+        c["orders_count"] += 1
+        c["total_spent"] += o.total_amount
+    for b in bookings:
+        c = customers_map.setdefault(
+            b.phone,
+            {"name": b.customer_name, "phone": b.phone, "email": b.email, "orders_count": 0, "bookings_count": 0, "total_spent": 0.0},
+        )
+        c["bookings_count"] += 1
+        if b.status != "Đã hủy":
+            c["total_spent"] += b.total_price
 
     return {
         "total_products": len(products),
@@ -346,7 +372,14 @@ def compute_dashboard_stats() -> Dict[str, Any]:
         "order_revenue": order_revenue,
         "total_bookings": len(bookings),
         "spa_revenue": spa_revenue,
+        "net_revenue": net_revenue,
+        "total_transactions": total_transactions,
+        "avg_order_value": avg_order_value,
+        "pending_bookings_count": pending_bookings_count,
+        "cancelled_bookings_count": cancelled_bookings_count,
+        "total_items_sold": total_items_sold,
         "unique_customers_count": len(unique_customer_phones),
+        "customers_list": list(customers_map.values()),
         "categories": CATEGORIES,
         "pet_types": PET_TYPES,
         "spa_services": SPA_SERVICES,

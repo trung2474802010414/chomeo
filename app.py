@@ -571,6 +571,41 @@ def admin_update_booking_status(booking_id: int):
     return redirect(url_for("admin_page", tab="bookings"))
 
 
+@app.route("/admin/bookings/<int:booking_id>/delete", methods=["POST"])
+@admin_required
+def admin_delete_booking(booking_id: int):
+    if SpaBooking.delete_by_id(booking_id):
+        flash(f"Đã xóa lịch hẹn Spa #{booking_id}.", "success")
+    else:
+        flash(f"Không tìm thấy lịch hẹn #{booking_id}.", "error")
+    return redirect(url_for("admin_page", tab="bookings"))
+
+
+@app.route("/admin/orders/<int:order_id>/delete", methods=["POST"])
+@admin_required
+def admin_delete_order(order_id: int):
+    if Order.delete_by_id(order_id):
+        flash(f"Đã xóa đơn hàng #{order_id}.", "success")
+    else:
+        flash(f"Không tìm thấy đơn hàng #{order_id}.", "error")
+    return redirect(url_for("admin_page", tab="orders"))
+
+
+@app.route("/admin/products/import-csv", methods=["POST"])
+@admin_required
+def admin_import_csv():
+    csv_text = request.form.get("csv_text", "").strip()
+    if not csv_text:
+        flash("Nội dung CSV không được để trống.", "error")
+        return redirect(url_for("admin_page", tab="import_export"))
+    summary = import_products_from_csv(csv_text)
+    flash(
+        f"Import CSV hoàn tất: Thêm mới {summary['imported']} sản phẩm, cập nhật {summary['updated']} sản phẩm.",
+        "success",
+    )
+    return redirect(url_for("admin_page", tab="products"))
+
+
 # ============================================================================
 # REST API ENDPOINTS (TƯƠNG THÍCH BỘ KIỂM THỬ & CLIENT)
 # ============================================================================

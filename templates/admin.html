@@ -1,465 +1,721 @@
-{% extends "base.html" %}
-
-{% block title %}Dashboard Quản Trị - Meow &amp; Woof Pet Shop{% endblock %}
-
-{% block content %}
-<div class="section-header">
-    <div>
-        <h1 class="section-title">Dashboard Quản Trị Hệ Thống</h1>
-        <p class="section-subtitle">
-            Xin chào Quản trị viên <strong>{{ admin_user }}</strong> | Tổng hợp số liệu bằng <strong>Comprehensions &amp; Generator Expressions</strong>
-        </p>
-    </div>
-    <div style="display:flex; gap:10px; align-items:center;">
-        <a href="{{ url_for('shop_page') }}" class="btn btn-outline">Xem Cửa hàng (Khách)</a>
-        <a href="{{ url_for('logout_page') }}" class="btn btn-danger">Đăng xuất</a>
-    </div>
-</div>
-
-<!-- 6 Thẻ KPI thống kê tổng quan -->
-<div class="stats-row">
-    <div class="stat-card">
-        <span class="stat-label">Tổng mặt hàng (SKU)</span>
-        <strong class="stat-num">{{ stats.total_products }}</strong>
-    </div>
-    <div class="stat-card teal">
-        <span class="stat-label">Tổng đơn vị tồn kho</span>
-        <strong class="stat-num">{{ stats.total_stock_units }}</strong>
-    </div>
-    <div class="stat-card">
-        <span class="stat-label">Giá trị tồn kho</span>
-        <strong class="stat-num">{{ "{:,.0f}".format(stats.total_inventory_value) }} đ</strong>
-    </div>
-    <div class="stat-card teal">
-        <span class="stat-label">Doanh thu bán hàng ({{ stats.total_orders }} đơn)</span>
-        <strong class="stat-num">{{ "{:,.0f}".format(stats.order_revenue) }} đ</strong>
-    </div>
-    <div class="stat-card">
-        <span class="stat-label">Doanh thu Spa ({{ stats.total_bookings }} lịch)</span>
-        <strong class="stat-num">{{ "{:,.0f}".format(stats.spa_revenue) }} đ</strong>
-    </div>
-    <div class="stat-card teal">
-        <span class="stat-label">Khách hàng duy nhất (Set)</span>
-        <strong class="stat-num">{{ stats.unique_customers_count }}</strong>
-    </div>
-</div>
-
-<!-- Thanh chọn phân mục Quản trị -->
-<div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px;">
-    <a href="{{ url_for('admin_page', tab='dashboard') }}" class="btn {% if admin_tab == 'dashboard' %}btn-primary{% else %}btn-outline{% endif %}">
-        1. Tổng quan Dashboard &amp; Thống kê
-    </a>
-    <a href="{{ url_for('admin_page', tab='products') }}" class="btn {% if admin_tab == 'products' %}btn-primary{% else %}btn-outline{% endif %}">
-        2. Quản lý Sản phẩm ({{ products|length }})
-    </a>
-    <a href="{{ url_for('admin_page', tab='bookings') }}" class="btn {% if admin_tab == 'bookings' %}btn-primary{% else %}btn-outline{% endif %}">
-        3. Quản lý Lịch hẹn Spa ({{ bookings|length }})
-    </a>
-    <a href="{{ url_for('admin_page', tab='orders') }}" class="btn {% if admin_tab == 'orders' %}btn-primary{% else %}btn-outline{% endif %}">
-        4. Quản lý Đơn hàng ({{ orders|length }})
-    </a>
-    <a href="{{ url_for('admin_page', tab='emails') }}" class="btn {% if admin_tab == 'emails' %}btn-primary{% else %}btn-outline{% endif %}">
-        5. Hộp thư Email đã gửi ({{ email_logs|length }})
-    </a>
-</div>
-
-{% if admin_tab == 'dashboard' %}
-<!-- TAB 1: TỔNG QUAN DASHBOARD & BIỂU ĐỒ THỐNG KÊ -->
-<div class="grid-2">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Cơ cấu Giá trị Kho theo Danh mục (Dict Comprehension)</h2>
-        </div>
-        <div class="table-wrap">
-            <table class="clean-table">
-                <thead>
-                    <tr>
-                        <th>Danh mục</th>
-                        <th class="text-center">Số SKU</th>
-                        <th class="text-center">Tồn kho</th>
-                        <th class="text-right">Giá trị kho &amp; Tỷ trọng</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cat_name, cat_info in stats.category_breakdown.items() %}
-                    {% set pct = (cat_info.inventory_value / stats.total_inventory_value * 100) if stats.total_inventory_value > 0 else 0 %}
-                    <tr>
-                        <td><strong>{{ cat_name }}</strong></td>
-                        <td class="text-center">{{ cat_info.product_count }}</td>
-                        <td class="text-center">{{ cat_info.stock_units }}</td>
-                        <td class="text-right">
-                            <div><strong>{{ "{:,.0f}".format(cat_info.inventory_value) }} đ</strong> ({{ "{:.1f}".format(pct) }}%)</div>
-                            <div style="width:100%; height:7px; background:#e2e8f0; border-radius:99px; margin-top:4px; overflow:hidden;">
-                                <div style="width:{{ pct }}%; height:100%; background:var(--secondary); border-radius:99px;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Cảnh báo Sắp hết hàng (List Comprehension: stock &le; 5)</h2>
-            <a href="{{ url_for('admin_page', tab='products') }}" class="btn btn-outline btn-sm">Quản lý kho &rarr;</a>
-        </div>
-        <div class="table-wrap">
-            <table class="clean-table">
-                <thead>
-                    <tr>
-                        <th>SKU</th>
-                        <th>Tên sản phẩm</th>
-                        <th class="text-center">Còn lại</th>
-                        <th class="text-center">Nhập thêm</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lp in stats.low_stock_products %}
-                    <tr>
-                        <td><code>{{ lp.sku }}</code></td>
-                        <td><strong>{{ lp.name }}</strong></td>
-                        <td class="text-center">
-                            <span class="badge {% if lp.stock == 0 %}badge-stock-out{% else %}badge-stock-low{% endif %}">
-                                {{ lp.stock }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <a href="{{ url_for('admin_page', tab='products', edit_id=lp.id) }}" class="btn btn-outline btn-sm">Cập nhật</a>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center" style="color:var(--text-muted);">Tất cả mặt hàng đều còn tồn kho dồi dào (&gt; 5).</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div class="grid-2">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Đơn hàng mới nhất</h2>
-            <a href="{{ url_for('admin_page', tab='orders') }}" class="btn btn-outline btn-sm">Xem tất cả</a>
-        </div>
-        <div class="table-wrap">
-            <table class="clean-table">
-                <thead>
-                    <tr>
-                        <th>Mã ĐH</th>
-                        <th>Khách hàng</th>
-                        <th class="text-right">Tổng tiền</th>
-                        <th>Thời gian</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for o in orders[:5] %}
-                    <tr>
-                        <td><strong>#{{ o.id }}</strong></td>
-                        <td>{{ o.customer_name }} ({{ o.phone }})</td>
-                        <td class="text-right"><strong style="color:var(--primary);">{{ "{:,.0f}".format(o.total_amount) }} đ</strong></td>
-                        <td>{{ o.created_at }}</td>
-                    </tr>
-                    {% else %}
-                    <tr><td colspan="4" class="text-center">Chưa có đơn hàng nào.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Lịch hẹn Spa mới nhất</h2>
-            <a href="{{ url_for('admin_page', tab='bookings') }}" class="btn btn-outline btn-sm">Xem tất cả</a>
-        </div>
-        <div class="table-wrap">
-            <table class="clean-table">
-                <thead>
-                    <tr>
-                        <th>Mã</th>
-                        <th>Thú cưng</th>
-                        <th>Ngày hẹn</th>
-                        <th>Trạng thái</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for b in bookings[:5] %}
-                    <tr>
-                        <td><strong>#{{ b.id }}</strong></td>
-                        <td>{{ b.pet_name }} ({{ b.pet_type }})</td>
-                        <td>{{ b.appointment_date }} {{ b.appointment_time }}</td>
-                        <td><span class="badge badge-stock-ok">{{ b.status }}</span></td>
-                    </tr>
-                    {% else %}
-                    <tr><td colspan="4" class="text-center">Chưa có lịch hẹn nào.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-{% elif admin_tab == 'products' %}
-<!-- TAB 2: QUẢN LÝ KHO SẢN PHẨM -->
-<div class="grid-2" style="grid-template-columns: 1.6fr 1fr;">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Danh sách Sản phẩm trong kho</h2>
-            <div style="display:flex; gap:6px;">
-                <a href="{{ url_for('export_csv_route') }}" class="btn btn-outline btn-sm" download>Xuất CSV</a>
-                <a href="{{ url_for('export_xml_route') }}" class="btn btn-outline btn-sm" download>Xuất XML</a>
-                <a href="{{ url_for('export_json_route') }}" class="btn btn-outline btn-sm" download>Xuất JSON</a>
-            </div>
-        </div>
-        <div class="table-wrap">
-            <table class="clean-table">
-                <thead>
-                    <tr>
-                        <th>SKU</th>
-                        <th>Tên sản phẩm</th>
-                        <th>Loài</th>
-                        <th class="text-right">Giá bán</th>
-                        <th class="text-center">Tồn kho</th>
-                        <th class="text-center">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in products %}
-                    <tr>
-                        <td><code>{{ p.sku }}</code></td>
-                        <td>
-                            <strong>{{ p.name }}</strong>
-                            <div style="font-size:12px; color:var(--text-muted);">{{ p.category }}</div>
-                        </td>
-                        <td>
-                            <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}">
-                                {{ p.pet_type }}
-                            </span>
-                        </td>
-                        <td class="text-right"><strong>{{ "{:,.0f}".format(p.price) }} đ</strong></td>
-                        <td class="text-center">
-                            <span class="badge {% if p.stock == 0 %}badge-stock-out{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
-                                {{ p.stock }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <div style="display:inline-flex; gap:6px;">
-                                <a href="{{ url_for('admin_page', tab='products', edit_id=p.id) }}" class="btn btn-outline btn-sm">Sửa</a>
-                                <form method="POST" action="{{ url_for('admin_delete_product', product_id=p.id) }}" onsubmit="return confirm('Xóa sản phẩm này?');">
-                                    <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">
-                {% if edit_product %}Cập nhật sản phẩm #{{ edit_product.id }}{% else %}Thêm sản phẩm mới{% endif %}
-            </h2>
-            {% if edit_product %}
-            <a href="{{ url_for('admin_page', tab='products') }}" class="btn btn-outline btn-sm">+ Tạo mới</a>
-            {% endif %}
-        </div>
-
-        <form method="POST" action="{{ url_for('admin_save_product') }}" novalidate>
-            <input type="hidden" name="csrf_token" value="{{ product_form.csrf_token }}">
-            <input type="hidden" name="product_id" value="{{ edit_product.id if edit_product else '' }}">
-
-            <div class="grid-2" style="gap:12px;">
-                <div class="form-group">
-                    <label class="form-label">Mã SKU *</label>
-                    <input type="text" name="sku" value="{{ edit_product.sku if edit_product else product_form.raw_data.get('sku', '') }}" class="form-control" placeholder="CAT-FD-009" required>
-                    {% for err in product_form.errors.get('sku', []) %}
-                        <div class="form-error">{{ err }}</div>
-                    {% endfor %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Quản Trị - Meow &amp; Woof Pet Shop &amp; Spa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="admin-body">
+    <div class="admin-shell">
+        <!-- ==============================================================
+             THANH SIDEBAR BÊN TRÁI (MÀU XANH RỪNG ĐẬM GIỐNG HÌNH MẪU)
+             ============================================================== -->
+        <aside class="admin-sidebar">
+            <a href="{{ url_for('admin_page', tab='dashboard') }}" class="admin-brand-box">
+                <div class="admin-brand-logo">
+                    <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+                        <circle cx="11" cy="13" r="3.2" fill="#FBBF24"/>
+                        <circle cx="18" cy="10" r="3.2" fill="#FBBF24"/>
+                        <circle cx="25" cy="13" r="3.2" fill="#FBBF24"/>
+                        <path d="M18 16C13 16 10 20 10 23.5C10 26.2 12.2 28 15 28H21C23.8 28 26 26.2 26 23.5C26 20 23 16 18 16Z" fill="#FBBF24"/>
+                    </svg>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Loài thú cưng *</label>
-                    {% set sel_pet = edit_product.pet_type if edit_product else product_form.raw_data.get('pet_type', 'Mèo') %}
-                    <select name="pet_type" class="form-control">
-                        {% for pt in stats.pet_types %}
-                        <option value="{{ pt }}" {% if sel_pet == pt %}selected{% endif %}>{{ pt }}</option>
+                <div>
+                    <div class="admin-brand-name">MEOW &amp; WOOF</div>
+                    <div class="admin-brand-sub">CỔNG QUẢN TRỊ NGHIỆP VỤ</div>
+                </div>
+            </a>
+
+            <nav class="admin-nav-scroll">
+                <div class="admin-nav-group-title">KINH DOANH &amp; THỐNG KÊ</div>
+
+                <a href="{{ url_for('admin_page', tab='dashboard') }}" class="admin-nav-link {% if admin_tab == 'dashboard' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20V10M18 20V4M6 20v-6"/>
+                    </svg>
+                    <span>Tổng quan &amp; Chỉ số</span>
+                </a>
+
+                <a href="{{ url_for('admin_page', tab='bookings') }}" class="admin-nav-link {% if admin_tab == 'bookings' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                    </svg>
+                    <span>Lịch hẹn Spa ({{ stats.total_bookings }})</span>
+                </a>
+
+                <div class="admin-nav-group-title">QUẢN LÝ BÁN HÀNG</div>
+
+                <a href="{{ url_for('admin_page', tab='orders') }}" class="admin-nav-link {% if admin_tab == 'orders' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <span>Đơn hàng ({{ stats.total_orders }})</span>
+                </a>
+
+                <a href="{{ url_for('admin_page', tab='products') }}" class="admin-nav-link {% if admin_tab == 'products' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    </svg>
+                    <span>Sản phẩm &amp; Kho ({{ stats.total_products }})</span>
+                </a>
+
+                <a href="{{ url_for('admin_page', tab='import_export') }}" class="admin-nav-link {% if admin_tab == 'import_export' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span>Xuất / Nhập XML &amp; CSV</span>
+                </a>
+
+                <div class="admin-nav-group-title">KHÁCH HÀNG &amp; TIẾP THỊ</div>
+
+                <a href="{{ url_for('admin_page', tab='customers') }}" class="admin-nav-link {% if admin_tab == 'customers' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span>Khách hàng ({{ stats.unique_customers_count }})</span>
+                </a>
+
+                <a href="{{ url_for('admin_page', tab='emails') }}" class="admin-nav-link {% if admin_tab == 'emails' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    <span>Hộp thư Email ({{ email_logs|length }})</span>
+                </a>
+            </nav>
+
+            <!-- Chân Sidebar: Thông tin Quản trị viên + Nút Đăng xuất -->
+            <div class="admin-sidebar-footer">
+                <div>
+                    <div class="admin-user-name">Quản Trị Viên ({{ admin_user }})</div>
+                    <span class="admin-role-pill">Quản trị viên</span>
+                </div>
+                <a href="{{ url_for('logout_page') }}" class="admin-logout-icon" title="Đăng xuất">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </a>
+            </div>
+        </aside>
+
+        <!-- ==============================================================
+             NỘI DUNG CHÍNH BÊN PHẢI
+             ============================================================== -->
+        <div class="admin-main">
+            <!-- Thanh Topbar trên cùng -->
+            <header class="admin-topbar">
+                <h1 class="admin-page-heading">
+                    {% if admin_tab == 'dashboard' %}Tổng Quan Kinh Doanh
+                    {% elif admin_tab == 'products' %}Quản Lý Sản Phẩm &amp; Tồn Kho (Thêm / Sửa / Xóa)
+                    {% elif admin_tab == 'bookings' %}Quản Lý Lịch Hẹn Spa &amp; Khám
+                    {% elif admin_tab == 'orders' %}Quản Lý Đơn Hàng Bán Lẻ
+                    {% elif admin_tab == 'import_export' %}Xuất / Nhập Dữ Liệu Chuẩn XML, CSV &amp; JSON
+                    {% elif admin_tab == 'customers' %}Danh Sách Khách Hàng Thân Thiết
+                    {% elif admin_tab == 'emails' %}Nhật Ký Email Xác Nhận Hệ Thống (SMTP)
+                    {% endif %}
+                </h1>
+
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <a href="{{ url_for('admin_page', tab='products') }}#form-san-pham" class="btn btn-primary btn-sm">+ Thêm sản phẩm mới</a>
+                    <a href="{{ url_for('home_page') }}" class="btn-view-site">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                        </svg>
+                        <span>Xem Website Khách Hàng</span>
+                    </a>
+                </div>
+            </header>
+
+            <main class="admin-content-area">
+                <!-- Hiển thị Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert {{ 'alert-error' if category == 'error' else 'alert-success' }}">
+                                {{ message }}
+                            </div>
                         {% endfor %}
-                    </select>
+                    {% endif %}
+                {% endwith %}
+
+                {% if admin_tab == 'dashboard' %}
+                <!-- ==========================================================
+                     TAB 1: TỔNG QUAN KINH DOANH (GIỐNG HÌNH MẪU)
+                     ========================================================== -->
+                <div class="admin-welcome-banner" id="welcomeBanner">
+                    <span>&#9432; Chào mừng bạn quay trở lại, Quản Trị Viên!</span>
+                    <button type="button" class="admin-welcome-close" onclick="document.getElementById('welcomeBanner').style.display='none'">&times;</button>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label class="form-label">Tên sản phẩm *</label>
-                <input type="text" name="name" value="{{ edit_product.name if edit_product else product_form.raw_data.get('name', '') }}" class="form-control" placeholder="Nhập tên sản phẩm..." required>
-                {% for err in product_form.errors.get('name', []) %}
-                    <div class="form-error">{{ err }}</div>
-                {% endfor %}
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Danh mục *</label>
-                {% set sel_cat = edit_product.category if edit_product else product_form.raw_data.get('category', 'Thức ăn') %}
-                <select name="category" class="form-control">
-                    {% for cat in stats.categories %}
-                    <option value="{{ cat }}" {% if sel_cat == cat %}selected{% endif %}>{{ cat }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="grid-2" style="gap:12px;">
-                <div class="form-group">
-                    <label class="form-label">Đơn giá (VNĐ) *</label>
-                    <input type="number" name="price" value="{{ edit_product.price|int if edit_product else product_form.raw_data.get('price', '150000') }}" min="1000" step="1000" class="form-control" required>
-                    {% for err in product_form.errors.get('price', []) %}
-                        <div class="form-error">{{ err }}</div>
-                    {% endfor %}
+                <!-- Thanh lọc kỳ báo cáo -->
+                <div class="admin-period-bar">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <span style="font-size:13px; color:#64748b; font-weight:600;">&#9661; Kỳ báo cáo:</span>
+                        <div class="period-btn-group">
+                            <button type="button" class="period-btn">Hôm nay</button>
+                            <button type="button" class="period-btn">7 ngày</button>
+                            <button type="button" class="period-btn active">30 ngày</button>
+                            <button type="button" class="period-btn">Tháng này</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px;">
+                        <span>Từ:</span>
+                        <input type="date" value="2026-09-26" class="form-control" style="width:auto; padding:5px 10px;">
+                        <span>Đến:</span>
+                        <input type="date" value="2026-10-26" class="form-control" style="width:auto; padding:5px 10px;">
+                        <a href="{{ url_for('admin_page', tab='dashboard') }}" class="btn btn-sm" style="background:#134e32; color:#fff;">Lọc</a>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Số lượng tồn kho *</label>
-                    <input type="number" name="stock" value="{{ edit_product.stock if edit_product else product_form.raw_data.get('stock', '15') }}" min="0" class="form-control" required>
-                    {% for err in product_form.errors.get('stock', []) %}
-                        <div class="form-error">{{ err }}</div>
-                    {% endfor %}
+
+                <!-- HÀNG 1: 4 THẺ KPI TRẮNG -->
+                <div class="admin-kpi-grid">
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Doanh Thu Thuần</span>
+                            <div class="kpi-icon-box kpi-icon-green">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" style="color:#15803d;">{{ "{:,.0f}".format(stats.net_revenue) }} đ</div>
+                        <div class="kpi-sub">Đơn hàng &amp; dịch vụ Spa hoàn tất</div>
+                    </div>
+
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Giá Trị Tồn Kho</span>
+                            <div class="kpi-icon-box kpi-icon-blue">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" style="color:#1d4ed8;">{{ "{:,.0f}".format(stats.total_inventory_value) }} đ</div>
+                        <div class="kpi-sub">Tổng {{ stats.total_products }} mặt hàng ({{ stats.total_stock_units }} đơn vị)</div>
+                    </div>
+
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Tổng Đơn &amp; Lịch Hẹn</span>
+                            <div class="kpi-icon-box kpi-icon-cyan">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" style="color:#0284c7;">{{ stats.total_transactions }}</div>
+                        <div class="kpi-sub">Đơn mua: <strong>{{ stats.total_orders }}</strong> | Lịch Spa: <strong>{{ stats.total_bookings }}</strong></div>
+                    </div>
+
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Giá Trị Giao Dịch TB (AOV)</span>
+                            <div class="kpi-icon-box kpi-icon-yellow">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" style="color:#0f172a;">{{ "{:,.0f}".format(stats.avg_order_value) }} đ</div>
+                        <div class="kpi-sub">Doanh thu / Tổng giao dịch</div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label class="form-label">Mô tả sản phẩm</label>
-                <textarea name="description" rows="3" class="form-control">{{ edit_product.description if edit_product else product_form.raw_data.get('description', '') }}</textarea>
-            </div>
+                <!-- HÀNG 2: 4 THẺ VIỀN MÀU (XANH DƯƠNG, VÀNG, ĐỎ, XANH LÁ) -->
+                <div class="admin-status-grid">
+                    <div class="admin-status-card status-border-blue">
+                        <div class="status-card-title">Lịch Hẹn Spa Cần Xử Lý</div>
+                        <div class="status-card-num" style="color:#0284c7;">{{ stats.pending_bookings_count }}</div>
+                        <a href="{{ url_for('admin_page', tab='bookings') }}" class="status-card-link" style="color:#0284c7;">Xem lịch hẹn Spa &rarr;</a>
+                    </div>
 
-            <button type="submit" class="btn btn-primary btn-block">
-                {% if edit_product %}Lưu cập nhật{% else %}Thêm sản phẩm vào kho{% endif %}
-            </button>
-        </form>
-    </div>
-</div>
+                    <div class="admin-status-card status-border-yellow">
+                        <div class="status-card-title">Sản Phẩm Đang Kinh Doanh</div>
+                        <div class="status-card-num" style="color:#ca8a04;">{{ stats.total_products }}</div>
+                        <a href="{{ url_for('admin_page', tab='products') }}" class="status-card-link" style="color:#ca8a04;">Thêm / Sửa / Xóa sản phẩm &rarr;</a>
+                    </div>
 
-{% elif admin_tab == 'bookings' %}
-<!-- TAB 3: QUẢN LÝ LỊCH HẸN SPA -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">Quản lý Lịch hẹn Spa &amp; Cập nhật Trạng thái</h2>
-    </div>
-    <div class="table-wrap">
-        <table class="clean-table">
-            <thead>
-                <tr>
-                    <th>Mã</th>
-                    <th>Khách hàng</th>
-                    <th>Thú cưng</th>
-                    <th>Gói dịch vụ</th>
-                    <th>Thời gian hẹn</th>
-                    <th class="text-right">Chi phí</th>
-                    <th>Đổi trạng thái</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for b in bookings %}
-                <tr>
-                    <td><strong>#{{ b.id }}</strong></td>
-                    <td>
-                        <strong>{{ b.customer_name }}</strong>
-                        <div style="font-size:12px; color:var(--text-muted);">{{ b.phone }} {% if b.email %}| {{ b.email }}{% endif %}</div>
-                    </td>
-                    <td>
-                        <strong>{{ b.pet_name }}</strong> ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)
-                        {% if b.note %}<div style="font-size:12px; color:var(--text-muted);">Ghi chú: {{ b.note }}</div>{% endif %}
-                    </td>
-                    <td>{{ b.service_name }}</td>
-                    <td>{{ b.appointment_date }} lúc {{ b.appointment_time }}</td>
-                    <td class="text-right"><strong>{{ "{:,.0f}".format(b.total_price) }} đ</strong></td>
-                    <td>
-                        <form method="POST" action="{{ url_for('admin_update_booking_status', booking_id=b.id) }}" style="display:flex; gap:6px;">
-                            <select name="status" class="form-control" style="padding:6px 8px; width:auto;">
-                                {% for st in stats.booking_statuses %}
-                                <option value="{{ st }}" {% if b.status == st %}selected{% endif %}>{{ st }}</option>
+                    <div class="admin-status-card status-border-red">
+                        <div class="status-card-title">Cảnh Báo Tồn Kho Thấp (&le; 5)</div>
+                        <div class="status-card-num" style="color:#dc2626;">{{ stats.low_stock_count }}</div>
+                        <a href="{{ url_for('admin_page', tab='products') }}" class="status-card-link" style="color:#dc2626;">Kiểm kê nhập kho &rarr;</a>
+                    </div>
+
+                    <div class="admin-status-card status-border-green">
+                        <div class="status-card-title">Tổng Đơn Vị Hàng Trong Kho</div>
+                        <div class="status-card-num" style="color:#16a34a;">{{ stats.total_stock_units }}</div>
+                        <div style="font-size:12.5px; color:#64748b;">Khách hàng duy nhất: <strong>{{ stats.unique_customers_count }}</strong></div>
+                    </div>
+                </div>
+
+                <!-- HÀNG 3: 2 KHUNG BIỂU ĐỒ TRỰC QUAN GIỐNG HÌNH MẪU -->
+                <div class="admin-charts-grid">
+                    <div class="card" style="margin-bottom:0;">
+                        <div class="card-header">
+                            <h2 class="card-title">&#128200; Xu Hướng &amp; Tỷ Trọng Giá Trị Kho Theo Danh Mục</h2>
+                        </div>
+                        <svg width="100%" height="220" viewBox="0 0 600 220" style="overflow:visible;">
+                            <!-- Lưới ngang -->
+                            <line x1="50" y1="30" x2="570" y2="30" stroke="#e2e8f0" stroke-dasharray="4 4"/>
+                            <line x1="50" y1="75" x2="570" y2="75" stroke="#e2e8f0" stroke-dasharray="4 4"/>
+                            <line x1="50" y1="120" x2="570" y2="120" stroke="#e2e8f0" stroke-dasharray="4 4"/>
+                            <line x1="50" y1="165" x2="570" y2="165" stroke="#cbd5e1"/>
+                            <text x="42" y="34" text-anchor="end" font-size="11" fill="#64748b">Cao</text>
+                            <text x="42" y="79" text-anchor="end" font-size="11" fill="#64748b">TB</text>
+                            <text x="42" y="169" text-anchor="end" font-size="11" fill="#64748b">0 đ</text>
+
+                            <!-- Đường biểu đồ xanh lá đậm giống mẫu -->
+                            <path d="M 90 60 Q 190 140, 230 125 T 360 45 T 490 95 L 540 70" fill="none" stroke="#14532d" stroke-width="3"/>
+                            <circle cx="90" cy="60" r="5" fill="#14532d"/>
+                            <circle cx="230" cy="125" r="5" fill="#14532d"/>
+                            <circle cx="360" cy="45" r="5" fill="#14532d"/>
+                            <circle cx="490" cy="95" r="5" fill="#14532d"/>
+                            <circle cx="540" cy="70" r="5" fill="#14532d"/>
+
+                            <text x="90" y="190" text-anchor="middle" font-size="11.5" fill="#334155" font-weight="600">Thức ăn</text>
+                            <text x="230" y="190" text-anchor="middle" font-size="11.5" fill="#334155" font-weight="600">Phụ kiện</text>
+                            <text x="360" y="190" text-anchor="middle" font-size="11.5" fill="#334155" font-weight="600">Vệ sinh</text>
+                            <text x="490" y="190" text-anchor="middle" font-size="11.5" fill="#334155" font-weight="600">Đồ chơi &amp; Y tế</text>
+                        </svg>
+                    </div>
+
+                    <div class="card" style="margin-bottom:0; text-align:center;">
+                        <div class="card-header" style="justify-content:flex-start;">
+                            <h2 class="card-title">&#9719; Tỷ Lệ Giao Dịch Theo Trạng Thái</h2>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 0;">
+                            <svg width="175" height="175" viewBox="0 0 42 42">
+                                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e2e8f0" stroke-width="6"></circle>
+                                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#15803d" stroke-width="6" stroke-dasharray="85 15" stroke-dashoffset="25"></circle>
+                                <text x="21" y="22.5" text-anchor="middle" font-size="6" font-weight="800" fill="#0f172a">
+                                    {{ stats.total_transactions }} GD
+                                </text>
+                            </svg>
+                            <div style="font-size:13px; color:#475569; margin-top:8px;">
+                                <span style="display:inline-block; width:10px; height:10px; background:#15803d; border-radius:2px; margin-right:4px;"></span>
+                                Đơn hàng ({{ stats.total_orders }}) &amp; Lịch Spa hoạt động ({{ stats.total_bookings - stats.cancelled_bookings_count }})
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BẢNG CẢNH BÁO SẮP HẾT HÀNG & CƠ CẤU DANH MỤC -->
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Chi tiết Giá trị Kho theo Danh mục (Dict Comprehension)</h2>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="clean-table">
+                                <thead>
+                                    <tr>
+                                        <th>Danh mục</th>
+                                        <th class="text-center">Số mã SP</th>
+                                        <th class="text-center">Tổng tồn</th>
+                                        <th class="text-right">Giá trị tồn kho</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cat_name, cat_info in stats.category_breakdown.items() %}
+                                    <tr>
+                                        <td><strong>{{ cat_name }}</strong></td>
+                                        <td class="text-center">{{ cat_info.product_count }}</td>
+                                        <td class="text-center">{{ cat_info.stock_units }}</td>
+                                        <td class="text-right"><strong>{{ "{:,.0f}".format(cat_info.inventory_value) }} đ</strong></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Sản phẩm Sắp hết hàng (List Comprehension: stock &le; 5)</h2>
+                            <a href="{{ url_for('admin_page', tab='products') }}" class="btn btn-outline btn-sm">Quản lý tất cả &rarr;</a>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="clean-table">
+                                <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th class="text-center">Tồn</th>
+                                        <th class="text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for lp in stats.low_stock_products %}
+                                    <tr>
+                                        <td><code>{{ lp.sku }}</code></td>
+                                        <td><strong>{{ lp.name }}</strong></td>
+                                        <td class="text-center"><span class="badge badge-stock-low">{{ lp.stock }}</span></td>
+                                        <td class="text-center">
+                                            <a href="{{ url_for('admin_page', tab='products', edit_id=lp.id) }}#form-san-pham" class="btn btn-outline btn-sm">&#9998; Sửa kho</a>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="4" class="text-center">Tất cả mặt hàng đều còn nhiều (&gt; 5).</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {% elif admin_tab == 'products' %}
+                <!-- ==========================================================
+                     TAB 2: QUẢN LÝ SẢN PHẨM (THÊM - SỬA - XÓA TRỰC QUAN)
+                     ========================================================== -->
+                <div class="grid-2" style="grid-template-columns: 1.55fr 1fr;">
+                    <!-- Bảng danh sách sản phẩm kèm nút Sửa / Xóa từng dòng -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <h2 class="card-title">Danh sách Sản phẩm ({{ products|length }} mặt hàng)</h2>
+                                <p class="section-subtitle">Bấm nút <strong>Sửa</strong> để nạp dữ liệu sang khung bên phải, hoặc bấm <strong>Xóa</strong> để xóa khỏi kho.</p>
+                            </div>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="clean-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã SKU</th>
+                                        <th>Tên sản phẩm &amp; Danh mục</th>
+                                        <th>Loài</th>
+                                        <th class="text-right">Giá bán</th>
+                                        <th class="text-center">Tồn kho</th>
+                                        <th class="text-center">Hành động (Sửa / Xóa)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in products %}
+                                    <tr {% if edit_product and edit_product.id == p.id %}style="background:#fff7ed;"{% endif %}>
+                                        <td><code>{{ p.sku }}</code></td>
+                                        <td>
+                                            <strong>{{ p.name }}</strong>
+                                            <div style="font-size:12px; color:var(--text-muted);">{{ p.category }}</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}">
+                                                {{ p.pet_type }}
+                                            </span>
+                                        </td>
+                                        <td class="text-right"><strong>{{ "{:,.0f}".format(p.price) }} đ</strong></td>
+                                        <td class="text-center">
+                                            <span class="badge {% if p.stock == 0 %}badge-stock-out{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
+                                                {{ p.stock }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div style="display:inline-flex; gap:6px;">
+                                                <a href="{{ url_for('admin_page', tab='products', edit_id=p.id) }}#form-san-pham" class="btn btn-outline btn-sm">&#9998; Sửa</a>
+                                                <form method="POST" action="{{ url_for('admin_delete_product', product_id=p.id) }}" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA sản phẩm {{ p.name }}?');">
+                                                    <button type="submit" class="btn btn-danger btn-sm">&#128465; Xóa</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Khung Form Thêm mới hoặc Cập nhật sản phẩm -->
+                    <div class="card" id="form-san-pham" style="border: 2px solid {% if edit_product %}#eab308{% else %}#15803d{% endif %};">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                {% if edit_product %}
+                                    &#9998; Đang Sửa Sản Phẩm #{{ edit_product.id }}
+                                {% else %}
+                                    + Thêm Sản Phẩm Mới Vào Kho
+                                {% endif %}
+                            </h2>
+                            {% if edit_product %}
+                            <a href="{{ url_for('admin_page', tab='products') }}" class="btn btn-outline btn-sm">Hủy sửa / Tạo mới</a>
+                            {% endif %}
+                        </div>
+
+                        <form method="POST" action="{{ url_for('admin_save_product') }}" novalidate>
+                            <input type="hidden" name="csrf_token" value="{{ product_form.csrf_token }}">
+                            <input type="hidden" name="product_id" value="{{ edit_product.id if edit_product else '' }}">
+
+                            <div class="grid-2" style="gap:12px;">
+                                <div class="form-group">
+                                    <label class="form-label">Mã SKU *</label>
+                                    <input type="text" name="sku" value="{{ edit_product.sku if edit_product else product_form.raw_data.get('sku', '') }}" class="form-control" placeholder="VD: CAT-FD-009" required>
+                                    {% for err in product_form.errors.get('sku', []) %}
+                                        <div class="form-error">{{ err }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Dành cho loài *</label>
+                                    {% set sel_pet = edit_product.pet_type if edit_product else product_form.raw_data.get('pet_type', 'Mèo') %}
+                                    <select name="pet_type" class="form-control">
+                                        {% for pt in stats.pet_types %}
+                                        <option value="{{ pt }}" {% if sel_pet == pt %}selected{% endif %}>{{ pt }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Tên sản phẩm *</label>
+                                <input type="text" name="name" value="{{ edit_product.name if edit_product else product_form.raw_data.get('name', '') }}" class="form-control" placeholder="Nhập tên sản phẩm..." required>
+                                {% for err in product_form.errors.get('name', []) %}
+                                    <div class="form-error">{{ err }}</div>
                                 {% endfor %}
-                            </select>
-                            <button type="submit" class="btn btn-teal btn-sm">Lưu</button>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Danh mục *</label>
+                                {% set sel_cat = edit_product.category if edit_product else product_form.raw_data.get('category', 'Thức ăn') %}
+                                <select name="category" class="form-control">
+                                    {% for cat in stats.categories %}
+                                    <option value="{{ cat }}" {% if sel_cat == cat %}selected{% endif %}>{{ cat }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="grid-2" style="gap:12px;">
+                                <div class="form-group">
+                                    <label class="form-label">Giá bán (VNĐ) *</label>
+                                    <input type="number" name="price" value="{{ edit_product.price|int if edit_product else product_form.raw_data.get('price', '150000') }}" min="1000" step="1000" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Số lượng tồn kho *</label>
+                                    <input type="number" name="stock" value="{{ edit_product.stock if edit_product else product_form.raw_data.get('stock', '20') }}" min="0" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Mô tả công dụng</label>
+                                <textarea name="description" rows="3" class="form-control" placeholder="Mô tả ngắn gọn về sản phẩm...">{{ edit_product.description if edit_product else product_form.raw_data.get('description', '') }}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg btn-block" style="background:{% if edit_product %}#ca8a04{% else %}#15803d{% endif %}; border-color:transparent;">
+                                {% if edit_product %}Lưu Cập Nhật Sản Phẩm{% else %}+ Thêm Sản Phẩm Mới{% endif %}
+                            </button>
                         </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+                    </div>
+                </div>
 
-{% elif admin_tab == 'orders' %}
-<!-- TAB 4: QUẢN LÝ ĐƠN HÀNG -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">Danh sách Đơn hàng đã đặt</h2>
-    </div>
-    <div class="table-wrap">
-        <table class="clean-table">
-            <thead>
-                <tr>
-                    <th>Mã ĐH</th>
-                    <th>Thời gian</th>
-                    <th>Khách hàng</th>
-                    <th>Địa chỉ nhận</th>
-                    <th>Chi tiết sản phẩm</th>
-                    <th class="text-right">Tổng tiền</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for o in orders %}
-                <tr>
-                    <td><strong>#{{ o.id }}</strong></td>
-                    <td>{{ o.created_at }}</td>
-                    <td>
-                        <strong>{{ o.customer_name }}</strong>
-                        <div style="font-size:12px; color:var(--text-muted);">{{ o.phone }} {% if o.email %}| {{ o.email }}{% endif %}</div>
-                    </td>
-                    <td>{{ o.address }}</td>
-                    <td>
-                        {% for item in o['items'] %}
-                        <div>&bull; {{ item.name }} (SL: {{ item.quantity }} &times; {{ "{:,.0f}".format(item.price) }}đ)</div>
-                        {% endfor %}
-                    </td>
-                    <td class="text-right"><strong style="color:var(--primary);">{{ "{:,.0f}".format(o.total_amount) }} đ</strong></td>
-                </tr>
-                {% else %}
-                <tr><td colspan="6" class="text-center">Chưa có đơn hàng nào.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+                {% elif admin_tab == 'bookings' %}
+                <!-- ==========================================================
+                     TAB 3: QUẢN LÝ LỊCH HẸN SPA (SỬA TRẠNG THÁI & XÓA)
+                     ========================================================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Danh sách Lịch hẹn Spa &amp; Khám ({{ bookings|length }} lịch)</h2>
+                            <p class="section-subtitle">Chọn trạng thái mới và bấm <strong>Lưu</strong> để cập nhật, hoặc bấm <strong>Xóa</strong> để hủy bỏ bản ghi.</p>
+                        </div>
+                        <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-sm">+ Tạo lịch hẹn mới</a>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="clean-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã</th>
+                                    <th>Khách hàng</th>
+                                    <th>Thú cưng</th>
+                                    <th>Gói dịch vụ</th>
+                                    <th>Ngày giờ hẹn</th>
+                                    <th class="text-right">Chi phí</th>
+                                    <th>Sửa trạng thái</th>
+                                    <th class="text-center">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for b in bookings %}
+                                <tr>
+                                    <td><strong>#{{ b.id }}</strong></td>
+                                    <td>
+                                        <strong>{{ b.customer_name }}</strong>
+                                        <div style="font-size:12px; color:var(--text-muted);">{{ b.phone }} {% if b.email %}| {{ b.email }}{% endif %}</div>
+                                    </td>
+                                    <td>
+                                        <strong>{{ b.pet_name }}</strong> ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)
+                                        {% if b.note %}<div style="font-size:12px; color:var(--text-muted);">Ghi chú: {{ b.note }}</div>{% endif %}
+                                    </td>
+                                    <td>{{ b.service_name }}</td>
+                                    <td>{{ b.appointment_date }} lúc {{ b.appointment_time }}</td>
+                                    <td class="text-right"><strong>{{ "{:,.0f}".format(b.total_price) }} đ</strong></td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin_update_booking_status', booking_id=b.id) }}" style="display:flex; gap:6px;">
+                                            <select name="status" class="form-control" style="padding:5px 8px; width:auto;">
+                                                {% for st in stats.booking_statuses %}
+                                                <option value="{{ st }}" {% if b.status == st %}selected{% endif %}>{{ st }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" class="btn btn-teal btn-sm">Lưu</button>
+                                        </form>
+                                    </td>
+                                    <td class="text-center">
+                                        <form method="POST" action="{{ url_for('admin_delete_booking', booking_id=b.id) }}" onsubmit="return confirm('Xóa lịch hẹn #{{ b.id }}?');">
+                                            <button type="submit" class="btn btn-danger btn-sm">&#128465; Xóa</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-{% elif admin_tab == 'emails' %}
-<!-- TAB 5: HỘP THƯ EMAIL ĐÃ GỬI -->
-<div class="card">
-    <div class="card-header">
-        <div>
-            <h2 class="card-title">Lịch sử Email đã gửi (CLO2: Email Confirmation Logs)</h2>
-            <p class="section-subtitle">Mỗi khi khách đặt hàng hoặc đặt lịch Spa, hệ thống tạo Email bằng <code>email.message.EmailMessage</code> / <code>smtplib</code> và lưu bản sao tại đây.</p>
+                {% elif admin_tab == 'orders' %}
+                <!-- ==========================================================
+                     TAB 4: QUẢN LÝ ĐƠN HÀNG (XEM CHI TIẾT & XÓA)
+                     ========================================================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Danh sách Đơn hàng đã đặt ({{ orders|length }} đơn)</h2>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="clean-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã ĐH</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Khách hàng</th>
+                                    <th>Địa chỉ giao</th>
+                                    <th>Chi tiết sản phẩm</th>
+                                    <th class="text-right">Tổng tiền</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for o in orders %}
+                                <tr>
+                                    <td><strong>#{{ o.id }}</strong></td>
+                                    <td>{{ o.created_at }}</td>
+                                    <td>
+                                        <strong>{{ o.customer_name }}</strong>
+                                        <div style="font-size:12px; color:var(--text-muted);">{{ o.phone }} {% if o.email %}| {{ o.email }}{% endif %}</div>
+                                    </td>
+                                    <td>{{ o.address }}</td>
+                                    <td>
+                                        {% for item in o['items'] %}
+                                        <div>&bull; {{ item.name }} (SL: {{ item.quantity }} &times; {{ "{:,.0f}".format(item.price) }}đ)</div>
+                                        {% endfor %}
+                                    </td>
+                                    <td class="text-right"><strong style="color:#15803d;">{{ "{:,.0f}".format(o.total_amount) }} đ</strong></td>
+                                    <td class="text-center">
+                                        <form method="POST" action="{{ url_for('admin_delete_order', order_id=o.id) }}" onsubmit="return confirm('Xóa đơn hàng #{{ o.id }}?');">
+                                            <button type="submit" class="btn btn-danger btn-sm">&#128465; Xóa</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="7" class="text-center">Chưa có đơn hàng nào.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {% elif admin_tab == 'import_export' %}
+                <!-- ==========================================================
+                     TAB 5: XUẤT / NHẬP DỮ LIỆU XML, CSV, JSON
+                     ========================================================== -->
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Xuất Dữ Liệu Kho Hàng (Streaming Generator &amp; ElementTree)</h2>
+                        </div>
+                        <p style="margin-bottom:16px; color:var(--text-body);">
+                            Tải toàn bộ danh mục sản phẩm hiện có trong cơ sở dữ liệu ra các định dạng chuẩn phục vụ lưu trữ hoặc báo cáo:
+                        </p>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <a href="{{ url_for('export_csv_route') }}" class="btn btn-primary" download>Tải xuống CSV (.csv)</a>
+                            <a href="{{ url_for('export_xml_route') }}" class="btn btn-teal" download>Tải xuống XML (.xml)</a>
+                            <a href="{{ url_for('export_json_route') }}" class="btn btn-outline" download>Tải xuống JSON (.json)</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Nhập Hàng Loạt Sản Phẩm Từ CSV (Generator Parser)</h2>
+                        </div>
+                        <form method="POST" action="{{ url_for('admin_import_csv') }}">
+                            <div class="form-group">
+                                <label class="form-label">Dán nội dung CSV (Nếu trùng mã SKU sẽ cập nhật, nếu mã mới sẽ thêm mới):</label>
+                                <textarea name="csv_text" rows="7" class="form-control" style="font-family:Consolas, monospace; font-size:12.5px;">sku,name,category,pet_type,price,stock,description
+CAT-FD-010,Pate Whiskas Vị Cá Thu (80g),Thức ăn,Mèo,18000,50,Pate túi tiện lợi cho mèo trên 1 năm tuổi
+DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dây dắt vải dù bền chắc cho chó từ 5-15kg</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Thực thi Import CSV vào Kho</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% elif admin_tab == 'customers' %}
+                <!-- ==========================================================
+                     TAB 6: KHÁCH HÀNG THÂN THIẾT
+                     ========================================================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Danh sách Khách hàng ({{ stats.customers_list|length }} khách hàng duy nhất)</h2>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="clean-table">
+                            <thead>
+                                <tr>
+                                    <th>Họ tên khách hàng</th>
+                                    <th>Số điện thoại</th>
+                                    <th>Email</th>
+                                    <th class="text-center">Số đơn mua</th>
+                                    <th class="text-center">Số lịch hẹn Spa</th>
+                                    <th class="text-right">Tổng chi tiêu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in stats.customers_list %}
+                                <tr>
+                                    <td><strong>{{ c.name }}</strong></td>
+                                    <td><code>{{ c.phone }}</code></td>
+                                    <td>{{ c.email or '-' }}</td>
+                                    <td class="text-center">{{ c.orders_count }}</td>
+                                    <td class="text-center">{{ c.bookings_count }}</td>
+                                    <td class="text-right"><strong style="color:#15803d;">{{ "{:,.0f}".format(c.total_spent) }} đ</strong></td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="6" class="text-center">Chưa có dữ liệu khách hàng.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {% elif admin_tab == 'emails' %}
+                <!-- ==========================================================
+                     TAB 7: HỘP THƯ EMAIL XÁC NHẬN
+                     ========================================================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Nhật ký Email đã gửi cho khách ({{ email_logs|length }} thư)</h2>
+                    </div>
+                    {% for log in email_logs %}
+                    <div style="border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:14px; background:#ffffff;">
+                        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+                            <strong>{{ log.subject }}</strong>
+                            <span class="badge badge-stock-ok">{{ log.delivery_status }}</span>
+                        </div>
+                        <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:10px;">
+                            Tới: <code>{{ log.recipient }}</code> | Lúc: {{ log.created_at }}
+                        </div>
+                        <pre style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:6px; font-family:inherit; font-size:13.5px; white-space:pre-wrap;">{{ log.body }}</pre>
+                    </div>
+                    {% else %}
+                    <p style="color:var(--text-muted);">Chưa có email nào trong nhật ký.</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </main>
         </div>
     </div>
-
-    {% for log in email_logs %}
-    <div style="border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; margin-bottom:14px; background:#fcfcfd;">
-        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-            <strong>{{ log.subject }}</strong>
-            <span class="badge badge-stock-ok">{{ log.delivery_status }}</span>
-        </div>
-        <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">
-            Người nhận: <code>{{ log.recipient }}</code> | Thời gian: {{ log.created_at }}
-        </div>
-        <pre style="background:#f1f5f9; padding:12px; border-radius:6px; font-family:inherit; font-size:13.5px; white-space:pre-wrap;">{{ log.body }}</pre>
-    </div>
-    {% else %}
-    <p style="color:var(--text-muted);">Chưa có email nào được gửi. Hãy thử đặt 1 đơn hàng hoặc đặt lịch Spa để xem email sinh tự động!</p>
-    {% endfor %}
-</div>
-{% endif %}
-{% endblock %}
+</body>
+</html>
