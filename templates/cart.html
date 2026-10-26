@@ -6,7 +6,7 @@
 <div class="section-header">
     <div>
         <h1 class="section-title">Giỏ hàng &amp; Thanh toán Đơn hàng</h1>
-        <p class="section-subtitle">Đặt hàng trừ tồn kho theo Transaction (`DatabaseSession`) và gửi Email hóa đơn xác nhận</p>
+        <p class="section-subtitle">Kiểm tra các mặt hàng đã chọn và điền thông tin giao hàng để nhận hóa đơn xác nhận</p>
     </div>
     <a href="{{ url_for('shop_page') }}" class="btn btn-outline">&larr; Tiếp tục mua sắm</a>
 </div>
@@ -82,20 +82,20 @@
             <h2 class="card-title">Thông tin Nhận hàng &amp; Hóa đơn Email</h2>
         </div>
 
-        <form method="POST" action="{{ url_for('cart_page') }}" novalidate>
+        <form method="POST" action="{{ url_for('cart_page') }}">
             <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}">
 
             <div class="form-group">
                 <label class="form-label">Họ và tên người nhận *</label>
-                <input type="text" name="customer_name" value="{{ form.raw_data.get('customer_name', '') }}" class="form-control" placeholder="VD: Trần Hoàng Nam" required>
+                <input type="text" name="customer_name" value="{{ form.raw_data.get('customer_name', '') }}" minlength="2" maxlength="80" class="form-control" placeholder="VD: Trần Hoàng Nam" required>
                 {% for err in form.errors.get('customer_name', []) %}
                     <div class="form-error">{{ err }}</div>
                 {% endfor %}
             </div>
 
             <div class="form-group">
-                <label class="form-label">Số điện thoại nhận hàng *</label>
-                <input type="text" name="phone" value="{{ form.raw_data.get('phone', '') }}" class="form-control" placeholder="VD: 0988765432" required>
+                <label class="form-label">Số điện thoại nhận hàng * (9-11 số)</label>
+                <input type="tel" name="phone" value="{{ form.raw_data.get('phone', '') }}" pattern="^0[0-9]{8,10}$" minlength="9" maxlength="11" title="Số điện thoại bắt đầu bằng số 0 và gồm 9-11 chữ số" class="form-control" placeholder="VD: 0988765432" required>
                 {% for err in form.errors.get('phone', []) %}
                     <div class="form-error">{{ err }}</div>
                 {% endfor %}
@@ -103,7 +103,7 @@
 
             <div class="form-group">
                 <label class="form-label">Địa chỉ Email nhận hóa đơn xác nhận</label>
-                <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" class="form-control" placeholder="VD: hoangnam@gmail.com">
+                <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" maxlength="120" class="form-control" placeholder="VD: hoangnam@gmail.com">
                 {% for err in form.errors.get('email', []) %}
                     <div class="form-error">{{ err }}</div>
                 {% endfor %}
@@ -111,7 +111,9 @@
 
             <div class="form-group">
                 <label class="form-label">Địa chỉ giao hàng chi tiết *</label>
-                <input type="text" name="address" value="{{ form.raw_data.get('address', '') }}" class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." required>
+                <input type="text" name="address" value="{{ form.raw_data.get('address', '') }}" minlength="6" maxlength="250" class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." required>
+                {% for err in form.errors.get('address', '') %}
+                {% endfor %}
                 {% for err in form.errors.get('address', []) %}
                     <div class="form-error">{{ err }}</div>
                 {% endfor %}

@@ -96,11 +96,11 @@
     <!-- Thanh trạng thái trên cùng -->
     <div class="topbar">
         <div class="container topbar-inner">
-            <span>Meow &amp; Woof Pet House &amp; Spa | Mở cửa: 08:00 - 21:00 | Hotline: 0905.123.456</span>
+            <span>&#128062; Meow &amp; Woof Pet House &amp; Spa | Mở cửa: 08:00 - 21:00 | Hotline tư vấn: <strong>0905.123.456</strong></span>
             <div class="topbar-badges">
-                <span class="clo-pill">CLO2: Flask, Template, Form, DB, Email</span>
-                <span class="clo-pill">CLO3: urllib, API Key, JSON/XML</span>
-                <span class="clo-pill">CLO4-5: Modular Architecture</span>
+                <span class="clo-pill">&#10003; Bảo hành sức khỏe 15 ngày</span>
+                <span class="clo-pill">&#10003; Sổ tiêm chủng &amp; Tẩy giun đầy đủ</span>
+                <span class="clo-pill">&#128666; Giao hàng tận nơi toàn quốc</span>
             </div>
         </div>
     </div>
@@ -127,7 +127,7 @@
                 <a href="{{ url_for('home_page') }}" class="nav-item {% if active_page == 'home' %}active{% endif %}">Trang chủ</a>
                 <a href="{{ url_for('shop_page') }}" class="nav-item {% if active_page == 'shop' %}active{% endif %}">Cửa hàng</a>
                 <a href="{{ url_for('spa_page') }}" class="nav-item {% if active_page == 'spa' %}active{% endif %}">Đặt lịch Spa</a>
-                <a href="{{ url_for('network_page') }}" class="nav-item {% if active_page == 'network' %}active{% endif %}">Lập trình mạng (API &amp; XML)</a>
+                <a href="{{ url_for('network_page') }}" class="nav-item {% if active_page == 'network' %}active{% endif %}">Cẩm nang Giống</a>
                 {% if is_admin %}
                     <a href="{{ url_for('admin_page') }}" class="nav-item {% if active_page == 'admin' %}active{% endif %}">Dashboard Quản trị</a>
                     <a href="{{ url_for('logout_page') }}" class="nav-item" style="color:#b91c1c;">Đăng xuất ({{ admin_user }})</a>
@@ -225,19 +225,21 @@
         <div class="container footer-grid">
             <div>
                 <h4>Meow &amp; Woof Pet House &amp; Spa</h4>
-                <p>Hệ thống cửa hàng Chó Mèo cảnh thuần chủng, thức ăn, phụ kiện và đặt lịch chăm sóc Spa xây dựng bằng Python Flask nâng cao.</p>
+                <p>Hệ thống cửa hàng Chó Mèo cảnh thuần chủng, thức ăn dinh dưỡng, phụ kiện cao cấp và dịch vụ chăm sóc Spa chuẩn thú y.</p>
+                <p style="margin-top:8px;">&#128205; Địa chỉ: 245 Nguyễn Thị Minh Khai, Quận 1, TP. Hồ Chí Minh</p>
             </div>
             <div>
                 <h4>Danh mục nổi bật</h4>
                 <p><a href="{{ url_for('shop_page', category='Chó cảnh') }}">Chó cảnh thuần chủng</a></p>
                 <p><a href="{{ url_for('shop_page', category='Mèo cảnh') }}">Mèo cảnh nhập khẩu &amp; nhân giống</a></p>
-                <p><a href="{{ url_for('spa_page') }}">Đặt lịch tắm sấy &amp; Grooming</a></p>
+                <p><a href="{{ url_for('shop_page', category='Thức ăn') }}">Thức ăn hạt &amp; Pate dinh dưỡng</a></p>
+                <p><a href="{{ url_for('spa_page') }}">Đặt lịch tắm sấy &amp; Grooming Spa</a></p>
             </div>
             <div>
-                <h4>Thông tin kỹ thuật</h4>
-                <p>Framework: Flask + Jinja2 Template + Custom Form Validation</p>
-                <p>Database: SQLite3 (Context Manager + Descriptor ORM)</p>
-                <p>Network: urllib.request + API Key + JSON/XML + SMTP Email</p>
+                <h4>Chính sách &amp; Hỗ trợ</h4>
+                <p>&#10003; Bảo hành sức khỏe 15 ngày (Parvo, Care, Giảm bạch cầu)</p>
+                <p>&#10003; Miễn phí tư vấn dinh dưỡng &amp; chăm sóc trọn đời</p>
+                <p>&#128222; Hotline / Zalo: <strong>0905.123.456</strong> (08:00 - 21:00)</p>
             </div>
         </div>
     </footer>

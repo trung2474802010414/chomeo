@@ -470,8 +470,9 @@ def export_csv_route():
 
 
 @app.route("/import/xml", methods=["POST"])
+@admin_required
 def import_xml_route():
-    """Phân tích cú pháp tài liệu XML và nhập sản phẩm vào SQLite."""
+    """Phân tích cú pháp tài liệu XML và nhập sản phẩm vào SQLite (Thuộc quyền Admin)."""
     xml_text = request.form.get("xml_text", "").strip()
     try:
         summary = import_products_from_xml(xml_text)
@@ -482,7 +483,7 @@ def import_xml_route():
         )
     except ValidationError as exc:
         flash(str(exc), "error")
-    return redirect(url_for("network_page"))
+    return redirect(url_for("admin_page", tab="import_export"))
 
 
 # ============================================================================
@@ -575,6 +576,7 @@ def admin_page():
     bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")]
     orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")]
     email_logs = [e.to_dict() for e in EmailLog.iter_all(order_by="id DESC")]
+    xml_preview = export_products_to_xml() if admin_tab == "import_export" else ""
 
     return render_template(
         "admin.html",
@@ -588,6 +590,7 @@ def admin_page():
         bookings=bookings,
         orders=orders,
         email_logs=email_logs,
+        xml_preview=xml_preview,
         edit_product=edit_product,
         product_form=ProductForm(),
     )

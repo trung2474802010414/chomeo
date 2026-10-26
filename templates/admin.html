@@ -452,14 +452,14 @@
                             {% endif %}
                         </div>
 
-                        <form method="POST" action="{{ url_for('admin_save_product') }}" novalidate>
+                        <form method="POST" action="{{ url_for('admin_save_product') }}">
                             <input type="hidden" name="csrf_token" value="{{ product_form.csrf_token }}">
                             <input type="hidden" name="product_id" value="{{ edit_product.id if edit_product else '' }}">
 
                             <div class="grid-2" style="gap:12px;">
                                 <div class="form-group">
-                                    <label class="form-label">Mã SKU *</label>
-                                    <input type="text" name="sku" value="{{ edit_product.sku if edit_product else product_form.raw_data.get('sku', '') }}" class="form-control" placeholder="VD: DOG-PET-009" required>
+                                    <label class="form-label">Mã SKU * (3-30 ký tự)</label>
+                                    <input type="text" name="sku" value="{{ edit_product.sku if edit_product else product_form.raw_data.get('sku', '') }}" pattern="^[A-Za-z0-9][A-Za-z0-9\-_]{2,29}$" minlength="3" maxlength="30" title="Mã SKU từ 3-30 ký tự gồm chữ, số, dấu gạch ngang" class="form-control" placeholder="VD: DOG-PET-009" required>
                                     {% for err in product_form.errors.get('sku', []) %}
                                         <div class="form-error">{{ err }}</div>
                                     {% endfor %}
@@ -467,7 +467,7 @@
                                 <div class="form-group">
                                     <label class="form-label">Dành cho loài *</label>
                                     {% set sel_pet = edit_product.pet_type if edit_product else product_form.raw_data.get('pet_type', 'Mèo') %}
-                                    <select name="pet_type" class="form-control">
+                                    <select name="pet_type" class="form-control" required>
                                         {% for pt in stats.pet_types %}
                                         <option value="{{ pt }}" {% if sel_pet == pt %}selected{% endif %}>{{ pt }}</option>
                                         {% endfor %}
@@ -476,8 +476,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Tên sản phẩm / Tên thú cưng *</label>
-                                <input type="text" name="name" value="{{ edit_product.name if edit_product else product_form.raw_data.get('name', '') }}" class="form-control" placeholder="VD: Chó Schnauzer thuần chủng 2.5 tháng..." required>
+                                <label class="form-label">Tên sản phẩm / Tên thú cưng * (3-150 ký tự)</label>
+                                <input type="text" name="name" value="{{ edit_product.name if edit_product else product_form.raw_data.get('name', '') }}" minlength="3" maxlength="150" class="form-control" placeholder="VD: Chó Schnauzer thuần chủng 2.5 tháng..." required>
                                 {% for err in product_form.errors.get('name', []) %}
                                     <div class="form-error">{{ err }}</div>
                                 {% endfor %}
@@ -487,7 +487,7 @@
                                 <div class="form-group">
                                     <label class="form-label">Danh mục *</label>
                                     {% set sel_cat = edit_product.category if edit_product else product_form.raw_data.get('category', 'Thức ăn') %}
-                                    <select name="category" class="form-control">
+                                    <select name="category" class="form-control" required>
                                         {% for cat in stats.categories %}
                                         <option value="{{ cat }}" {% if sel_cat == cat %}selected{% endif %}>{{ cat }}</option>
                                         {% endfor %}
@@ -496,7 +496,7 @@
                                 <div class="form-group">
                                     <label class="form-label">Giống thú cưng (nếu có)</label>
                                     {% set sel_breed = edit_product.breed if edit_product else product_form.raw_data.get('breed', '') %}
-                                    <input type="text" name="breed" list="breedSuggestions" value="{{ sel_breed }}" class="form-control" placeholder="VD: Chó Schnauzer, Chó Poodle...">
+                                    <input type="text" name="breed" list="breedSuggestions" value="{{ sel_breed }}" maxlength="80" class="form-control" placeholder="VD: Chó Schnauzer, Chó Poodle...">
                                     <datalist id="breedSuggestions">
                                         {% for b in stats.dog_breeds %}
                                         <option value="{{ b }}">
@@ -511,11 +511,17 @@
                             <div class="grid-2" style="gap:12px;">
                                 <div class="form-group">
                                     <label class="form-label">Giá bán (VNĐ) *</label>
-                                    <input type="number" name="price" value="{{ edit_product.price|int if edit_product else product_form.raw_data.get('price', '150000') }}" min="1000" step="1000" class="form-control" required>
+                                    <input type="number" name="price" value="{{ edit_product.price|int if edit_product else product_form.raw_data.get('price', '150000') }}" min="1000" max="500000000" step="1000" class="form-control" required>
+                                    {% for err in product_form.errors.get('price', []) %}
+                                        <div class="form-error">{{ err }}</div>
+                                    {% endfor %}
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Số lượng tồn kho *</label>
-                                    <input type="number" name="stock" value="{{ edit_product.stock if edit_product else product_form.raw_data.get('stock', '20') }}" min="0" class="form-control" required>
+                                    <input type="number" name="stock" value="{{ edit_product.stock if edit_product else product_form.raw_data.get('stock', '20') }}" min="0" max="10000" class="form-control" required>
+                                    {% for err in product_form.errors.get('stock', []) %}
+                                        <div class="form-error">{{ err }}</div>
+                                    {% endfor %}
                                 </div>
                             </div>
 
@@ -696,36 +702,65 @@
 
                 {% elif admin_tab == 'import_export' %}
                 <!-- ==========================================================
-                     TAB 5: XUẤT / NHẬP DỮ LIỆU XML, CSV, JSON
+                     TAB 5: XUẤT / NHẬP DỮ LIỆU XML, CSV, JSON (QUẢN TRỊ KHO)
                      ========================================================== -->
                 <div class="grid-2">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Xuất Dữ Liệu Kho Hàng (Streaming Generator &amp; ElementTree)</h2>
+                            <h2 class="card-title">1. Xuất Dữ Liệu Kho Hàng (XML / JSON / CSV)</h2>
                         </div>
-                        <p style="margin-bottom:16px; color:var(--text-body);">
-                            Tải toàn bộ danh mục sản phẩm hiện có trong cơ sở dữ liệu ra các định dạng chuẩn phục vụ lưu trữ hoặc báo cáo:
+                        <p style="margin-bottom:14px; color:var(--text-body); font-size:14px;">
+                            Tải toàn bộ danh mục sản phẩm hiện có trong cơ sở dữ liệu ra các định dạng chuẩn phục vụ lưu trữ, sao lưu hoặc báo cáo:
                         </p>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <a href="{{ url_for('export_csv_route') }}" class="btn btn-primary" download>Tải xuống CSV (.csv)</a>
-                            <a href="{{ url_for('export_xml_route') }}" class="btn btn-teal" download>Tải xuống XML (.xml)</a>
-                            <a href="{{ url_for('export_json_route') }}" class="btn btn-outline" download>Tải xuống JSON (.json)</a>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
+                            <a href="{{ url_for('export_xml_route') }}" class="btn btn-primary" download>Tải xuống XML (.xml)</a>
+                            <a href="{{ url_for('export_json_route') }}" class="btn btn-teal" download>Tải xuống JSON (.json)</a>
+                            <a href="{{ url_for('export_csv_route') }}" class="btn btn-outline" download>Tải xuống CSV (.csv)</a>
                         </div>
+                        <label class="form-label">Xem trước tài liệu XML sinh tự động từ Database:</label>
+                        <pre class="code-preview">{{ xml_preview }}</pre>
                     </div>
 
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Nhập Hàng Loạt Sản Phẩm Từ CSV (Generator Parser)</h2>
+                    <div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">2. Nhập (Parse) Sản Phẩm Từ XML Vào SQLite</h2>
+                            </div>
+                            <form method="POST" action="{{ url_for('import_xml_route') }}">
+                                <div class="form-group">
+                                    <label class="form-label">Nội dung tài liệu XML cần Import (Tự động thêm mới hoặc cập nhật theo mã SKU):</label>
+                                    <textarea name="xml_text" rows="8" required class="form-control" style="font-family:Consolas, monospace; font-size:12.5px;">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;petshop_catalog version="1.0"&gt;
+  &lt;products&gt;
+    &lt;product sku="CAT-XML-01"&gt;
+      &lt;name&gt;Súp Thưởng Mèo Ciao Vị Cá Hồi (Gói 4 thanh)&lt;/name&gt;
+      &lt;category&gt;Thức ăn&lt;/category&gt;
+      &lt;pet_type&gt;Mèo&lt;/pet_type&gt;
+      &lt;price&gt;38000&lt;/price&gt;
+      &lt;stock&gt;25&lt;/stock&gt;
+      &lt;description&gt;Súp thưởng giàu DHA nhập qua chuẩn XML.&lt;/description&gt;
+    &lt;/product&gt;
+  &lt;/products&gt;
+&lt;/petshop_catalog&gt;</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Phân tích cú pháp XML &amp; Lưu vào Kho</button>
+                            </form>
                         </div>
-                        <form method="POST" action="{{ url_for('admin_import_csv') }}">
-                            <div class="form-group">
-                                <label class="form-label">Dán nội dung CSV (Nếu trùng mã SKU sẽ cập nhật, nếu mã mới sẽ thêm mới):</label>
-                                <textarea name="csv_text" rows="7" class="form-control" style="font-family:Consolas, monospace; font-size:12.5px;">sku,name,category,pet_type,price,stock,description
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">3. Nhập Hàng Loạt Sản Phẩm Từ CSV</h2>
+                            </div>
+                            <form method="POST" action="{{ url_for('admin_import_csv') }}">
+                                <div class="form-group">
+                                    <label class="form-label">Dán nội dung CSV (Nếu trùng mã SKU sẽ cập nhật, nếu mã mới sẽ thêm mới):</label>
+                                    <textarea name="csv_text" rows="5" required class="form-control" style="font-family:Consolas, monospace; font-size:12.5px;">sku,name,category,pet_type,price,stock,description
 CAT-FD-010,Pate Whiskas Vị Cá Thu (80g),Thức ăn,Mèo,18000,50,Pate túi tiện lợi cho mèo trên 1 năm tuổi
 DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dây dắt vải dù bền chắc cho chó từ 5-15kg</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Thực thi Import CSV vào Kho</button>
-                        </form>
+                                </div>
+                                <button type="submit" class="btn btn-teal btn-block">Thực thi Import CSV vào Kho</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 

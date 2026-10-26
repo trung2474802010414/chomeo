@@ -63,8 +63,8 @@
         <div class="feature-box">
             <div class="feature-icon">04</div>
             <div>
-                <h3>Tích hợp API &amp; XML</h3>
-                <p>Tra cứu giống thú cưng qua Internet (`urllib`) và xuất/nhập dữ liệu chuẩn JSON/XML.</p>
+                <h3>Bảo Hành &amp; Giao Tận Nơi</h3>
+                <p>Hợp đồng bảo hành sức khỏe 15 ngày rõ ràng, hỗ trợ vận chuyển thú cưng an toàn toàn quốc.</p>
             </div>
         </div>
     </div>
@@ -92,12 +92,12 @@
     <div class="card-header">
         <div>
             <h2 class="card-title">Tra cứu nhanh Đơn hàng &amp; Lịch hẹn Spa</h2>
-            <p class="section-subtitle">Nhập số điện thoại bạn đã dùng để kiểm tra trạng thái (Thử SĐT mẫu: <code>0905123456</code>)</p>
+            <p class="section-subtitle">Nhập số điện thoại bạn đã đăng ký để kiểm tra trạng thái đơn mua hàng hoặc lịch hẹn Spa (Thử SĐT mẫu: <code>0905123456</code>)</p>
         </div>
     </div>
 
     <form method="GET" action="{{ url_for('home_page') }}" style="display:flex; gap:12px; max-width:520px; margin-bottom:16px;">
-        <input type="text" name="lookup_phone" value="{{ lookup_phone }}" class="form-control" placeholder="Nhập số điện thoại cần tra cứu..." required>
+        <input type="tel" name="lookup_phone" value="{{ lookup_phone }}" pattern="^0[0-9]{8,10}$" minlength="9" maxlength="11" title="Số điện thoại bắt đầu bằng số 0 và gồm 9-11 chữ số" class="form-control" placeholder="Nhập số điện thoại của bạn (VD: 0905123456)..." required>
         <button type="submit" class="btn btn-teal">Tra cứu</button>
     </form>
 

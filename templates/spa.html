@@ -6,19 +6,19 @@
 <div class="section-header">
     <div>
         <h1 class="section-title">Đặt lịch Spa &amp; Chăm sóc Thú cưng</h1>
-        <p class="section-subtitle">Biểu mẫu kiểm tra dữ liệu (Form Validation + CSRF) và tự động gửi Email xác nhận lịch hẹn</p>
+        <p class="section-subtitle">Chăm sóc toàn diện cho Boss với quy trình tắm sấy khử khuẩn, cắt tỉa tạo kiểu lông và kiểm tra sức khỏe định kỳ</p>
     </div>
 </div>
 
 <div class="grid-2">
-    <!-- Cột trái: Bảng giá & Quy trình -->
+    <!-- Cột trái: Bảng giá & Quy trình 4 bước chuyên nghiệp -->
     <div>
         <div class="card">
             <div class="card-header">
                 <h2 class="card-title">Bảng giá Dịch vụ theo Cân nặng</h2>
             </div>
             <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:14px;">
-                Hệ thống tự động tính phí dựa trên cân nặng thực tế của bé: Dưới 5kg (Giá chuẩn), Từ 5–10kg (+20%), Trên 10kg (+40%).
+                Chi phí được tính minh bạch theo cân nặng của bé: Dưới 5kg (Giá tiêu chuẩn), Từ 5–10kg (+20%), Trên 10kg (+40%).
             </p>
             <div class="table-wrap">
                 <table class="clean-table">
@@ -56,7 +56,7 @@
                             <td class="text-right">168.000đ</td>
                         </tr>
                         <tr>
-                            <td><strong>Trông giữ thú cưng (1 ngày)</strong></td>
+                            <td><strong>Trông giữ thú cưng (Khách sạn 1 ngày)</strong></td>
                             <td class="text-right">200.000đ</td>
                             <td class="text-right">240.000đ</td>
                             <td class="text-right">280.000đ</td>
@@ -68,56 +68,50 @@
 
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Lịch hẹn mới đăng ký gần đây</h2>
+                <h2 class="card-title">Cam kết Dịch vụ &amp; Quy trình 4 bước chuẩn Spa</h2>
             </div>
-            <div class="table-wrap">
-                <table class="clean-table">
-                    <thead>
-                        <tr>
-                            <th>Mã</th>
-                            <th>Thú cưng</th>
-                            <th>Dịch vụ</th>
-                            <th>Ngày giờ</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for b in recent_bookings %}
-                        <tr>
-                            <td><strong>#{{ b.id }}</strong></td>
-                            <td>{{ b.pet_name }} ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)</td>
-                            <td>{{ b.service_name }}</td>
-                            <td>{{ b.appointment_date }} {{ b.appointment_time }}</td>
-                            <td><span class="badge badge-stock-ok">{{ b.status }}</span></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <ul style="list-style:none; display:grid; gap:12px; font-size:14px; color:var(--text-body);">
+                <li style="display:flex; gap:10px; align-items:flex-start;">
+                    <span class="badge badge-stock-ok" style="flex-shrink:0;">Bước 1</span>
+                    <div><strong>Kiểm tra da &amp; lông miễn phí:</strong> Chuyên viên kiểm tra tình trạng da, tai, mắt và tư vấn kiểu cắt phù hợp trước khi thực hiện.</div>
+                </li>
+                <li style="display:flex; gap:10px; align-items:flex-start;">
+                    <span class="badge badge-stock-ok" style="flex-shrink:0;">Bước 2</span>
+                    <div><strong>Vệ sinh chuyên sâu:</strong> Cắt mài móng, nhổ lông tai, vệ sinh tuyến hôi và tắm massage 2 lần bằng sữa tắm thảo dược SOS.</div>
+                </li>
+                <li style="display:flex; gap:10px; align-items:flex-start;">
+                    <span class="badge badge-stock-ok" style="flex-shrink:0;">Bước 3</span>
+                    <div><strong>Sấy đánh bông &amp; Cắt tỉa tạo kiểu:</strong> Sử dụng lồng sấy ion âm êm ái chống hoảng sợ cho mèo và tạo form chuẩn Poodle/Corgi/Schnauzer.</div>
+                </li>
+                <li style="display:flex; gap:10px; align-items:flex-start;">
+                    <span class="badge badge-stock-ok" style="flex-shrink:0;">Bước 4</span>
+                    <div><strong>Xịt dưỡng lông &amp; Nước hoa:</strong> Dưỡng ẩm mượt lông, khử khuẩn toàn bộ dụng cụ bằng tia UV trước và sau mỗi ca.</div>
+                </li>
+            </ul>
         </div>
     </div>
 
-    <!-- Cột phải: Form Đặt lịch -->
+    <!-- Cột phải: Form Đặt lịch (Có đầy đủ ràng buộc dữ liệu) -->
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">Phiếu Đăng Ký Lịch Hẹn Spa</h2>
         </div>
 
-        <form method="POST" action="{{ url_for('spa_page') }}" novalidate>
+        <form method="POST" action="{{ url_for('spa_page') }}">
             <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}">
 
             <div class="grid-2" style="gap:14px;">
                 <div class="form-group">
                     <label class="form-label">Họ tên chủ nuôi *</label>
-                    <input type="text" name="customer_name" value="{{ form.raw_data.get('customer_name', '') }}" class="form-control" placeholder="VD: Nguyễn Minh Anh" required>
+                    <input type="text" name="customer_name" value="{{ form.raw_data.get('customer_name', '') }}" minlength="2" maxlength="80" class="form-control" placeholder="VD: Nguyễn Minh Anh" required>
                     {% for err in form.errors.get('customer_name', []) %}
                         <div class="form-error">{{ err }}</div>
                     {% endfor %}
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Số điện thoại liên hệ *</label>
-                    <input type="text" name="phone" value="{{ form.raw_data.get('phone', '') }}" class="form-control" placeholder="VD: 0905123456" required>
+                    <label class="form-label">Số điện thoại liên hệ * (9-11 số)</label>
+                    <input type="tel" name="phone" value="{{ form.raw_data.get('phone', '') }}" pattern="^0[0-9]{8,10}$" minlength="9" maxlength="11" title="Số điện thoại bắt đầu bằng số 0 và gồm 9-11 chữ số" class="form-control" placeholder="VD: 0905123456" required>
                     {% for err in form.errors.get('phone', []) %}
                         <div class="form-error">{{ err }}</div>
                     {% endfor %}
@@ -126,7 +120,7 @@
 
             <div class="form-group">
                 <label class="form-label">Địa chỉ Email nhận phiếu xác nhận</label>
-                <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" class="form-control" placeholder="VD: minhanh@gmail.com">
+                <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" maxlength="120" class="form-control" placeholder="VD: minhanh@gmail.com">
                 {% for err in form.errors.get('email', []) %}
                     <div class="form-error">{{ err }}</div>
                 {% endfor %}
@@ -135,7 +129,7 @@
             <div class="grid-3" style="gap:12px;">
                 <div class="form-group">
                     <label class="form-label">Tên thú cưng *</label>
-                    <input type="text" name="pet_name" value="{{ form.raw_data.get('pet_name', '') }}" class="form-control" placeholder="VD: Mochi" required>
+                    <input type="text" name="pet_name" value="{{ form.raw_data.get('pet_name', '') }}" minlength="1" maxlength="50" class="form-control" placeholder="VD: Mochi" required>
                     {% for err in form.errors.get('pet_name', []) %}
                         <div class="form-error">{{ err }}</div>
                     {% endfor %}
@@ -143,14 +137,14 @@
 
                 <div class="form-group">
                     <label class="form-label">Loài *</label>
-                    <select name="pet_type" class="form-control">
+                    <select name="pet_type" class="form-control" required>
                         <option value="Mèo" {% if form.raw_data.get('pet_type') == 'Mèo' %}selected{% endif %}>Mèo</option>
                         <option value="Chó" {% if form.raw_data.get('pet_type') == 'Chó' %}selected{% endif %}>Chó</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Cân nặng (kg) *</label>
+                    <label class="form-label">Cân nặng (0.2 - 80kg) *</label>
                     <input type="number" id="spaWeightInput" name="pet_weight_kg" value="{{ form.raw_data.get('pet_weight_kg', '4.0') }}" step="0.1" min="0.2" max="80" class="form-control" required>
                     {% for err in form.errors.get('pet_weight_kg', []) %}
                         <div class="form-error">{{ err }}</div>
@@ -160,7 +154,7 @@
 
             <div class="form-group">
                 <label class="form-label">Gói dịch vụ đăng ký *</label>
-                <select id="spaServiceSelect" name="service_name" class="form-control">
+                <select id="spaServiceSelect" name="service_name" class="form-control" required>
                     {% for s_name, s_price in spa_services.items() %}
                     <option value="{{ s_name }}" data-base="{{ s_price }}" {% if form.raw_data.get('service_name') == s_name %}selected{% endif %}>
                         {{ s_name }} (Giá gốc: {{ "{:,.0f}".format(s_price) }}đ)
@@ -172,15 +166,15 @@
             <div class="grid-2" style="gap:14px;">
                 <div class="form-group">
                     <label class="form-label">Ngày hẹn *</label>
-                    <input type="date" name="appointment_date" value="{{ form.raw_data.get('appointment_date', default_date) }}" class="form-control" required>
+                    <input type="date" name="appointment_date" value="{{ form.raw_data.get('appointment_date', default_date) }}" min="{{ default_date }}" class="form-control" required>
                     {% for err in form.errors.get('appointment_date', []) %}
                         <div class="form-error">{{ err }}</div>
                     {% endfor %}
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Giờ hẹn *</label>
-                    <input type="time" name="appointment_time" value="{{ form.raw_data.get('appointment_time', '09:30') }}" class="form-control" required>
+                    <label class="form-label">Giờ hẹn (08:00 - 20:30) *</label>
+                    <input type="time" name="appointment_time" value="{{ form.raw_data.get('appointment_time', '09:30') }}" min="08:00" max="20:30" class="form-control" required>
                     {% for err in form.errors.get('appointment_time', []) %}
                         <div class="form-error">{{ err }}</div>
                     {% endfor %}
@@ -188,8 +182,11 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Ghi chú tình trạng của bé</label>
-                <input type="text" name="note" value="{{ form.raw_data.get('note', '') }}" class="form-control" placeholder="Tính cách của bé, lưu ý nhiệt độ sấy...">
+                <label class="form-label">Ghi chú tình trạng của bé (Tối đa 300 ký tự)</label>
+                <input type="text" name="note" value="{{ form.raw_data.get('note', '') }}" maxlength="300" class="form-control" placeholder="Tính cách của bé, lưu ý nhiệt độ sấy, dị ứng...">
+                {% for err in form.errors.get('note', []) %}
+                    <div class="form-error">{{ err }}</div>
+                {% endfor %}
             </div>
 
             <div style="background:var(--bg-accent-light); border:1px solid #fbd5ce; padding:14px 18px; border-radius:var(--radius-sm); display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
@@ -197,7 +194,7 @@
                 <strong id="spaPricePreview" style="font-size:20px; color:var(--primary);">150,000 đ</strong>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg btn-block">Xác nhận Đặt lịch &amp; Gửi Email</button>
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Xác nhận Đặt lịch &amp; Nhận phiếu qua Email</button>
         </form>
     </div>
 </div>
