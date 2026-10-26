@@ -9,10 +9,11 @@ app.py
 """
 
 from datetime import datetime
+import functools
 import json
 import os
 import sys
-from typing import Any, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
@@ -22,7 +23,7 @@ from flask import (
     Flask,
     Response,
     flash,
-     jsonify,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -33,7 +34,7 @@ from flask import (
 from core.orm import ValidationError
 from core.paginator import paginate_stream
 from core.router import Router
-from forms.petshop_forms import CheckoutForm, ProductForm, SpaBookingForm
+from forms.petshop_forms import AdminLoginForm, CheckoutForm, ProductForm, SpaBookingForm
 from models.booking import SPA_SERVICES, SpaBooking
 from models.email_log import EmailLog
 from models.order import Order
@@ -120,9 +121,29 @@ def build_cart_view_data() -> Tuple[List[Dict[str, Any]], float, int]:
 
 @app.context_processor
 def inject_global_template_vars() -> Dict[str, Any]:
-    """Tự động truyền số lượng món trong giỏ hàng vào mọi template Jinja2."""
+    """Tự động truyền số lượng món trong giỏ hàng và trạng thái đăng nhập Admin vào mọi template Jinja2."""
     _, _, count = build_cart_view_data()
-    return {"cart_count": count}
+    return {
+        "cart_count": count,
+        "is_admin": bool(session.get("admin_logged_in")),
+        "admin_user": session.get("admin_user", "admin"),
+    }
+
+
+def admin_required(view_func: Callable) -> Callable:
+    """
+    Custom Decorator bảo vệ các route Quản trị (`/admin*`):
+    Nếu người dùng chưa đăng nhập tài khoản Admin, tự động chặn và chuyển hướng sang trang `/login`.
+    """
+
+    @functools.wraps(view_func)
+    def wrapped_view(*args: Any, **kwargs: Any):
+        if not session.get("admin_logged_in"):
+            flash("Vui lòng đăng nhập tài khoản Quản trị viên để truy cập Dashboard.", "error")
+            return redirect(url_for("login_page", next=request.path))
+        return view_func(*args, **kwargs)
+
+    return wrapped_view
 
 
 # ============================================================================
@@ -423,13 +444,59 @@ def import_xml_route():
 
 
 # ============================================================================
-# TRANG QUẢN TRỊ ADMIN (`/admin`)
+# ĐĂNG NHẬP & TRANG QUẢN TRỊ ADMIN (`/login`, `/logout`, `/admin`)
 # ============================================================================
 
+@app.route("/login", methods=["GET", "POST"])
+def login_page():
+    """Trang Đăng nhập Quản trị viên (Admin Login)."""
+    if session.get("admin_logged_in"):
+        return redirect(url_for("admin_page", tab="dashboard"))
+
+    form = AdminLoginForm()
+    next_url = request.args.get("next") or request.form.get("next") or url_for("admin_page", tab="dashboard")
+
+    if request.method == "POST":
+        if form.validate_on_submit():
+            expected_user = os.environ.get("ADMIN_USER", "admin")
+            expected_pass = os.environ.get("ADMIN_PASSWORD", "admin123")
+            username = form.data["username"]
+            password = form.data["password"]
+
+            if username == expected_user and password == expected_pass:
+                session["admin_logged_in"] = True
+                session["admin_user"] = username
+                session.modified = True
+                flash(f"Đăng nhập thành công! Chào mừng Quản trị viên '{username}' đến với Dashboard.", "success")
+                return redirect(next_url)
+            else:
+                flash("Tên đăng nhập hoặc mật khẩu không chính xác (Mặc định: admin / admin123).", "error")
+        else:
+            flash("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.", "error")
+
+    return render_template(
+        "login.html",
+        active_page="login",
+        form=form,
+        next_url=next_url,
+    )
+
+
+@app.route("/logout")
+def logout_page():
+    """Đăng xuất khỏi phiên Quản trị viên."""
+    session.pop("admin_logged_in", None)
+    session.pop("admin_user", None)
+    session.modified = True
+    flash("Đã đăng xuất khỏi tài khoản Quản trị viên.", "success")
+    return redirect(url_for("login_page"))
+
+
 @app.route("/admin")
+@admin_required
 def admin_page():
-    """Trang Quản trị hệ thống: Kho hàng, Lịch hẹn Spa, Đơn hàng & Hộp thư Email."""
-    admin_tab = request.args.get("tab", "products").strip()
+    """Trang Dashboard & Quản trị hệ thống: Thống kê, Kho hàng, Lịch hẹn Spa, Đơn hàng & Hộp thư Email."""
+    admin_tab = request.args.get("tab", "dashboard").strip()
     edit_id = request.args.get("edit_id", "").strip()
     edit_product = Product.get_by_id(int(edit_id)) if edit_id.isdigit() else None
 
@@ -454,6 +521,7 @@ def admin_page():
 
 
 @app.route("/admin/products/save", methods=["POST"])
+@admin_required
 def admin_save_product():
     form = ProductForm()
     product_id = request.form.get("product_id", "").strip()
@@ -479,6 +547,7 @@ def admin_save_product():
 
 
 @app.route("/admin/products/<int:product_id>/delete", methods=["POST"])
+@admin_required
 def admin_delete_product(product_id: int):
     if Product.delete_by_id(product_id):
         flash(f"Đã xóa sản phẩm #{product_id}.", "success")
@@ -488,6 +557,7 @@ def admin_delete_product(product_id: int):
 
 
 @app.route("/admin/bookings/<int:booking_id>/status", methods=["POST"])
+@admin_required
 def admin_update_booking_status(booking_id: int):
     new_status = request.form.get("status", "").strip()
     booking = SpaBooking.get_by_id(booking_id)

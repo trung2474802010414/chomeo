@@ -211,3 +211,21 @@ class NetworkApiForm(BaseFlaskForm):
             "search_breed": search_breed,
         }
 
+
+class AdminLoginForm(BaseFlaskForm):
+    """Form Đăng nhập Quản trị viên (Admin Login) có kiểm tra CSRF và dữ liệu đầu vào."""
+
+    def _clean_fields(self) -> None:
+        username = str(self.raw_data.get("username", "")).strip()
+        password = str(self.raw_data.get("password", "")).strip()
+
+        if not username:
+            self.add_error("username", "Vui lòng nhập tên đăng nhập.")
+        if not password:
+            self.add_error("password", "Vui lòng nhập mật khẩu.")
+
+        self.data = {
+            "username": username,
+            "password": password,
+        }
+

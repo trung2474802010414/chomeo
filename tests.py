@@ -114,10 +114,27 @@ class TestAdvancedPythonPetShop(unittest.TestCase):
         self.assertEqual(parsed[0]["sku"], "TEST-1")
 
     def test_clo2_flask_pages_and_forms_and_email(self) -> None:
-        """Kiểm tra CLO2: Các trang Flask Template, Form Validation và gửi Email xác nhận."""
-        for route in ("/", "/shop", "/spa", "/cart", "/network", "/admin"):
+        """Kiểm tra CLO2: Các trang Flask Template, Admin Login Decorator, Form Validation và gửi Email."""
+        for route in ("/", "/shop", "/spa", "/cart", "/network", "/login"):
             resp = self.client.get(route)
             self.assertEqual(resp.status_code, 200, f"Trang {route} phải trả về HTTP 200")
+
+        # Kiểm tra @admin_required chặn truy cập /admin khi chưa đăng nhập (redirect 302 sang /login)
+        unauth_resp = self.client.get("/admin", follow_redirects=False)
+        self.assertEqual(unauth_resp.status_code, 302)
+        self.assertIn("/login", unauth_resp.headers.get("Location", ""))
+
+        # Kiểm tra đăng nhập Admin thành công -> vào thẳng trang Dashboard Quản trị
+        login_resp = self.client.post(
+            "/login",
+            data={"username": "admin", "password": "admin123"},
+            follow_redirects=True,
+        )
+        self.assertEqual(login_resp.status_code, 200)
+        self.assertIn("Dashboard Quản Trị", login_resp.get_data(as_text=True))
+
+        # Đăng xuất sau khi kiểm tra
+        self.client.get("/logout", follow_redirects=True)
 
         # Kiểm tra Form Validation bắt lỗi SĐT sai
         bad_form = SpaBookingForm({"customer_name": "A", "phone": "abc"})

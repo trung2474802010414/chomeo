@@ -1,16 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}Quản trị Hệ thống - Meow &amp; Woof Pet Shop{% endblock %}
+{% block title %}Dashboard Quản Trị - Meow &amp; Woof Pet Shop{% endblock %}
 
 {% block content %}
 <div class="section-header">
     <div>
-        <h1 class="section-title">Bảng Điều Khiển Quản Trị (Admin)</h1>
-        <p class="section-subtitle">Thống kê dữ liệu bằng Comprehensions, quản lý Kho hàng, Lịch hẹn Spa, Đơn hàng và Hộp thư Email đã gửi</p>
+        <h1 class="section-title">Dashboard Quản Trị Hệ Thống</h1>
+        <p class="section-subtitle">
+            Xin chào Quản trị viên <strong>{{ admin_user }}</strong> | Tổng hợp số liệu bằng <strong>Comprehensions &amp; Generator Expressions</strong>
+        </p>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <a href="{{ url_for('shop_page') }}" class="btn btn-outline">Xem Cửa hàng (Khách)</a>
+        <a href="{{ url_for('logout_page') }}" class="btn btn-danger">Đăng xuất</a>
     </div>
 </div>
 
-<!-- 6 Thẻ thống kê tổng quan -->
+<!-- 6 Thẻ KPI thống kê tổng quan -->
 <div class="stats-row">
     <div class="stat-card">
         <span class="stat-label">Tổng mặt hàng (SKU)</span>
@@ -33,32 +39,182 @@
         <strong class="stat-num">{{ "{:,.0f}".format(stats.spa_revenue) }} đ</strong>
     </div>
     <div class="stat-card teal">
-        <span class="stat-label">Email đã gửi (SMTP/Log)</span>
-        <strong class="stat-num">{{ email_logs|length }}</strong>
+        <span class="stat-label">Khách hàng duy nhất (Set)</span>
+        <strong class="stat-num">{{ stats.unique_customers_count }}</strong>
     </div>
 </div>
 
 <!-- Thanh chọn phân mục Quản trị -->
 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px;">
+    <a href="{{ url_for('admin_page', tab='dashboard') }}" class="btn {% if admin_tab == 'dashboard' %}btn-primary{% else %}btn-outline{% endif %}">
+        1. Tổng quan Dashboard &amp; Thống kê
+    </a>
     <a href="{{ url_for('admin_page', tab='products') }}" class="btn {% if admin_tab == 'products' %}btn-primary{% else %}btn-outline{% endif %}">
-        1. Quản lý Kho sản phẩm ({{ products|length }})
+        2. Quản lý Sản phẩm ({{ products|length }})
     </a>
     <a href="{{ url_for('admin_page', tab='bookings') }}" class="btn {% if admin_tab == 'bookings' %}btn-primary{% else %}btn-outline{% endif %}">
-        2. Quản lý Lịch hẹn Spa ({{ bookings|length }})
+        3. Quản lý Lịch hẹn Spa ({{ bookings|length }})
     </a>
     <a href="{{ url_for('admin_page', tab='orders') }}" class="btn {% if admin_tab == 'orders' %}btn-primary{% else %}btn-outline{% endif %}">
-        3. Quản lý Đơn hàng ({{ orders|length }})
+        4. Quản lý Đơn hàng ({{ orders|length }})
     </a>
     <a href="{{ url_for('admin_page', tab='emails') }}" class="btn {% if admin_tab == 'emails' %}btn-primary{% else %}btn-outline{% endif %}">
-        4. Hộp thư Email đã gửi ({{ email_logs|length }})
+        5. Hộp thư Email đã gửi ({{ email_logs|length }})
     </a>
 </div>
 
-{% if admin_tab == 'products' %}
+{% if admin_tab == 'dashboard' %}
+<!-- TAB 1: TỔNG QUAN DASHBOARD & BIỂU ĐỒ THỐNG KÊ -->
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Cơ cấu Giá trị Kho theo Danh mục (Dict Comprehension)</h2>
+        </div>
+        <div class="table-wrap">
+            <table class="clean-table">
+                <thead>
+                    <tr>
+                        <th>Danh mục</th>
+                        <th class="text-center">Số SKU</th>
+                        <th class="text-center">Tồn kho</th>
+                        <th class="text-right">Giá trị kho &amp; Tỷ trọng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat_name, cat_info in stats.category_breakdown.items() %}
+                    {% set pct = (cat_info.inventory_value / stats.total_inventory_value * 100) if stats.total_inventory_value > 0 else 0 %}
+                    <tr>
+                        <td><strong>{{ cat_name }}</strong></td>
+                        <td class="text-center">{{ cat_info.product_count }}</td>
+                        <td class="text-center">{{ cat_info.stock_units }}</td>
+                        <td class="text-right">
+                            <div><strong>{{ "{:,.0f}".format(cat_info.inventory_value) }} đ</strong> ({{ "{:.1f}".format(pct) }}%)</div>
+                            <div style="width:100%; height:7px; background:#e2e8f0; border-radius:99px; margin-top:4px; overflow:hidden;">
+                                <div style="width:{{ pct }}%; height:100%; background:var(--secondary); border-radius:99px;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Cảnh báo Sắp hết hàng (List Comprehension: stock &le; 5)</h2>
+            <a href="{{ url_for('admin_page', tab='products') }}" class="btn btn-outline btn-sm">Quản lý kho &rarr;</a>
+        </div>
+        <div class="table-wrap">
+            <table class="clean-table">
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Tên sản phẩm</th>
+                        <th class="text-center">Còn lại</th>
+                        <th class="text-center">Nhập thêm</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lp in stats.low_stock_products %}
+                    <tr>
+                        <td><code>{{ lp.sku }}</code></td>
+                        <td><strong>{{ lp.name }}</strong></td>
+                        <td class="text-center">
+                            <span class="badge {% if lp.stock == 0 %}badge-stock-out{% else %}badge-stock-low{% endif %}">
+                                {{ lp.stock }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('admin_page', tab='products', edit_id=lp.id) }}" class="btn btn-outline btn-sm">Cập nhật</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center" style="color:var(--text-muted);">Tất cả mặt hàng đều còn tồn kho dồi dào (&gt; 5).</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Đơn hàng mới nhất</h2>
+            <a href="{{ url_for('admin_page', tab='orders') }}" class="btn btn-outline btn-sm">Xem tất cả</a>
+        </div>
+        <div class="table-wrap">
+            <table class="clean-table">
+                <thead>
+                    <tr>
+                        <th>Mã ĐH</th>
+                        <th>Khách hàng</th>
+                        <th class="text-right">Tổng tiền</th>
+                        <th>Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for o in orders[:5] %}
+                    <tr>
+                        <td><strong>#{{ o.id }}</strong></td>
+                        <td>{{ o.customer_name }} ({{ o.phone }})</td>
+                        <td class="text-right"><strong style="color:var(--primary);">{{ "{:,.0f}".format(o.total_amount) }} đ</strong></td>
+                        <td>{{ o.created_at }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center">Chưa có đơn hàng nào.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Lịch hẹn Spa mới nhất</h2>
+            <a href="{{ url_for('admin_page', tab='bookings') }}" class="btn btn-outline btn-sm">Xem tất cả</a>
+        </div>
+        <div class="table-wrap">
+            <table class="clean-table">
+                <thead>
+                    <tr>
+                        <th>Mã</th>
+                        <th>Thú cưng</th>
+                        <th>Ngày hẹn</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings[:5] %}
+                    <tr>
+                        <td><strong>#{{ b.id }}</strong></td>
+                        <td>{{ b.pet_name }} ({{ b.pet_type }})</td>
+                        <td>{{ b.appointment_date }} {{ b.appointment_time }}</td>
+                        <td><span class="badge badge-stock-ok">{{ b.status }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center">Chưa có lịch hẹn nào.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% elif admin_tab == 'products' %}
+<!-- TAB 2: QUẢN LÝ KHO SẢN PHẨM -->
 <div class="grid-2" style="grid-template-columns: 1.6fr 1fr;">
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">Danh sách Sản phẩm trong kho</h2>
+            <div style="display:flex; gap:6px;">
+                <a href="{{ url_for('export_csv_route') }}" class="btn btn-outline btn-sm" download>Xuất CSV</a>
+                <a href="{{ url_for('export_xml_route') }}" class="btn btn-outline btn-sm" download>Xuất XML</a>
+                <a href="{{ url_for('export_json_route') }}" class="btn btn-outline btn-sm" download>Xuất JSON</a>
+            </div>
         </div>
         <div class="table-wrap">
             <table class="clean-table">
@@ -187,6 +343,7 @@
 </div>
 
 {% elif admin_tab == 'bookings' %}
+<!-- TAB 3: QUẢN LÝ LỊCH HẸN SPA -->
 <div class="card">
     <div class="card-header">
         <h2 class="card-title">Quản lý Lịch hẹn Spa &amp; Cập nhật Trạng thái</h2>
@@ -237,6 +394,7 @@
 </div>
 
 {% elif admin_tab == 'orders' %}
+<!-- TAB 4: QUẢN LÝ ĐƠN HÀNG -->
 <div class="card">
     <div class="card-header">
         <h2 class="card-title">Danh sách Đơn hàng đã đặt</h2>
@@ -279,6 +437,7 @@
 </div>
 
 {% elif admin_tab == 'emails' %}
+<!-- TAB 5: HỘP THƯ EMAIL ĐÃ GỬI -->
 <div class="card">
     <div class="card-header">
         <div>

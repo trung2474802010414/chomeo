@@ -83,7 +83,12 @@
                 <a href="{{ url_for('shop_page') }}" class="nav-item {% if active_page == 'shop' %}active{% endif %}">Cửa hàng</a>
                 <a href="{{ url_for('spa_page') }}" class="nav-item {% if active_page == 'spa' %}active{% endif %}">Đặt lịch Spa</a>
                 <a href="{{ url_for('network_page') }}" class="nav-item {% if active_page == 'network' %}active{% endif %}">Lập trình mạng (API &amp; XML)</a>
-                <a href="{{ url_for('admin_page') }}" class="nav-item {% if active_page == 'admin' %}active{% endif %}">Quản trị</a>
+                {% if is_admin %}
+                    <a href="{{ url_for('admin_page') }}" class="nav-item {% if active_page == 'admin' %}active{% endif %}">Dashboard Quản trị</a>
+                    <a href="{{ url_for('logout_page') }}" class="nav-item" style="color:#b91c1c;">Đăng xuất ({{ admin_user }})</a>
+                {% else %}
+                    <a href="{{ url_for('login_page') }}" class="nav-item {% if active_page == 'login' %}active{% endif %}">Đăng nhập</a>
+                {% endif %}
                 <a href="{{ url_for('cart_page') }}" class="nav-cart-btn">
                     <span>Giỏ hàng</span>
                     <span class="cart-badge" id="navCartCount">{{ cart_count|default(0) }}</span>
