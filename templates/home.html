@@ -1,41 +1,39 @@
 {% extends "base.html" %}
-{% from "base.html" import render_product_svg %}
+{% from "base.html" import render_product_card %}
 
-{% block title %}Trang chủ - Meow &amp; Woof Pet Shop &amp; Spa{% endblock %}
+{% block title %}Trang chủ - Meow &amp; Woof Pet House &amp; Spa{% endblock %}
 
 {% block content %}
 <section class="hero-section">
     <div class="hero-card">
         <div>
             <span class="hero-eyebrow">Chăm sóc Chó Mèo tận tâm mỗi ngày</span>
-            <h1 class="hero-title">Siêu thị Dinh dưỡng, Phụ kiện &amp; Spa Thú cưng</h1>
+            <h1 class="hero-title">Pet House Chó Mèo Cảnh, Phụ Kiện &amp; Spa Thú Cưng</h1>
             <p class="hero-desc">
-                Cung cấp hạt dinh dưỡng chính hãng, pate súp thưởng, cát vệ sinh hữu cơ cùng dịch vụ tắm sấy, cắt tỉa lông chuyên nghiệp cho các bé Chó và Mèo.
+                Cung cấp các giống Chó cảnh, Mèo cảnh thuần chủng (Schnauzer, Poodle, Corgi, Phốc Sóc, Mèo Anh, Scottish Fold, Munchkin) cùng thức ăn hạt, pate, phụ kiện và dịch vụ Spa chuyên nghiệp.
             </p>
             <div class="hero-actions">
-                <a href="{{ url_for('shop_page') }}" class="btn btn-primary btn-lg">Mua sắm ngay &rarr;</a>
-                <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-lg">Đặt lịch Spa cho Boss</a>
-                <a href="{{ url_for('network_page') }}" class="btn btn-outline btn-lg">Từ điển Giống Chó Mèo (API)</a>
+                <a href="{{ url_for('shop_page', category='Chó cảnh') }}" class="btn btn-primary btn-lg">&#128054; Xem Chó Cảnh</a>
+                <a href="{{ url_for('shop_page', category='Mèo cảnh') }}" class="btn btn-teal btn-lg">&#128049; Xem Mèo Cảnh</a>
+                <a href="{{ url_for('spa_page') }}" class="btn btn-outline btn-lg">Đặt lịch Spa cho Boss</a>
             </div>
         </div>
 
         <div class="hero-illustration">
             <svg width="220" height="170" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="10" y="15" width="220" height="150" rx="18" fill="#FFF8F5" stroke="#FADCD5" stroke-width="2"/>
-                <!-- Hình Mèo cam -->
                 <path d="M58 68L48 42L72 54H92L116 42L106 68" fill="#FDBA74" stroke="#C2410C" stroke-width="2.5" stroke-linejoin="round"/>
                 <circle cx="82" cy="86" r="30" fill="#FFEDD5" stroke="#C2410C" stroke-width="2.5"/>
                 <circle cx="72" cy="81" r="3.5" fill="#1E293B"/>
                 <circle cx="92" cy="81" r="3.5" fill="#1E293B"/>
                 <path d="M78 90L82 94L86 90" stroke="#C2410C" stroke-width="2.5" stroke-linecap="round"/>
-                <!-- Hình Chó đốm xanh ngọc -->
                 <ellipse cx="140" cy="75" rx="9" ry="18" transform="rotate(15 140 75)" fill="#2A9D8F"/>
                 <ellipse cx="192" cy="75" rx="9" ry="18" transform="rotate(-15 192 75)" fill="#2A9D8F"/>
                 <circle cx="166" cy="84" r="28" fill="#E0F4F1" stroke="#2A9D8F" stroke-width="2.5"/>
                 <circle cx="156" cy="79" r="3.5" fill="#1E293B"/>
                 <circle cx="176" cy="79" r="3.5" fill="#1E293B"/>
                 <ellipse cx="166" cy="88" rx="5" ry="3.5" fill="#1E293B"/>
-                <text x="120" y="146" text-anchor="middle" fill="#1E293B" font-size="14" font-weight="700">Meow &amp; Woof Care Center</text>
+                <text x="120" y="146" text-anchor="middle" fill="#1E293B" font-size="14" font-weight="700">Meow &amp; Woof Pet House</text>
             </svg>
         </div>
     </div>
@@ -44,22 +42,22 @@
         <div class="feature-box">
             <div class="feature-icon">01</div>
             <div>
-                <h3>Sản phẩm chính hãng</h3>
-                <p>Thức ăn hạt, pate, vitamin từ Royal Canin, SmartHeart, Ciao, Virbac.</p>
+                <h3>Chó Mèo Thuần Chủng</h3>
+                <p>Đầy đủ các giống Poodle, Schnauzer, Corgi, ALN, Scottish Fold kèm bảo hành sức khỏe.</p>
             </div>
         </div>
         <div class="feature-box">
             <div class="feature-icon">02</div>
             <div>
-                <h3>Spa &amp; Grooming chuẩn</h3>
-                <p>Tắm sấy khử mùi, cắt tỉa tạo kiểu lông, tính phí minh bạch theo cân nặng.</p>
+                <h3>Đồ dùng &amp; Dinh dưỡng</h3>
+                <p>Gợi ý thức ăn hạt, pate, cát vệ sinh và phụ kiện phù hợp riêng cho từng giống.</p>
             </div>
         </div>
         <div class="feature-box">
             <div class="feature-icon">03</div>
             <div>
-                <h3>Xác nhận qua Email</h3>
-                <p>Tự động gửi Email hóa đơn mua hàng và lịch hẹn Spa ngay sau khi đăng ký.</p>
+                <h3>Spa &amp; Grooming chuẩn</h3>
+                <p>Tắm sấy khử mùi, cắt tỉa tạo kiểu lông, tự động gửi Email xác nhận lịch hẹn.</p>
             </div>
         </div>
         <div class="feature-box">
@@ -72,53 +70,19 @@
     </div>
 </section>
 
-<!-- SẢN PHẨM NỔI BẬT -->
+<!-- CHÓ MÈO CẢNH & SẢN PHẨM NỔI BẬT -->
 <section style="margin-bottom: 42px;">
     <div class="section-header">
         <div>
-            <h2 class="section-title">Sản phẩm nổi bật cho Boss</h2>
-            <p class="section-subtitle">Chọn lọc các sản phẩm được yêu thích nhất dành cho Chó và Mèo</p>
+            <h2 class="section-title">Thú Cưng &amp; Sản Phẩm Nổi Bật</h2>
+            <p class="section-subtitle">Bấm vào từng bé thú cưng hoặc sản phẩm để xem thông tin chi tiết và các đồ vật liên quan</p>
         </div>
         <a href="{{ url_for('shop_page') }}" class="btn btn-outline">Xem toàn bộ cửa hàng ({{ stats.total_products }}) &rarr;</a>
     </div>
 
     <div class="product-grid">
         {% for p in featured_products %}
-        <article class="product-card">
-            <div>
-                <div class="product-visual">
-                    <div class="product-badges-top">
-                        <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}">
-                            {{ p.pet_type }}
-                        </span>
-                        <span class="badge {% if p.stock == 0 %}badge-stock-out{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
-                            {% if p.stock > 0 %}Còn {{ p.stock }}{% else %}Hết hàng{% endif %}
-                        </span>
-                    </div>
-                    <div class="product-svg-wrap">
-                        {{ render_product_svg(p.category, p.pet_type) }}
-                    </div>
-                    <span class="product-cat-name">{{ p.category }}</span>
-                </div>
-
-                <div class="product-content">
-                    <div class="product-sku">SKU: {{ p.sku }}</div>
-                    <h3 class="product-name">{{ p.name }}</h3>
-                    <p class="product-desc">{{ p.description }}</p>
-                </div>
-            </div>
-
-            <div class="product-bottom">
-                <span class="product-price">{{ "{:,.0f}".format(p.price) }} đ</span>
-                <form method="POST" action="{{ url_for('add_to_cart_route') }}">
-                    <input type="hidden" name="product_id" value="{{ p.id }}">
-                    <input type="hidden" name="next_url" value="{{ request.path }}">
-                    <button type="submit" class="btn btn-primary btn-sm" {% if p.stock <= 0 %}disabled{% endif %}>
-                        {% if p.stock > 0 %}+ Thêm vào giỏ{% else %}Tạm hết{% endif %}
-                    </button>
-                </form>
-            </div>
-        </article>
+            {{ render_product_card(p, request.path) }}
         {% endfor %}
     </div>
 </section>
@@ -175,4 +139,3 @@
     {% endif %}
 </section>
 {% endblock %}
-

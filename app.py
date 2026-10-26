@@ -8,7 +8,7 @@ app.py
 - CLO5 (10%): Module hóa code rõ ràng (`core/`, `models/`, `forms/`, `services/`, `templates/`, `static/`).
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import functools
 import json
 import os
@@ -38,7 +38,7 @@ from forms.petshop_forms import AdminLoginForm, CheckoutForm, ProductForm, SpaBo
 from models.booking import SPA_SERVICES, SpaBooking
 from models.email_log import EmailLog
 from models.order import Order
-from models.product import CATEGORIES, Product
+from models.product import CATEGORIES, CAT_BREEDS, DOG_BREEDS, Product
 from services.email_service import send_booking_confirmation_email
 from services.network_service import (
     export_products_to_xml,
@@ -49,6 +49,7 @@ from services.petshop_service import (
     compute_dashboard_stats,
     create_order_transactional,
     export_products_csv_generator,
+    get_product_detail_and_related,
     import_products_from_csv,
     init_db_and_seed,
     query_products,
@@ -121,12 +122,14 @@ def build_cart_view_data() -> Tuple[List[Dict[str, Any]], float, int]:
 
 @app.context_processor
 def inject_global_template_vars() -> Dict[str, Any]:
-    """Tự động truyền số lượng món trong giỏ hàng và trạng thái đăng nhập Admin vào mọi template Jinja2."""
+    """Tự động truyền số lượng món trong giỏ hàng, trạng thái Admin và danh sách Giống chó/mèo vào mọi template Jinja2."""
     _, _, count = build_cart_view_data()
     return {
         "cart_count": count,
         "is_admin": bool(session.get("admin_logged_in")),
         "admin_user": session.get("admin_user", "admin"),
+        "global_dog_breeds": DOG_BREEDS,
+        "global_cat_breeds": CAT_BREEDS,
     }
 
 
@@ -179,10 +182,11 @@ def home_page():
 
 @app.route("/shop")
 def shop_page():
-    """Trang Cửa hàng: Lọc đa điều kiện bằng Generator Pipeline & phân trang bằng PageIterator."""
+    """Trang Cửa hàng: Lọc đa điều kiện (loài, giống chó/mèo, danh mục, giá) bằng Generator Pipeline & PageIterator."""
     keyword = request.args.get("keyword", "").strip()
     pet_type = request.args.get("pet_type", "ALL").strip()
     category = request.args.get("category", "ALL").strip()
+    breed = request.args.get("breed", "ALL").strip()
     min_price_str = request.args.get("min_price", "").strip()
     max_price_str = request.args.get("max_price", "").strip()
     sort_by = request.args.get("sort_by", "id_desc").strip()
@@ -195,6 +199,7 @@ def shop_page():
         keyword=keyword,
         category=category,
         pet_type=pet_type,
+        breed=breed,
         min_price=min_price,
         max_price=max_price,
         sort_by=sort_by,
@@ -202,10 +207,24 @@ def shop_page():
         page_size=6,
     )
 
+    # Khi khách chọn lọc theo 1 giống cụ thể (VD: Chó Schnauzer hoặc giống chưa có sẵn cá thể),
+    # tự động gợi ý các giống chó/mèo cùng loài và các đồ dùng/thức ăn phù hợp cho loài đó.
+    related_suggestions: List[Dict[str, Any]] = []
+    if breed and breed != "ALL":
+        target_pet_type = pet_type if pet_type in ("Chó", "Mèo") else ("Chó" if "Chó" in breed or breed in DOG_BREEDS else "Mèo")
+        current_ids = {item["id"] for item in page_data["items"]}
+        all_items = [p.to_dict() for p in Product.iter_all(order_by="id ASC")]
+        related_suggestions = [
+            item
+            for item in all_items
+            if item["id"] not in current_ids and item["pet_type"] in (target_pet_type, "Cả hai")
+        ][:8]
+
     filters = {
         "keyword": keyword,
         "pet_type": pet_type,
         "category": category,
+        "breed": breed,
         "min_price": min_price_str,
         "max_price": max_price_str,
         "sort_by": sort_by,
@@ -217,6 +236,29 @@ def shop_page():
         page_data=page_data,
         filters=filters,
         categories=CATEGORIES,
+        related_suggestions=related_suggestions,
+    )
+
+
+@app.route("/product/<int:product_id>")
+def product_detail_page(product_id: int):
+    """
+    Trang Chi tiết Thú cưng / Sản phẩm (Tham khảo PetHouse):
+    Hiển thị ảnh lớn, thông số chi tiết, danh sách các giống liên quan (`related_pets`)
+    và danh sách thức ăn / phụ kiện / đồ dùng liên quan (`related_supplies`).
+    """
+    detail_bundle = get_product_detail_and_related(product_id)
+    if not detail_bundle:
+        flash(f"Không tìm thấy sản phẩm hoặc thú cưng mã #{product_id}.", "error")
+        return redirect(url_for("shop_page"))
+
+    return render_template(
+        "product_detail.html",
+        active_page="shop",
+        p=detail_bundle["product"],
+        product=detail_bundle["product"],
+        related_pets=detail_bundle["related_pets"],
+        related_supplies=detail_bundle["related_supplies"],
     )
 
 
@@ -495,12 +537,40 @@ def logout_page():
 @app.route("/admin")
 @admin_required
 def admin_page():
-    """Trang Dashboard & Quản trị hệ thống: Thống kê, Kho hàng, Lịch hẹn Spa, Đơn hàng & Hộp thư Email."""
+    """Trang Dashboard & Quản trị hệ thống: Hỗ trợ lọc kỳ báo cáo (Hôm nay, 7 ngày, 30 ngày, Tháng này, Tự chọn ngày)."""
     admin_tab = request.args.get("tab", "dashboard").strip()
     edit_id = request.args.get("edit_id", "").strip()
     edit_product = Product.get_by_id(int(edit_id)) if edit_id.isdigit() else None
 
-    stats = compute_dashboard_stats()
+    # Xử lý lọc kỳ báo cáo theo ngày cho Dashboard
+    period = request.args.get("period", "30d").strip()
+    start_date_arg = request.args.get("start_date", "").strip()
+    end_date_arg = request.args.get("end_date", "").strip()
+
+    today_dt = datetime.now()
+    today_str = today_dt.strftime("%Y-%m-%d")
+
+    if period == "custom" and (start_date_arg or end_date_arg):
+        start_date = start_date_arg
+        end_date = end_date_arg or today_str
+    elif period == "today":
+        start_date = today_str
+        end_date = today_str
+    elif period == "7d":
+        start_date = (today_dt - timedelta(days=7)).strftime("%Y-%m-%d")
+        end_date = today_str
+    elif period == "month":
+        start_date = today_dt.replace(day=1).strftime("%Y-%m-%d")
+        end_date = today_str
+    elif period == "all":
+        start_date = ""
+        end_date = ""
+    else:
+        period = "30d"
+        start_date = (today_dt - timedelta(days=30)).strftime("%Y-%m-%d")
+        end_date = today_str
+
+    stats = compute_dashboard_stats(start_date=start_date, end_date=end_date)
     products = [p.to_dict() for p in Product.iter_all(order_by="id DESC")]
     bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")]
     orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")]
@@ -510,6 +580,9 @@ def admin_page():
         "admin.html",
         active_page="admin",
         admin_tab=admin_tab,
+        period=period,
+        start_date=start_date or (today_dt - timedelta(days=30)).strftime("%Y-%m-%d"),
+        end_date=end_date or today_str,
         stats=stats,
         products=products,
         bookings=bookings,

@@ -83,6 +83,7 @@ def build_filter_pipeline(
     keyword: Optional[str] = None,
     category: Optional[str] = None,
     pet_type: Optional[str] = None,
+    breed: Optional[str] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     in_stock_only: bool = False,
@@ -101,6 +102,7 @@ def build_filter_pipeline(
             item for item in pipeline
             if kw in getattr(item, "name", "").lower()
             or kw in getattr(item, "description", "").lower()
+            or kw in getattr(item, "breed", "").lower()
         )
 
     if category and category != "ALL":
@@ -110,6 +112,15 @@ def build_filter_pipeline(
         pipeline = (
             item for item in pipeline
             if getattr(item, "pet_type", "") in (pet_type, "Chó & Mèo")
+        )
+
+    if breed and breed != "ALL":
+        br = breed.strip().lower()
+        pipeline = (
+            item for item in pipeline
+            if br in getattr(item, "breed", "").lower()
+            or br in getattr(item, "name", "").lower()
+            or br in getattr(item, "description", "").lower()
         )
 
     if min_price is not None:

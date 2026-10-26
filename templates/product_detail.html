@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% from "base.html" import render_product_svg, render_product_card %}
+
+{% block title %}{{ p.name }} - Meow &amp; Woof Pet House{% endblock %}
+
+{% block content %}
+<!-- Thanh điều hướng Breadcrumb -->
+<div class="breadcrumb-bar">
+    <a href="{{ url_for('home_page') }}">Trang chủ</a>
+    <span>/</span>
+    <a href="{{ url_for('shop_page') }}">Cửa hàng</a>
+    <span>/</span>
+    <a href="{{ url_for('shop_page', category=p.category) }}">{{ p.category }}</a>
+    {% if p.breed %}
+    <span>/</span>
+    <a href="{{ url_for('shop_page', pet_type=p.pet_type, breed=p.breed) }}">{{ p.breed }}</a>
+    {% endif %}
+    <span>/</span>
+    <span>{{ p.name }}</span>
+</div>
+
+<!-- Khung thông tin chi tiết Thú cưng / Sản phẩm (Tham khảo PetHouse) -->
+<div class="detail-card">
+    <div class="detail-grid">
+        <!-- Cột trái: Ảnh lớn -->
+        <div class="detail-image-box">
+            {% if p.image_url %}
+                <img src="{{ p.image_url }}" alt="{{ p.name }}">
+            {% else %}
+                <div style="text-align:center; padding:40px;">
+                    <div class="product-svg-wrap" style="width:110px; height:110px; margin:0 auto 12px;">
+                        {{ render_product_svg(p.category, p.pet_type) }}
+                    </div>
+                    <div style="font-weight:700; color:var(--text-muted);">{{ p.category }}</div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Cột phải: Thông số & Đặt mua -->
+        <div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
+                <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}">
+                    {{ p.pet_type }}
+                </span>
+                {% if p.breed %}
+                <a href="{{ url_for('shop_page', pet_type=p.pet_type, breed=p.breed) }}" class="badge" style="background:#e0f2fe; color:#0369a1; text-decoration:none;">
+                    Giống: {{ p.breed }}
+                </a>
+                {% endif %}
+                <span class="badge {% if p.stock == 0 %}badge-stock-out{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
+                    {% if p.stock > 0 %}Còn {{ p.stock }} ({{ p.stock_status }}){% else %}Tạm hết hàng{% endif %}
+                </span>
+            </div>
+
+            <h1 class="detail-title">{{ p.name }}</h1>
+            <div style="font-size:13px; color:var(--text-muted);">Mã định danh (SKU): <code>{{ p.sku }}</code> | Phân nhóm: <strong>{{ p.category }}</strong></div>
+
+            <div class="detail-price-box">
+                <div>
+                    <div style="font-size:12.5px; color:var(--text-muted); font-weight:600;">Giá niêm yết tại Pet House:</div>
+                    <div class="detail-price">{{ "{:,.0f}".format(p.price) }} đ</div>
+                </div>
+                <div style="text-align:right; font-size:13px; color:#15803d; font-weight:600;">
+                    &#10004; Kiểm định chất lượng &amp; sức khỏe
+                </div>
+            </div>
+
+            <p style="font-size:15px; color:var(--text-body); margin-bottom:18px; line-height:1.65;">
+                {{ p.description }}
+            </p>
+
+            <!-- Bảng thông số kỹ thuật / Hồ sơ thú cưng -->
+            <table class="specs-table">
+                <tbody>
+                    <tr>
+                        <th>Danh mục</th>
+                        <td>{{ p.category }}</td>
+                    </tr>
+                    <tr>
+                        <th>Loài thú cưng</th>
+                        <td>{{ p.pet_type }}</td>
+                    </tr>
+                    <tr>
+                        <th>Giống / Dòng liên quan</th>
+                        <td>{{ p.breed if p.breed else 'Phù hợp cho mọi giống ' + p.pet_type }}</td>
+                    </tr>
+                    {% if p.category in ('Chó cảnh', 'Mèo cảnh') %}
+                    <tr>
+                        <th>Độ tuổi &amp; Tiêm chủng</th>
+                        <td>Từ 2 - 2.5 tháng tuổi, đã tiêm phòng vaccine &amp; tẩy giun định kỳ</td>
+                    </tr>
+                    <tr>
+                        <th>Chế độ bảo hành</th>
+                        <td>Bảo hành sức khỏe 30 ngày, tặng kèm sổ khám &amp; gói tư vấn dinh dưỡng trọn đời</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <th>Xuất xứ &amp; Bảo quản</th>
+                        <td>Phân phối chính hãng tại Meow &amp; Woof Pet House, hạn sử dụng dài</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <!-- Nút hành động -->
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <form method="POST" action="{{ url_for('add_to_cart_route') }}" style="flex:1; min-width:200px;">
+                    <input type="hidden" name="product_id" value="{{ p.id }}">
+                    <input type="hidden" name="next_url" value="{{ url_for('cart_page') }}">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" {% if p.stock <= 0 %}disabled{% endif %}>
+                        {% if p.stock > 0 %}Đặt Mua Ngay / Thêm Vào Giỏ{% else %}Tạm Hết Hàng{% endif %}
+                    </button>
+                </form>
+
+                <form method="POST" action="{{ url_for('add_to_cart_route') }}">
+                    <input type="hidden" name="product_id" value="{{ p.id }}">
+                    <input type="hidden" name="next_url" value="{{ request.path }}">
+                    <button type="submit" class="btn btn-outline btn-lg" {% if p.stock <= 0 %}disabled{% endif %}>
+                        + Giữ trang &amp; Thêm giỏ
+                    </button>
+                </form>
+
+                <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-lg">Đặt lịch Spa</a>
+            </div>
+
+            <ul class="policy-list">
+                <li><strong>Cam kết từ Meow &amp; Woof Pet House:</strong> Hỗ trợ giao thú cưng &amp; phụ kiện tận nơi an toàn.</li>
+                <li>Giảm ngay 15% phí tắm sấy &amp; cắt tỉa lông (Grooming) lần đầu khi mua kèm tại cửa hàng.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- KHU VỰC 1: CÁC GIỐNG CHÓ / MÈO LIÊN QUAN -->
+{% if related_pets %}
+<section style="margin-bottom: 40px;">
+    <div class="section-header">
+        <div>
+            <h2 class="section-title">Các Bé {{ p.pet_type }} Cảnh Cùng Loài &amp; Giống Liên Quan</h2>
+            <p class="section-subtitle">Tham khảo thêm các bé thú cưng thuần chủng khỏe mạnh đang có mặt tại Pet House</p>
+        </div>
+        <a href="{{ url_for('shop_page', pet_type=p.pet_type) }}" class="btn btn-outline btn-sm">Xem tất cả {{ p.pet_type }} &rarr;</a>
+    </div>
+
+    <div class="product-grid">
+        {% for rp in related_pets %}
+            {{ render_product_card(rp, request.path) }}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- KHU VỰC 2: ĐỒ VẬT, THỨC ĂN & PHỤ KIỆN LIÊN QUAN -->
+{% if related_supplies %}
+<section style="margin-bottom: 24px;">
+    <div class="section-header">
+        <div>
+            <h2 class="section-title">Đồ Vật, Thức Ăn &amp; Phụ Kiện Khuyên Dùng Kèm Theo</h2>
+            <p class="section-subtitle">Các sản phẩm dinh dưỡng, vệ sinh và đồ chơi phù hợp nhất cho {{ p.breed if p.breed else p.pet_type }}</p>
+        </div>
+        <a href="{{ url_for('shop_page', pet_type=p.pet_type) }}" class="btn btn-outline btn-sm">Xem toàn bộ phụ kiện &rarr;</a>
+    </div>
+
+    <div class="product-grid">
+        {% for rs in related_supplies %}
+            {{ render_product_card(rs, request.path) }}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+

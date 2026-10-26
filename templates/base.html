@@ -1,5 +1,5 @@
 {% macro render_product_svg(category, pet_type) -%}
-{% if category == 'Thức ăn' %}
+{% if category in ('Thức ăn', 'Chó cảnh', 'Mèo cảnh') %}
 <svg width="44" height="44" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="10" y="8" width="28" height="34" rx="5" fill="#FFE4DE" stroke="#E05A47" stroke-width="2.5"/>
     <path d="M10 16H38" stroke="#E05A47" stroke-width="2.2"/>
@@ -39,6 +39,51 @@
 {% endif %}
 {%- endmacro %}
 
+{% macro render_product_card(p, next_url) -%}
+<article class="product-card">
+    <a href="{{ url_for('product_detail_page', product_id=p.id) }}" class="product-card-link">
+        <div class="product-visual {% if p.image_url %}has-photo{% endif %}">
+            <div class="product-badges-top" style="z-index:2;">
+                <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}">
+                    {{ p.breed if p.breed else p.pet_type }}
+                </span>
+                <span class="badge {% if p.stock == 0 %}badge-stock-out{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
+                    {% if p.stock > 0 %}Còn {{ p.stock }}{% else %}Hết hàng{% endif %}
+                </span>
+            </div>
+            {% if p.image_url %}
+                <img src="{{ p.image_url }}" alt="{{ p.name }}" class="product-photo" loading="lazy">
+            {% else %}
+                <div class="product-svg-wrap">
+                    {{ render_product_svg(p.category, p.pet_type) }}
+                </div>
+                <span class="product-cat-name">{{ p.category }}</span>
+            {% endif %}
+        </div>
+
+        <div class="product-content">
+            <div class="product-sku">{{ p.category }} &bull; SKU: {{ p.sku }}</div>
+            <h3 class="product-name">{{ p.name }}</h3>
+            <p class="product-desc">{{ p.description }}</p>
+        </div>
+    </a>
+
+    <div class="product-bottom">
+        <span class="product-price">{{ "{:,.0f}".format(p.price) }} đ</span>
+        <div style="display:flex; gap:6px; align-items:center;">
+            <a href="{{ url_for('product_detail_page', product_id=p.id) }}" class="btn btn-outline btn-sm">Chi tiết</a>
+            <form method="POST" action="{{ url_for('add_to_cart_route') }}">
+                <input type="hidden" name="product_id" value="{{ p.id }}">
+                <input type="hidden" name="next_url" value="{{ next_url }}">
+                <button type="submit" class="btn btn-primary btn-sm" {% if p.stock <= 0 %}disabled{% endif %}>
+                    {% if p.stock > 0 %}+ Giỏ{% else %}Hết{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</article>
+{%- endmacro %}
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -51,7 +96,7 @@
     <!-- Thanh trạng thái trên cùng -->
     <div class="topbar">
         <div class="container topbar-inner">
-            <span>Meow &amp; Woof Pet Shop &amp; Spa | Mở cửa: 08:00 - 21:00 | Hotline: 0905.123.456</span>
+            <span>Meow &amp; Woof Pet House &amp; Spa | Mở cửa: 08:00 - 21:00 | Hotline: 0905.123.456</span>
             <div class="topbar-badges">
                 <span class="clo-pill">CLO2: Flask, Template, Form, DB, Email</span>
                 <span class="clo-pill">CLO3: urllib, API Key, JSON/XML</span>
@@ -60,7 +105,7 @@
         </div>
     </div>
 
-    <!-- Thanh điều hướng chính -->
+    <!-- Thanh điều hướng chính + Mega-Menu Giống Chó Mèo -->
     <header class="site-navbar">
         <div class="container navbar-inner">
             <a href="{{ url_for('home_page') }}" class="brand-link">
@@ -74,7 +119,7 @@
                 </div>
                 <div>
                     <div class="brand-title">Meow &amp; Woof</div>
-                    <div class="brand-sub">Siêu thị &amp; Spa Chó Mèo</div>
+                    <div class="brand-sub">Pet House &amp; Spa Chó Mèo</div>
                 </div>
             </a>
 
@@ -94,6 +139,67 @@
                     <span class="cart-badge" id="navCartCount">{{ cart_count|default(0) }}</span>
                 </a>
             </nav>
+        </div>
+
+        <!-- THANH MEGA-MENU XANH NGỌC CHỌN GIỐNG CHÓ CẢNH / MÈO CẢNH / ĐỒ VẬT LIÊN QUAN (GIỐNG HÌNH 2 PETHOUSE) -->
+        <div class="mega-nav-bar">
+            <div class="container mega-nav-container">
+                <a href="{{ url_for('shop_page') }}" class="mega-trigger">Tất cả thú cưng &amp; Đồ dùng</a>
+
+                <!-- Mega-Menu 1: CHÓ CẢNH -->
+                <div class="mega-dropdown">
+                    <a href="{{ url_for('shop_page', pet_type='Chó') }}" class="mega-trigger">
+                        <span>&#128054; Chó Cảnh (Chọn giống)</span>
+                        <span>&#9662;</span>
+                    </a>
+                    <div class="mega-panel">
+                        <div class="container">
+                            <div class="mega-grid-3">
+                                {% for br in global_dog_breeds %}
+                                <a href="{{ url_for('shop_page', pet_type='Chó', breed=br) }}" class="mega-breed-link">{{ br }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mega-Menu 2: MÈO CẢNH -->
+                <div class="mega-dropdown">
+                    <a href="{{ url_for('shop_page', pet_type='Mèo') }}" class="mega-trigger">
+                        <span>&#128049; Mèo Cảnh (Chọn giống)</span>
+                        <span>&#9662;</span>
+                    </a>
+                    <div class="mega-panel">
+                        <div class="container">
+                            <div class="mega-grid-3">
+                                {% for br in global_cat_breeds %}
+                                <a href="{{ url_for('shop_page', pet_type='Mèo', breed=br) }}" class="mega-breed-link">{{ br }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mega-Menu 3: ĐỒ VẬT, THỨC ĂN & PHỤ KIỆN -->
+                <div class="mega-dropdown">
+                    <a href="{{ url_for('shop_page', category='Thức ăn') }}" class="mega-trigger">
+                        <span>&#129460; Đồ dùng &amp; Thức ăn</span>
+                        <span>&#9662;</span>
+                    </a>
+                    <div class="mega-panel">
+                        <div class="container">
+                            <div class="mega-grid-3">
+                                <a href="{{ url_for('shop_page', category='Thức ăn') }}" class="mega-breed-link">Thức ăn &amp; Pate Dinh Dưỡng</a>
+                                <a href="{{ url_for('shop_page', category='Phụ kiện') }}" class="mega-breed-link">Phụ kiện, Balo &amp; Dây dắt</a>
+                                <a href="{{ url_for('shop_page', category='Vệ sinh & Chăm sóc') }}" class="mega-breed-link">Cát vệ sinh &amp; Sữa tắm SOS</a>
+                                <a href="{{ url_for('shop_page', category='Đồ chơi') }}" class="mega-breed-link">Đồ chơi, Trụ cào móng &amp; Xương gặm</a>
+                                <a href="{{ url_for('shop_page', category='Y tế & Vitamin') }}" class="mega-breed-link">Thuốc thú y, Nhỏ gáy &amp; Gel Vitamin</a>
+                                <a href="{{ url_for('spa_page') }}" class="mega-breed-link">Đặt lịch Tắm sấy &amp; Grooming Spa</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -118,14 +224,14 @@
     <footer class="site-footer">
         <div class="container footer-grid">
             <div>
-                <h4>Meow &amp; Woof Pet Shop &amp; Spa</h4>
-                <p>Hệ thống quản lý cửa hàng thức ăn, phụ kiện và đặt lịch chăm sóc Chó Mèo xây dựng bằng Python Flask nâng cao.</p>
+                <h4>Meow &amp; Woof Pet House &amp; Spa</h4>
+                <p>Hệ thống cửa hàng Chó Mèo cảnh thuần chủng, thức ăn, phụ kiện và đặt lịch chăm sóc Spa xây dựng bằng Python Flask nâng cao.</p>
             </div>
             <div>
-                <h4>Liên kết nhanh</h4>
-                <p><a href="{{ url_for('shop_page') }}">Danh mục sản phẩm</a></p>
+                <h4>Danh mục nổi bật</h4>
+                <p><a href="{{ url_for('shop_page', category='Chó cảnh') }}">Chó cảnh thuần chủng</a></p>
+                <p><a href="{{ url_for('shop_page', category='Mèo cảnh') }}">Mèo cảnh nhập khẩu &amp; nhân giống</a></p>
                 <p><a href="{{ url_for('spa_page') }}">Đặt lịch tắm sấy &amp; Grooming</a></p>
-                <p><a href="{{ url_for('network_page') }}">Tra cứu Giống thú cưng &amp; Xuất XML/JSON</a></p>
             </div>
             <div>
                 <h4>Thông tin kỹ thuật</h4>
@@ -137,4 +243,3 @@
     </footer>
 </body>
 </html>
-

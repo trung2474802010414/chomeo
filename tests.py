@@ -188,6 +188,21 @@ class TestAdvancedPythonPetShop(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertTrue(payload["ok"])
 
+        # Kiểm tra trang chi tiết sản phẩm (/product/<id>) & lọc giống chó/mèo (/shop?breed=...)
+        first_prod = next(Product.iter_all())
+        detail_resp = self.client.get(f"/product/{first_prod.id}")
+        self.assertEqual(detail_resp.status_code, 200)
+
+        breed_resp = self.client.get("/shop?pet_type=Chó&breed=Chó+Schnauzer")
+        self.assertEqual(breed_resp.status_code, 200)
+
+        # Kiểm tra lọc kỳ báo cáo trong Admin Dashboard
+        with self.client.session_transaction() as sess:
+            sess["admin_logged_in"] = True
+        for p in ("today", "7d", "30d", "month", "all"):
+            r = self.client.get(f"/admin?tab=dashboard&period={p}")
+            self.assertEqual(r.status_code, 200)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

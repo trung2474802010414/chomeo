@@ -156,6 +156,8 @@ class ProductForm(BaseFlaskForm):
         name = str(self.raw_data.get("name", "")).strip()
         category = str(self.raw_data.get("category", "")).strip()
         pet_type = str(self.raw_data.get("pet_type", "")).strip()
+        breed = str(self.raw_data.get("breed", "")).strip()
+        image_url = str(self.raw_data.get("image_url", "")).strip()
         description = str(self.raw_data.get("description", "")).strip()
 
         if not sku:
@@ -188,8 +190,10 @@ class ProductForm(BaseFlaskForm):
             "name": name,
             "category": category,
             "pet_type": pet_type,
+            "breed": breed,
             "price": price,
             "stock": stock,
+            "image_url": image_url,
             "description": description,
         }
 
