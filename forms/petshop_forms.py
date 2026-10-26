@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from flask import current_app, has_request_context, request, session
 from models.booking import SPA_SERVICES
-from models.product import CATEGORIES, PET_TYPES
+from models.product import CATEGORIES, CAT_BREEDS, DOG_BREEDS, PET_TYPES
 
 
 class BaseFlaskForm:
@@ -191,8 +191,20 @@ class ProductForm(BaseFlaskForm):
             self.add_error("category", "Danh mục không hợp lệ.")
         if pet_type not in PET_TYPES:
             self.add_error("pet_type", "Loài thú cưng không hợp lệ.")
+
+        # Ràng buộc chéo giữa Loài (pet_type), Danh mục (category) và Giống (breed)
+        if category == "Chó cảnh" and pet_type != "Chó":
+            self.add_error("category", "Danh mục 'Chó cảnh' chỉ áp dụng khi loài thú cưng là 'Chó'.")
+        elif category == "Mèo cảnh" and pet_type != "Mèo":
+            self.add_error("category", "Danh mục 'Mèo cảnh' chỉ áp dụng khi loài thú cưng là 'Mèo'.")
+
         if len(breed) > 80:
             self.add_error("breed", "Tên giống thú cưng tối đa 80 ký tự.")
+        elif breed:
+            if pet_type == "Chó" and (breed in CAT_BREEDS or breed.lower().startswith("mèo")):
+                self.add_error("breed", f"Loài đang chọn là 'Chó', không thể gắn giống mèo ('{breed}').")
+            elif pet_type == "Mèo" and (breed in DOG_BREEDS or breed.lower().startswith("chó")):
+                self.add_error("breed", f"Loài đang chọn là 'Mèo', không thể gắn giống chó ('{breed}').")
 
         if image_url and not (
             image_url.startswith("http://")

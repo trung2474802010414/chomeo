@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from app import app, router
 from core.orm import ValidationError
 from core.paginator import PageIterator, parse_csv_stream, stream_csv_export
-from forms.petshop_forms import SpaBookingForm
+from forms.petshop_forms import ProductForm, SpaBookingForm
 from models.booking import SpaBooking
 from models.email_log import EmailLog
 from models.product import Product
@@ -202,6 +202,22 @@ class TestAdvancedPythonPetShop(unittest.TestCase):
         for p in ("today", "7d", "30d", "month", "all"):
             r = self.client.get(f"/admin?tab=dashboard&period={p}")
             self.assertEqual(r.status_code, 200)
+
+        # Kiểm tra ràng buộc chéo trong ProductForm (Loài Chó nhưng chọn giống Mèo hoặc danh mục Mèo cảnh phải bị chặn)
+        bad_form = ProductForm(
+            {
+                "sku": "DOG-ERR-001",
+                "name": "Chó thử nghiệm lỗi",
+                "category": "Mèo cảnh",
+                "pet_type": "Chó",
+                "breed": "Mèo Anh Lông Ngắn (ALN)",
+                "price": "5000000",
+                "stock": "2",
+            }
+        )
+        self.assertFalse(bad_form.validate())
+        self.assertIn("category", bad_form.errors)
+        self.assertIn("breed", bad_form.errors)
 
 
 if __name__ == "__main__":

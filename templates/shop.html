@@ -22,8 +22,8 @@
     <a href="{{ url_for('cart_page') }}" class="btn btn-teal">Xem Giỏ hàng &amp; Thanh toán ({{ cart_count }}) &rarr;</a>
 </div>
 
-<!-- Thanh bộ lọc đa tiêu chí (Từ khóa, Loài, Giống Chó/Mèo, Danh mục, Khoảng giá, Sắp xếp) -->
-<form method="GET" action="{{ url_for('shop_page') }}" class="filter-panel">
+<!-- Thanh bộ lọc đa tiêu chí (Tự động ràng buộc Loài <-> Giống <-> Danh mục <-> Khoảng giá) -->
+<form method="GET" action="{{ url_for('shop_page') }}" class="filter-panel" id="shopFilterForm" onsubmit="return validateShopFilterForm();">
     <div class="filter-grid" style="grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));">
         <div>
             <label class="form-label">Từ khóa tìm kiếm</label>
@@ -31,32 +31,32 @@
         </div>
         <div>
             <label class="form-label">Loài thú cưng</label>
-            <select name="pet_type" class="form-control">
+            <select name="pet_type" id="shopPetTypeSelect" class="form-control" onchange="syncShopFilters('pet_type')">
                 <option value="ALL" {% if filters.pet_type == 'ALL' %}selected{% endif %}>Tất cả loài</option>
                 <option value="Chó" {% if filters.pet_type == 'Chó' %}selected{% endif %}>Chó</option>
                 <option value="Mèo" {% if filters.pet_type == 'Mèo' %}selected{% endif %}>Mèo</option>
-                <option value="Chó & Mèo" {% if filters.pet_type == 'Chó & Mèo' %}selected{% endif %}>Dùng chung</option>
+                <option value="Chó & Mèo" {% if filters.pet_type == 'Chó & Mèo' %}selected{% endif %}>Dùng chung (Chó &amp; Mèo)</option>
             </select>
         </div>
         <div>
             <label class="form-label">Giống Chó / Mèo</label>
-            <select name="breed" class="form-control">
+            <select name="breed" id="shopBreedSelect" class="form-control" onchange="syncShopFilters('breed')">
                 <option value="ALL" {% if filters.breed == 'ALL' %}selected{% endif %}>-- Tất cả giống --</option>
-                <optgroup label="Giống Chó Cảnh">
+                <optgroup label="Giống Chó Cảnh" id="shopDogBreedsGroup">
                     {% for br in global_dog_breeds %}
-                    <option value="{{ br }}" {% if filters.breed == br %}selected{% endif %}>{{ br }}</option>
+                    <option value="{{ br }}" data-species="Chó" {% if filters.breed == br %}selected{% endif %}>{{ br }}</option>
                     {% endfor %}
                 </optgroup>
-                <optgroup label="Giống Mèo Cảnh">
+                <optgroup label="Giống Mèo Cảnh" id="shopCatBreedsGroup">
                     {% for br in global_cat_breeds %}
-                    <option value="{{ br }}" {% if filters.breed == br %}selected{% endif %}>{{ br }}</option>
+                    <option value="{{ br }}" data-species="Mèo" {% if filters.breed == br %}selected{% endif %}>{{ br }}</option>
                     {% endfor %}
                 </optgroup>
             </select>
         </div>
         <div>
             <label class="form-label">Danh mục</label>
-            <select name="category" class="form-control">
+            <select name="category" id="shopCategorySelect" class="form-control" onchange="syncShopFilters('category')">
                 <option value="ALL" {% if filters.category == 'ALL' %}selected{% endif %}>Tất cả danh mục</option>
                 {% for cat in categories %}
                 <option value="{{ cat }}" {% if filters.category == cat %}selected{% endif %}>{{ cat }}</option>
@@ -65,11 +65,11 @@
         </div>
         <div>
             <label class="form-label">Giá từ (VNĐ)</label>
-            <input type="number" name="min_price" value="{{ filters.min_price }}" class="form-control" min="0" max="500000000" step="10000" placeholder="0">
+            <input type="number" id="shopMinPrice" name="min_price" value="{{ filters.min_price }}" class="form-control" min="0" max="500000000" step="1000" placeholder="0">
         </div>
         <div>
             <label class="form-label">Đến giá (VNĐ)</label>
-            <input type="number" name="max_price" value="{{ filters.max_price }}" class="form-control" min="0" max="500000000" step="10000" placeholder="15.000.000">
+            <input type="number" id="shopMaxPrice" name="max_price" value="{{ filters.max_price }}" class="form-control" min="0" max="500000000" step="1000" placeholder="15.000.000">
         </div>
         <div>
             <label class="form-label">Sắp xếp</label>
@@ -94,6 +94,104 @@
         {% endfor %}
     </div>
 </form>
+
+<script>
+function syncShopFilters(changedSource) {
+    var petSelect = document.getElementById('shopPetTypeSelect');
+    var breedSelect = document.getElementById('shopBreedSelect');
+    var catSelect = document.getElementById('shopCategorySelect');
+    var dogGroup = document.getElementById('shopDogBreedsGroup');
+    var catGroup = document.getElementById('shopCatBreedsGroup');
+
+    // 1. Nếu khách chọn Danh mục là "Chó cảnh" hoặc "Mèo cảnh", tự động khóa Loài tương ứng
+    if (changedSource === 'category') {
+        if (catSelect.value === 'Chó cảnh') {
+            petSelect.value = 'Chó';
+        } else if (catSelect.value === 'Mèo cảnh') {
+            petSelect.value = 'Mèo';
+        }
+    }
+
+    // 2. Nếu khách chọn 1 Giống cụ thể trước, tự động chuyển Loài sang đúng Chó hoặc Mèo
+    if (changedSource === 'breed' && breedSelect.value !== 'ALL') {
+        var selectedOpt = breedSelect.options[breedSelect.selectedIndex];
+        var optSpecies = selectedOpt ? selectedOpt.getAttribute('data-species') : '';
+        if (optSpecies === 'Chó' && petSelect.value !== 'Chó') {
+            petSelect.value = 'Chó';
+        } else if (optSpecies === 'Mèo' && petSelect.value !== 'Mèo') {
+            petSelect.value = 'Mèo';
+        }
+    }
+
+    var petType = petSelect.value;
+
+    // 3. Ẩn/hiện nhóm Giống Chó hoặc Giống Mèo theo đúng Loài đã chọn
+    if (dogGroup && catGroup) {
+        var showDog = (petType === 'ALL' || petType === 'Chó');
+        var showCat = (petType === 'ALL' || petType === 'Mèo');
+
+        dogGroup.hidden = !showDog;
+        dogGroup.disabled = !showDog;
+        for (var i = 0; i < dogGroup.children.length; i++) {
+            dogGroup.children[i].hidden = !showDog;
+            dogGroup.children[i].disabled = !showDog;
+        }
+
+        catGroup.hidden = !showCat;
+        catGroup.disabled = !showCat;
+        for (var j = 0; j < catGroup.children.length; j++) {
+            catGroup.children[j].hidden = !showCat;
+            catGroup.children[j].disabled = !showCat;
+        }
+
+        // Nếu đang chọn giống không khớp với loài mới chọn -> reset về ALL
+        if (breedSelect.value !== 'ALL') {
+            var curOpt = breedSelect.options[breedSelect.selectedIndex];
+            var curSpecies = curOpt ? curOpt.getAttribute('data-species') : '';
+            if ((petType === 'Chó' && curSpecies !== 'Chó') ||
+                (petType === 'Mèo' && curSpecies !== 'Mèo') ||
+                (petType === 'Chó & Mèo')) {
+                breedSelect.value = 'ALL';
+            }
+        }
+    }
+
+    // 4. Ẩn/khóa Danh mục "Mèo cảnh" khi đang chọn Loài "Chó" và ngược lại
+    for (var k = 0; k < catSelect.options.length; k++) {
+        var opt = catSelect.options[k];
+        if (opt.value === 'Chó cảnh') {
+            var allowDogCat = (petType === 'ALL' || petType === 'Chó');
+            opt.hidden = !allowDogCat;
+            opt.disabled = !allowDogCat;
+            if (!allowDogCat && catSelect.value === 'Chó cảnh') catSelect.value = 'ALL';
+        } else if (opt.value === 'Mèo cảnh') {
+            var allowCatCat = (petType === 'ALL' || petType === 'Mèo');
+            opt.hidden = !allowCatCat;
+            opt.disabled = !allowCatCat;
+            if (!allowCatCat && catSelect.value === 'Mèo cảnh') catSelect.value = 'ALL';
+        }
+    }
+}
+
+function validateShopFilterForm() {
+    var minEl = document.getElementById('shopMinPrice');
+    var maxEl = document.getElementById('shopMaxPrice');
+    if (minEl && maxEl && minEl.value !== '' && maxEl.value !== '') {
+        var minVal = parseFloat(minEl.value);
+        var maxVal = parseFloat(maxEl.value);
+        if (minVal > maxVal) {
+            alert('Ràng buộc giá: "Giá từ" không được lớn hơn "Đến giá"!');
+            minEl.focus();
+            return false;
+        }
+    }
+    return true;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    syncShopFilters('init');
+});
+</script>
 
 <!-- Lưới sản phẩm / thú cưng khớp bộ lọc -->
 {% if page_data['items'] %}

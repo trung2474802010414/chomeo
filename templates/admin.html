@@ -159,16 +159,28 @@
                             <a href="{{ url_for('admin_page', tab='dashboard', period='all') }}" class="period-btn {% if period == 'all' %}active{% endif %}">Tất cả</a>
                         </div>
                     </div>
-                    <form method="GET" action="{{ url_for('admin_page') }}" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px;">
+                    <!-- Thanh lọc theo ngày (Có kiểm tra ngày bắt đầu <= ngày kết thúc) -->
+                    <form method="GET" action="{{ url_for('admin_page') }}" onsubmit="return validateAdminDateFilter();" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px;">
                         <input type="hidden" name="tab" value="dashboard">
                         <input type="hidden" name="period" value="custom">
                         <span>Từ:</span>
-                        <input type="date" name="start_date" value="{{ start_date }}" class="form-control" style="width:auto; padding:5px 10px;">
+                        <input type="date" id="adminStartDate" name="start_date" value="{{ start_date }}" class="form-control" style="width:auto; padding:5px 10px;" required>
                         <span>Đến:</span>
-                        <input type="date" name="end_date" value="{{ end_date }}" class="form-control" style="width:auto; padding:5px 10px;">
+                        <input type="date" id="adminEndDate" name="end_date" value="{{ end_date }}" class="form-control" style="width:auto; padding:5px 10px;" required>
                         <button type="submit" class="btn btn-sm" style="background:#134e32; color:#fff;">Lọc</button>
                     </form>
                 </div>
+                <script>
+                function validateAdminDateFilter() {
+                    var s = document.getElementById('adminStartDate').value;
+                    var e = document.getElementById('adminEndDate').value;
+                    if (s && e && s > e) {
+                        alert('Ràng buộc ngày báo cáo: Ngày "Từ" không được lớn hơn ngày "Đến"!');
+                        return false;
+                    }
+                    return true;
+                }
+                </script>
 
                 <!-- HÀNG 1: 4 THẺ KPI TRẮNG -->
                 <div class="admin-kpi-grid">
@@ -467,11 +479,14 @@
                                 <div class="form-group">
                                     <label class="form-label">Dành cho loài *</label>
                                     {% set sel_pet = edit_product.pet_type if edit_product else product_form.raw_data.get('pet_type', 'Mèo') %}
-                                    <select name="pet_type" class="form-control" required>
+                                    <select name="pet_type" id="adminPetTypeSelect" class="form-control" required onchange="syncAdminProductForm('pet_type')">
                                         {% for pt in stats.pet_types %}
                                         <option value="{{ pt }}" {% if sel_pet == pt %}selected{% endif %}>{{ pt }}</option>
                                         {% endfor %}
                                     </select>
+                                    {% for err in product_form.errors.get('pet_type', []) %}
+                                        <div class="form-error">{{ err }}</div>
+                                    {% endfor %}
                                 </div>
                             </div>
 
@@ -487,24 +502,34 @@
                                 <div class="form-group">
                                     <label class="form-label">Danh mục *</label>
                                     {% set sel_cat = edit_product.category if edit_product else product_form.raw_data.get('category', 'Thức ăn') %}
-                                    <select name="category" class="form-control" required>
+                                    <select name="category" id="adminCategorySelect" class="form-control" required onchange="syncAdminProductForm('category')">
                                         {% for cat in stats.categories %}
                                         <option value="{{ cat }}" {% if sel_cat == cat %}selected{% endif %}>{{ cat }}</option>
                                         {% endfor %}
                                     </select>
+                                    {% for err in product_form.errors.get('category', []) %}
+                                        <div class="form-error">{{ err }}</div>
+                                    {% endfor %}
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Giống thú cưng (nếu có)</label>
+                                    <label class="form-label">Giống thú cưng (theo loài)</label>
                                     {% set sel_breed = edit_product.breed if edit_product else product_form.raw_data.get('breed', '') %}
-                                    <input type="text" name="breed" list="breedSuggestions" value="{{ sel_breed }}" maxlength="80" class="form-control" placeholder="VD: Chó Schnauzer, Chó Poodle...">
-                                    <datalist id="breedSuggestions">
-                                        {% for b in stats.dog_breeds %}
-                                        <option value="{{ b }}">
-                                        {% endfor %}
-                                        {% for b in stats.cat_breeds %}
-                                        <option value="{{ b }}">
-                                        {% endfor %}
-                                    </datalist>
+                                    <select name="breed" id="adminBreedSelect" class="form-control" onchange="syncAdminProductForm('breed')">
+                                        <option value="" {% if not sel_breed %}selected{% endif %}>-- Không chọn giống cụ thể (Đồ dùng chung) --</option>
+                                        <optgroup label="Giống Chó Cảnh" id="adminDogBreedsGroup">
+                                            {% for b in stats.dog_breeds %}
+                                            <option value="{{ b }}" data-species="Chó" {% if sel_breed == b %}selected{% endif %}>{{ b }}</option>
+                                            {% endfor %}
+                                        </optgroup>
+                                        <optgroup label="Giống Mèo Cảnh" id="adminCatBreedsGroup">
+                                            {% for b in stats.cat_breeds %}
+                                            <option value="{{ b }}" data-species="Mèo" {% if sel_breed == b %}selected{% endif %}>{{ b }}</option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    </select>
+                                    {% for err in product_form.errors.get('breed', []) %}
+                                        <div class="form-error">{{ err }}</div>
+                                    {% endfor %}
                                 </div>
                             </div>
 
@@ -547,8 +572,11 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Mô tả chi tiết</label>
-                                <textarea name="description" rows="3" class="form-control" placeholder="Mô tả nguồn gốc, độ tuổi, tiêm phòng hoặc công dụng sản phẩm...">{{ edit_product.description if edit_product else product_form.raw_data.get('description', '') }}</textarea>
+                                <label class="form-label">Mô tả chi tiết (Tối đa 1000 ký tự)</label>
+                                <textarea name="description" rows="3" maxlength="1000" class="form-control" placeholder="Mô tả nguồn gốc, độ tuổi, tiêm phòng hoặc công dụng sản phẩm...">{{ edit_product.description if edit_product else product_form.raw_data.get('description', '') }}</textarea>
+                                {% for err in product_form.errors.get('description', []) %}
+                                    <div class="form-error">{{ err }}</div>
+                                {% endfor %}
                             </div>
 
                             <button type="submit" class="btn btn-primary btn-lg btn-block" style="background:{% if edit_product %}#ca8a04{% else %}#15803d{% endif %}; border-color:transparent;">
@@ -556,6 +584,79 @@
                             </button>
                         </form>
                         <script>
+                            function syncAdminProductForm(changedSource) {
+                                var petSelect = document.getElementById('adminPetTypeSelect');
+                                var catSelect = document.getElementById('adminCategorySelect');
+                                var breedSelect = document.getElementById('adminBreedSelect');
+                                var dogGroup = document.getElementById('adminDogBreedsGroup');
+                                var catGroup = document.getElementById('adminCatBreedsGroup');
+                                if (!petSelect || !catSelect || !breedSelect) return;
+
+                                // 1. Nếu Admin chọn Danh mục là "Chó cảnh" hoặc "Mèo cảnh" -> ép Loài tương ứng
+                                if (changedSource === 'category') {
+                                    if (catSelect.value === 'Chó cảnh') petSelect.value = 'Chó';
+                                    else if (catSelect.value === 'Mèo cảnh') petSelect.value = 'Mèo';
+                                }
+
+                                // 2. Nếu Admin chọn 1 Giống cụ thể -> tự động chuyển Loài tương ứng
+                                if (changedSource === 'breed' && breedSelect.value !== '') {
+                                    var selOpt = breedSelect.options[breedSelect.selectedIndex];
+                                    var sp = selOpt ? selOpt.getAttribute('data-species') : '';
+                                    if (sp === 'Chó') petSelect.value = 'Chó';
+                                    else if (sp === 'Mèo') petSelect.value = 'Mèo';
+                                }
+
+                                var petType = petSelect.value;
+
+                                // 3. Ẩn/khóa nhóm Giống không thuộc Loài đang chọn
+                                var allowDogBreed = (petType === 'Chó');
+                                var allowCatBreed = (petType === 'Mèo');
+
+                                if (dogGroup) {
+                                    dogGroup.hidden = !allowDogBreed;
+                                    dogGroup.disabled = !allowDogBreed;
+                                    for (var i = 0; i < dogGroup.children.length; i++) {
+                                        dogGroup.children[i].hidden = !allowDogBreed;
+                                        dogGroup.children[i].disabled = !allowDogBreed;
+                                    }
+                                }
+                                if (catGroup) {
+                                    catGroup.hidden = !allowCatBreed;
+                                    catGroup.disabled = !allowCatBreed;
+                                    for (var j = 0; j < catGroup.children.length; j++) {
+                                        catGroup.children[j].hidden = !allowCatBreed;
+                                        catGroup.children[j].disabled = !allowCatBreed;
+                                    }
+                                }
+
+                                // Nếu đang chọn giống không khớp loài -> reset về trống
+                                if (breedSelect.value !== '') {
+                                    var curOpt = breedSelect.options[breedSelect.selectedIndex];
+                                    var curSp = curOpt ? curOpt.getAttribute('data-species') : '';
+                                    if ((petType === 'Chó' && curSp !== 'Chó') ||
+                                        (petType === 'Mèo' && curSp !== 'Mèo') ||
+                                        (petType === 'Chó & Mèo')) {
+                                        breedSelect.value = '';
+                                    }
+                                }
+
+                                // 4. Ẩn/khóa Danh mục "Mèo cảnh" khi chọn Loài "Chó" và ngược lại
+                                for (var k = 0; k < catSelect.options.length; k++) {
+                                    var cOpt = catSelect.options[k];
+                                    if (cOpt.value === 'Chó cảnh') {
+                                        var okDog = (petType === 'Chó');
+                                        cOpt.hidden = !okDog;
+                                        cOpt.disabled = !okDog;
+                                        if (!okDog && catSelect.value === 'Chó cảnh') catSelect.value = 'Thức ăn';
+                                    } else if (cOpt.value === 'Mèo cảnh') {
+                                        var okCat = (petType === 'Mèo');
+                                        cOpt.hidden = !okCat;
+                                        cOpt.disabled = !okCat;
+                                        if (!okCat && catSelect.value === 'Mèo cảnh') catSelect.value = 'Thức ăn';
+                                    }
+                                }
+                            }
+
                             function updateAdminImgPreview(url) {
                                 var img = document.getElementById('adminImgPreview');
                                 var ph = document.getElementById('adminImgPlaceholder');
@@ -582,6 +683,10 @@
                                 };
                                 reader.readAsDataURL(file);
                             }
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                syncAdminProductForm('init');
+                            });
                         </script>
                     </div>
                 </div>

@@ -195,6 +195,26 @@ def shop_page():
     min_price = float(min_price_str) if min_price_str else None
     max_price = float(max_price_str) if max_price_str else None
 
+    # Ràng buộc chéo trên Backend:
+    # 1. Nếu min_price > max_price thì tự động hoán đổi để không bị lỗi rỗng vô lý
+    if min_price is not None and max_price is not None and min_price > max_price:
+        min_price, max_price = max_price, min_price
+        min_price_str, max_price_str = str(int(min_price)), str(int(max_price))
+
+    # 2. Nếu chọn Danh mục "Chó cảnh" hoặc "Mèo cảnh" thì tự động đồng bộ Loài tương ứng
+    if category == "Chó cảnh" and pet_type not in ("ALL", "Chó"):
+        pet_type = "Chó"
+    elif category == "Mèo cảnh" and pet_type not in ("ALL", "Mèo"):
+        pet_type = "Mèo"
+
+    # 3. Nếu chọn Loài là "Chó" nhưng breed lại là giống Mèo (hoặc ngược lại) thì tự động đặt lại breed = "ALL"
+    if pet_type == "Chó" and breed in CAT_BREEDS:
+        breed = "ALL"
+    elif pet_type == "Mèo" and breed in DOG_BREEDS:
+        breed = "ALL"
+    elif pet_type == "Chó & Mèo" and breed != "ALL":
+        breed = "ALL"
+
     page_data = query_products(
         keyword=keyword,
         category=category,
@@ -554,6 +574,9 @@ def admin_page():
     if period == "custom" and (start_date_arg or end_date_arg):
         start_date = start_date_arg
         end_date = end_date_arg or today_str
+        if start_date and end_date and start_date > end_date:
+            start_date, end_date = end_date, start_date
+            flash("Ngày bắt đầu lớn hơn ngày kết thúc, hệ thống đã tự động đảo lại khoảng ngày hợp lệ.", "error")
     elif period == "today":
         start_date = today_str
         end_date = today_str
