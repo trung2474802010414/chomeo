@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Giỏ hàng &amp; Thanh toán - Meow &amp; Woof{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <div>
+        <h1 class="section-title">Giỏ hàng &amp; Thanh toán Đơn hàng</h1>
+        <p class="section-subtitle">Đặt hàng trừ tồn kho theo Transaction (`DatabaseSession`) và gửi Email hóa đơn xác nhận</p>
+    </div>
+    <a href="{{ url_for('shop_page') }}" class="btn btn-outline">&larr; Tiếp tục mua sắm</a>
+</div>
+
+<div class="grid-2">
+    <!-- Cột trái: Danh sách món trong giỏ -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Sản phẩm trong giỏ ({{ cart_items|length }} mặt hàng)</h2>
+            {% if cart_items %}
+            <form method="POST" action="{{ url_for('clear_cart_route') }}">
+                <button type="submit" class="btn btn-danger btn-sm">Xóa toàn bộ giỏ</button>
+            </form>
+            {% endif %}
+        </div>
+
+        {% if cart_items %}
+        <div class="table-wrap">
+            <table class="clean-table">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th class="text-right">Đơn giá</th>
+                        <th class="text-center">Số lượng</th>
+                        <th class="text-right">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.name }}</strong>
+                            <div style="font-size:12px; color:var(--text-muted);">Mã: {{ item.sku }} (Kho còn: {{ item.stock }})</div>
+                        </td>
+                        <td class="text-right">{{ "{:,.0f}".format(item.price) }} đ</td>
+                        <td class="text-center">
+                            <div style="display:inline-flex; align-items:center; gap:6px;">
+                                <form method="POST" action="{{ url_for('update_cart_route') }}">
+                                    <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                                    <input type="hidden" name="delta" value="-1">
+                                    <button type="submit" class="btn btn-outline btn-sm" style="padding:3px 9px;">-</button>
+                                </form>
+                                <strong style="min-width:24px;">{{ item.quantity }}</strong>
+                                <form method="POST" action="{{ url_for('update_cart_route') }}">
+                                    <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                                    <input type="hidden" name="delta" value="1">
+                                    <button type="submit" class="btn btn-outline btn-sm" style="padding:3px 9px;">+</button>
+                                </form>
+                            </div>
+                        </td>
+                        <td class="text-right"><strong>{{ "{:,.0f}".format(item.subtotal) }} đ</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top:20px; padding-top:16px; border-top:2px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:17px; font-weight:700;">Tổng tiền thanh toán:</span>
+            <strong style="font-size:24px; color:var(--primary);">{{ "{:,.0f}".format(cart_total) }} đ</strong>
+        </div>
+        {% else %}
+        <div class="text-center" style="padding:36px 16px;">
+            <p style="color:var(--text-muted); margin-bottom:16px;">Giỏ hàng của bạn hiện đang trống.</p>
+            <a href="{{ url_for('shop_page') }}" class="btn btn-primary">Chọn sản phẩm tại Cửa hàng</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Cột phải: Form thông tin giao hàng -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Thông tin Nhận hàng &amp; Hóa đơn Email</h2>
+        </div>
+
+        <form method="POST" action="{{ url_for('cart_page') }}" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}">
+
+            <div class="form-group">
+                <label class="form-label">Họ và tên người nhận *</label>
+                <input type="text" name="customer_name" value="{{ form.raw_data.get('customer_name', '') }}" class="form-control" placeholder="VD: Trần Hoàng Nam" required>
+                {% for err in form.errors.get('customer_name', []) %}
+                    <div class="form-error">{{ err }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Số điện thoại nhận hàng *</label>
+                <input type="text" name="phone" value="{{ form.raw_data.get('phone', '') }}" class="form-control" placeholder="VD: 0988765432" required>
+                {% for err in form.errors.get('phone', []) %}
+                    <div class="form-error">{{ err }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Địa chỉ Email nhận hóa đơn xác nhận</label>
+                <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" class="form-control" placeholder="VD: hoangnam@gmail.com">
+                {% for err in form.errors.get('email', []) %}
+                    <div class="form-error">{{ err }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Địa chỉ giao hàng chi tiết *</label>
+                <input type="text" name="address" value="{{ form.raw_data.get('address', '') }}" class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." required>
+                {% for err in form.errors.get('address', []) %}
+                    <div class="form-error">{{ err }}</div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block" {% if not cart_items %}disabled{% endif %}>
+                Đặt mua &amp; Gửi Email xác nhận
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

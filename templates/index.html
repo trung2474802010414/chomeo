@@ -3,162 +3,362 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetHouse - Cửa Hàng Thú Cưng</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Meow &amp; Woof Pet Shop - Cửa hàng &amp; Spa Chó Mèo</title>
+    <link rel="stylesheet" href="/static/css/shop.css">
 </head>
 <body>
-    <!-- Thanh điều hướng (Navbar) -->
-    <header class="navbar">
-        <div class="logo">🐾 <span>PetHouse</span></div>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Tìm theo tên hoặc giống loài (VD: Corgi, Poodle)..." onkeyup="if(event.key==='Enter') fetchPets(1)">
-            <button onclick="fetchPets(1)">Tìm kiếm</button>
+    <!-- Thanh thông tin trên cùng -->
+    <div class="topbar">
+        <div class="container topbar-inner">
+            <span>Giờ mở cửa: 08:00 - 21:00 hàng ngày | Hotline: 0905.123.456</span>
+            <div class="topbar-links">
+                <a href="#section-lookup">Tra cứu đơn hàng / lịch hẹn</a>
+                <span>|</span>
+                <a href="/admin" class="admin-link">Trang Quản Trị (Admin) &rarr;</a>
+            </div>
         </div>
-        <div class="nav-actions">
-            <span id="userGreeting" class="user-greeting" style="display:none;"></span>
-            <button id="btnLoginModal" class="btn-auth" onclick="toggleModal('authModal')">🔑 Đăng nhập</button>
-            <button id="btnLogout" class="btn-logout" style="display:none;" onclick="handleLogout()">Đăng xuất</button>
-            
-            <button class="btn-orders" onclick="openOrdersModal()">📊 Đơn hàng & CSV</button>
-            <button id="btnAdminAdd" class="btn-admin" style="display:none;" onclick="toggleModal('adminModal')">+ Thêm Thú Cưng</button>
-            <button class="btn-cart" onclick="toggleModal('cartModal')">
-                🛒 Giỏ hàng (<span id="cartCount">0</span>)
-            </button>
+    </div>
+
+    <!-- Header chính của Cửa hàng -->
+    <header class="shop-header">
+        <div class="container header-main">
+            <a href="/" class="brand">
+                <div class="brand-logo">MW</div>
+                <div>
+                    <div class="brand-name">Meow &amp; Woof</div>
+                    <div class="brand-tagline">Siêu thị &amp; Spa Chó Mèo</div>
+                </div>
+            </a>
+
+            <form id="headerSearchForm" class="search-box">
+                <input type="text" id="shopSearchInput" placeholder="Tìm hạt cho mèo, pate, cát vệ sinh, phụ kiện chó mèo...">
+                <button type="submit">Tìm kiếm</button>
+            </form>
+
+            <div class="header-actions">
+                <a href="#section-spa" class="btn-outline">Đặt lịch Spa</a>
+                <button type="button" class="cart-btn" id="btnOpenCart">
+                    Giỏ hàng (<span id="cartCountBadge">0</span>)
+                </button>
+            </div>
         </div>
+
+        <!-- Thanh danh mục nhanh -->
+        <nav class="category-nav">
+            <div class="container category-nav-list" id="quickCategoryNav">
+                <button type="button" class="cat-link active" data-cat="ALL" data-pet="ALL">Tất cả sản phẩm</button>
+                <button type="button" class="cat-link" data-cat="ALL" data-pet="Mèo">Đồ cho Mèo</button>
+                <button type="button" class="cat-link" data-cat="ALL" data-pet="Chó">Đồ cho Chó</button>
+                <button type="button" class="cat-link" data-cat="Thức ăn" data-pet="ALL">Thức ăn &amp; Pate</button>
+                <button type="button" class="cat-link" data-cat="Vệ sinh & Chăm sóc" data-pet="ALL">Cát &amp; Сhăm sóc</button>
+                <button type="button" class="cat-link" data-cat="Phụ kiện" data-pet="ALL">Phụ kiện</button>
+                <button type="button" class="cat-link" data-cat="Đồ chơi" data-pet="ALL">Đồ chơi</button>
+                <button type="button" class="cat-link" data-cat="Y tế & Vitamin" data-pet="ALL">Y tế &amp; Vitamin</button>
+            </div>
+        </nav>
     </header>
 
-    <!-- Banner -->
-    <section class="banner">
-        <h1>Tìm Người Bạn Bốn Chân Tuyệt Vời Nhất</h1>
-        <p>Đồ án Lập trình Python Nâng Cao: SHA-256 Auth • Decorator • Context Manager • Generator CSV • Pagination</p>
-    </section>
+    <!-- Thông báo nổi -->
+    <div id="toastBox" class="toast hidden"></div>
 
-    <!-- Bộ lọc danh mục & Sắp xếp giá -->
-    <section class="toolbar">
-        <div class="filters">
-            <button class="filter-btn active" onclick="filterSpecies('All', this)">Tất cả</button>
-            <button class="filter-btn" onclick="filterSpecies('Chó', this)">🐶 Chó cưng</button>
-            <button class="filter-btn" onclick="filterSpecies('Mèo', this)">🐱 Mèo cưng</button>
-        </div>
-        <div class="sorter">
-            <select id="sortSelect" onchange="fetchPets(1)">
-                <option value="newest">Sắp xếp: Mới nhất</option>
-                <option value="price_asc">Giá: Từ thấp đến cao</option>
-                <option value="price_desc">Giá: Từ cao đến thấp</option>
-            </select>
-        </div>
-    </section>
-
-    <!-- Danh sách thú cưng & Phân trang -->
-    <main class="container">
-        <div id="petGrid" class="pet-grid"></div>
-        <div id="pagination" class="pagination"></div>
-    </main>
-
-    <!-- MODAL 1: Đăng nhập & Đăng ký -->
-    <div id="authModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="toggleModal('authModal')">&times;</span>
-            <div class="auth-tabs">
-                <button id="tabLogin" class="active" onclick="switchAuthTab('login')">Đăng Nhập</button>
-                <button id="tabRegister" onclick="switchAuthTab('register')">Đăng Ký</button>
-            </div>
-
-            <!-- Form Đăng nhập -->
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="demo-box">
-                    💡 <b>Tài khoản mẫu để test phân quyền:</b><br>
-                    • Admin: <code>admin</code> / Mật khẩu: <code>123456</code><br>
-                    • Khách: <code>khachhang</code> / Mật khẩu: <code>123456</code>
+    <!-- Banner giới thiệu -->
+    <section class="hero-banner">
+        <div class="container hero-inner">
+            <div class="hero-content">
+                <span class="hero-tag">Chăm sóc thú cưng toàn diện</span>
+                <h1>Thực phẩm dinh dưỡng, Phụ kiện &amp; Dịch vụ Spa cho Chó Mèo</h1>
+                <p>Sản phẩm chính hãng, kiểm tra tồn kho trực tiếp và đặt lịch tắm sấy, cắt tỉa lông nhanh chóng.</p>
+                <div class="hero-buttons">
+                    <a href="#section-shop" class="btn-primary">Mua sắm ngay</a>
+                    <a href="#section-spa" class="btn-secondary">Đặt lịch Spa cho Boss</a>
                 </div>
-                <input type="text" id="loginUsername" placeholder="Tên đăng nhập" required>
-                <input type="password" id="loginPassword" placeholder="Mật khẩu" required>
-                <button type="submit" class="btn-submit">Đăng Nhập</button>
-            </form>
+            </div>
+            <div class="hero-highlights">
+                <div class="highlight-card">
+                    <strong>Thức ăn &amp; Dinh dưỡng</strong>
+                    <p>Hạt Royal Canin, SmartHeart, সúp thưởng Ciao, Gel dinh dưỡng.</p>
+                </div>
+                <div class="highlight-card">
+                    <strong>Spa &amp; Grooming</strong>
+                    <p>Tắm sấy khử mùi, cắt tỉa tạo kiểu, vệ sinh tai móng theo cân nặng.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            <!-- Form Đăng ký -->
-            <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
-                <input type="text" id="regFullName" placeholder="Họ và tên của bạn" required>
-                <input type="text" id="regUsername" placeholder="Tên đăng nhập mới" required>
-                <input type="password" id="regPassword" placeholder="Mật khẩu (Băm SHA-256)" required>
-                <button type="submit" class="btn-submit" style="background-color: #6c5ce7;">Đăng Ký Tài Khoản</button>
+    <!-- KHU VỰC 1: CỬA HÀNG SẢN PHẨM -->
+    <section id="section-shop" class="shop-section container">
+        <div class="shop-layout">
+            <!-- Cột lọc bên trái -->
+            <aside class="shop-sidebar">
+                <div class="filter-card">
+                    <h3>Bộ lọc tìm kiếm</h3>
+
+                    <div class="filter-block">
+                        <label>Dành cho thú cưng</label>
+                        <select id="sidePetType">
+                            <option value="ALL">Tất cả (Chó &amp; Mèo)</option>
+                            <option value="Mèo">Dành cho Mèo</option>
+                            <option value="Chó">Dành cho Chó</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-block">
+                        <label>Danh mục sản phẩm</label>
+                        <select id="sideCategory">
+                            <option value="ALL">Tất cả danh mục</option>
+                            <option value="Thức ăn">Thức ăn</option>
+                            <option value="Vệ sinh & Chăm sóc">Vệ sinh &amp; Chăm sóc</option>
+                            <option value="Phụ kiện">Phụ kiện</option>
+                            <option value="Đồ chơi">Đồ chơi</option>
+                            <option value="Y tế & Vitamin">Y tế &amp; Vitamin</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-block">
+                        <label>Khoảng giá (VNĐ)</label>
+                        <div class="price-inputs">
+                            <input type="number" id="sideMinPrice" placeholder="Từ 0" min="0" step="10000">
+                            <span>-</span>
+                            <input type="number" id="sideMaxPrice" placeholder="Đến 1.000.000" min="0" step="10000">
+                        </div>
+                    </div>
+
+                    <div class="filter-block">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="sideInStock" checked>
+                            Chỉ hiện sản phẩm còn hàng
+                        </label>
+                    </div>
+
+                    <button type="button" class="btn-primary btn-full" id="btnApplyFilter">Áp dụng bộ lọc</button>
+                    <button type="button" class="btn-light btn-full" id="btnResetShopFilter" style="margin-top:8px;">Xóa bộ lọc</button>
+                </div>
+            </aside>
+
+            <!-- Lưới sản phẩm bên phải -->
+            <div class="shop-main">
+                <div class="shop-toolbar">
+                    <div class="result-count">
+                        Hiển thị <strong id="shopTotalItems">0</strong> sản phẩm
+                    </div>
+                    <div class="sort-control">
+                        <label for="shopSortSelect">Sắp xếp theo:</label>
+                        <select id="shopSortSelect">
+                            <option value="id_desc">Mới cập nhật</option>
+                            <option value="price_asc">Giá: Thấp đến Cao</option>
+                            <option value="price_desc">Giá: Cao đến Thấp</option>
+                            <option value="name_asc">Tên sản phẩm: A - Z</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Danh sách thẻ sản phẩm -->
+                <div class="product-grid" id="shopProductGrid">
+                    <div class="empty-state">Đang tải danh sách sản phẩm...</div>
+                </div>
+
+                <!-- Phân trang (Custom Iterator) -->
+                <div class="shop-pagination">
+                    <button type="button" class="btn-light" id="shopPrevPage">&larr; Trang trước</button>
+                    <span id="shopPageText">Trang 1 / 1</span>
+                    <button type="button" class="btn-light" id="shopNextPage">Trang sau &rarr;</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KHU VỰC 2: ĐẶT LỊCH SPA & GROOMING -->
+    <section id="section-spa" class="spa-section">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Đặt lịch Spa &amp; Chăm sóc Thú cưng</h2>
+                <p>Đội ngũ kỹ thuật viên giàu kinh nghiệm, quy trình tắm sấy và cắt tỉa an toàn cho từng bé.</p>
+            </div>
+
+            <div class="spa-layout">
+                <!-- Bảng giá minh bạch -->
+                <div class="spa-pricing-card">
+                    <h3>Bảng giá dịch vụ tiêu chuẩn</h3>
+                    <p class="small-note">Giá thực tế tự động tính theo cân nặng của bé: Dưới 5kg (Giá chuẩn), Từ 5-10kg (+20%), Trên 10kg (+40%).</p>
+                    <table class="price-table">
+                        <thead>
+                            <tr>
+                                <th>Gói dịch vụ</th>
+                                <th>Dưới 5kg</th>
+                                <th>5 - 10kg</th>
+                                <th>Trên 10kg</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Tắm sấy &amp; Vệ sinh tai móng</td>
+                                <td>150.000đ</td>
+                                <td>180.000đ</td>
+                                <td>210.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>Cắt tỉa &amp; Tạo kiểu lông (Grooming)</td>
+                                <td>280.000đ</td>
+                                <td>336.000đ</td>
+                                <td>392.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>Cạo lông máu / Cạo vệ sinh</td>
+                                <td>180.000đ</td>
+                                <td>216.000đ</td>
+                                <td>252.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>Khám sức khỏe &amp; Tư vấn dinh dưỡng</td>
+                                <td>120.000đ</td>
+                                <td>144.000đ</td>
+                                <td>168.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>Trông giữ thú cưng (1 ngày)</td>
+                                <td>200.000đ</td>
+                                <td>240.000đ</td>
+                                <td>280.000đ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Form khách đặt lịch -->
+                <div class="spa-form-card">
+                    <h3>Phiếu đăng ký lịch hẹn</h3>
+                    <form id="customerBookingForm">
+                        <div class="form-row-2">
+                            <div class="field">
+                                <label for="cBkName">Họ tên của bạn *</label>
+                                <input type="text" id="cBkName" required placeholder="VD: Nguyễn Thu Hà">
+                            </div>
+                            <div class="field">
+                                <label for="cBkPhone">Số điện thoại liên hệ *</label>
+                                <input type="text" id="cBkPhone" required placeholder="VD: 0905123456">
+                            </div>
+                        </div>
+
+                        <div class="form-row-3">
+                            <div class="field">
+                                <label for="cBkPetName">Tên thú cưng *</label>
+                                <input type="text" id="cBkPetName" required placeholder="VD: Mochi">
+                            </div>
+                            <div class="field">
+                                <label for="cBkPetType">Loài *</label>
+                                <select id="cBkPetType" required>
+                                    <option value="Mèo">Mèo</option>
+                                    <option value="Chó">Chó</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="cBkWeight">Cân nặng (kg) *</label>
+                                <input type="number" id="cBkWeight" min="0.2" max="80" step="0.1" value="4.0" required>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="cBkService">Chọn gói dịch vụ *</label>
+                            <select id="cBkService" required>
+                                <option value="Tắm sấy & Vệ sinh tai móng">Tắm sấy &amp; Vệ sinh tai móng</option>
+                                <option value="Cắt tỉa & Tạo kiểu lông (Grooming)">Cắt tỉa &amp; Tạo kiểu lông (Grooming)</option>
+                                <option value="Cạo lông máu / Cạo vệ sinh">Cạo lông máu / Cạo vệ sinh</option>
+                                <option value="Khám sức khỏe & Tư vấn dinh dưỡng">Khám sức khỏe &amp; Tư vấn dinh dưỡng</option>
+                                <option value="Trông giữ thú cưng (1 ngày)">Trông giữ thú cưng (1 ngày)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="field">
+                                <label for="cBkDate">Ngày hẹn *</label>
+                                <input type="date" id="cBkDate" required>
+                            </div>
+                            <div class="field">
+                                <label for="cBkTime">Giờ hẹn *</label>
+                                <input type="time" id="cBkTime" value="09:30" required>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="cBkNote">Ghi chú thêm cho kỹ thuật viên</label>
+                            <input type="text" id="cBkNote" placeholder="Bé có sợ máy sấy hay dị ứng sữa tắm không?">
+                        </div>
+
+                        <div class="estimated-fee-bar">
+                            <span>Chi phí tạm tính theo cân nặng:</span>
+                            <strong id="cBkEstimatedPrice">150.000 đ</strong>
+                        </div>
+
+                        <button type="submit" class="btn-primary btn-full">Xác nhận đặt lịch hẹn</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KHU VỰC 3: TRA CỨU ĐƠN HÀNG & LỊCH HẸN CỦA KHÁCH -->
+    <section id="section-lookup" class="lookup-section container">
+        <div class="lookup-card">
+            <h2>Tra cứu Đơn mua hàng &amp; Lịch hẹn Spa</h2>
+            <p>Nhập số điện thoại bạn đã dùng khi mua hàng hoặc đặt lịch để kiểm tra trạng thái (Thử nhập SĐT mẫu: <code>0905123456</code>).</p>
+            <form id="lookupForm" class="lookup-form">
+                <input type="text" id="lookupPhoneInput" placeholder="Nhập số điện thoại của bạn..." required>
+                <button type="submit" class="btn-primary">Tra cứu ngay</button>
             </form>
+            <div id="lookupResultBox" class="lookup-results hidden"></div>
+        </div>
+    </section>
+
+    <!-- MODAL GIỎ HÀNG & THANH TOÁN -->
+    <div id="cartModal" class="modal-overlay hidden">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Giỏ hàng của bạn</h3>
+                <button type="button" class="close-btn" id="btnCloseCart">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="shopCartItemsList"></div>
+                <div class="cart-summary-bar">
+                    <span>Tổng tiền thanh toán:</span>
+                    <strong id="shopCartTotal">0 đ</strong>
+                </div>
+
+                <form id="shopCheckoutForm" class="checkout-form">
+                    <h4>Thông tin người nhận hàng</h4>
+                    <div class="field">
+                        <label for="coName">Họ và tên *</label>
+                        <input type="text" id="coName" required placeholder="Nhập họ tên người nhận">
+                    </div>
+                    <div class="field">
+                        <label for="coPhone">Số điện thoại nhận hàng *</label>
+                        <input type="text" id="coPhone" required placeholder="Nhập số điện thoại">
+                    </div>
+                    <div class="field">
+                        <label for="coAddress">Địa chỉ giao hàng chi tiết *</label>
+                        <input type="text" id="coAddress" required placeholder="Số nhà, tên đường, phường/xã, quận/huyện">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-light" id="btnClearShopCart">Xóa giỏ hàng</button>
+                        <button type="submit" class="btn-primary">Đặt mua ngay</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- MODAL 2: Thêm thú cưng mới (Chỉ hiện khi đăng nhập Admin) -->
-    <div id="adminModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="toggleModal('adminModal')">&times;</span>
-            <h2>Thêm Thú Cưng Mới (Admin)</h2>
-            <form id="addPetForm" onsubmit="handleAddPet(event)">
-                <input type="text" id="petName" placeholder="Tên thú cưng (VD: Bé Corgi Vàng)" required>
-                <select id="petSpecies" required>
-                    <option value="Chó">Loài: Chó</option>
-                    <option value="Mèo">Loài: Mèo</option>
-                </select>
-                <input type="text" id="petBreed" placeholder="Giống (VD: Poodle, Anh lông ngắn)" required>
-                <input type="number" id="petAge" placeholder="Tuổi (Tháng)" min="1" required>
-                <input type="number" id="petPrice" placeholder="Giá bán (VNĐ)" min="100000" required>
-                <input type="url" id="petImage" placeholder="Link ảnh (URL hình ảnh)" required>
-                <button type="submit" class="btn-submit">Lưu vào Database</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL 3: Giỏ hàng & Thanh toán -->
-    <div id="cartModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="toggleModal('cartModal')">&times;</span>
-            <h2>Giỏ Hàng Của Bạn</h2>
-            <div id="cartItems" class="cart-items"></div>
-            <div class="cart-total">
-                <strong>Tổng cộng: <span id="cartTotalPrice">0</span> VNĐ</strong>
+    <footer class="shop-footer">
+        <div class="container footer-inner">
+            <div>
+                <strong>Meow &amp; Woof Pet Shop &amp; Spa</strong>
+                <p>Hệ thống Web Bán hàng &amp; Đặt lịch Thú cưng xây dựng bằng Python Nâng Cao (100% Standard Library).</p>
             </div>
-            <hr style="margin: 15px 0; border: 0.5px solid #eee;">
-            <h3>Thông tin nhận thú cưng</h3>
-            <form id="checkoutForm" onsubmit="handleCheckout(event)">
-                <input type="text" id="cusName" placeholder="Họ và tên người nhận" required>
-                <input type="tel" id="cusPhone" placeholder="Số điện thoại liên hệ" required>
-                <input type="text" id="cusAddress" placeholder="Địa chỉ giao thú cưng" required>
-                <button type="submit" class="btn-submit">Xác Nhận Đặt Hàng</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL 4: Lịch sử đơn hàng & Xuất file Excel/CSV -->
-    <div id="ordersModal" class="modal">
-        <div class="modal-content modal-large">
-            <span class="close" onclick="toggleModal('ordersModal')">&times;</span>
-            <div class="orders-header">
-                <h2>📊 Lịch Sử Đơn Hàng & Thống Kê</h2>
-                <a href="/api/orders/export" class="btn-export">📥 Xuất Hóa Đơn ra Excel (CSV)</a>
-            </div>
-            
-            <div class="stats-bar">
-                <div>Tổng đơn đã đặt: <strong id="statTotalOrders">0</strong></div>
-                <div>Tổng doanh thu: <strong id="statTotalRevenue" style="color: #ff6b6b;">0 VNĐ</strong></div>
-            </div>
-
-            <div class="table-wrapper">
-                <table class="orders-table">
-                    <thead>
-                        <tr>
-                            <th>Mã</th>
-                            <th>Khách hàng</th>
-                            <th>SĐT</th>
-                            <th>Địa chỉ</th>
-                            <th>Thú cưng đã mua</th>
-                            <th>Tổng tiền</th>
-                            <th>Thời gian</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersTableBody"></tbody>
-                </table>
+            <div>
+                <a href="/admin">Truy cập Trang Quản Trị (Admin)</a>
             </div>
         </div>
-    </div>
+    </footer>
 
-    <script src="/static/script.js"></script>
+    <script src="/static/js/shop.js"></script>
 </body>
 </html>

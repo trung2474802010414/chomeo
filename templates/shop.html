@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% from "base.html" import render_product_svg %}
+
+{% block title %}Cửa hàng sản phẩm - Meow &amp; Woof Pet Shop{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <div>
+        <h1 class="section-title">Cửa hàng Sản phẩm cho Chó &amp; Mèo</h1>
+        <p class="section-subtitle">
+            Lọc dữ liệu bằng <strong>Generator Pipeline</strong> và phân trang qua <strong>Custom PageIterator</strong> ({{ page_data.total_items }} sản phẩm)
+        </p>
+    </div>
+    <a href="{{ url_for('cart_page') }}" class="btn btn-teal">Xem Giỏ hàng &amp; Thanh toán ({{ cart_count }}) &rarr;</a>
+</div>
+
+<!-- Thanh bộ lọc gọn gàng -->
+<form method="GET" action="{{ url_for('shop_page') }}" class="filter-panel">
+    <div class="filter-grid">
+        <div>
+            <label class="form-label">Từ khóa tìm kiếm</label>
+            <input type="text" name="keyword" value="{{ filters.keyword }}" class="form-control" placeholder="Tên hạt, pate, cát, phụ kiện...">
+        </div>
+        <div>
+            <label class="form-label">Thú cưng</label>
+            <select name="pet_type" class="form-control">
+                <option value="ALL" {% if filters.pet_type == 'ALL' %}selected{% endif %}>Tất cả loài</option>
+                <option value="Mèo" {% if filters.pet_type == 'Mèo' %}selected{% endif %}>Dành cho Mèo</option>
+                <option value="Chó" {% if filters.pet_type == 'Chó' %}selected{% endif %}>Dành cho Chó</option>
+                <option value="Chó & Mèo" {% if filters.pet_type == 'Chó & Mèo' %}selected{% endif %}>Dùng chung</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Danh mục</label>
+            <select name="category" class="form-control">
+                <option value="ALL" {% if filters.category == 'ALL' %}selected{% endif %}>Tất cả danh mục</option>
+                {% for cat in categories %}
+                <option value="{{ cat }}" {% if filters.category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Giá từ (VNĐ)</label>
+            <input type="number" name="min_price" value="{{ filters.min_price }}" class="form-control" min="0" step="10000" placeholder="0">
+        </div>
+        <div>
+            <label class="form-label">Đến giá (VNĐ)</label>
+            <input type="number" name="max_price" value="{{ filters.max_price }}" class="form-control" min="0" step="10000" placeholder="1.000.000">
+        </div>
+        <div>
+            <label class="form-label">Sắp xếp</label>
+            <select name="sort_by" class="form-control">
+                <option value="id_desc" {% if filters.sort_by == 'id_desc' %}selected{% endif %}>Mới cập nhật</option>
+                <option value="price_asc" {% if filters.sort_by == 'price_asc' %}selected{% endif %}>Giá: Thấp &rarr; Cao</option>
+                <option value="price_desc" {% if filters.sort_by == 'price_desc' %}selected{% endif %}>Giá: Cao &rarr; Thấp</option>
+                <option value="name_asc" {% if filters.sort_by == 'name_asc' %}selected{% endif %}>Tên A &rarr; Z</option>
+            </select>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <button type="submit" class="btn btn-primary">Lọc</button>
+            <a href="{{ url_for('shop_page') }}" class="btn btn-outline">Đặt lại</a>
+        </div>
+    </div>
+
+    <div class="quick-pills">
+        <a href="{{ url_for('shop_page') }}" class="pill-link {% if filters.pet_type == 'ALL' and filters.category == 'ALL' %}active{% endif %}">Tất cả</a>
+        <a href="{{ url_for('shop_page', pet_type='Mèo') }}" class="pill-link {% if filters.pet_type == 'Mèo' %}active{% endif %}">Đồ cho Mèo</a>
+        <a href="{{ url_for('shop_page', pet_type='Chó') }}" class="pill-link {% if filters.pet_type == 'Chó' %}active{% endif %}">Đồ cho Chó</a>
+        {% for cat in categories %}
+        <a href="{{ url_for('shop_page', category=cat) }}" class="pill-link {% if filters.category == cat %}active{% endif %}">{{ cat }}</a>
+        {% endfor %}
+    </div>
+</form>
+
+<!-- Lưới sản phẩm -->
+{% if page_data['items'] %}
+<div class="product-grid">
+    {% for p in page_data['items'] %}
+    <article class="product-card">
+        <div>
+            <div class="product-visual">
+                <div class="product-badges-top">
+                    <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}">
+                        {{ p.pet_type }}
+                    </span>
+                    <span class="badge {% if p.stock == 0 %}badge-stock-out{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
+                        {% if p.stock > 0 %}Còn {{ p.stock }} ({{ p.stock_status }}){% else %}Hết hàng{% endif %}
+                    </span>
+                </div>
+                <div class="product-svg-wrap">
+                    {{ render_product_svg(p.category, p.pet_type) }}
+                </div>
+                <span class="product-cat-name">{{ p.category }}</span>
+            </div>
+
+            <div class="product-content">
+                <div class="product-sku">Mã SP: {{ p.sku }}</div>
+                <h3 class="product-name">{{ p.name }}</h3>
+                <p class="product-desc">{{ p.description }}</p>
+            </div>
+        </div>
+
+        <div class="product-bottom">
+            <span class="product-price">{{ "{:,.0f}".format(p.price) }} đ</span>
+            <form method="POST" action="{{ url_for('add_to_cart_route') }}">
+                <input type="hidden" name="product_id" value="{{ p.id }}">
+                <input type="hidden" name="next_url" value="{{ request.full_path }}">
+                <button type="submit" class="btn btn-primary btn-sm" {% if p.stock <= 0 %}disabled{% endif %}>
+                    {% if p.stock > 0 %}+ Thêm vào giỏ{% else %}Tạm hết{% endif %}
+                </button>
+            </form>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+
+<!-- Thanh phân trang -->
+<div class="pagination-bar">
+    {% if page_data.has_prev %}
+    <a href="{{ url_for('shop_page', page=page_data.page - 1, keyword=filters.keyword, pet_type=filters.pet_type, category=filters.category, min_price=filters.min_price, max_price=filters.max_price, sort_by=filters.sort_by) }}" class="btn btn-outline">&larr; Trang trước</a>
+    {% else %}
+    <button class="btn btn-outline" disabled>&larr; Trang trước</button>
+    {% endif %}
+
+    <span style="font-weight:700; color:var(--navy);">Trang {{ page_data.page }} / {{ page_data.total_pages }}</span>
+
+    {% if page_data.has_next %}
+    <a href="{{ url_for('shop_page', page=page_data.page + 1, keyword=filters.keyword, pet_type=filters.pet_type, category=filters.category, min_price=filters.min_price, max_price=filters.max_price, sort_by=filters.sort_by) }}" class="btn btn-outline">Trang sau &rarr;</a>
+    {% else %}
+    <button class="btn btn-outline" disabled>Trang sau &rarr;</button>
+    {% endif %}
+</div>
+{% else %}
+<div class="card text-center" style="padding:48px 20px;">
+    <h3 style="margin-bottom:8px;">Không tìm thấy sản phẩm phù hợp</h3>
+    <p style="color:var(--text-muted); margin-bottom:16px;">Thử thay đổi từ khóa hoặc xóa bộ lọc để xem toàn bộ sản phẩm.</p>
+    <a href="{{ url_for('shop_page') }}" class="btn btn-primary">Xem tất cả sản phẩm</a>
+</div>
+{% endif %}
+{% endblock %}

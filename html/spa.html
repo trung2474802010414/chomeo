@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Đặt lịch Spa &amp; Grooming - Meow &amp; Woof{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <div>
+        <h1 class="section-title">Đặt lịch Spa &amp; Chăm sóc Thú cưng</h1>
+        <p class="section-subtitle">Biểu mẫu kiểm tra dữ liệu (Form Validation + CSRF) và tự động gửi Email xác nhận lịch hẹn</p>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Cột trái: Bảng giá & Quy trình -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Bảng giá Dịch vụ theo Cân nặng</h2>
+            </div>
+            <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:14px;">
+                Hệ thống tự động tính phí dựa trên cân nặng thực tế của bé: Dưới 5kg (Giá chuẩn), Từ 5–10kg (+20%), Trên 10kg (+40%).
+            </p>
+            <div class="table-wrap">
+                <table class="clean-table">
+                    <thead>
+                        <tr>
+                            <th>Gói dịch vụ</th>
+                            <th class="text-right">&lt; 5kg</th>
+                            <th class="text-right">5 - 10kg</th>
+                            <th class="text-right">&gt; 10kg</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Tắm sấy &amp; Vệ sinh tai móng</strong></td>
+                            <td class="text-right">150.000đ</td>
+                            <td class="text-right">180.000đ</td>
+                            <td class="text-right">210.000đ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cắt tỉa &amp; Tạo kiểu lông (Grooming)</strong></td>
+                            <td class="text-right">280.000đ</td>
+                            <td class="text-right">336.000đ</td>
+                            <td class="text-right">392.000đ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cạo lông máu / Cạo vệ sinh</strong></td>
+                            <td class="text-right">180.000đ</td>
+                            <td class="text-right">216.000đ</td>
+                            <td class="text-right">252.000đ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Khám sức khỏe &amp; Tư vấn dinh dưỡng</strong></td>
+                            <td class="text-right">120.000đ</td>
+                            <td class="text-right">144.000đ</td>
+                            <td class="text-right">168.000đ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trông giữ thú cưng (1 ngày)</strong></td>
+                            <td class="text-right">200.000đ</td>
+                            <td class="text-right">240.000đ</td>
+                            <td class="text-right">280.000đ</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Lịch hẹn mới đăng ký gần đây</h2>
+            </div>
+            <div class="table-wrap">
+                <table class="clean-table">
+                    <thead>
+                        <tr>
+                            <th>Mã</th>
+                            <th>Thú cưng</th>
+                            <th>Dịch vụ</th>
+                            <th>Ngày giờ</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in recent_bookings %}
+                        <tr>
+                            <td><strong>#{{ b.id }}</strong></td>
+                            <td>{{ b.pet_name }} ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)</td>
+                            <td>{{ b.service_name }}</td>
+                            <td>{{ b.appointment_date }} {{ b.appointment_time }}</td>
+                            <td><span class="badge badge-stock-ok">{{ b.status }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột phải: Form Đặt lịch -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Phiếu Đăng Ký Lịch Hẹn Spa</h2>
+        </div>
+
+        <form method="POST" action="{{ url_for('spa_page') }}" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}">
+
+            <div class="grid-2" style="gap:14px;">
+                <div class="form-group">
+                    <label class="form-label">Họ tên chủ nuôi *</label>
+                    <input type="text" name="customer_name" value="{{ form.raw_data.get('customer_name', '') }}" class="form-control" placeholder="VD: Nguyễn Minh Anh" required>
+                    {% for err in form.errors.get('customer_name', []) %}
+                        <div class="form-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Số điện thoại liên hệ *</label>
+                    <input type="text" name="phone" value="{{ form.raw_data.get('phone', '') }}" class="form-control" placeholder="VD: 0905123456" required>
+                    {% for err in form.errors.get('phone', []) %}
+                        <div class="form-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Địa chỉ Email nhận phiếu xác nhận</label>
+                <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" class="form-control" placeholder="VD: minhanh@gmail.com">
+                {% for err in form.errors.get('email', []) %}
+                    <div class="form-error">{{ err }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="grid-3" style="gap:12px;">
+                <div class="form-group">
+                    <label class="form-label">Tên thú cưng *</label>
+                    <input type="text" name="pet_name" value="{{ form.raw_data.get('pet_name', '') }}" class="form-control" placeholder="VD: Mochi" required>
+                    {% for err in form.errors.get('pet_name', []) %}
+                        <div class="form-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Loài *</label>
+                    <select name="pet_type" class="form-control">
+                        <option value="Mèo" {% if form.raw_data.get('pet_type') == 'Mèo' %}selected{% endif %}>Mèo</option>
+                        <option value="Chó" {% if form.raw_data.get('pet_type') == 'Chó' %}selected{% endif %}>Chó</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Cân nặng (kg) *</label>
+                    <input type="number" id="spaWeightInput" name="pet_weight_kg" value="{{ form.raw_data.get('pet_weight_kg', '4.0') }}" step="0.1" min="0.2" max="80" class="form-control" required>
+                    {% for err in form.errors.get('pet_weight_kg', []) %}
+                        <div class="form-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Gói dịch vụ đăng ký *</label>
+                <select id="spaServiceSelect" name="service_name" class="form-control">
+                    {% for s_name, s_price in spa_services.items() %}
+                    <option value="{{ s_name }}" data-base="{{ s_price }}" {% if form.raw_data.get('service_name') == s_name %}selected{% endif %}>
+                        {{ s_name }} (Giá gốc: {{ "{:,.0f}".format(s_price) }}đ)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid-2" style="gap:14px;">
+                <div class="form-group">
+                    <label class="form-label">Ngày hẹn *</label>
+                    <input type="date" name="appointment_date" value="{{ form.raw_data.get('appointment_date', default_date) }}" class="form-control" required>
+                    {% for err in form.errors.get('appointment_date', []) %}
+                        <div class="form-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Giờ hẹn *</label>
+                    <input type="time" name="appointment_time" value="{{ form.raw_data.get('appointment_time', '09:30') }}" class="form-control" required>
+                    {% for err in form.errors.get('appointment_time', []) %}
+                        <div class="form-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Ghi chú tình trạng của bé</label>
+                <input type="text" name="note" value="{{ form.raw_data.get('note', '') }}" class="form-control" placeholder="Tính cách của bé, lưu ý nhiệt độ sấy...">
+            </div>
+
+            <div style="background:var(--bg-accent-light); border:1px solid #fbd5ce; padding:14px 18px; border-radius:var(--radius-sm); display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                <span style="font-weight:600;">Chi phí tạm tính theo cân nặng:</span>
+                <strong id="spaPricePreview" style="font-size:20px; color:var(--primary);">150,000 đ</strong>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Xác nhận Đặt lịch &amp; Gửi Email</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function calcPreviewSpaFee() {
+    const sel = document.getElementById("spaServiceSelect");
+    const opt = sel.options[sel.selectedIndex];
+    const base = parseFloat(opt.getAttribute("data-base") || "150000");
+    const weight = parseFloat(document.getElementById("spaWeightInput").value || "4");
+    let mult = 1.0;
+    if (weight > 10) mult = 1.4;
+    else if (weight >= 5) mult = 1.2;
+    const total = Math.round(base * mult);
+    document.getElementById("spaPricePreview").textContent = total.toLocaleString("vi-VN") + " đ";
+}
+document.getElementById("spaServiceSelect").addEventListener("change", calcPreviewSpaFee);
+document.getElementById("spaWeightInput").addEventListener("input", calcPreviewSpaFee);
+calcPreviewSpaFee();
+</script>
+{% endblock %}
+

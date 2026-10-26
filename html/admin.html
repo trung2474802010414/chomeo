@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Quản trị Hệ thống - Meow &amp; Woof Pet Shop{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <div>
+        <h1 class="section-title">Bảng Điều Khiển Quản Trị (Admin)</h1>
+        <p class="section-subtitle">Thống kê dữ liệu bằng Comprehensions, quản lý Kho hàng, Lịch hẹn Spa, Đơn hàng và Hộp thư Email đã gửi</p>
+    </div>
+</div>
+
+<!-- 6 Thẻ thống kê tổng quan -->
+<div class="stats-row">
+    <div class="stat-card">
+        <span class="stat-label">Tổng mặt hàng (SKU)</span>
+        <strong class="stat-num">{{ stats.total_products }}</strong>
+    </div>
+    <div class="stat-card teal">
+        <span class="stat-label">Tổng đơn vị tồn kho</span>
+        <strong class="stat-num">{{ stats.total_stock_units }}</strong>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Giá trị tồn kho</span>
+        <strong class="stat-num">{{ "{:,.0f}".format(stats.total_inventory_value) }} đ</strong>
+    </div>
+    <div class="stat-card teal">
+        <span class="stat-label">Doanh thu bán hàng ({{ stats.total_orders }} đơn)</span>
+        <strong class="stat-num">{{ "{:,.0f}".format(stats.order_revenue) }} đ</strong>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Doanh thu Spa ({{ stats.total_bookings }} lịch)</span>
+        <strong class="stat-num">{{ "{:,.0f}".format(stats.spa_revenue) }} đ</strong>
+    </div>
+    <div class="stat-card teal">
+        <span class="stat-label">Email đã gửi (SMTP/Log)</span>
+        <strong class="stat-num">{{ email_logs|length }}</strong>
+    </div>
+</div>
+
+<!-- Thanh chọn phân mục Quản trị -->
+<div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px;">
+    <a href="{{ url_for('admin_page', tab='products') }}" class="btn {% if admin_tab == 'products' %}btn-primary{% else %}btn-outline{% endif %}">
+        1. Quản lý Kho sản phẩm ({{ products|length }})
+    </a>
+    <a href="{{ url_for('admin_page', tab='bookings') }}" class="btn {% if admin_tab == 'bookings' %}btn-primary{% else %}btn-outline{% endif %}">
+        2. Quản lý Lịch hẹn Spa ({{ bookings|length }})
+    </a>
+    <a href="{{ url_for('admin_page', tab='orders') }}" class="btn {% if admin_tab == 'orders' %}btn-primary{% else %}btn-outline{% endif %}">
+        3. Quản lý Đơn hàng ({{ orders|length }})
+    </a>
+    <a href="{{ url_for('admin_page', tab='emails') }}" class="btn {% if admin_tab == 'emails' %}btn-primary{% else %}btn-outline{% endif %}">
+        4. Hộp thư Email đã gửi ({{ email_logs|length }})
+    </a>
+</div>
+
+{% if admin_tab == 'products' %}
+<div class="grid-2" style="grid-template-columns: 1.6fr 1fr;">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Danh sách Sản phẩm trong kho</h2>
+        </div>
+        <div class="table-wrap">
+            <table class="clean-table">
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Loài</th>
+                        <th class="text-right">Giá bán</th>
+                        <th class="text-center">Tồn kho</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td><code>{{ p.sku }}</code></td>
+                        <td>
+                            <strong>{{ p.name }}</strong>
+                            <div style="font-size:12px; color:var(--text-muted);">{{ p.category }}</div>
+                        </td>
+                        <td>
+                            <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}">
+                                {{ p.pet_type }}
+                            </span>
+                        </td>
+                        <td class="text-right"><strong>{{ "{:,.0f}".format(p.price) }} đ</strong></td>
+                        <td class="text-center">
+                            <span class="badge {% if p.stock == 0 %}badge-stock-out{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
+                                {{ p.stock }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div style="display:inline-flex; gap:6px;">
+                                <a href="{{ url_for('admin_page', tab='products', edit_id=p.id) }}" class="btn btn-outline btn-sm">Sửa</a>
+                                <form method="POST" action="{{ url_for('admin_delete_product', product_id=p.id) }}" onsubmit="return confirm('Xóa sản phẩm này?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                {% if edit_product %}Cập nhật sản phẩm #{{ edit_product.id }}{% else %}Thêm sản phẩm mới{% endif %}
+            </h2>
+            {% if edit_product %}
+            <a href="{{ url_for('admin_page', tab='products') }}" class="btn btn-outline btn-sm">+ Tạo mới</a>
+            {% endif %}
+        </div>
+
+        <form method="POST" action="{{ url_for('admin_save_product') }}" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ product_form.csrf_token }}">
+            <input type="hidden" name="product_id" value="{{ edit_product.id if edit_product else '' }}">
+
+            <div class="grid-2" style="gap:12px;">
+                <div class="form-group">
+                    <label class="form-label">Mã SKU *</label>
+                    <input type="text" name="sku" value="{{ edit_product.sku if edit_product else product_form.raw_data.get('sku', '') }}" class="form-control" placeholder="CAT-FD-009" required>
+                    {% for err in product_form.errors.get('sku', []) %}
+                        <div class="form-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Loài thú cưng *</label>
+                    {% set sel_pet = edit_product.pet_type if edit_product else product_form.raw_data.get('pet_type', 'Mèo') %}
+                    <select name="pet_type" class="form-control">
+                        {% for pt in stats.pet_types %}
+                        <option value="{{ pt }}" {% if sel_pet == pt %}selected{% endif %}>{{ pt }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Tên sản phẩm *</label>
+                <input type="text" name="name" value="{{ edit_product.name if edit_product else product_form.raw_data.get('name', '') }}" class="form-control" placeholder="Nhập tên sản phẩm..." required>
+                {% for err in product_form.errors.get('name', []) %}
+                    <div class="form-error">{{ err }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Danh mục *</label>
+                {% set sel_cat = edit_product.category if edit_product else product_form.raw_data.get('category', 'Thức ăn') %}
+                <select name="category" class="form-control">
+                    {% for cat in stats.categories %}
+                    <option value="{{ cat }}" {% if sel_cat == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid-2" style="gap:12px;">
+                <div class="form-group">
+                    <label class="form-label">Đơn giá (VNĐ) *</label>
+                    <input type="number" name="price" value="{{ edit_product.price|int if edit_product else product_form.raw_data.get('price', '150000') }}" min="1000" step="1000" class="form-control" required>
+                    {% for err in product_form.errors.get('price', []) %}
+                        <div class="form-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Số lượng tồn kho *</label>
+                    <input type="number" name="stock" value="{{ edit_product.stock if edit_product else product_form.raw_data.get('stock', '15') }}" min="0" class="form-control" required>
+                    {% for err in product_form.errors.get('stock', []) %}
+                        <div class="form-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Mô tả sản phẩm</label>
+                <textarea name="description" rows="3" class="form-control">{{ edit_product.description if edit_product else product_form.raw_data.get('description', '') }}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+                {% if edit_product %}Lưu cập nhật{% else %}Thêm sản phẩm vào kho{% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+
+{% elif admin_tab == 'bookings' %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Quản lý Lịch hẹn Spa &amp; Cập nhật Trạng thái</h2>
+    </div>
+    <div class="table-wrap">
+        <table class="clean-table">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Khách hàng</th>
+                    <th>Thú cưng</th>
+                    <th>Gói dịch vụ</th>
+                    <th>Thời gian hẹn</th>
+                    <th class="text-right">Chi phí</th>
+                    <th>Đổi trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in bookings %}
+                <tr>
+                    <td><strong>#{{ b.id }}</strong></td>
+                    <td>
+                        <strong>{{ b.customer_name }}</strong>
+                        <div style="font-size:12px; color:var(--text-muted);">{{ b.phone }} {% if b.email %}| {{ b.email }}{% endif %}</div>
+                    </td>
+                    <td>
+                        <strong>{{ b.pet_name }}</strong> ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)
+                        {% if b.note %}<div style="font-size:12px; color:var(--text-muted);">Ghi chú: {{ b.note }}</div>{% endif %}
+                    </td>
+                    <td>{{ b.service_name }}</td>
+                    <td>{{ b.appointment_date }} lúc {{ b.appointment_time }}</td>
+                    <td class="text-right"><strong>{{ "{:,.0f}".format(b.total_price) }} đ</strong></td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin_update_booking_status', booking_id=b.id) }}" style="display:flex; gap:6px;">
+                            <select name="status" class="form-control" style="padding:6px 8px; width:auto;">
+                                {% for st in stats.booking_statuses %}
+                                <option value="{{ st }}" {% if b.status == st %}selected{% endif %}>{{ st }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-teal btn-sm">Lưu</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% elif admin_tab == 'orders' %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Danh sách Đơn hàng đã đặt</h2>
+    </div>
+    <div class="table-wrap">
+        <table class="clean-table">
+            <thead>
+                <tr>
+                    <th>Mã ĐH</th>
+                    <th>Thời gian</th>
+                    <th>Khách hàng</th>
+                    <th>Địa chỉ nhận</th>
+                    <th>Chi tiết sản phẩm</th>
+                    <th class="text-right">Tổng tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for o in orders %}
+                <tr>
+                    <td><strong>#{{ o.id }}</strong></td>
+                    <td>{{ o.created_at }}</td>
+                    <td>
+                        <strong>{{ o.customer_name }}</strong>
+                        <div style="font-size:12px; color:var(--text-muted);">{{ o.phone }} {% if o.email %}| {{ o.email }}{% endif %}</div>
+                    </td>
+                    <td>{{ o.address }}</td>
+                    <td>
+                        {% for item in o['items'] %}
+                        <div>&bull; {{ item.name }} (SL: {{ item.quantity }} &times; {{ "{:,.0f}".format(item.price) }}đ)</div>
+                        {% endfor %}
+                    </td>
+                    <td class="text-right"><strong style="color:var(--primary);">{{ "{:,.0f}".format(o.total_amount) }} đ</strong></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center">Chưa có đơn hàng nào.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% elif admin_tab == 'emails' %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h2 class="card-title">Lịch sử Email đã gửi (CLO2: Email Confirmation Logs)</h2>
+            <p class="section-subtitle">Mỗi khi khách đặt hàng hoặc đặt lịch Spa, hệ thống tạo Email bằng <code>email.message.EmailMessage</code> / <code>smtplib</code> và lưu bản sao tại đây.</p>
+        </div>
+    </div>
+
+    {% for log in email_logs %}
+    <div style="border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; margin-bottom:14px; background:#fcfcfd;">
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+            <strong>{{ log.subject }}</strong>
+            <span class="badge badge-stock-ok">{{ log.delivery_status }}</span>
+        </div>
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">
+            Người nhận: <code>{{ log.recipient }}</code> | Thời gian: {{ log.created_at }}
+        </div>
+        <pre style="background:#f1f5f9; padding:12px; border-radius:6px; font-family:inherit; font-size:13.5px; white-space:pre-wrap;">{{ log.body }}</pre>
+    </div>
+    {% else %}
+    <p style="color:var(--text-muted);">Chưa có email nào được gửi. Hãy thử đặt 1 đơn hàng hoặc đặt lịch Spa để xem email sinh tự động!</p>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
