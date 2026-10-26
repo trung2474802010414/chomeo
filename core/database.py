@@ -7,9 +7,24 @@ Minh họa:
 
 import os
 import sqlite3
+import tempfile
 from typing import Any, Dict, Generator, Iterable, Optional, Tuple
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "petshop.db")
+
+def _resolve_db_path() -> str:
+    """
+    Tự động chọn đường dẫn lưu file SQLite:
+    - Khi chạy trên máy cá nhân (Local): lưu tại `petshop/petshop.db`.
+    - Khi deploy lên môi trường Serverless như Vercel (chỉ cho phép ghi trong `/tmp`):
+      tự động lưu tại `/tmp/petshop.db` để không bị lỗi Read-Only Filesystem.
+    """
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if os.environ.get("VERCEL") or not os.access(base_dir, os.W_OK):
+        return os.path.join(tempfile.gettempdir(), "petshop.db")
+    return os.path.join(base_dir, "petshop.db")
+
+
+DB_PATH = _resolve_db_path()
 
 
 class DatabaseSession:

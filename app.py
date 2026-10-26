@@ -53,12 +53,20 @@ from services.petshop_service import (
     query_products,
 )
 
+# Tự động nhận diện thư mục chứa template ('templates' hoặc 'html')
+_TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+if not os.path.isdir(_TEMPLATE_DIR) and os.path.isdir(os.path.join(BASE_DIR, "html")):
+    _TEMPLATE_DIR = os.path.join(BASE_DIR, "html")
+
 app = Flask(
     __name__,
-    template_folder=os.path.join(BASE_DIR, "templates"),
+    template_folder=_TEMPLATE_DIR,
     static_folder=os.path.join(BASE_DIR, "static"),
 )
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "meow-woof-petshop-secret-2026")
+
+# Tự động khởi tạo bảng và dữ liệu mẫu ngay khi Vercel WSGI import `app`
+init_db_and_seed()
 
 # Giữ bộ Router Decorator phục vụ REST API & Unit Test
 router = Router()
