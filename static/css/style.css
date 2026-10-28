@@ -1,29 +1,35 @@
 /*
  * static/css/style.css
- * Thiết kế giao diện sáng, thoáng mắt, hiện đại và dễ nhìn cho Meow & Woof Pet Shop & Spa.
+ * Giao diện Gen Z trẻ trung, năng động, thân thiện & dễ nhìn cho Meow & Woof Pet House & Spa.
  */
 
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 :root {
-    --bg-page: #faf8f5;
+    --bg-page: #fffaf5;
     --bg-card: #ffffff;
-    --bg-soft: #f3efeA;
-    --bg-accent-light: #fff4f1;
-    --bg-teal-light: #eef8f6;
-    --text-main: #1e293b;
-    --text-body: #475569;
-    --text-muted: #64748b;
-    --primary: #e05a47;
-    --primary-hover: #c84735;
-    --secondary: #2a9d8f;
-    --secondary-hover: #21867a;
-    --navy: #1e293b;
-    --border: #e2e8f0;
-    --border-warm: #eaddd3;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --shadow-sm: 0 2px 8px rgba(30, 41, 59, 0.05);
-    --shadow-md: 0 8px 24px rgba(30, 41, 59, 0.08);
+    --bg-soft: #fff0ed;
+    --bg-accent-light: #ffeef2;
+    --bg-teal-light: #e6fcf5;
+    --bg-lilac-light: #f3f0ff;
+    --text-main: #18181b;
+    --text-body: #3f3f46;
+    --text-muted: #71717a;
+    --primary: #ff5d73;
+    --primary-hover: #f43f5e;
+    --secondary: #12b886;
+    --secondary-hover: #0ca678;
+    --accent-purple: #7950f2;
+    --accent-yellow: #ffd43b;
+    --navy: #18181b;
+    --border: #f1e4de;
+    --border-warm: #ffd8cc;
+    --radius-sm: 12px;
+    --radius-md: 20px;
+    --radius-lg: 28px;
+    --shadow-sm: 0 4px 16px rgba(255, 93, 115, 0.06);
+    --shadow-md: 0 12px 30px rgba(24, 24, 27, 0.08);
+    --shadow-pop: 0 6px 0px #ffd8cc;
 }
 
 * {
@@ -37,29 +43,35 @@ html {
 }
 
 body {
-    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Plus Jakarta Sans", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
     font-size: 15px;
     line-height: 1.6;
     color: var(--text-main);
     background-color: var(--bg-page);
+    background-image:
+        radial-gradient(at 10% 10%, rgba(255, 194, 209, 0.22) 0px, transparent 45%),
+        radial-gradient(at 90% 15%, rgba(186, 230, 253, 0.25) 0px, transparent 45%),
+        radial-gradient(at 50% 85%, rgba(254, 240, 138, 0.18) 0px, transparent 50%);
+    background-attachment: fixed;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
 .container {
-    max-width: 1220px;
+    max-width: 1240px;
     margin: 0 auto;
     padding: 0 20px;
 }
 
 /* ==========================================================================
-   TOPBAR & HEADER
+   TOPBAR & HEADER (PHONG CÁCH GEN Z NĂNG ĐỘNG)
    ========================================================================== */
 .topbar {
-    background-color: var(--navy);
-    color: #e2e8f0;
+    background: linear-gradient(90deg, #ff5d73 0%, #ff8787 50%, #7950f2 100%);
+    color: #ffffff;
     font-size: 13px;
+    font-weight: 600;
     padding: 8px 0;
 }
 
@@ -79,28 +91,30 @@ body {
 }
 
 .clo-pill {
-    background-color: rgba(255, 255, 255, 0.12);
-    color: #f8fafc;
-    padding: 2px 9px;
-    border-radius: 20px;
-    font-size: 11.5px;
-    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    padding: 3px 11px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
 }
 
 .site-navbar {
-    background-color: var(--bg-card);
-    border-bottom: 1px solid var(--border-warm);
+    background-color: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: 90;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
 .navbar-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 20px;
+    padding: 13px 20px;
     gap: 20px;
     flex-wrap: wrap;
 }
@@ -114,45 +128,52 @@ body {
 }
 
 .brand-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 12px;
-    background-color: var(--bg-accent-light);
-    border: 1px solid #fbd5ce;
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #ffe3e8 0%, #fff0f6 100%);
+    border: 2px solid #ffccd5;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--primary);
+    box-shadow: 0 4px 10px rgba(255, 93, 115, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.brand-link:hover .brand-icon {
+    transform: rotate(-8deg) scale(1.05);
 }
 
 .brand-title {
-    font-size: 20px;
+    font-size: 21px;
     font-weight: 800;
     color: var(--navy);
-    letter-spacing: -0.3px;
-    line-height: 1.2;
+    letter-spacing: -0.4px;
+    line-height: 1.15;
 }
 
 .brand-sub {
     font-size: 12.5px;
-    color: var(--text-muted);
+    font-weight: 600;
+    color: var(--primary);
 }
 
 .nav-menu {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
 .nav-item {
     text-decoration: none;
     color: var(--text-body);
-    font-weight: 600;
-    font-size: 14.5px;
-    padding: 9px 15px;
-    border-radius: var(--radius-sm);
-    transition: all 0.15s ease;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 9px 16px;
+    border-radius: 99px;
+    transition: all 0.18s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -160,7 +181,8 @@ body {
 
 .nav-item:hover {
     background-color: var(--bg-soft);
-    color: var(--navy);
+    color: var(--primary);
+    transform: translateY(-1px);
 }
 
 .nav-item.active {
@@ -169,19 +191,23 @@ body {
 }
 
 .nav-cart-btn {
-    background-color: var(--primary);
+    background: linear-gradient(135deg, #ff5d73 0%, #ff875c 100%);
     color: #ffffff !important;
-    padding: 9px 16px;
-    border-radius: var(--radius-sm);
-    font-weight: 700;
+    padding: 9px 18px;
+    border-radius: 99px;
+    font-weight: 800;
+    font-size: 14px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    box-shadow: 0 4px 14px rgba(255, 93, 115, 0.3);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .nav-cart-btn:hover {
-    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(255, 93, 115, 0.4);
 }
 
 .cart-badge {
@@ -189,26 +215,26 @@ body {
     color: var(--primary);
     font-size: 12px;
     font-weight: 800;
-    padding: 1px 7px;
+    padding: 1px 8px;
     border-radius: 99px;
 }
 
 /* ==========================================================================
-   BUTTONS & BADGES
+   BUTTONS & BADGES (BO TRÒN PILL HIỆN ĐẠI)
    ========================================================================== */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 18px;
+    padding: 10px 20px;
     font-size: 14px;
-    font-weight: 600;
-    border-radius: var(--radius-sm);
-    border: 1px solid transparent;
+    font-weight: 700;
+    border-radius: 99px;
+    border: 1.5px solid transparent;
     cursor: pointer;
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: all 0.18s ease;
     font-family: inherit;
 }
 
@@ -218,53 +244,58 @@ body {
 }
 
 .btn-primary {
-    background-color: var(--primary);
+    background: linear-gradient(135deg, #ff5d73 0%, #ff7b54 100%);
     color: #ffffff;
-    border-color: var(--primary);
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(255, 93, 115, 0.25);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 93, 115, 0.35);
 }
 
 .btn-teal {
-    background-color: var(--secondary);
+    background: linear-gradient(135deg, #12b886 0%, #20c997 100%);
     color: #ffffff;
-    border-color: var(--secondary);
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(18, 184, 134, 0.25);
 }
 
 .btn-teal:hover:not(:disabled) {
-    background-color: var(--secondary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(18, 184, 134, 0.35);
 }
 
 .btn-outline {
     background-color: #ffffff;
     color: var(--text-main);
-    border-color: #cbd5e1;
+    border-color: #e4d5cf;
 }
 
 .btn-outline:hover:not(:disabled) {
     background-color: var(--bg-soft);
-    border-color: #94a3b8;
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .btn-danger {
-    background-color: #fee2e2;
-    color: #b91c1c;
-    border-color: #fecaca;
+    background-color: #ffe3e3;
+    color: #e03131;
+    border-color: #ffc9c9;
 }
 
 .btn-danger:hover:not(:disabled) {
-    background-color: #fecaca;
+    background-color: #ffc9c9;
 }
 
 .btn-sm {
-    padding: 6px 12px;
+    padding: 7px 14px;
     font-size: 13px;
 }
 
 .btn-lg {
-    padding: 12px 24px;
+    padding: 13px 26px;
     font-size: 15.5px;
 }
 
@@ -274,59 +305,68 @@ body {
 
 .badge {
     display: inline-block;
-    padding: 3px 10px;
+    padding: 4px 12px;
     font-size: 12px;
     font-weight: 700;
     border-radius: 99px;
+    letter-spacing: 0.1px;
 }
 
 .badge-cat {
-    background-color: #ffedd5;
-    color: #9a3412;
+    background-color: #fff0f6;
+    color: #c2255c;
+    border: 1px solid #ffdeeb;
 }
 
 .badge-dog {
-    background-color: #dbeafe;
-    color: #1e40af;
+    background-color: #e7f5ff;
+    color: #1971c2;
+    border: 1px solid #d0ebff;
 }
 
 .badge-both {
-    background-color: #f3e8ff;
-    color: #6b21a8;
+    background-color: #f3f0ff;
+    color: #6741d9;
+    border: 1px solid #e5dbff;
 }
 
 .badge-stock-ok {
-    background-color: #dcfce7;
-    color: #166534;
+    background-color: #ebfbee;
+    color: #2b8a3e;
+    border: 1px solid #d3f9d8;
 }
 
 .badge-stock-low {
-    background-color: #fef9c3;
-    color: #854d0e;
+    background-color: #fff9db;
+    color: #e67700;
+    border: 1px solid #ffec99;
 }
 
 .badge-stock-out {
-    background-color: #fee2e2;
-    color: #991b1b;
+    background-color: #fff5f5;
+    color: #c92a2a;
+    border: 1px solid #ffc9c9;
 }
 
 /* ==========================================================================
-   HERO BANNER & FEATURE CARDS (HOME PAGE)
+   HERO BANNER & FEATURE CARDS (PHONG CÁCH GEN Z PASTEL POP)
    ========================================================================== */
 .hero-section {
-    padding: 36px 0 28px;
+    padding: 32px 0 28px;
 }
 
 .hero-card {
-    background: linear-gradient(135deg, #fff8f5 0%, #eef8f6 100%);
-    border: 1px solid var(--border-warm);
+    background: linear-gradient(135deg, #fff0f3 0%, #fff9db 52%, #e6fcf5 100%);
+    border: 2px solid #ffd8cc;
     border-radius: var(--radius-lg);
-    padding: 40px;
+    padding: 42px;
     display: grid;
-    grid-template-columns: 1.3fr 0.9fr;
+    grid-template-columns: 1.35fr 0.85fr;
     gap: 32px;
     align-items: center;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 12px 32px rgba(255, 93, 115, 0.08);
+    position: relative;
+    overflow: hidden;
 }
 
 @media (max-width: 860px) {
@@ -337,29 +377,39 @@ body {
 }
 
 .hero-eyebrow {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background-color: #ffffff;
     color: var(--primary);
-    border: 1px solid #fbd5ce;
-    padding: 4px 12px;
+    border: 1.5px solid #ffccd5;
+    padding: 6px 15px;
     border-radius: 99px;
     font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 14px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    box-shadow: 0 3px 10px rgba(255, 93, 115, 0.1);
 }
 
 .hero-title {
-    font-size: 32px;
+    font-size: 35px;
     font-weight: 800;
     color: var(--navy);
-    line-height: 1.25;
+    line-height: 1.22;
+    letter-spacing: -0.6px;
     margin-bottom: 14px;
 }
 
+.hero-title .text-highlight {
+    background: linear-gradient(90deg, #ff5d73 0%, #7950f2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 .hero-desc {
-    font-size: 16px;
+    font-size: 15.5px;
     color: var(--text-body);
-    margin-bottom: 24px;
+    margin-bottom: 26px;
 }
 
 .hero-actions {
@@ -369,48 +419,55 @@ body {
 }
 
 .hero-illustration {
-    background-color: #ffffff;
-    border: 1px solid var(--border-warm);
-    border-radius: var(--radius-md);
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid #ffdeeb;
+    border-radius: 24px;
     padding: 24px;
     text-align: center;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 10px 25px rgba(255, 93, 115, 0.1);
 }
 
 .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 18px;
-    margin: 28px 0 40px;
+    margin: 26px 0 38px;
 }
 
 .feature-box {
     background-color: var(--bg-card);
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius-md);
     padding: 20px;
     display: flex;
     gap: 14px;
     align-items: flex-start;
     box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.feature-box:hover {
+    transform: translateY(-4px);
+    border-color: #ffccd5;
 }
 
 .feature-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background-color: var(--bg-teal-light);
-    color: var(--secondary);
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ffe3e8 0%, #e6fcf5 100%);
+    color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 18px;
+    font-size: 20px;
     flex-shrink: 0;
 }
 
 .feature-box h3 {
     font-size: 16px;
+    font-weight: 800;
     margin-bottom: 4px;
     color: var(--navy);
 }
@@ -421,10 +478,10 @@ body {
 }
 
 /* ==========================================================================
-   SECTIONS, CARDS & PRODUCT GRID
+   SECTIONS, CARDS & PRODUCT GRID (TRẺ TRUNG, DỄ NHÌN)
    ========================================================================== */
 .page-section {
-    padding: 28px 0 48px;
+    padding: 28px 0 52px;
     flex: 1;
 }
 
@@ -432,30 +489,31 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-bottom: 22px;
+    margin-bottom: 24px;
     flex-wrap: wrap;
     gap: 12px;
 }
 
 .section-title {
-    font-size: 24px;
+    font-size: 25px;
     font-weight: 800;
     color: var(--navy);
+    letter-spacing: -0.4px;
 }
 
 .section-subtitle {
     font-size: 14.5px;
     color: var(--text-muted);
-    margin-top: 2px;
+    margin-top: 3px;
 }
 
 .card {
     background-color: var(--bg-card);
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 24px;
+    padding: 26px;
     box-shadow: var(--shadow-sm);
-    margin-bottom: 22px;
+    margin-bottom: 24px;
 }
 
 .card-header {
@@ -464,24 +522,24 @@ body {
     align-items: center;
     padding-bottom: 14px;
     margin-bottom: 18px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1.5px dashed var(--border);
     flex-wrap: wrap;
     gap: 10px;
 }
 
 .card-title {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 18.5px;
+    font-weight: 800;
     color: var(--navy);
 }
 
 /* Filter Bar */
 .filter-panel {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
+    background: linear-gradient(180deg, #ffffff 0%, #fffaf8 100%);
+    border: 1.5px solid #ffd8cc;
     border-radius: var(--radius-md);
-    padding: 20px;
-    margin-bottom: 24px;
+    padding: 22px;
+    margin-bottom: 28px;
     box-shadow: var(--shadow-sm);
 }
 
@@ -502,57 +560,61 @@ body {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-    margin-top: 14px;
+    margin-top: 16px;
     padding-top: 14px;
-    border-top: 1px dashed var(--border);
+    border-top: 1.5px dashed var(--border);
 }
 
 .pill-link {
     text-decoration: none;
     font-size: 13px;
-    font-weight: 600;
-    padding: 5px 13px;
+    font-weight: 700;
+    padding: 6px 15px;
     border-radius: 99px;
-    background-color: var(--bg-soft);
+    background-color: #fff0ed;
     color: var(--text-body);
-    border: 1px solid transparent;
+    border: 1px solid #ffd8cc;
+    transition: all 0.16s ease;
 }
 
 .pill-link:hover,
 .pill-link.active {
-    background-color: var(--primary);
+    background: linear-gradient(135deg, #ff5d73 0%, #ff7b54 100%);
     color: #ffffff;
+    border-color: transparent;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(255, 93, 115, 0.25);
 }
 
-/* Product Grid (Giao diện bán hàng bắt mắt, hiện đại & chuyên nghiệp) */
+/* Product Grid (Card Bo Tròn Gen Z, Sáng Sủa & Bắt Mắt) */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
     gap: 24px;
 }
 
 .product-card {
     background-color: #ffffff;
-    border: 1px solid #e8ecf2;
-    border-radius: 16px;
+    border: 1.5px solid #f2e3dc;
+    border-radius: 22px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
-    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    box-shadow: 0 6px 20px rgba(24, 24, 27, 0.04);
+    transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.24s ease, border-color 0.24s ease;
 }
 
 .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
-    border-color: #f8b4a6;
+    transform: translateY(-6px);
+    box-shadow: 0 16px 34px rgba(255, 93, 115, 0.14);
+    border-color: #ffa8b6;
 }
 
 .product-visual {
-    height: 215px;
-    background: linear-gradient(180deg, #fff9f6 0%, #f8fafc 100%);
-    border-bottom: 1px solid #f1f5f9;
+    height: 225px;
+    background: linear-gradient(180deg, #fff5f7 0%, #fffaf5 100%);
+    border-bottom: 1px solid #f8ebe6;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -573,8 +635,8 @@ body {
 }
 
 .product-badges-top .badge {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-    backdrop-filter: blur(4px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6px);
 }
 
 .product-svg-wrap {
@@ -582,17 +644,17 @@ body {
     height: 78px;
     border-radius: 50%;
     background-color: #ffffff;
-    border: 1px solid var(--border-warm);
+    border: 1.5px solid var(--border-warm);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 12px rgba(255, 93, 115, 0.08);
 }
 
 .product-cat-name {
     margin-top: 8px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-muted);
 }
 
@@ -605,17 +667,17 @@ body {
 
 .product-sku {
     font-size: 11.5px;
-    color: #94a3b8;
-    font-family: Consolas, monospace;
+    color: var(--secondary);
+    font-weight: 700;
     margin-bottom: 5px;
 }
 
 .product-name {
     font-size: 16.5px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--navy);
     margin-bottom: 8px;
-    line-height: 1.4;
+    line-height: 1.38;
     transition: color 0.15s ease;
 }
 
@@ -631,8 +693,8 @@ body {
 
 .product-bottom {
     padding: 14px 20px;
-    background-color: #fafbfc;
-    border-top: 1px solid #f1f5f9;
+    background-color: #fffcfa;
+    border-top: 1px dashed #f1e4de;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -643,7 +705,7 @@ body {
     font-size: 19px;
     font-weight: 800;
     color: var(--primary);
-    letter-spacing: -0.2px;
+    letter-spacing: -0.3px;
 }
 
 /* ==========================================================================
@@ -1333,15 +1395,15 @@ body {
    MEGA-MENU GIỐNG CHÓ MÈO (MÀU XANH NGỌC GIỐNG HÌNH 2 PETHOUSE)
    ========================================================================== */
 .mega-nav-bar {
-    background: linear-gradient(90deg, #0f766e 0%, #15803d 100%);
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    background: linear-gradient(90deg, #10b981 0%, #059669 50%, #0d9488 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
     position: relative;
 }
 
 .mega-nav-container {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
@@ -1356,17 +1418,18 @@ body {
     padding: 11px 18px;
     color: #ffffff;
     font-size: 13.5px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     text-decoration: none;
     letter-spacing: 0.4px;
     cursor: pointer;
+    border-radius: 10px 10px 0 0;
     transition: background-color 0.15s ease;
 }
 
 .mega-trigger:hover,
 .mega-dropdown:hover .mega-trigger {
-    background-color: #16c172;
+    background-color: rgba(255, 255, 255, 0.2);
     color: #ffffff;
 }
 
@@ -1376,12 +1439,12 @@ body {
     left: 0;
     right: 0;
     top: 100%;
-    background-color: #16c172;
+    background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
     color: #ffffff;
     padding: 26px 0;
-    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.22);
     z-index: 120;
-    border-top: 3px solid #0ea5e9;
+    border-top: 3px solid #fde047;
 }
 
 .mega-dropdown:hover .mega-panel {
