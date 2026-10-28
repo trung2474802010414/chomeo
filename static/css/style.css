@@ -589,7 +589,7 @@ body {
 /* Product Grid (Card Bo Tròn Gen Z, Sáng Sủa & Bắt Mắt) */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
 }
 
@@ -692,20 +692,35 @@ body {
 }
 
 .product-bottom {
-    padding: 14px 20px;
+    padding: 14px 18px;
     background-color: #fffcfa;
     border-top: 1px dashed #f1e4de;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    flex-wrap: nowrap;
+    gap: 8px;
+}
+
+.product-bottom .btn {
+    white-space: nowrap;
+    padding: 7px 13px;
+    flex-shrink: 0;
+}
+
+.product-bottom form {
+    margin: 0;
+    flex-shrink: 0;
 }
 
 .product-price {
-    font-size: 19px;
+    font-size: 18px;
     font-weight: 800;
     color: var(--primary);
     letter-spacing: -0.3px;
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 /* ==========================================================================
