@@ -1303,6 +1303,23 @@ Hẹn gặp lại bạn và bé cưng tại cửa hàng nhé!</textarea>
                 <!-- ==========================================================
                      TAB 7: HỘP THƯ EMAIL XÁC NHẬN
                      ========================================================== -->
+                <div style="background: linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(236,72,153,0.12) 100%); border: 1px solid rgba(139,92,246,0.35); border-radius: 18px; padding: 20px 24px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+                    <div>
+                        <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.4); font-size:11.5px; font-weight:800; color:#c4b5fd; margin-bottom:6px;">
+                            <span>✨ MEOW &amp; WOOF BRAND LUXURY EMAIL TEMPLATES</span>
+                        </div>
+                        <h3 style="margin:0; font-size:17px; font-weight:800; color:#ffffff;">Giao Diện Email HTML Gửi Tới Khách Hàng Chuẩn 5 Sao</h3>
+                        <p style="margin:4px 0 0; font-size:13px; color:#cbd5e1; max-width:650px; line-height:1.5;">
+                            Toàn bộ vé đặt lịch Spa, đơn mua hàng và chiến dịch khuyến mãi đều được tối ưu giao diện HTML Dark Glass rực rỡ, kèm bản text fallback chống lỗi hiển thị.
+                        </p>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openEmailPreviewModal('spa')">🎟️ Demo Email Vé Spa</button>
+                        <button type="button" class="btn btn-teal btn-sm" onclick="openEmailPreviewModal('order')">🛍️ Demo Email Đơn Hàng</button>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="openEmailPreviewModal('marketing')">🎁 Demo Email Khuyến Mãi</button>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">Nhật ký Email đã gửi cho khách ({{ email_logs|length }} thư)</h2>
@@ -1322,6 +1339,41 @@ Hẹn gặp lại bạn và bé cưng tại cửa hàng nhé!</textarea>
                     <p style="color:var(--text-muted);">Chưa có email nào trong nhật ký.</p>
                     {% endfor %}
                 </div>
+
+                <!-- Modal xem trước giao diện Email HTML -->
+                <div id="emailPreviewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:99999; backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:20px;">
+                    <div style="background:#0f172a; border:1px solid rgba(139,92,246,0.5); border-radius:20px; width:100%; max-width:680px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.8);">
+                        <div style="padding:14px 20px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; background:#161f38;">
+                            <strong id="emailPreviewModalTitle" style="color:#ffffff; font-size:15px;">✨ Xem Trước Giao Diện Email HTML</strong>
+                            <button type="button" onclick="closeEmailPreviewModal()" style="background:transparent; border:none; color:#cbd5e1; font-size:20px; cursor:pointer; padding:4px 8px; line-height:1;">&times;</button>
+                        </div>
+                        <div style="flex:1; overflow-y:auto; padding:12px; background:#0b081d;">
+                            <iframe id="emailPreviewIframe" src="" style="width:100%; height:600px; border:none; border-radius:12px; background:#0b081d;"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                function openEmailPreviewModal(type) {
+                    const titles = {
+                        'spa': '🎟️ Giao Diện Email Xác Nhận Vé Hẹn Spa Hoàng Gia 5 Sao',
+                        'order': '🛍️ Giao Diện Email Xác Nhận Đơn Mua Hàng & Vận Chuyển',
+                        'marketing': '🎁 Giao Diện Email Chiến Dịch Khuyến Mãi & Tri Ân VIP'
+                    };
+                    const modal = document.getElementById('emailPreviewModal');
+                    const titleEl = document.getElementById('emailPreviewModalTitle');
+                    const iframe = document.getElementById('emailPreviewIframe');
+                    if (titleEl) titleEl.textContent = titles[type] || '✨ Giao Diện Email';
+                    if (iframe) iframe.src = '/admin/emails/preview-sample/' + type;
+                    if (modal) modal.style.display = 'flex';
+                }
+                function closeEmailPreviewModal() {
+                    const modal = document.getElementById('emailPreviewModal');
+                    const iframe = document.getElementById('emailPreviewIframe');
+                    if (iframe) iframe.src = '';
+                    if (modal) modal.style.display = 'none';
+                }
+                </script>
 
                 {% elif admin_tab == 'system_settings' %}
                 <!-- ==========================================================

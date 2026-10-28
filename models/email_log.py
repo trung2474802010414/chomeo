@@ -13,8 +13,8 @@ class EmailLog(BaseModel):
     id = IntField(primary_key=True)
     recipient = StringField(max_length=150)
     subject = StringField(max_length=200)
-    body = StringField(max_length=4000)
-    delivery_status = StringField(max_length=60, default="Đã lưu & Gửi")
+    body = StringField(max_length=15000)
+    delivery_status = StringField(max_length=80, default="Đã lưu & Gửi")
     created_at = StringField(
         max_length=40,
         default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),

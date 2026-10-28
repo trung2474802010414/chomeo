@@ -18,98 +18,116 @@
         <span class="spa-tier-pill" style="color:#6ee7b7; border-color:rgba(110,231,183,0.35); background:rgba(16,185,129,0.14);">🛡️ 100% Khử trùng tia cực tím UV</span>
         <span class="spa-tier-pill" style="color:#93c5fd; border-color:rgba(147,197,253,0.3); background:rgba(59,130,246,0.12);">🌿 Sữa tắm thảo dược hữu cơ SOS</span>
         <span class="spa-tier-pill" style="color:#fde68a; border-color:rgba(253,230,138,0.3); background:rgba(245,158,11,0.14);">🩺 Bác sĩ thú y kiểm tra da lông miễn phí</span>
-        <span class="spa-tier-pill" style="color:#f472b6; border-color:rgba(244,114,182,0.3); background:rgba(236,72,153,0.14);">✉️ Xác nhận lịch hẹn qua Email tức thì</span>
+        <span class="spa-tier-pill" style="color:#f472b6; border-color:rgba(244,114,182,0.3); background:rgba(236,72,153,0.14);">✉️ Nhận vé điện tử qua Email tức thì</span>
     </div>
 </div>
 
-<div class="grid-2">
-    <!-- Cột trái: Bảng giá Dịch vụ & Quy trình 4 bước chuẩn Spa -->
+<div class="grid-2" style="align-items:start; gap:24px;">
+    <!-- ================= CỘT TRÁI: BẢNG GIÁ 1-CHẠM & QUY TRÌNH SPA ================= -->
     <div>
         <div class="card" style="margin-bottom:24px;">
-            <div class="card-header">
+            <div class="card-header" style="margin-bottom:14px;">
                 <div>
-                    <h2 class="card-title">Bảng Giá Dịch Vụ Spa Niêm Yết</h2>
-                    <p class="section-subtitle">Chi phí minh bạch theo cân nặng: Dưới 5kg (Tiêu chuẩn) • 5–10kg (+20%) • Trên 10kg (+40%)</p>
+                    <h2 class="card-title">1. Bảng Giá Dịch Vụ Spa Niêm Yết</h2>
+                    <p class="section-subtitle">Chạm vào bất kỳ gói dịch vụ nào dưới đây để tự động chọn vào phiếu đặt lịch</p>
                 </div>
             </div>
 
-            <!-- Gói 1 -->
-            <div class="spa-service-item">
-                <div class="spa-service-header">
-                    <span class="spa-service-name">🛁 Tắm Sấy &amp; Vệ Sinh Toàn Diện</span>
-                    <span class="badge badge-stock-ok">Phổ biến nhất</span>
+            <!-- Danh sách gói dịch vụ tương tác 1-chạm -->
+            <div class="spa-services-interactive-list">
+                <!-- Gói 1 -->
+                <div class="spa-service-item clickable-service-card active" data-service-key="Tắm sấy &amp; Vệ sinh tai móng" data-base-price="150000" onclick="selectSpaServiceCard(this)">
+                    <div class="spa-service-header">
+                        <span class="spa-service-name">🛁 Tắm Sấy &amp; Vệ Sinh Toàn Diện</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <span class="badge badge-stock-ok">Phổ biến nhất</span>
+                            <span class="service-select-status-badge">✓ Đang chọn</span>
+                        </div>
+                    </div>
+                    <div style="font-size:13px; color:#94a3b8; line-height:1.5;">
+                        Tắm 2 lần sữa tắm thảo mộc SOS, vắt tuyến hôi khử mùi, cắt mài móng không đau, nhổ lông tai và sấy đánh bông lông.
+                    </div>
+                    <div class="spa-price-tiers">
+                        <span class="spa-tier-pill tier-small">&lt; 5kg: 150.000đ</span>
+                        <span class="spa-tier-pill tier-medium">5 – 10kg: 180.000đ</span>
+                        <span class="spa-tier-pill tier-large">&gt; 10kg: 210.000đ</span>
+                    </div>
                 </div>
-                <div style="font-size:13px; color:#94a3b8; line-height:1.5;">
-                    Tắm 2 lần sữa tắm thảo mộc SOS, vắt tuyến hôi khử mùi, cắt mài móng không đau, nhổ lông tai và sấy đánh bông lông.
-                </div>
-                <div class="spa-price-tiers">
-                    <span class="spa-tier-pill tier-small">&lt; 5kg: 150.000đ</span>
-                    <span class="spa-tier-pill tier-medium">5 – 10kg: 180.000đ</span>
-                    <span class="spa-tier-pill tier-large">&gt; 10kg: 210.000đ</span>
-                </div>
-            </div>
 
-            <!-- Gói 2 -->
-            <div class="spa-service-item">
-                <div class="spa-service-header">
-                    <span class="spa-service-name">✂️ Cắt Tỉa &amp; Tạo Kiểu Lông (Grooming Teddy)</span>
-                    <span class="badge badge-cat">Hot Trend</span>
+                <!-- Gói 2 -->
+                <div class="spa-service-item clickable-service-card" data-service-key="Cắt tỉa &amp; Tạo kiểu lông (Grooming)" data-base-price="280000" onclick="selectSpaServiceCard(this)">
+                    <div class="spa-service-header">
+                        <span class="spa-service-name">✂️ Cắt Tỉa &amp; Tạo Kiểu Lông (Grooming Teddy)</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <span class="badge badge-cat">Hot Trend</span>
+                            <span class="service-select-status-badge" style="display:none;">✓ Đang chọn</span>
+                        </div>
+                    </div>
+                    <div style="font-size:13px; color:#94a3b8; line-height:1.5;">
+                        Groomer 5+ năm kinh nghiệm tạo form mặt tròn Teddy, form gấu bông Poodle/Corgi/Schnauzer, tỉa gọn chân và bụng.
+                    </div>
+                    <div class="spa-price-tiers">
+                        <span class="spa-tier-pill tier-small">&lt; 5kg: 280.000đ</span>
+                        <span class="spa-tier-pill tier-medium">5 – 10kg: 336.000đ</span>
+                        <span class="spa-tier-pill tier-large">&gt; 10kg: 392.000đ</span>
+                    </div>
                 </div>
-                <div style="font-size:13px; color:#94a3b8; line-height:1.5;">
-                    Groomer 5+ năm kinh nghiệm tạo form mặt tròn Teddy, form gấu bông Poodle/Corgi/Schnauzer, tỉa gọn chân và bụng.
-                </div>
-                <div class="spa-price-tiers">
-                    <span class="spa-tier-pill tier-small">&lt; 5kg: 280.000đ</span>
-                    <span class="spa-tier-pill tier-medium">5 – 10kg: 336.000đ</span>
-                    <span class="spa-tier-pill tier-large">&gt; 10kg: 392.000đ</span>
-                </div>
-            </div>
 
-            <!-- Gói 3 -->
-            <div class="spa-service-item">
-                <div class="spa-service-header">
-                    <span class="spa-service-name">🧼 Cạo Lông Máu / Cạo Vệ Sinh 4 Bàn Chân</span>
-                    <span class="badge badge-dog">Chuẩn Y Khoa</span>
+                <!-- Gói 3 -->
+                <div class="spa-service-item clickable-service-card" data-service-key="Cạo lông máu / Cạo vệ sinh" data-base-price="180000" onclick="selectSpaServiceCard(this)">
+                    <div class="spa-service-header">
+                        <span class="spa-service-name">🧼 Cạo Lông Máu / Cạo Vệ Sinh 4 Bàn Chân</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <span class="badge badge-dog">Chuẩn Y Khoa</span>
+                            <span class="service-select-status-badge" style="display:none;">✓ Đang chọn</span>
+                        </div>
+                    </div>
+                    <div style="font-size:13px; color:#94a3b8; line-height:1.5;">
+                        Dành cho các bé thay lông đầu đời hoặc điều trị nấm da, cạo sạch kẽ bàn chân chống trơn trượt khi di chuyển.
+                    </div>
+                    <div class="spa-price-tiers">
+                        <span class="spa-tier-pill tier-small">&lt; 5kg: 180.000đ</span>
+                        <span class="spa-tier-pill tier-medium">5 – 10kg: 216.000đ</span>
+                        <span class="spa-tier-pill tier-large">&gt; 10kg: 252.000đ</span>
+                    </div>
                 </div>
-                <div style="font-size:13px; color:#94a3b8; line-height:1.5;">
-                    Dành cho các bé thay lông đầu đời hoặc điều trị nấm da, cạo sạch kẽ bàn chân chống trơn trượt khi di chuyển.
-                </div>
-                <div class="spa-price-tiers">
-                    <span class="spa-tier-pill tier-small">&lt; 5kg: 180.000đ</span>
-                    <span class="spa-tier-pill tier-medium">5 – 10kg: 216.000đ</span>
-                    <span class="spa-tier-pill tier-large">&gt; 10kg: 252.000đ</span>
-                </div>
-            </div>
 
-            <!-- Gói 4 -->
-            <div class="spa-service-item">
-                <div class="spa-service-header">
-                    <span class="spa-service-name">🩺 Khám Sức Khỏe &amp; Tư Vấn Dinh Dưỡng</span>
-                    <span class="badge badge-both">Bác Sĩ Khám</span>
+                <!-- Gói 4 -->
+                <div class="spa-service-item clickable-service-card" data-service-key="Khám sức khỏe &amp; Tư vấn dinh dưỡng" data-base-price="120000" onclick="selectSpaServiceCard(this)">
+                    <div class="spa-service-header">
+                        <span class="spa-service-name">🩺 Khám Sức Khỏe &amp; Tư Vấn Dinh Dưỡng</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <span class="badge badge-both">Bác Sĩ Khám</span>
+                            <span class="service-select-status-badge" style="display:none;">✓ Đang chọn</span>
+                        </div>
+                    </div>
+                    <div style="font-size:13px; color:#94a3b8; line-height:1.5;">
+                        Soi đèn Wood kiểm tra nấm da, kiểm tra răng miệng, tư vấn thực đơn thức ăn hạt, súp thưởng và vitamin chuẩn từng giống.
+                    </div>
+                    <div class="spa-price-tiers">
+                        <span class="spa-tier-pill tier-small">&lt; 5kg: 120.000đ</span>
+                        <span class="spa-tier-pill tier-medium">5 – 10kg: 144.000đ</span>
+                        <span class="spa-tier-pill tier-large">&gt; 10kg: 168.000đ</span>
+                    </div>
                 </div>
-                <div style="font-size:13px; color:#94a3b8; line-height:1.5;">
-                    Soi đèn Wood kiểm tra nấm da, kiểm tra răng miệng, tư vấn thực đơn thức ăn hạt, súp thưởng và vitamin chuẩn từng giống.
-                </div>
-                <div class="spa-price-tiers">
-                    <span class="spa-tier-pill tier-small">&lt; 5kg: 120.000đ</span>
-                    <span class="spa-tier-pill tier-medium">5 – 10kg: 144.000đ</span>
-                    <span class="spa-tier-pill tier-large">&gt; 10kg: 168.000đ</span>
-                </div>
-            </div>
 
-            <!-- Gói 5 -->
-            <div class="spa-service-item" style="margin-bottom:0;">
-                <div class="spa-service-header">
-                    <span class="spa-service-name">🏨 Trông Giữ Thú Cưng (Khách Sạn 1 Ngày)</span>
-                    <span class="badge badge-stock-low">Phòng VIP</span>
-                </div>
-                <div style="font-size:13px; color:#94a3b8; line-height:1.5;">
-                    Phòng riêng điều hòa 24/24, camera theo dõi qua app, ăn 3 bữa pate dinh dưỡng và đi dạo khu vui chơi riêng biệt.
-                </div>
-                <div class="spa-price-tiers">
-                    <span class="spa-tier-pill tier-small">&lt; 5kg: 200.000đ</span>
-                    <span class="spa-tier-pill tier-medium">5 – 10kg: 240.000đ</span>
-                    <span class="spa-tier-pill tier-large">&gt; 10kg: 280.000đ</span>
+                <!-- Gói 5 -->
+                <div class="spa-service-item clickable-service-card" data-service-key="Trông giữ thú cưng (1 ngày)" data-base-price="200000" onclick="selectSpaServiceCard(this)" style="margin-bottom:0;">
+                    <div class="spa-service-header">
+                        <span class="spa-service-name">🏨 Trông Giữ Thú Cưng (Khách Sạn 1 Ngày)</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <span class="badge badge-stock-low">Phòng VIP</span>
+                            <span class="service-select-status-badge" style="display:none;">✓ Đang chọn</span>
+                        </div>
+                    </div>
+                    <div style="font-size:13px; color:#94a3b8; line-height:1.5;">
+                        Phòng riêng điều hòa 24/24, camera theo dõi qua app, ăn 3 bữa pate dinh dưỡng và đi dạo khu vui chơi riêng biệt.
+                    </div>
+                    <div class="spa-price-tiers">
+                        <span class="spa-tier-pill tier-small">&lt; 5kg: 200.000đ</span>
+                        <span class="spa-tier-pill tier-medium">5 – 10kg: 240.000đ</span>
+                        <span class="spa-tier-pill tier-large">&gt; 10kg: 280.000đ</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -156,141 +174,360 @@
         </div>
     </div>
 
-    <!-- Cột phải: Form Đặt lịch Chuyên nghiệp & Dự toán chi phí tự động -->
+    <!-- ================= CỘT PHẢI: FORM ĐẶT LỊCH GỌN GÀNG (2 BƯỚC RÕ RÀNG) ================= -->
     <div>
-        <div class="card" style="border: 1px solid rgba(139,92,246,0.4); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-            <div class="card-header">
+        <div class="card" style="border: 1px solid rgba(139,92,246,0.45); box-shadow: 0 20px 50px rgba(0,0,0,0.5); position:sticky; top:20px;">
+            <div class="card-header" style="margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px;">
                 <div>
-                    <h2 class="card-title">Phiếu Đăng Ký Lịch Hẹn Spa</h2>
-                    <p class="section-subtitle">Điền thông tin bên dưới để giữ chỗ và nhận email xác nhận tức thì</p>
+                    <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); font-size:11.5px; font-weight:800; color:#34d399; margin-bottom:6px;">
+                        <span>⚡ ĐẶT LỊCH NHANH TRONG 20 GIÂY</span>
+                    </div>
+                    <h2 class="card-title" style="font-size:20px;">2. Phiếu Đăng Ký Lịch Hẹn Spa</h2>
+                    <p class="section-subtitle" style="margin:0;">Điền nhanh vài thông tin cơ bản để giữ chỗ &amp; nhận vé điện tử</p>
                 </div>
             </div>
 
-            <form method="POST" action="{{ url_for('spa_page') }}">
+            <form method="POST" action="{{ url_for('spa_page') }}" id="spaBookingForm">
                 <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}">
 
-                <div class="grid-2" style="gap:14px;">
-                    <div class="form-group">
-                        <label class="form-label">Họ tên chủ nuôi (*)</label>
-                        <input type="text" name="customer_name" value="{{ form.raw_data.get('customer_name', '') }}" minlength="2" maxlength="80" class="form-control" placeholder="VD: Nguyễn Minh Anh" required>
-                        {% for err in form.errors.get('customer_name', []) %}
-                            <div class="form-error">{{ err }}</div>
-                        {% endfor %}
+                <!-- ================= BƯỚC 1: THÔNG TIN BÉ CƯNG ================= -->
+                <div class="spa-form-section">
+                    <div class="spa-form-section-title">
+                        <span class="spa-step-num">1</span>
+                        <span>🐾 Thông Tin Bé Cưng &amp; Gói Dịch Vụ</span>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Số điện thoại liên hệ (*) (9-11 số)</label>
-                        <input type="tel" name="phone" value="{{ form.raw_data.get('phone', '') }}" pattern="^0[0-9]{8,10}$" minlength="9" maxlength="11" title="Số điện thoại bắt đầu bằng số 0 và gồm 9-11 chữ số" class="form-control" placeholder="VD: 0905123456" required>
-                        {% for err in form.errors.get('phone', []) %}
-                            <div class="form-error">{{ err }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Địa chỉ Email nhận phiếu xác nhận hệ thống</label>
-                    <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" maxlength="120" class="form-control" placeholder="VD: minhanh@gmail.com">
-                    {% for err in form.errors.get('email', []) %}
-                        <div class="form-error">{{ err }}</div>
-                    {% endfor %}
-                </div>
-
-                <div class="grid-3" style="gap:12px;">
-                    <div class="form-group">
-                        <label class="form-label">Tên bé cưng (*)</label>
-                        <input type="text" name="pet_name" value="{{ form.raw_data.get('pet_name', '') }}" minlength="1" maxlength="50" class="form-control" placeholder="VD: Mochi" required>
-                        {% for err in form.errors.get('pet_name', []) %}
-                            <div class="form-error">{{ err }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Loài (*)</label>
-                        <select name="pet_type" class="form-control" required>
-                            <option value="Mèo" {% if form.raw_data.get('pet_type') == 'Mèo' %}selected{% endif %}>🐱 Mèo</option>
-                            <option value="Chó" {% if form.raw_data.get('pet_type') == 'Chó' %}selected{% endif %}>🐶 Chó</option>
+                    <!-- Gói dịch vụ đã chọn (hiển thị trực quan, có dropdown ẩn/đồng bộ) -->
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>Gói dịch vụ đã chọn (*)</span>
+                            <span style="font-size:11px; color:#c4b5fd; font-weight:600;">(Chạm gói bên trái để đổi nhanh)</span>
+                        </label>
+                        <select id="spaServiceSelect" name="service_name" class="form-control" style="font-weight:700; color:#ffffff;" required onchange="syncServiceCardWithSelect(this.value)">
+                            {% for s_name, s_price in spa_services.items() %}
+                            <option value="{{ s_name }}" data-base="{{ s_price }}" {% if (form.raw_data.get('service_name') == s_name) or (not form.raw_data.get('service_name') and loop.first) %}selected{% endif %}>
+                                {{ s_name }} (Giá chuẩn: {{ "{:,.0f}".format(s_price) }}đ)
+                            </option>
+                            {% endfor %}
                         </select>
+                        {% for err in form.errors.get('service_name', []) %}
+                            <div class="form-error">{{ err }}</div>
+                        {% endfor %}
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Cân nặng (kg) (*)</label>
-                        <input type="number" id="spaWeightInput" name="pet_weight_kg" value="{{ form.raw_data.get('pet_weight_kg', '4.0') }}" step="0.1" min="0.2" max="80" class="form-control" required>
+                    <!-- Hàng: Tên bé cưng + Chọn nhanh Loài (1-click) -->
+                    <div style="display:grid; grid-template-columns: 1fr 150px; gap:12px; margin-bottom:12px;">
+                        <div class="form-group" style="margin:0;">
+                            <label class="form-label">Tên bé cưng (*)</label>
+                            <input type="text" id="spaPetNameInput" name="pet_name" value="{{ form.raw_data.get('pet_name', '') }}" minlength="1" maxlength="50" class="form-control" placeholder="VD: Mochi, Bơ..." required oninput="updateLiveTicketPreview()">
+                            {% for err in form.errors.get('pet_name', []) %}
+                                <div class="form-error">{{ err }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- 1-Click Pet Type Switcher Buttons -->
+                        <div class="form-group" style="margin:0;">
+                            <label class="form-label">Loài (*)</label>
+                            <div style="display:flex; gap:6px;">
+                                <input type="hidden" id="spaPetTypeInput" name="pet_type" value="{{ form.raw_data.get('pet_type', 'Mèo') }}">
+                                <button type="button" class="pet-type-toggle-btn {% if form.raw_data.get('pet_type', 'Mèo') == 'Mèo' %}active{% endif %}" id="btnTypeCat" onclick="setPetType('Mèo')">
+                                    🐱 Mèo
+                                </button>
+                                <button type="button" class="pet-type-toggle-btn {% if form.raw_data.get('pet_type') == 'Chó' %}active{% endif %}" id="btnTypeDog" onclick="setPetType('Chó')">
+                                    🐶 Chó
+                                </button>
+                            </div>
+                            {% for err in form.errors.get('pet_type', []) %}
+                                <div class="form-error">{{ err }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Cân nặng bé cưng với 3 nút Preset nhanh -->
+                    <div class="form-group" style="margin-bottom:0;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <label class="form-label" style="margin:0;">Cân nặng (kg) (*)</label>
+                            <div style="display:flex; gap:5px;">
+                                <button type="button" class="quick-chip-btn" onclick="setWeightPreset(3.5)">&lt; 5kg</button>
+                                <button type="button" class="quick-chip-btn" onclick="setWeightPreset(6.5)">5-10kg</button>
+                                <button type="button" class="quick-chip-btn" onclick="setWeightPreset(12.0)">&gt; 10kg</button>
+                            </div>
+                        </div>
+                        <input type="number" id="spaWeightInput" name="pet_weight_kg" value="{{ form.raw_data.get('pet_weight_kg', '4.0') }}" step="0.1" min="0.2" max="80" class="form-control" required oninput="calcPreviewSpaFee()">
                         {% for err in form.errors.get('pet_weight_kg', []) %}
                             <div class="form-error">{{ err }}</div>
                         {% endfor %}
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Gói dịch vụ đăng ký (*)</label>
-                    <select id="spaServiceSelect" name="service_name" class="form-control" required>
-                        {% for s_name, s_price in spa_services.items() %}
-                        <option value="{{ s_name }}" data-base="{{ s_price }}" {% if form.raw_data.get('service_name') == s_name %}selected{% endif %}>
-                            {{ s_name }} (Giá gốc &lt; 5kg: {{ "{:,.0f}".format(s_price) }}đ)
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
+                <!-- ================= BƯỚC 2: THỜI GIAN & LIÊN HỆ ================= -->
+                <div class="spa-form-section" style="margin-top:14px;">
+                    <div class="spa-form-section-title">
+                        <span class="spa-step-num">2</span>
+                        <span>📅 Thời Gian Hẹn &amp; Nhận Vé Điện Tử</span>
+                    </div>
 
-                <div class="grid-2" style="gap:14px;">
-                    <div class="form-group">
-                        <label class="form-label">Ngày hẹn (*)</label>
-                        <input type="date" name="appointment_date" value="{{ form.raw_data.get('appointment_date', default_date) }}" min="{{ default_date }}" class="form-control" required>
-                        {% for err in form.errors.get('appointment_date', []) %}
+                    <!-- Ngày hẹn & Giờ hẹn (1 hàng) -->
+                    <div class="grid-2" style="gap:12px; margin-bottom:12px;">
+                        <div class="form-group" style="margin:0;">
+                            <label class="form-label">Ngày hẹn (*)</label>
+                            <input type="date" id="spaDateInput" name="appointment_date" value="{{ form.raw_data.get('appointment_date', default_date) }}" min="{{ default_date }}" class="form-control" required onchange="updateLiveTicketPreview()">
+                            {% for err in form.errors.get('appointment_date', []) %}
+                                <div class="form-error">{{ err }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group" style="margin:0;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <label class="form-label" style="margin:0;">Giờ hẹn (*)</label>
+                                <div style="display:flex; gap:4px;">
+                                    <button type="button" class="quick-chip-btn" onclick="setTimePreset('09:30')">09:30</button>
+                                    <button type="button" class="quick-chip-btn" onclick="setTimePreset('14:00')">14:00</button>
+                                    <button type="button" class="quick-chip-btn" onclick="setTimePreset('16:30')">16:30</button>
+                                </div>
+                            </div>
+                            <input type="time" id="spaTimeInput" name="appointment_time" value="{{ form.raw_data.get('appointment_time', '09:30') }}" min="08:00" max="20:30" class="form-control" required onchange="updateLiveTicketPreview()">
+                            {% for err in form.errors.get('appointment_time', []) %}
+                                <div class="form-error">{{ err }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Họ tên & SĐT (1 hàng 2 cột) -->
+                    <div class="grid-2" style="gap:12px; margin-bottom:12px;">
+                        <div class="form-group" style="margin:0;">
+                            <label class="form-label">Họ tên chủ nuôi (*)</label>
+                            <input type="text" name="customer_name" value="{{ form.raw_data.get('customer_name', '') }}" minlength="2" maxlength="80" class="form-control" placeholder="VD: Nguyễn Minh Anh" required>
+                            {% for err in form.errors.get('customer_name', []) %}
+                                <div class="form-error">{{ err }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group" style="margin:0;">
+                            <label class="form-label">Số điện thoại (*)</label>
+                            <input type="tel" name="phone" value="{{ form.raw_data.get('phone', '') }}" pattern="^0[0-9]{8,10}$" minlength="9" maxlength="11" title="Số điện thoại bắt đầu bằng số 0 và gồm 9-11 chữ số" class="form-control" placeholder="VD: 0905123456" required>
+                            {% for err in form.errors.get('phone', []) %}
+                                <div class="form-error">{{ err }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Email nhận vé điện tử -->
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>Địa chỉ Email nhận vé xác nhận</span>
+                            <span style="font-size:11px; color:#34d399; font-weight:600;">✉️ Giao diện vé chuẩn Brand VIP</span>
+                        </label>
+                        <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" maxlength="120" class="form-control" placeholder="VD: minhanh@gmail.com (Không bắt buộc)">
+                        {% for err in form.errors.get('email', []) %}
                             <div class="form-error">{{ err }}</div>
                         {% endfor %}
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Giờ hẹn (08:00 - 20:30) (*)</label>
-                        <input type="time" name="appointment_time" value="{{ form.raw_data.get('appointment_time', '09:30') }}" min="08:00" max="20:30" class="form-control" required>
-                        {% for err in form.errors.get('appointment_time', []) %}
-                            <div class="form-error">{{ err }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Ghi chú tình trạng của bé (Tối đa 300 ký tự)</label>
-                    <input type="text" name="note" value="{{ form.raw_data.get('note', '') }}" maxlength="300" class="form-control" placeholder="Tính cách bé nhút nhát, sợ tiếng sấy, dị ứng xà phòng...">
-                    {% for err in form.errors.get('note', []) %}
-                        <div class="form-error">{{ err }}</div>
-                    {% endfor %}
-                </div>
-
-                <!-- Khung Dự Toán Chi Phí Tự Động Theo Cân Nặng -->
-                <div style="background:linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(255,93,143,0.12) 100%); border:1px solid rgba(139,92,246,0.35); padding:16px 20px; border-radius:18px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <!-- Dặn dò / Ghi chú (Thu gọn thông minh chống rối) -->
                     <div>
-                        <div style="font-size:12.5px; color:#cbd5e1; font-weight:600;">DỰ TOÁN CHI PHÍ TẠM TÍNH:</div>
-                        <div style="font-size:11.5px; color:#a39ecb;">(Tự động điều chỉnh theo cân nặng bé cưng)</div>
+                        <button type="button" class="btn-toggle-note" id="btnToggleNote" onclick="toggleSpaNoteField()">
+                            <span id="noteToggleIcon">{% if form.raw_data.get('note') %}➖{% else %}➕{% endif %}</span>
+                            <span id="noteToggleText">{% if form.raw_data.get('note') %}Thu gọn dặn dò{% else %}Thêm dặn dò đặc biệt cho bé (Tính cách, dị ứng... - Tùy chọn){% endif %}</span>
+                        </button>
+                        <div id="spaNoteWrapper" style="display:{% if form.raw_data.get('note') %}block{% else %}none{% endif %}; margin-top:8px;">
+                            <input type="text" name="note" value="{{ form.raw_data.get('note', '') }}" maxlength="300" class="form-control" placeholder="VD: Bé sợ tiếng sấy mạnh, nhút nhát, có ve rận nhẹ...">
+                            {% for err in form.errors.get('note', []) %}
+                                <div class="form-error">{{ err }}</div>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <strong id="spaPricePreview" style="font-size:24px; color:#34d399; letter-spacing:-0.5px;">150.000 đ</strong>
                 </div>
 
-                <button type="submit" class="btn-add-product-glow" style="width:100%; justify-content:center; padding:13px; font-size:15px;">
-                    🚀 Xác Nhận Đặt Lịch &amp; Nhận Phiếu Xác Nhận Email
+                <!-- ================= KHUNG TÓM TẮT VÉ VÀ DỰ TOÁN ================= -->
+                <div class="spa-live-ticket-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed rgba(255,255,255,0.14); padding-bottom:8px; margin-bottom:8px;">
+                        <div style="font-size:12px; font-weight:800; color:#c4b5fd; text-transform:uppercase; letter-spacing:0.5px;">
+                            🎟️ VÉ HẸN SPA DỰ KIẾN
+                        </div>
+                        <div style="font-size:11px; font-weight:700; color:#34d399; background:rgba(52,211,153,0.15); padding:2px 8px; border-radius:99px;">
+                            ✓ Tự động tính giá
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; font-size:13px; color:#cbd5e1; line-height:1.5;">
+                        <div>
+                            <div><strong id="ticketServiceName" style="color:#ffffff;">Tắm sấy &amp; Vệ sinh tai móng</strong></div>
+                            <div style="font-size:12px; color:#94a3b8;" id="ticketPetSummary">Bé: <span id="summaryPetName">Bé cưng</span> (<span id="summaryPetType">🐱 Mèo</span>, <span id="summaryPetWeight">4.0</span>kg)</div>
+                            <div style="font-size:12px; color:#facc15;" id="ticketTimeSummary">📅 <span id="summaryDate">Hôm nay</span> lúc ⏰ <span id="summaryTime">09:30</span></div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:11px; color:#94a3b8; text-transform:uppercase;">TỔNG TẠM TÍNH:</div>
+                            <div id="spaPricePreview" style="font-size:22px; font-weight:900; color:#34d399; letter-spacing:-0.5px;">150.000 đ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút Submit -->
+                <button type="submit" class="btn-add-product-glow" style="width:100%; justify-content:center; padding:14px; font-size:15px; margin-top:14px;">
+                    🚀 Xác Nhận Đặt Lịch &amp; Nhận Vé Qua Email
                 </button>
+                <div style="text-align:center; margin-top:8px; font-size:11.5px; color:#94a3b8;">
+                    🔒 Giữ chỗ 100% • Miễn phí hủy trước 2 giờ • Không phụ phí phát sinh
+                </div>
             </form>
         </div>
     </div>
 </div>
 
 <script>
+// 1. Đồng bộ thẻ dịch vụ bên trái khi click
+function selectSpaServiceCard(cardEl) {
+    const serviceKey = cardEl.getAttribute("data-service-key");
+    const sel = document.getElementById("spaServiceSelect");
+    if (sel && serviceKey) {
+        sel.value = serviceKey;
+    }
+
+    // Cập nhật trạng thái active & badge
+    document.querySelectorAll(".clickable-service-card").forEach(el => {
+        el.classList.remove("active");
+        const b = el.querySelector(".service-select-status-badge");
+        if (b) b.style.display = "none";
+    });
+
+    cardEl.classList.add("active");
+    const activeBadge = cardEl.querySelector(".service-select-status-badge");
+    if (activeBadge) activeBadge.style.display = "inline-flex";
+
+    calcPreviewSpaFee();
+    updateLiveTicketPreview();
+}
+
+// 2. Đồng bộ ngược khi user đổi select dropdown
+function syncServiceCardWithSelect(val) {
+    document.querySelectorAll(".clickable-service-card").forEach(el => {
+        const isMatch = el.getAttribute("data-service-key") === val;
+        el.classList.toggle("active", isMatch);
+        const b = el.querySelector(".service-select-status-badge");
+        if (b) b.style.display = isMatch ? "inline-flex" : "none";
+    });
+    calcPreviewSpaFee();
+    updateLiveTicketPreview();
+}
+
+// 3. Chọn nhanh loài thú cưng (1 chạm)
+function setPetType(type) {
+    const input = document.getElementById("spaPetTypeInput");
+    if (input) input.value = type;
+
+    const btnCat = document.getElementById("btnTypeCat");
+    const btnDog = document.getElementById("btnTypeDog");
+    if (type === "Mèo") {
+        if (btnCat) btnCat.classList.add("active");
+        if (btnDog) btnDog.classList.remove("active");
+    } else {
+        if (btnCat) btnCat.classList.remove("active");
+        if (btnDog) btnDog.classList.add("active");
+    }
+    updateLiveTicketPreview();
+}
+
+// 4. Chọn nhanh cân nặng preset
+function setWeightPreset(kg) {
+    const input = document.getElementById("spaWeightInput");
+    if (input) {
+        input.value = kg;
+        calcPreviewSpaFee();
+        updateLiveTicketPreview();
+    }
+}
+
+// 5. Chọn nhanh giờ hẹn preset
+function setTimePreset(timeStr) {
+    const input = document.getElementById("spaTimeInput");
+    if (input) {
+        input.value = timeStr;
+        updateLiveTicketPreview();
+    }
+}
+
+// 6. Thu gọn / mở rộng ghi chú dặn dò
+function toggleSpaNoteField() {
+    const wrapper = document.getElementById("spaNoteWrapper");
+    const icon = document.getElementById("noteToggleIcon");
+    const text = document.getElementById("noteToggleText");
+    if (!wrapper) return;
+    if (wrapper.style.display === "none" || wrapper.style.display === "") {
+        wrapper.style.display = "block";
+        if (icon) icon.textContent = "➖";
+        if (text) text.textContent = "Thu gọn dặn dò";
+    } else {
+        wrapper.style.display = "none";
+        if (icon) icon.textContent = "➕";
+        if (text) text.textContent = "Thêm dặn dò đặc biệt cho bé (Tính cách, dị ứng... - Tùy chọn)";
+    }
+}
+
+// 7. Tính phí Spa tự động theo cân nặng
 function calcPreviewSpaFee() {
     const sel = document.getElementById("spaServiceSelect");
     if (!sel || sel.selectedIndex < 0) return;
     const opt = sel.options[sel.selectedIndex];
     const base = parseFloat(opt.getAttribute("data-base") || "150000");
-    const weight = parseFloat(document.getElementById("spaWeightInput").value || "4");
+    const weightInput = document.getElementById("spaWeightInput");
+    const weight = parseFloat(weightInput ? weightInput.value || "4" : "4");
+
     let mult = 1.0;
     if (weight > 10) mult = 1.4;
     else if (weight >= 5) mult = 1.2;
+
     const total = Math.round(base * mult);
-    document.getElementById("spaPricePreview").textContent = total.toLocaleString("vi-VN") + " đ";
+    const formatted = total.toLocaleString("vi-VN") + " đ";
+    const previewEl = document.getElementById("spaPricePreview");
+    if (previewEl) previewEl.textContent = formatted;
 }
-document.getElementById("spaServiceSelect").addEventListener("change", calcPreviewSpaFee);
-document.getElementById("spaWeightInput").addEventListener("input", calcPreviewSpaFee);
-calcPreviewSpaFee();
+
+// 8. Cập nhật vé tóm tắt trực quan
+function updateLiveTicketPreview() {
+    const sel = document.getElementById("spaServiceSelect");
+    const petNameInput = document.getElementById("spaPetNameInput");
+    const petTypeInput = document.getElementById("spaPetTypeInput");
+    const weightInput = document.getElementById("spaWeightInput");
+    const dateInput = document.getElementById("spaDateInput");
+    const timeInput = document.getElementById("spaTimeInput");
+
+    const tService = document.getElementById("ticketServiceName");
+    if (tService && sel && sel.selectedIndex >= 0) {
+        tService.textContent = sel.options[sel.selectedIndex].value;
+    }
+
+    const sPetName = document.getElementById("summaryPetName");
+    if (sPetName) {
+        sPetName.textContent = (petNameInput && petNameInput.value.trim()) ? petNameInput.value.trim() : "Bé cưng";
+    }
+
+    const sPetType = document.getElementById("summaryPetType");
+    if (sPetType && petTypeInput) {
+        sPetType.textContent = petTypeInput.value === "Chó" ? "🐶 Chó" : "🐱 Mèo";
+    }
+
+    const sPetWeight = document.getElementById("summaryPetWeight");
+    if (sPetWeight && weightInput) {
+        sPetWeight.textContent = weightInput.value || "4.0";
+    }
+
+    const sDate = document.getElementById("summaryDate");
+    if (sDate && dateInput) {
+        sDate.textContent = dateInput.value || "Hôm nay";
+    }
+
+    const sTime = document.getElementById("summaryTime");
+    if (sTime && timeInput) {
+        sTime.textContent = timeInput.value || "09:30";
+    }
+}
+
+// Khởi chạy khi load trang
+document.addEventListener("DOMContentLoaded", function() {
+    const sel = document.getElementById("spaServiceSelect");
+    if (sel) syncServiceCardWithSelect(sel.value);
+    calcPreviewSpaFee();
+    updateLiveTicketPreview();
+});
 </script>
 {% endblock %}
-

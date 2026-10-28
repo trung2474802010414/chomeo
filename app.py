@@ -39,7 +39,14 @@ from models.booking import SPA_SERVICES, SpaBooking
 from models.email_log import EmailLog
 from models.order import Order
 from models.product import CATEGORIES, CAT_BREEDS, DOG_BREEDS, Product
-from services.email_service import send_booking_confirmation_email
+from services.email_service import (
+    build_booking_html_email,
+    build_marketing_html_email,
+    build_order_html_email,
+    send_and_log_email,
+    send_booking_confirmation_email,
+    send_order_confirmation_email,
+)
 from services.network_service import (
     export_products_to_xml,
     fetch_pet_breeds_via_urllib,
@@ -768,15 +775,9 @@ def admin_send_marketing_email():
         flash("Vui lòng nhập đầy đủ Email người nhận hợp lệ, Tiêu đề và Nội dung chương trình khuyến mãi.", "error")
         return redirect(url_for("admin_page", tab="spa_pricing"))
 
-    log = EmailLog(
-        recipient=recipient,
-        subject=subject,
-        body=body,
-        delivery_status="Đã gửi (Chiến dịch Marketing VIP)",
-        created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    )
-    log.save()
-    flash(f"Đã phát hành Email ưu đãi VIP tới '{recipient}' và lưu vào Hộp thư hệ thống!", "success")
+    html_body = build_marketing_html_email(recipient, subject, body)
+    send_and_log_email(recipient, subject, body, html_body=html_body)
+    flash(f"Đã phát hành Email ưu đãi VIP chuẩn Brand tới '{recipient}' và lưu vào Hộp thư hệ thống!", "success")
     return redirect(url_for("admin_page", tab="spa_pricing"))
 
 
@@ -786,6 +787,44 @@ def admin_resync_seed():
     init_db_and_seed()
     flash("Đã đồng bộ và kiểm tra toàn bộ 42 sản phẩm chuẩn trong SEED_CATALOG thành công!", "success")
     return redirect(url_for("admin_page", tab="system_settings"))
+
+
+@app.route("/admin/emails/preview-sample/<sample_type>")
+@admin_required
+def admin_email_preview_sample(sample_type: str):
+    """Xem trực quan giao diện HTML Email gửi cho khách hàng chuẩn Brand Meow & Woof."""
+    if sample_type == "spa":
+        sample_data = {
+            "id": 108,
+            "customer_name": "Nguyễn Minh Anh",
+            "pet_name": "Mochi",
+            "pet_type": "Mèo",
+            "pet_weight_kg": "4.2",
+            "service_name": "Cắt tỉa & Tạo kiểu lông (Grooming)",
+            "appointment_date": "2026-10-29",
+            "appointment_time": "09:30",
+            "total_price": 280000,
+            "note": "Bé nhút nhát, sợ tiếng sấy to",
+        }
+        return Response(build_booking_html_email(sample_data), mimetype="text/html; charset=utf-8")
+    elif sample_type == "order":
+        sample_data = {
+            "id": 204,
+            "customer_name": "Trần Hải Đăng",
+            "phone": "0905123456",
+            "address": "123 Nguyễn Văn Linh, Q. Hải Châu, TP. Đà Nẵng",
+            "created_at": "2026-10-28 15:30:00",
+            "total_amount": 560000,
+            "items": [
+                {"name": "Hạt Royal Canin British Shorthair 2kg", "quantity": 1, "price": 420000, "subtotal": 420000},
+                {"name": "Pate Ciao Churu Cá Hồi Gói 4 Tuýp", "quantity": 2, "price": 70000, "subtotal": 140000},
+            ],
+        }
+        return Response(build_order_html_email(sample_data), mimetype="text/html; charset=utf-8")
+    else:
+        sample_body = "Cảm ơn bạn đã đồng hành cùng Meow & Woof Pet House!\nTặng bạn mã giảm giá 20% cho toàn bộ dịch vụ Spa và phụ kiện thú cưng trong tuần lễ khai trương cơ sở mới."
+        return Response(build_marketing_html_email("khachhang@vip.com", "[Meow & Woof] Tri ân khách hàng thân thiết", sample_body), mimetype="text/html; charset=utf-8")
+
 
 
 # ============================================================================

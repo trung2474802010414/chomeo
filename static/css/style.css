@@ -3130,3 +3130,153 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     color: #c4b5fd;
     margin: 2px 3px 2px 0;
 }
+
+/* ==========================================================================
+   GIAO DIỆN SPA STREAMLINED & THÔNG MINH (CHỐNG RỐI, 2 BƯỚC RÕ RÀNG)
+   ========================================================================== */
+.clickable-service-card {
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    user-select: none;
+}
+
+.clickable-service-card:hover {
+    border-color: rgba(168, 85, 247, 0.5) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+}
+
+.clickable-service-card.active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.22) 0%, rgba(236, 72, 153, 0.16) 100%) !important;
+    border: 1.5px solid #a855f7 !important;
+    box-shadow: 0 0 25px rgba(168, 85, 247, 0.35) !important;
+}
+
+.service-select-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+}
+
+.spa-form-section {
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 16px 18px;
+    transition: border-color 0.2s ease;
+}
+
+.spa-form-section:hover {
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+.spa-form-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 14px;
+    letter-spacing: -0.2px;
+}
+
+.spa-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 900;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.5);
+}
+
+.pet-type-toggle-btn {
+    flex: 1;
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.pet-type-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.pet-type-toggle-btn.active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(236, 72, 153, 0.3) 100%) !important;
+    border: 1.5px solid #ec4899 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 14px rgba(236, 72, 153, 0.35) !important;
+    font-weight: 800;
+}
+
+.quick-chip-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2.5px 9px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.quick-chip-btn:hover {
+    background: rgba(139, 92, 246, 0.25);
+    border-color: #8b5cf6;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.btn-toggle-note {
+    background: transparent;
+    border: none;
+    padding: 4px 0;
+    color: #c4b5fd;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-toggle-note:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.spa-live-ticket-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(255, 93, 143, 0.12) 100%);
+    border: 1.5px dashed rgba(139, 92, 246, 0.45);
+    border-radius: 18px;
+    padding: 14px 18px;
+    margin-top: 16px;
+}
+
