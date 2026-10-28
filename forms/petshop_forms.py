@@ -160,6 +160,9 @@ class CheckoutForm(BaseFlaskForm):
             if len(email) > 120 or not re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", email):
                 self.add_error("email", "Địa chỉ Email nhận hóa đơn không đúng định dạng.")
 
+        payment_method = str(self.raw_data.get("payment_method", "cod")).strip()
+        note = str(self.raw_data.get("note", "")).strip()
+
         if len(address) < 6 or len(address) > 250:
             self.add_error("address", "Địa chỉ giao hàng phải từ 6 đến 250 ký tự (Số nhà, đường, phường/xã, quận/huyện).")
 
@@ -168,6 +171,8 @@ class CheckoutForm(BaseFlaskForm):
             "phone": phone,
             "email": email,
             "address": address,
+            "payment_method": payment_method or "cod",
+            "note": note,
         }
 
 

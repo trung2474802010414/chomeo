@@ -98,6 +98,43 @@ def save_smtp_credentials(smtp_user: str, smtp_pass: str, smtp_host: str = "smtp
     os.environ["SMTP_PORT"] = str(data["smtp_port"])
 
 
+def get_admin_notification_email() -> str:
+    """Lấy địa chỉ Email nhận thông báo của Admin (có thể tùy chỉnh trong trang Quản trị)."""
+    admin_mail = os.environ.get("ADMIN_NOTIFICATION_EMAIL", "").strip()
+    cfg_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "admin_settings.json")
+    if not admin_mail and os.path.exists(cfg_path):
+        try:
+            with open(cfg_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                admin_mail = data.get("admin_notification_email", "").strip()
+        except Exception:
+            pass
+    if not admin_mail:
+        creds = get_smtp_credentials()
+        admin_mail = creds.get("smtp_user") or "admin@meowandwoof.vn"
+    return admin_mail
+
+
+def set_admin_notification_email(email_addr: str) -> None:
+    """Lưu địa chỉ Email nhận thông báo của Admin vào file data/admin_settings.json."""
+    clean_mail = email_addr.strip()
+    cfg_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+    os.makedirs(cfg_dir, exist_ok=True)
+    cfg_path = os.path.join(cfg_dir, "admin_settings.json")
+    data = {}
+    if os.path.exists(cfg_path):
+        try:
+            with open(cfg_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            data = {}
+    data["admin_notification_email"] = clean_mail
+    with open(cfg_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    os.environ["ADMIN_NOTIFICATION_EMAIL"] = clean_mail
+
+
 def send_test_email(recipient: str) -> Dict[str, Any]:
     """Gửi email HTML kiểm tra kết nối SMTP tới Gmail của người dùng."""
     subject = "[Meow & Woof] Kiểm tra kết nối SMTP gửi Email thành công! 🎉"
@@ -412,43 +449,85 @@ def send_and_log_email(
 
 
 def send_order_confirmation_email(order_dict: Dict[str, Any]) -> Dict[str, Any]:
-    """Soạn và gửi email xác nhận đơn mua hàng tại Meow & Woof Pet Shop (HTML + Text fallback)."""
+    """Soạn và gửi email xác nhận đơn mua hàng (Gửi trực tiếp cho Admin & Khách hàng)."""
     items_lines = "\n".join(
         f"  - {item['name']} (SL: {item['quantity']} x {item['price']:,.0f}đ) = {item['subtotal']:,.0f}đ"
         for item in order_dict.get("items", [])
     )
-    subject = f"[Meow & Woof] Xác nhận đơn hàng #{order_dict.get('id')} - {order_dict.get('customer_name')}"
-    body = (
-        f"Xin chào {order_dict.get('customer_name')},\n\n"
-        f"Cảm ơn bạn đã mua sắm tại Meow & Woof Pet Shop!\n"
-        f"Mã đơn hàng: #{order_dict.get('id')}\n"
-        f"Số điện thoại nhận hàng: {order_dict.get('phone')}\n"
-        f"Địa chỉ giao hàng: {order_dict.get('address')}\n\n"
+    admin_email = get_admin_notification_email()
+    cust_email = (order_dict.get("email") or "").strip()
+    total_fmt = f"{order_dict.get('total_amount', 0):,.0f}"
+
+    subject_admin = f"🔔 [ĐƠN HÀNG MỚI #{order_dict.get('id')}] Khách {order_dict.get('customer_name')} ({order_dict.get('phone')}) - {total_fmt}đ"
+    body_admin = (
+        f"🔔 THÔNG BÁO QUẢN TRỊ VIÊN:\n"
+        f"Có đơn hàng mới #{order_dict.get('id')} vừa được đặt trên website Meow & Woof!\n\n"
+        f"👤 Khách hàng: {order_dict.get('customer_name')}\n"
+        f"📞 Điện thoại: {order_dict.get('phone')}\n"
+        f"✉️ Email khách: {cust_email or 'Không cung cấp'}\n"
+        f"🏠 Địa chỉ nhận: {order_dict.get('address')}\n"
+        f"⏰ Thời gian: {order_dict.get('created_at')}\n\n"
         f"Chi tiết sản phẩm:\n{items_lines}\n\n"
-        f"Tổng thanh toán: {order_dict.get('total_amount', 0):,.0f} VNĐ\n"
-        f"Thời gian đặt: {order_dict.get('created_at')}\n\n"
-        f"Trân trọng,\nĐội ngũ Meow & Woof Pet Shop & Spa"
+        f"💰 TỔNG TIỀN: {total_fmt} VNĐ\n"
     )
     html_body = build_order_html_email(order_dict)
-    return send_and_log_email(order_dict.get("email", ""), subject, body, html_body=html_body)
+
+    # 1. Gửi trực tiếp về Email của Admin
+    admin_res = send_and_log_email(admin_email, subject_admin, body_admin, html_body=html_body)
+
+    # 2. Nếu khách có nhập email và khác email admin thì gửi thêm cho khách
+    if cust_email and cust_email.lower() != admin_email.lower():
+        subject_cust = f"[Meow & Woof] Xác nhận đơn hàng #{order_dict.get('id')} - {order_dict.get('customer_name')}"
+        body_cust = (
+            f"Xin chào {order_dict.get('customer_name')},\n\n"
+            f"Cảm ơn bạn đã mua sắm tại Meow & Woof Pet Shop!\n"
+            f"Mã đơn hàng: #{order_dict.get('id')}\n"
+            f"Tổng thanh toán: {total_fmt} VNĐ\n\n"
+            f"Chi tiết sản phẩm:\n{items_lines}\n"
+        )
+        send_and_log_email(cust_email, subject_cust, body_cust, html_body=html_body)
+
+    return admin_res
 
 
 def send_booking_confirmation_email(booking_dict: Dict[str, Any]) -> Dict[str, Any]:
-    """Soạn và gửi email xác nhận lịch hẹn Spa cho thú cưng (HTML chuẩn Brand + Text fallback)."""
-    subject = f"[Meow & Woof Spa] Vé hẹn Spa #{booking_dict.get('id')} cho bé {booking_dict.get('pet_name')}"
-    body = (
-        f"Xin chào {booking_dict.get('customer_name')},\n\n"
-        f"Lịch hẹn chăm sóc thú cưng của bạn tại Meow & Woof Spa đã được ghi nhận:\n"
-        f"  - Mã lịch hẹn: #{booking_dict.get('id')}\n"
-        f"  - Thú cưng: {booking_dict.get('pet_name')} ({booking_dict.get('pet_type')} - {booking_dict.get('pet_weight_kg')}kg)\n"
-        f"  - Gói dịch vụ: {booking_dict.get('service_name')}\n"
-        f"  - Ngày giờ hẹn: {booking_dict.get('appointment_date')} lúc {booking_dict.get('appointment_time')}\n"
-        f"  - Chi phí dự kiến: {booking_dict.get('total_price', 0):,.0f} VNĐ\n"
-        f"  - Ghi chú: {booking_dict.get('note') or 'Không có'}\n\n"
-        f"Vui lòng đưa bé đến trước giờ hẹn 10 phút để kỹ thuật viên đón tiếp chu đáo nhất.\n"
-        f"Trân trọng,\nMeow & Woof Pet Shop & Spa"
+    """Soạn và gửi email xác nhận lịch hẹn Spa (Gửi trực tiếp cho Admin & Khách hàng)."""
+    admin_email = get_admin_notification_email()
+    cust_email = (booking_dict.get("email") or "").strip()
+    total_fmt = f"{booking_dict.get('total_price', 0):,.0f}"
+
+    subject_admin = f"🔔 [LỊCH HẸN SPA MỚI #{booking_dict.get('id')}] Bé {booking_dict.get('pet_name')} - {booking_dict.get('customer_name')} ({booking_dict.get('appointment_date')} {booking_dict.get('appointment_time')})"
+    body_admin = (
+        f"🔔 THÔNG BÁO QUẢN TRỊ VIÊN:\n"
+        f"Có khách vừa đặt lịch Spa chăm sóc thú cưng mới trên website Meow & Woof!\n\n"
+        f"Mã lịch hẹn: #{booking_dict.get('id')}\n"
+        f"👤 Chủ nuôi: {booking_dict.get('customer_name')} (SĐT: {booking_dict.get('phone')})\n"
+        f"✉️ Email khách: {cust_email or 'Không cung cấp'}\n"
+        f"🐾 Thú cưng: {booking_dict.get('pet_name')} ({booking_dict.get('pet_type')} - {booking_dict.get('pet_weight_kg')}kg)\n"
+        f"🛁 Gói dịch vụ: {booking_dict.get('service_name')}\n"
+        f"📅 Thời gian: {booking_dict.get('appointment_date')} lúc {booking_dict.get('appointment_time')}\n"
+        f"💰 Chi phí tạm tính: {total_fmt} VNĐ\n"
+        f"📝 Ghi chú: {booking_dict.get('note') or 'Không có'}\n"
     )
     html_body = build_booking_html_email(booking_dict)
-    return send_and_log_email(booking_dict.get("email", ""), subject, body, html_body=html_body)
+
+    # 1. Gửi trực tiếp về Email của Admin
+    admin_res = send_and_log_email(admin_email, subject_admin, body_admin, html_body=html_body)
+
+    # 2. Nếu khách có nhập email và khác email admin thì gửi thêm cho khách
+    if cust_email and cust_email.lower() != admin_email.lower():
+        subject_cust = f"[Meow & Woof Spa] Vé hẹn Spa #{booking_dict.get('id')} cho bé {booking_dict.get('pet_name')}"
+        body_cust = (
+            f"Xin chào {booking_dict.get('customer_name')},\n\n"
+            f"Lịch hẹn chăm sóc thú cưng của bạn tại Meow & Woof Spa đã được ghi nhận:\n"
+            f"  - Mã lịch hẹn: #{booking_dict.get('id')}\n"
+            f"  - Thú cưng: {booking_dict.get('pet_name')} ({booking_dict.get('pet_type')} - {booking_dict.get('pet_weight_kg')}kg)\n"
+            f"  - Gói dịch vụ: {booking_dict.get('service_name')}\n"
+            f"  - Ngày giờ hẹn: {booking_dict.get('appointment_date')} lúc {booking_dict.get('appointment_time')}\n"
+            f"  - Chi phí dự kiến: {total_fmt} VNĐ\n"
+        )
+        send_and_log_email(cust_email, subject_cust, body_cust, html_body=html_body)
+
+    return admin_res
 
 

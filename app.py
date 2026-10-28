@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import functools
 import json
 import os
+import re
 import sys
 from typing import Any, Callable, Dict, List, Tuple
 
@@ -39,16 +40,19 @@ from models.booking import SPA_SERVICES, SpaBooking
 from models.email_log import EmailLog
 from models.order import Order
 from models.product import CATEGORIES, CAT_BREEDS, DOG_BREEDS, Product
+from models.user import User, hash_password
 from services.email_service import (
     build_booking_html_email,
     build_marketing_html_email,
     build_order_html_email,
+    get_admin_notification_email,
     get_smtp_credentials,
     save_smtp_credentials,
     send_and_log_email,
     send_booking_confirmation_email,
     send_order_confirmation_email,
     send_test_email,
+    set_admin_notification_email,
 )
 from services.network_service import (
     export_products_to_xml,
@@ -136,13 +140,17 @@ def build_cart_view_data() -> Tuple[List[Dict[str, Any]], float, int]:
 
 @app.context_processor
 def inject_global_template_vars() -> Dict[str, Any]:
-    """Tự động truyền số lượng món trong giỏ hàng, trạng thái Admin và danh sách Giống chó/mèo vào mọi template Jinja2."""
+    """Tự động truyền số lượng giỏ hàng, trạng thái Admin & Khách hàng vào mọi template Jinja2."""
     cart_map = get_session_cart()
     count = sum(max(0, int(v)) for v in cart_map.values() if isinstance(v, (int, str)) and str(v).isdigit())
     return {
         "cart_count": count,
         "is_admin": bool(session.get("admin_logged_in")),
         "admin_user": session.get("admin_user", "admin"),
+        "customer_logged_in": bool(session.get("customer_logged_in")),
+        "customer_name": session.get("customer_name", ""),
+        "customer_email": session.get("customer_email", ""),
+        "customer_phone": session.get("customer_phone", ""),
         "global_dog_breeds": DOG_BREEDS,
         "global_cat_breeds": CAT_BREEDS,
     }
@@ -534,30 +542,100 @@ def import_xml_route():
 
 @app.route("/login", methods=["GET", "POST"])
 def login_page():
-    """Trang Đăng nhập Quản trị viên (Admin Login)."""
+    """Trang Đăng nhập Quản trị viên (Admin) & Đăng nhập/Đăng ký Thành viên Khách hàng."""
     if session.get("admin_logged_in"):
         return redirect(url_for("admin_page", tab="dashboard"))
+    if session.get("customer_logged_in"):
+        return redirect(url_for("shop_page"))
 
     form = AdminLoginForm()
     next_url = request.args.get("next") or request.form.get("next") or url_for("admin_page", tab="dashboard")
 
     if request.method == "POST":
-        if form.validate_on_submit():
+        auth_action = request.form.get("auth_action", "login").strip()
+
+        # 1. Xử lý ĐĂNG KÝ THÀNH VIÊN MỚI
+        if auth_action == "register":
+            fullname = request.form.get("reg_fullname", "").strip()
+            username = request.form.get("reg_username", "").strip()
+            email = request.form.get("reg_email", "").strip()
+            phone = request.form.get("reg_phone", "").strip()
+            password = request.form.get("reg_password", "").strip()
+            confirm_pass = request.form.get("reg_confirm_password", "").strip()
+
+            if len(fullname) < 2 or len(fullname) > 80:
+                flash("Họ và tên phải từ 2 đến 80 ký tự.", "error")
+            elif len(username) < 3 or len(username) > 40:
+                flash("Tên đăng nhập phải từ 3 đến 40 ký tự.", "error")
+            elif not re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", email):
+                flash("Địa chỉ Email không đúng định dạng.", "error")
+            elif not re.match(r"^0\d{8,10}$", phone):
+                flash("Số điện thoại phải bắt đầu bằng số 0 và gồm 9–11 chữ số.", "error")
+            elif len(password) < 6:
+                flash("Mật khẩu phải có tối thiểu 6 ký tự.", "error")
+            elif password != confirm_pass:
+                flash("Mật khẩu xác nhận không khớp.", "error")
+            else:
+                existing = User.find_by_identifier(username) or User.find_by_identifier(email)
+                if existing:
+                    flash(f"Tên đăng nhập '{username}' hoặc Email '{email}' đã được đăng ký. Vui lòng đăng nhập hoặc dùng tên khác.", "error")
+                else:
+                    new_user = User(
+                        username=username,
+                        fullname=fullname,
+                        email=email,
+                        phone=phone,
+                        password_hash=hash_password(password),
+                        role="customer",
+                    )
+                    new_user.save()
+                    session.pop("admin_logged_in", None)
+                    session.pop("admin_user", None)
+                    session["customer_logged_in"] = True
+                    session["customer_id"] = new_user.id
+                    session["customer_name"] = new_user.fullname
+                    session["customer_username"] = new_user.username
+                    session["customer_email"] = new_user.email
+                    session["customer_phone"] = new_user.phone
+                    session["user_role"] = "customer"
+                    session.modified = True
+                    flash(f"🎉 Đăng ký thành viên thành công! Xin chào {new_user.fullname}, chúc bạn mua sắm vui vẻ!", "success")
+                    return redirect(url_for("shop_page"))
+
+        # 2. Xử lý ĐĂNG NHẬP (ADMIN HOẶC THÀNH VIÊN)
+        else:
             expected_user = os.environ.get("ADMIN_USER", "admin")
             expected_pass = os.environ.get("ADMIN_PASSWORD", "admin123")
-            username = form.data["username"]
-            password = form.data["password"]
+            input_user = request.form.get("username", "").strip()
+            input_pass = request.form.get("password", "").strip()
 
-            if username == expected_user and password == expected_pass:
+            # A. Kiểm tra tài khoản Quản trị Admin -> Vào Dashboard
+            if input_user == expected_user and input_pass == expected_pass:
+                session.pop("customer_logged_in", None)
                 session["admin_logged_in"] = True
-                session["admin_user"] = username
+                session["admin_user"] = expected_user
+                session["user_role"] = "admin"
                 session.modified = True
-                flash(f"Đăng nhập thành công! Chào mừng Quản trị viên '{username}' đến với Dashboard.", "success")
+                flash(f"Đăng nhập thành công! Chào mừng Quản trị viên '{expected_user}' đến với Dashboard.", "success")
                 return redirect(next_url)
-            else:
-                flash("Tên đăng nhập hoặc mật khẩu không chính xác (Mặc định: admin / admin123).", "error")
-        else:
-            flash("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.", "error")
+
+            # B. Kiểm tra tài khoản Thành viên Khách hàng -> Vào Trang bán hàng
+            customer_user = User.find_by_identifier(input_user)
+            if customer_user and customer_user.verify_password(input_pass):
+                session.pop("admin_logged_in", None)
+                session.pop("admin_user", None)
+                session["customer_logged_in"] = True
+                session["customer_id"] = customer_user.id
+                session["customer_name"] = customer_user.fullname
+                session["customer_username"] = customer_user.username
+                session["customer_email"] = customer_user.email
+                session["customer_phone"] = customer_user.phone
+                session["user_role"] = "customer"
+                session.modified = True
+                flash(f"🎉 Đăng nhập thành công! Xin chào {customer_user.fullname}, chúc bạn mua sắm vui vẻ!", "success")
+                return redirect(url_for("shop_page"))
+
+            flash("Tên đăng nhập hoặc mật khẩu không chính xác (Mặc định Admin: admin / admin123).", "error")
 
     return render_template(
         "login.html",
@@ -569,12 +647,19 @@ def login_page():
 
 @app.route("/logout")
 def logout_page():
-    """Đăng xuất khỏi phiên Quản trị viên."""
+    """Đăng xuất khỏi phiên Quản trị viên hoặc Thành viên."""
     session.pop("admin_logged_in", None)
     session.pop("admin_user", None)
+    session.pop("customer_logged_in", None)
+    session.pop("customer_id", None)
+    session.pop("customer_name", None)
+    session.pop("customer_username", None)
+    session.pop("customer_email", None)
+    session.pop("customer_phone", None)
+    session.pop("user_role", None)
     session.modified = True
-    flash("Đã đăng xuất khỏi tài khoản Quản trị viên.", "success")
-    return redirect(url_for("login_page"))
+    flash("Bạn đã đăng xuất tài khoản thành công.", "success")
+    return redirect(url_for("home_page"))
 
 
 @app.route("/admin")
@@ -655,6 +740,7 @@ def admin_page():
         edit_product=edit_product,
         product_form=ProductForm(),
         smtp_creds=get_smtp_credentials(),
+        admin_notification_email=get_admin_notification_email(),
     )
 
 
@@ -815,6 +901,10 @@ def admin_save_smtp():
         smtp_port = int(smtp_port_raw)
     except ValueError:
         smtp_port = 587
+
+    admin_notify_mail = request.form.get("admin_notification_email", "").strip()
+    if admin_notify_mail:
+        set_admin_notification_email(admin_notify_mail)
 
     save_smtp_credentials(smtp_user, smtp_pass, smtp_host, smtp_port)
 

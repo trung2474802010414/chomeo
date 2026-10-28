@@ -3,31 +3,33 @@
 {% block title %}Giỏ hàng &amp; Thanh toán - Meow &amp; Woof{% endblock %}
 
 {% block content %}
-<div class="section-header">
+<div class="section-header" style="margin-bottom:24px;">
     <div>
         <h1 class="section-title">Giỏ hàng &amp; Thanh toán Đơn hàng</h1>
-        <p class="section-subtitle">Kiểm tra các mặt hàng đã chọn và điền thông tin giao hàng để nhận hóa đơn xác nhận</p>
+        <p class="section-subtitle">Kiểm tra các mặt hàng đã chọn và điền thông tin giao hàng để nhận hóa đơn xác nhận tức thì</p>
     </div>
     <a href="{{ url_for('shop_page') }}" class="btn btn-outline">&larr; Tiếp tục mua sắm</a>
 </div>
 
-<div class="grid-2">
-    <!-- Cột trái: Danh sách món trong giỏ -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Sản phẩm trong giỏ ({{ cart_items|length }} mặt hàng)</h2>
+<div class="grid-2" style="align-items:start; gap:24px;">
+    <!-- ================= CỘT TRÁI: DANH SÁCH MÓN TRONG GIỎ ================= -->
+    <div class="card" style="border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 15px 35px rgba(0,0,0,0.4);">
+        <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:16px;">
+            <h2 class="card-title" style="font-size:18px; color:#ffffff;">📦 Sản phẩm trong giỏ ({{ cart_items|length }} mặt hàng)</h2>
             {% if cart_items %}
-            <form method="POST" action="{{ url_for('clear_cart_route') }}">
-                <button type="submit" class="btn btn-danger btn-sm">Xóa toàn bộ giỏ</button>
+            <form method="POST" action="{{ url_for('clear_cart_route') }}" style="margin:0;">
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn làm trống giỏ hàng?');">
+                    🗑️ Xóa toàn bộ giỏ
+                </button>
             </form>
             {% endif %}
         </div>
 
         {% if cart_items %}
         <div class="table-wrap">
-            <table class="clean-table">
+            <table class="clean-table" style="color:#ffffff;">
                 <thead>
-                    <tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.15); color:#c4b5fd;">
                         <th>Sản phẩm</th>
                         <th class="text-right">Đơn giá</th>
                         <th class="text-center">Số lượng</th>
@@ -36,78 +38,127 @@
                 </thead>
                 <tbody>
                     {% for item in cart_items %}
-                    <tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
                         <td>
-                            <strong>{{ item.name }}</strong>
-                            <div style="font-size:12px; color:var(--text-muted);">Mã: {{ item.sku }} (Kho còn: {{ item.stock }})</div>
+                            <strong style="color:#ffffff; font-size:14.5px;">{{ item.name }}</strong>
+                            <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">Mã SKU: <code style="color:#38bdf8;">{{ item.sku }}</code> (Kho còn: {{ item.stock }})</div>
                         </td>
-                        <td class="text-right">{{ "{:,.0f}".format(item.price) }} đ</td>
+                        <td class="text-right" style="color:#cbd5e1; font-weight:600;">{{ "{:,.0f}".format(item.price) }} đ</td>
                         <td class="text-center">
-                            <div style="display:inline-flex; align-items:center; gap:6px;">
-                                <form method="POST" action="{{ url_for('update_cart_route') }}">
+                            <div style="display:inline-flex; align-items:center; gap:8px;">
+                                <form method="POST" action="{{ url_for('update_cart_route') }}" style="margin:0;">
                                     <input type="hidden" name="product_id" value="{{ item.product_id }}">
                                     <input type="hidden" name="delta" value="-1">
-                                    <button type="submit" class="btn btn-outline btn-sm" style="padding:3px 9px;">-</button>
+                                    <button type="submit" class="btn btn-outline btn-sm" style="padding:2px 8px; font-weight:800; border-radius:8px;">-</button>
                                 </form>
-                                <strong style="min-width:24px;">{{ item.quantity }}</strong>
-                                <form method="POST" action="{{ url_for('update_cart_route') }}">
+                                <strong style="min-width:26px; text-align:center; color:#ffffff; font-size:15px;">{{ item.quantity }}</strong>
+                                <form method="POST" action="{{ url_for('update_cart_route') }}" style="margin:0;">
                                     <input type="hidden" name="product_id" value="{{ item.product_id }}">
                                     <input type="hidden" name="delta" value="1">
-                                    <button type="submit" class="btn btn-outline btn-sm" style="padding:3px 9px;">+</button>
+                                    <button type="submit" class="btn btn-outline btn-sm" style="padding:2px 8px; font-weight:800; border-radius:8px;">+</button>
                                 </form>
                             </div>
                         </td>
-                        <td class="text-right"><strong>{{ "{:,.0f}".format(item.subtotal) }} đ</strong></td>
+                        <td class="text-right"><strong style="color:#34d399; font-size:15.5px;">{{ "{:,.0f}".format(item.subtotal) }} đ</strong></td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <div style="margin-top:20px; padding-top:16px; border-top:2px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:17px; font-weight:700;">Tổng tiền thanh toán:</span>
-            <strong style="font-size:24px; color:var(--primary);">{{ "{:,.0f}".format(cart_total) }} đ</strong>
+        <div style="margin-top:20px; padding:16px 20px; background:linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(236,72,153,0.12) 100%); border:1px dashed rgba(139,92,246,0.4); border-radius:16px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <span style="font-size:14px; font-weight:700; color:#e2e8f0;">TỔNG TIỀN THANH TOÁN:</span>
+                <div style="font-size:11.5px; color:#c4b5fd;">(Đã bao gồm thuế VAT &amp; phí kiểm định thú cưng)</div>
+            </div>
+            <strong style="font-size:26px; font-weight:900; color:#34d399; letter-spacing:-0.5px;">{{ "{:,.0f}".format(cart_total) }} đ</strong>
         </div>
         {% else %}
-        <div class="text-center" style="padding:36px 16px;">
-            <p style="color:var(--text-muted); margin-bottom:16px;">Giỏ hàng của bạn hiện đang trống.</p>
-            <a href="{{ url_for('shop_page') }}" class="btn btn-primary">Chọn sản phẩm tại Cửa hàng</a>
+        <div class="text-center" style="padding:48px 16px;">
+            <div style="font-size:42px; margin-bottom:12px;">🛒</div>
+            <h3 style="color:#ffffff; font-size:18px; margin-bottom:6px;">Giỏ hàng của bạn đang trống</h3>
+            <p style="color:#cbd5e1; margin-bottom:20px; font-size:14px;">Hãy khám phá hàng trăm giống chó mèo và phụ kiện chính hãng tại cửa hàng!</p>
+            <a href="{{ url_for('shop_page') }}" class="btn btn-primary" style="padding:10px 24px; font-weight:800;">🐾 Mua sắm ngay tại Cửa hàng</a>
         </div>
         {% endif %}
     </div>
 
-    <!-- Cột phải: Form thông tin giao hàng -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Thông tin Nhận hàng &amp; Hóa đơn Email</h2>
+    <!-- ================= CỘT PHẢI: FORM GIAO HÀNG & RÀNG BUỘC CHẶT CHẼ ================= -->
+    <div class="card" style="border: 1px solid rgba(139,92,246,0.45); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+        <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:16px;">
+            <div>
+                <h2 class="card-title" style="font-size:18px; color:#ffffff;">📋 Thông Tin Nhận Hàng &amp; Hóa Đơn Email</h2>
+                {% if customer_logged_in %}
+                <div style="display:inline-flex; align-items:center; gap:6px; margin-top:6px; padding:3px 10px; border-radius:99px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.35); font-size:11.5px; font-weight:800; color:#34d399;">
+                    <span>✓ Tự động điền từ tài khoản thành viên ({{ customer_name }})</span>
+                </div>
+                {% else %}
+                <p class="section-subtitle" style="margin:2px 0 0; color:#cbd5e1;">Vui lòng điền đúng thông tin để shop liên hệ giao hàng và gửi hóa đơn</p>
+                {% endif %}
+            </div>
         </div>
 
-        <form method="POST" action="{{ url_for('cart_page') }}">
+        <form method="POST" action="{{ url_for('cart_page') }}" id="checkoutForm">
             <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}">
 
-            <div class="form-group">
-                <label class="form-label">Họ và tên người nhận *</label>
-                <input type="text" name="customer_name" value="{{ form.raw_data.get('customer_name', '') }}" minlength="2" maxlength="80" class="form-control" placeholder="VD: Trần Hoàng Nam" required>
+            <!-- 1. Họ và tên người nhận -->
+            <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" style="color:#f8fafc; font-weight:700;">Họ và tên người nhận (*)</label>
+                <input
+                    type="text"
+                    name="customer_name"
+                    value="{{ form.raw_data.get('customer_name') or (customer_name if customer_logged_in else '') }}"
+                    minlength="2"
+                    maxlength="80"
+                    pattern="^[a-zA-ZÀ-ỹ\s]{2,80}$"
+                    title="Họ và tên chỉ gồm chữ cái tiếng Việt, từ 2 đến 80 ký tự, không chứa số hoặc ký tự đặc biệt"
+                    class="form-control"
+                    placeholder="VD: Nguyễn Minh Anh"
+                    required
+                >
+                <div style="font-size:11.5px; color:#cbd5e1; margin-top:3px;">Chỉ gồm chữ cái tiếng Việt, không chứa chữ số hoặc ký tự lạ.</div>
                 {% for err in form.errors.get('customer_name', []) %}
                     <div class="form-error">{{ err }}</div>
                 {% endfor %}
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Số điện thoại nhận hàng * (9-11 số)</label>
-                <input type="tel" name="phone" value="{{ form.raw_data.get('phone', '') }}" pattern="^0[0-9]{8,10}$" minlength="9" maxlength="11" title="Số điện thoại bắt đầu bằng số 0 và gồm 9-11 chữ số" class="form-control" placeholder="VD: 0988765432" required>
+            <!-- 2. Số điện thoại nhận hàng -->
+            <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" style="color:#f8fafc; font-weight:700;">Số điện thoại nhận hàng (*) (Đúng 10 số)</label>
+                <input
+                    type="tel"
+                    name="phone"
+                    value="{{ form.raw_data.get('phone') or (customer_phone if customer_logged_in else '') }}"
+                    pattern="^0[3|5|7|8|9][0-9]{8}$"
+                    minlength="10"
+                    maxlength="10"
+                    title="Số điện thoại phải gồm đúng 10 chữ số của Việt Nam (bắt đầu bằng 03, 05, 07, 08, 09)"
+                    class="form-control"
+                    placeholder="VD: 0905123456"
+                    required
+                >
+                <div style="font-size:11.5px; color:#cbd5e1; margin-top:3px;">Định dạng chuẩn 10 chữ số (Đầu số di động Việt Nam: 03x, 05x, 07x, 08x, 09x).</div>
                 {% for err in form.errors.get('phone', []) %}
                     <div class="form-error">{{ err }}</div>
                 {% endfor %}
             </div>
 
-            <div class="form-group">
-                <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+            <!-- 3. Địa chỉ Email nhận hóa đơn -->
+            <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" style="display:flex; justify-content:space-between; align-items:center; color:#f8fafc; font-weight:700;">
                     <span>Địa chỉ Email nhận hóa đơn điện tử (*)</span>
                     <span style="font-size:11.5px; color:#34d399; font-weight:700;">✉️ Gửi hóa đơn về Gmail ngay</span>
                 </label>
-                <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" maxlength="120" class="form-control" placeholder="VD: yourname@gmail.com" required>
-                <div style="font-size:12px; color:#94a3b8; margin-top:4px;">
+                <input
+                    type="email"
+                    name="email"
+                    value="{{ form.raw_data.get('email') or (customer_email if customer_logged_in else '') }}"
+                    maxlength="120"
+                    class="form-control"
+                    placeholder="VD: yourname@gmail.com"
+                    required
+                >
+                <div style="font-size:11.5px; color:#cbd5e1; margin-top:3px;">
                     Hóa đơn chi tiết chuẩn Brand Meow &amp; Woof kèm mã đơn hàng sẽ được gửi tự động về hộp thư Gmail của bạn ngay khi bấm Đặt mua!
                 </div>
                 {% for err in form.errors.get('email', []) %}
@@ -115,21 +166,55 @@
                 {% endfor %}
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Địa chỉ giao hàng chi tiết *</label>
-                <input type="text" name="address" value="{{ form.raw_data.get('address', '') }}" minlength="6" maxlength="250" class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." required>
-                {% for err in form.errors.get('address', '') %}
-                {% endfor %}
+            <!-- 4. Địa chỉ giao hàng chi tiết -->
+            <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" style="color:#f8fafc; font-weight:700;">Địa chỉ giao hàng chi tiết (*) (Tối thiểu 10 ký tự)</label>
+                <input
+                    type="text"
+                    name="address"
+                    value="{{ form.raw_data.get('address', '') }}"
+                    minlength="10"
+                    maxlength="250"
+                    class="form-control"
+                    placeholder="VD: Số 123 đường Nguyễn Văn Linh, P. Nam Dương, Q. Hải Châu, Đà Nẵng"
+                    required
+                >
+                <div style="font-size:11.5px; color:#cbd5e1; margin-top:3px;">
+                    Vui lòng ghi rõ số nhà, tên đường, phường/xã, quận/huyện để shipper giao tận tay.
+                </div>
                 {% for err in form.errors.get('address', []) %}
                     <div class="form-error">{{ err }}</div>
                 {% endfor %}
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg btn-block" {% if not cart_items %}disabled{% endif %}>
-                Đặt mua &amp; Gửi Email xác nhận
+            <!-- 5. Phương thức thanh toán (Ràng buộc trực quan) -->
+            <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label" style="color:#f8fafc; font-weight:700;">Phương thức thanh toán (*)</label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <label style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; background:rgba(255,255,255,0.05); border:1.5px solid #8b5cf6; cursor:pointer;">
+                        <input type="radio" name="payment_method" value="cod" checked style="accent-color:#8b5cf6;">
+                        <span style="font-size:13px; font-weight:700; color:#ffffff;">💵 Nhận hàng trả tiền (COD)</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); cursor:pointer;">
+                        <input type="radio" name="payment_method" value="banking" style="accent-color:#8b5cf6;">
+                        <span style="font-size:13px; font-weight:700; color:#ffffff;">💳 Chuyển khoản QR (VietQR)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 6. Ghi chú giao hàng (Tùy chọn) -->
+            <div class="form-group" style="margin-bottom:18px;">
+                <label class="form-label" style="color:#cbd5e1; font-weight:600;">Ghi chú giao hàng (Tùy chọn):</label>
+                <input type="text" name="note" value="{{ form.raw_data.get('note', '') }}" maxlength="200" class="form-control" placeholder="VD: Giao giờ hành chính, gọi trước khi giao 15 phút...">
+            </div>
+
+            <button type="submit" class="btn-add-product-glow" style="width:100%; justify-content:center; padding:14px; font-size:15.5px;" {% if not cart_items %}disabled{% endif %}>
+                🛍️ Đặt Mua &amp; Gửi Thông Báo Đơn Hàng Ngay
             </button>
+            <div style="text-align:center; margin-top:8px; font-size:12px; color:#cbd5e1;">
+                🔒 Bảo hành sức khỏe thú cưng 15 ngày • Đổi trả thức ăn phụ kiện trong 7 ngày
+            </div>
         </form>
     </div>
 </div>
 {% endblock %}
-

@@ -22,6 +22,7 @@ from models.booking import BOOKING_STATUSES, SPA_SERVICES, SpaBooking
 from models.email_log import EmailLog
 from models.order import Order
 from models.product import CATEGORIES, CAT_BREEDS, DOG_BREEDS, PET_TYPES, Product
+from models.user import User
 from services.email_service import (
     send_booking_confirmation_email,
     send_order_confirmation_email,
@@ -511,6 +512,7 @@ def init_db_and_seed() -> None:
     SpaBooking.create_table()
     Order.create_table()
     EmailLog.create_table()
+    User.create_table()
 
     with DatabaseSession() as db:
         for tbl in ("spa_bookings", "orders"):

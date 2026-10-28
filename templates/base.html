@@ -132,9 +132,14 @@
                 <a href="{{ url_for('network_page') }}" class="nav-item {% if active_page == 'network' %}active{% endif %}">Cẩm nang Giống</a>
                 {% if is_admin %}
                     <a href="{{ url_for('admin_page') }}" class="nav-item {% if active_page == 'admin' %}active{% endif %}">Dashboard Quản trị</a>
-                    <a href="{{ url_for('logout_page') }}" class="nav-item" style="color:#ff8fb0;">Đăng xuất ({{ admin_user }})</a>
+                    <a href="{{ url_for('logout_page') }}" class="nav-item" style="color:#ff8fb0;">Đăng xuất (admin)</a>
+                {% elif customer_logged_in %}
+                    <div style="display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:99px; background:linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(236,72,153,0.2) 100%); border:1px solid rgba(139,92,246,0.45); font-size:13px; font-weight:800; color:#ffffff;">
+                        <span>👋 Xin chào, <strong style="color:#fde047;">{{ customer_name }}</strong></span>
+                    </div>
+                    <a href="{{ url_for('logout_page') }}" class="nav-item" style="color:#ff8fb0; font-size:13px;">Đăng xuất</a>
                 {% else %}
-                    <a href="{{ url_for('login_page') }}" class="nav-item {% if active_page == 'login' %}active{% endif %}">Đăng nhập</a>
+                    <a href="{{ url_for('login_page') }}" class="nav-item {% if active_page == 'login' %}active{% endif %}">🔑 Đăng nhập / Đăng ký</a>
                 {% endif %}
                 <a href="{{ url_for('cart_page') }}" class="nav-cart-btn">
                     <span>🛒 Giỏ hàng</span>
