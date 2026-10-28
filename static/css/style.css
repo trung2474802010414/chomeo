@@ -2138,3 +2138,296 @@ body {
     color: #0ca678 !important;
     font-weight: 800;
 }
+
+
+/* ==========================================================================
+   ADMIN V3 — GEN Z DARK GLASS (CHUYÊN NGHIỆP, TRẺ TRUNG, NHẤT QUÁN MỌI TRÌNH DUYỆT)
+   Thiết kế tối có chủ đích (không phụ thuộc chế độ ép nền tối của trình duyệt).
+   ========================================================================== */
+.admin-body {
+    --adm-bg: #0d0a1f;
+    --adm-card: rgba(255, 255, 255, 0.045);
+    --adm-border: rgba(255, 255, 255, 0.09);
+    --adm-ink: #f3f0ff;
+    --adm-muted: #a39ecb;
+    --adm-brand: #8b5cf6;
+    --adm-pink: #ff5d8f;
+    --adm-mint: #34d399;
+    --adm-sun: #fbbf24;
+    --adm-sky: #60a5fa;
+
+    /* Ghi đè biến chung để mọi thành phần cũ tự đổi sang tông tối */
+    --text-main: #f3f0ff;
+    --text-body: #d6d1f5;
+    --text-muted: #a39ecb;
+    --navy: #f3f0ff;
+    --border: rgba(255, 255, 255, 0.09);
+    --bg-soft: rgba(255, 255, 255, 0.06);
+
+    color-scheme: dark;
+    background-color: var(--adm-bg);
+    background-image: none;
+    color: var(--adm-ink);
+    position: relative;
+}
+
+/* Vệt sáng màu trôi chậm phía sau nội dung */
+.admin-body::before,
+.admin-body::after {
+    content: "";
+    position: fixed;
+    width: 520px;
+    height: 520px;
+    border-radius: 50%;
+    filter: blur(110px);
+    opacity: 0.28;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.admin-body::before {
+    background: #8b5cf6;
+    top: -160px;
+    right: -120px;
+    animation: admFloatA 18s ease-in-out infinite alternate;
+}
+
+.admin-body::after {
+    background: #ff5d8f;
+    bottom: -200px;
+    left: 260px;
+    animation: admFloatB 22s ease-in-out infinite alternate;
+}
+
+@keyframes admFloatA { to { transform: translate(-80px, 90px) scale(1.15); } }
+@keyframes admFloatB { to { transform: translate(120px, -70px) scale(1.1); } }
+
+.admin-shell, .admin-sidebar, .admin-main { position: relative; z-index: 1; }
+
+/* ---------- Sidebar ---------- */
+.admin-sidebar {
+    background: rgba(18, 13, 44, 0.78);
+    backdrop-filter: blur(18px);
+    border-right: 1px solid var(--adm-border);
+    box-shadow: none;
+}
+
+.admin-brand-box { border-bottom: 1px solid var(--adm-border); }
+.admin-brand-name { color: #ffffff; }
+.admin-brand-sub { color: var(--adm-muted); }
+.admin-nav-group-title { color: #7d78a8; }
+
+.admin-nav-link {
+    color: var(--adm-muted);
+    border: 1px solid transparent;
+}
+
+.admin-nav-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--adm-border);
+    color: #ffffff;
+}
+
+.admin-nav-link.active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(255, 93, 143, 0.85) 100%);
+    border-color: transparent;
+    box-shadow: 0 8px 26px rgba(139, 92, 246, 0.38);
+    color: #ffffff;
+}
+
+.admin-sidebar-footer { background: rgba(0, 0, 0, 0.25); border-top: 1px solid var(--adm-border); }
+.admin-user-name { color: #ffffff; }
+
+/* ---------- Topbar ---------- */
+.admin-topbar {
+    background: rgba(13, 10, 31, 0.72);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--adm-border);
+}
+
+.admin-page-heading { color: #ffffff; }
+
+.btn-view-site {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--adm-border);
+    color: #ffffff;
+}
+
+.btn-view-site:hover { background: rgba(139, 92, 246, 0.2); border-color: var(--adm-brand); color: #ffffff; }
+
+/* ---------- Banner & thanh kỳ báo cáo ---------- */
+.admin-welcome-banner {
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.22) 0%, rgba(255, 93, 143, 0.18) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    color: #efeaff;
+}
+
+.admin-welcome-close { color: #efeaff; }
+
+.admin-period-bar {
+    background: var(--adm-card);
+    border: 1px solid var(--adm-border);
+    backdrop-filter: blur(10px);
+    box-shadow: none;
+}
+
+.admin-period-bar span { color: var(--adm-muted) !important; }
+
+.period-btn-group { background: rgba(255, 255, 255, 0.06); }
+.period-btn { color: var(--adm-muted); }
+.period-btn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.08); }
+
+.period-btn.active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ff5d8f 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.45);
+}
+
+/* ---------- Thẻ kính mờ ---------- */
+.admin-kpi-card,
+.admin-status-card,
+.admin-body .card {
+    background: var(--adm-card);
+    border: 1px solid var(--adm-border);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+    color: var(--adm-ink);
+}
+
+.admin-kpi-card:hover,
+.admin-status-card:hover {
+    border-color: rgba(139, 92, 246, 0.55);
+    box-shadow: 0 18px 40px rgba(139, 92, 246, 0.22);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.admin-body .card:hover { box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3); }
+
+.kpi-label, .kpi-sub, .status-card-title { color: var(--adm-muted); }
+
+/* Màu số liệu (ghi đè màu inline trong template để đọc rõ trên nền tối) */
+.admin-kpi-grid > .admin-kpi-card:nth-child(1) .kpi-value { color: #34d399 !important; }
+.admin-kpi-grid > .admin-kpi-card:nth-child(2) .kpi-value { color: #a78bfa !important; }
+.admin-kpi-grid > .admin-kpi-card:nth-child(3) .kpi-value { color: #60a5fa !important; }
+.admin-kpi-grid > .admin-kpi-card:nth-child(4) .kpi-value { color: #fbbf24 !important; }
+
+.admin-status-grid > .admin-status-card:nth-child(1) { border-color: rgba(96, 165, 250, 0.55); }
+.admin-status-grid > .admin-status-card:nth-child(2) { border-color: rgba(251, 191, 36, 0.55); }
+.admin-status-grid > .admin-status-card:nth-child(3) { border-color: rgba(255, 93, 143, 0.55); }
+.admin-status-grid > .admin-status-card:nth-child(4) { border-color: rgba(52, 211, 153, 0.55); }
+
+.admin-status-card .status-card-num { color: #ffffff !important; }
+.admin-status-card .status-card-link { color: var(--adm-pink) !important; }
+.admin-status-card div[style*="font-size:12.5px"] { color: var(--adm-muted) !important; }
+
+.kpi-icon-green  { background: rgba(52, 211, 153, 0.16); color: #34d399; }
+.kpi-icon-blue   { background: rgba(167, 139, 250, 0.18); color: #a78bfa; }
+.kpi-icon-cyan   { background: rgba(96, 165, 250, 0.18); color: #60a5fa; }
+.kpi-icon-yellow { background: rgba(251, 191, 36, 0.18); color: #fbbf24; }
+
+/* ---------- Biểu đồ SVG ---------- */
+.admin-charts-grid svg text { fill: var(--adm-muted) !important; }
+.admin-charts-grid svg line[stroke="#e2e8f0"] { stroke: rgba(255, 255, 255, 0.1); }
+.admin-charts-grid svg line[stroke="#cbd5e1"] { stroke: rgba(255, 255, 255, 0.2); }
+.admin-charts-grid svg circle[stroke="#e2e8f0"] { stroke: rgba(255, 255, 255, 0.1); }
+.admin-charts-grid svg path[stroke] { filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.7)); }
+.admin-charts-grid svg text[font-weight="800"] { fill: #ffffff !important; }
+.admin-charts-grid svg text[fill="#334155"] { fill: #d6d1f5 !important; }
+.admin-charts-grid div { color: var(--adm-muted) !important; }
+
+/* ---------- Bảng ---------- */
+.admin-body .clean-table th {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--adm-muted);
+    border-bottom: 1px solid var(--adm-border);
+}
+
+.admin-body .clean-table td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--adm-ink);
+}
+
+.admin-body .clean-table tbody tr:hover { background: rgba(139, 92, 246, 0.1); }
+.admin-body .clean-table td code { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; }
+.admin-body .clean-table td div[style*="color:var(--text-muted)"],
+.admin-body .clean-table td div[style*="font-size:12px"] { color: var(--adm-muted) !important; }
+.admin-body .clean-table td a { color: #ffffff !important; }
+.admin-body .clean-table tr[style*="fff7ed"] { background: rgba(251, 191, 36, 0.12) !important; }
+.admin-body .clean-table td strong[style*="color:#15803d"] { color: #34d399 !important; }
+
+/* ---------- Nút ---------- */
+.admin-body .btn-outline {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    border-color: var(--adm-border);
+}
+
+.admin-body .btn-outline:hover:not(:disabled) {
+    background: rgba(139, 92, 246, 0.22);
+    border-color: var(--adm-brand);
+    color: #ffffff;
+}
+
+.admin-body .btn-danger {
+    background: rgba(255, 93, 143, 0.14);
+    color: #ff8fb0;
+    border-color: rgba(255, 93, 143, 0.35);
+}
+
+.admin-body .btn-danger:hover:not(:disabled) { background: rgba(255, 93, 143, 0.3); color: #ffffff; }
+
+.admin-body .btn-teal { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: #052e22; }
+
+/* ---------- Ô nhập ---------- */
+.admin-body .form-control {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--adm-border);
+    color: #ffffff;
+}
+
+.admin-body .form-control::placeholder { color: #7d78a8; }
+.admin-body .form-control:hover { border-color: rgba(139, 92, 246, 0.5); }
+
+.admin-body .form-control:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--adm-brand);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.22);
+}
+
+.admin-body select.form-control option,
+.admin-body select.form-control optgroup { background: #1a1536; color: #ffffff; }
+
+.admin-body input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.7); cursor: pointer; }
+
+.admin-body .form-label { color: #e4e0ff; }
+.admin-body .form-error { color: #ff8fb0; }
+
+/* Khung tải ảnh & các khối có nền sáng inline */
+.admin-body [style*="background:#f8fafc"],
+.admin-body [style*="background:#fff;"],
+.admin-body [style*="background:#ffffff"] {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: var(--adm-border) !important;
+    color: var(--adm-ink) !important;
+}
+
+.admin-body [style*="color:#475569"],
+.admin-body [style*="color:#94a3b8"] { color: var(--adm-muted) !important; }
+.admin-body [style*="color:#0f172a"] { color: #ffffff !important; }
+.admin-body #form-san-pham { border-color: rgba(139, 92, 246, 0.55) !important; }
+
+/* ---------- Huy hiệu & thông báo ---------- */
+.admin-body .badge-cat { background: rgba(255, 93, 143, 0.16); color: #ff9db9; border-color: rgba(255, 93, 143, 0.3); }
+.admin-body .badge-dog { background: rgba(96, 165, 250, 0.16); color: #93c5fd; border-color: rgba(96, 165, 250, 0.3); }
+.admin-body .badge-both { background: rgba(167, 139, 250, 0.18); color: #c4b5fd; border-color: rgba(167, 139, 250, 0.3); }
+.admin-body .badge-stock-ok { background: rgba(52, 211, 153, 0.16); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.3); }
+.admin-body .badge-stock-low { background: rgba(251, 191, 36, 0.16); color: #fcd34d; border-color: rgba(251, 191, 36, 0.3); }
+.admin-body .badge-stock-out { background: rgba(255, 93, 143, 0.16); color: #ff9db9; border-color: rgba(255, 93, 143, 0.3); }
+
+.admin-body .alert-success { background: rgba(52, 211, 153, 0.14); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.35); }
+.admin-body .alert-error { background: rgba(255, 93, 143, 0.14); color: #ff9db9; border-color: rgba(255, 93, 143, 0.35); }
+
+.admin-body .code-preview { background: rgba(0, 0, 0, 0.35); border: 1px solid var(--adm-border); color: #d6d1f5; }
+.admin-body pre { color: #d6d1f5; }
+.admin-body ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); }
+.admin-body ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.6); }
