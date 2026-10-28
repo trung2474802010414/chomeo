@@ -2431,3 +2431,199 @@ body {
 .admin-body pre { color: #d6d1f5; }
 .admin-body ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); }
 .admin-body ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.6); }
+
+/* ==========================================================================
+   ADMIN: MODAL THÊM / SỬA SẢN PHẨM & BẢNG SẢN PHẨM FULL-WIDTH GEN Z
+   ========================================================================== */
+.admin-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(6, 4, 18, 0.82);
+    backdrop-filter: blur(14px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.admin-modal-backdrop.active {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.admin-modal-card {
+    background: #14102c;
+    background: linear-gradient(145deg, rgba(22, 17, 48, 0.98) 0%, rgba(13, 10, 31, 0.98) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    box-shadow: 0 25px 65px rgba(0, 0, 0, 0.75), 0 0 45px rgba(139, 92, 246, 0.22);
+    border-radius: 26px;
+    width: 100%;
+    max-width: 820px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.94) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-modal-backdrop.active .admin-modal-card {
+    transform: scale(1) translateY(0);
+}
+
+.admin-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-modal-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.3px;
+}
+
+.admin-modal-close-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+
+.admin-modal-close-btn:hover {
+    background: rgba(255, 93, 143, 0.25);
+    border-color: rgba(255, 93, 143, 0.5);
+    color: #ffffff;
+    transform: rotate(90deg);
+}
+
+.admin-modal-body {
+    padding: 24px 28px;
+    overflow-y: auto;
+}
+
+.admin-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 18px 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Thanh công cụ tìm kiếm và lọc danh mục sản phẩm (Table Toolbar) */
+.admin-table-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid var(--adm-border);
+    border-radius: 18px;
+}
+
+.admin-filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.admin-filter-pill {
+    padding: 7px 15px;
+    border-radius: 99px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--adm-muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--adm-border);
+    cursor: pointer;
+    transition: all 0.22s var(--adm-ease);
+}
+
+.admin-filter-pill:hover {
+    background: rgba(139, 92, 246, 0.15);
+    color: #ffffff;
+    border-color: rgba(139, 92, 246, 0.4);
+}
+
+.admin-filter-pill.active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ff5d8f 100%);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+}
+
+/* Nút thêm mới nổi bật (Gradient Glow Button) */
+.btn-add-product-glow {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    color: #ffffff !important;
+    font-weight: 800;
+    font-size: 13.5px;
+    padding: 10px 22px;
+    border-radius: 99px;
+    border: none;
+    box-shadow: 0 6px 22px rgba(139, 92, 246, 0.45);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s var(--adm-ease);
+}
+
+.btn-add-product-glow:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 28px rgba(139, 92, 246, 0.6);
+}
+
+.btn-add-product-glow:active {
+    transform: scale(0.98);
+}
+
+/* Bảng sản phẩm toàn màn hình hiện đại */
+.admin-prod-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.admin-prod-img:hover {
+    transform: scale(1.15) rotate(-3deg);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+}
+
+.admin-actions-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
