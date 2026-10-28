@@ -89,20 +89,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light">
+    <meta name="color-scheme" content="dark">
     <meta name="darkreader-lock">
     <title>{% block title %}Meow &amp; Woof - Cửa hàng &amp; Spa Thú cưng{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <!-- Thanh trạng thái trên cùng -->
+    <!-- Thanh trạng thái trên cùng (Dark Glass Gen Z) -->
     <div class="topbar">
         <div class="container topbar-inner">
-            <span>&#128062; Meow &amp; Woof Pet House &amp; Spa | Mở cửa: 08:00 - 21:00 | Hotline tư vấn: <strong>0905.123.456</strong></span>
+            <span>🐾 <strong>Meow &amp; Woof Pet House &amp; Spa</strong> • Mở cửa: 08:00 – 21:00 • Hotline: <strong>0905.123.456</strong></span>
             <div class="topbar-badges">
-                <span class="clo-pill">&#10003; Bảo hành sức khỏe 15 ngày</span>
-                <span class="clo-pill">&#10003; Sổ tiêm chủng &amp; Tẩy giun đầy đủ</span>
-                <span class="clo-pill">&#128666; Giao hàng tận nơi toàn quốc</span>
+                <span class="clo-pill">🛡️ Bảo hành sức khỏe 15 ngày</span>
+                <span class="clo-pill">💉 Sổ tiêm &amp; Tẩy giun đủ</span>
+                <span class="clo-pill">⚡ Giao hỏa tốc toàn quốc</span>
             </div>
         </div>
     </div>
@@ -113,10 +113,10 @@
             <a href="{{ url_for('home_page') }}" class="brand-link">
                 <div class="brand-icon">
                     <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="11" cy="13" r="3.2" fill="#E05A47"/>
-                        <circle cx="18" cy="10" r="3.2" fill="#E05A47"/>
-                        <circle cx="25" cy="13" r="3.2" fill="#E05A47"/>
-                        <path d="M18 16C13 16 10 20 10 23.5C10 26.2 12.2 28 15 28H21C23.8 28 26 26.2 26 23.5C26 20 23 16 18 16Z" fill="#E05A47"/>
+                        <circle cx="11" cy="13" r="3.2" fill="#ff5d8f"/>
+                        <circle cx="18" cy="10" r="3.2" fill="#ff5d8f"/>
+                        <circle cx="25" cy="13" r="3.2" fill="#ff5d8f"/>
+                        <path d="M18 16C13 16 10 20 10 23.5C10 26.2 12.2 28 15 28H21C23.8 28 26 26.2 26 23.5C26 20 23 16 18 16Z" fill="#ff5d8f"/>
                     </svg>
                 </div>
                 <div>
@@ -132,33 +132,34 @@
                 <a href="{{ url_for('network_page') }}" class="nav-item {% if active_page == 'network' %}active{% endif %}">Cẩm nang Giống</a>
                 {% if is_admin %}
                     <a href="{{ url_for('admin_page') }}" class="nav-item {% if active_page == 'admin' %}active{% endif %}">Dashboard Quản trị</a>
-                    <a href="{{ url_for('logout_page') }}" class="nav-item" style="color:#b91c1c;">Đăng xuất ({{ admin_user }})</a>
+                    <a href="{{ url_for('logout_page') }}" class="nav-item" style="color:#ff8fb0;">Đăng xuất ({{ admin_user }})</a>
                 {% else %}
                     <a href="{{ url_for('login_page') }}" class="nav-item {% if active_page == 'login' %}active{% endif %}">Đăng nhập</a>
                 {% endif %}
                 <a href="{{ url_for('cart_page') }}" class="nav-cart-btn">
-                    <span>Giỏ hàng</span>
+                    <span>🛒 Giỏ hàng</span>
                     <span class="cart-badge" id="navCartCount">{{ cart_count|default(0) }}</span>
                 </a>
             </nav>
         </div>
 
-        <!-- THANH MEGA-MENU XANH NGỌC CHỌN GIỐNG CHÓ CẢNH / MÈO CẢNH / ĐỒ VẬT LIÊN QUAN (GIỐNG HÌNH 2 PETHOUSE) -->
+        <!-- THANH MEGA-MENU CHỌN GIỐNG CHÓ CẢNH / MÈO CẢNH / ĐỒ DÙNG -->
         <div class="mega-nav-bar">
             <div class="container mega-nav-container">
-                <a href="{{ url_for('shop_page') }}" class="mega-trigger">Tất cả thú cưng &amp; Đồ dùng</a>
+                <a href="{{ url_for('shop_page') }}" class="mega-trigger">🐾 Tất cả thú cưng &amp; Đồ dùng</a>
 
                 <!-- Mega-Menu 1: CHÓ CẢNH -->
                 <div class="mega-dropdown">
                     <a href="{{ url_for('shop_page', pet_type='Chó') }}" class="mega-trigger">
-                        <span>&#128054; Chó Cảnh (Chọn giống)</span>
-                        <span>&#9662;</span>
+                        <span>🐶 Chó Cảnh (20 giống)</span>
+                        <span style="font-size:10px; opacity:0.8; margin-left:2px;">▼</span>
                     </a>
                     <div class="mega-panel">
                         <div class="container">
+                            <div style="font-size:12.5px; font-weight:800; color:#a5b4fc; margin-bottom:12px; letter-spacing:0.5px;">🐶 20 GIỐNG CHÓ CẢNH THUẦN CHỦNG TẠI MEOW &amp; WOOF:</div>
                             <div class="mega-grid-3">
                                 {% for br in global_dog_breeds %}
-                                <a href="{{ url_for('shop_page', pet_type='Chó', breed=br) }}" class="mega-breed-link">{{ br }}</a>
+                                <a href="{{ url_for('shop_page', pet_type='Chó', breed=br) }}" class="mega-breed-link">🐾 {{ br }}</a>
                                 {% endfor %}
                             </div>
                         </div>
@@ -168,35 +169,37 @@
                 <!-- Mega-Menu 2: MÈO CẢNH -->
                 <div class="mega-dropdown">
                     <a href="{{ url_for('shop_page', pet_type='Mèo') }}" class="mega-trigger">
-                        <span>&#128049; Mèo Cảnh (Chọn giống)</span>
-                        <span>&#9662;</span>
+                        <span>🐱 Mèo Cảnh (12 giống)</span>
+                        <span style="font-size:10px; opacity:0.8; margin-left:2px;">▼</span>
                     </a>
                     <div class="mega-panel">
                         <div class="container">
+                            <div style="font-size:12.5px; font-weight:800; color:#ff9db9; margin-bottom:12px; letter-spacing:0.5px;">🐱 12 GIỐNG MÈO CẢNH THUẦN CHỦNG TẠI MEOW &amp; WOOF:</div>
                             <div class="mega-grid-3">
                                 {% for br in global_cat_breeds %}
-                                <a href="{{ url_for('shop_page', pet_type='Mèo', breed=br) }}" class="mega-breed-link">{{ br }}</a>
+                                <a href="{{ url_for('shop_page', pet_type='Mèo', breed=br) }}" class="mega-breed-link">🐱 {{ br }}</a>
                                 {% endfor %}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Mega-Menu 3: ĐỒ VẬT, THỨC ĂN & PHỤ KIỆN -->
+                <!-- Mega-Menu 3: ĐỒ DÙNG, THỨC ĂN & PHỤ KIỆN -->
                 <div class="mega-dropdown">
                     <a href="{{ url_for('shop_page', category='Thức ăn') }}" class="mega-trigger">
-                        <span>&#129460; Đồ dùng &amp; Thức ăn</span>
-                        <span>&#9662;</span>
+                        <span>🥩 Đồ Dùng &amp; Thức Ăn</span>
+                        <span style="font-size:10px; opacity:0.8; margin-left:2px;">▼</span>
                     </a>
                     <div class="mega-panel">
                         <div class="container">
+                            <div style="font-size:12.5px; font-weight:800; color:#6ee7b7; margin-bottom:12px; letter-spacing:0.5px;">🥩 MENU DINH DƯỠNG, PHỤ KIỆN &amp; DỊCH VỤ SPA:</div>
                             <div class="mega-grid-3">
-                                <a href="{{ url_for('shop_page', category='Thức ăn') }}" class="mega-breed-link">Thức ăn &amp; Pate Dinh Dưỡng</a>
-                                <a href="{{ url_for('shop_page', category='Phụ kiện') }}" class="mega-breed-link">Phụ kiện, Balo &amp; Dây dắt</a>
-                                <a href="{{ url_for('shop_page', category='Vệ sinh & Chăm sóc') }}" class="mega-breed-link">Cát vệ sinh &amp; Sữa tắm SOS</a>
-                                <a href="{{ url_for('shop_page', category='Đồ chơi') }}" class="mega-breed-link">Đồ chơi, Trụ cào móng &amp; Xương gặm</a>
-                                <a href="{{ url_for('shop_page', category='Y tế & Vitamin') }}" class="mega-breed-link">Thuốc thú y, Nhỏ gáy &amp; Gel Vitamin</a>
-                                <a href="{{ url_for('spa_page') }}" class="mega-breed-link">Đặt lịch Tắm sấy &amp; Grooming Spa</a>
+                                <a href="{{ url_for('shop_page', category='Thức ăn') }}" class="mega-breed-link">🍖 Thức ăn hạt &amp; Pate tươi cao cấp</a>
+                                <a href="{{ url_for('shop_page', category='Phụ kiện') }}" class="mega-breed-link">🎒 Balo phi hành gia &amp; Dây dắt yếm</a>
+                                <a href="{{ url_for('shop_page', category='Vệ sinh & Chăm sóc') }}" class="mega-breed-link">🧼 Cát đậu nành &amp; Sữa tắm SOS</a>
+                                <a href="{{ url_for('shop_page', category='Đồ chơi') }}" class="mega-breed-link">🎾 Trụ cào móng &amp; Đồ chơi nhai gặm</a>
+                                <a href="{{ url_for('shop_page', category='Y tế & Vitamin') }}" class="mega-breed-link">💊 Gel dinh dưỡng &amp; Nhỏ gáy diệt ve</a>
+                                <a href="{{ url_for('spa_page') }}" class="mega-breed-link">✨ Đặt lịch Spa Tắm sấy &amp; Cắt tỉa Teddy</a>
                             </div>
                         </div>
                     </div>

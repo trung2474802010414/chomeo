@@ -7,68 +7,161 @@
 <section class="hero-section">
     <div class="hero-card">
         <div>
-            <span class="hero-eyebrow">&#10024; Trạm Dừng Chân Của Mọi "Con Sen" Chính Hiệu</span>
-            <h1 class="hero-title">Rước "Boss" Xinh Về Nhà &amp; <span class="text-highlight">Spa Chuẩn 5 Sao</span></h1>
+            <span class="hero-eyebrow">✨ Trạm Dừng Chân Của Mọi "Con Sen" Chính Hiệu 🐾</span>
+            <h1 class="hero-title">Rước "Boss" Siêu Xinh &amp; Trải Nghiệm <span class="text-highlight">Spa Chuẩn 5 Sao</span></h1>
             <p class="hero-desc">
-                Thiên đường Chó Mèo cảnh thuần chủng siêu cưng (Schnauzer, Poodle, Corgi, Phốc Sóc, Mèo Anh, Scottish Fold, Munchkin) cùng đầy đủ thức ăn hạt, pate, phụ kiện trendy và dịch vụ Grooming tận tâm.
+                Thiên đường 32 giống Chó &amp; Mèo cảnh thuần chủng thuần khiết (Corgi, Poodle, Schnauzer, ALN, Scottish Fold, Munchkin) cùng đầy đủ thức ăn hạt, pate tươi, súp thưởng và dịch vụ Grooming tận tâm chuẩn Hoàng gia.
             </p>
             <div class="hero-actions">
-                <a href="{{ url_for('shop_page', category='Chó cảnh') }}" class="btn btn-primary btn-lg">&#128054; Chọn Boss Chó</a>
-                <a href="{{ url_for('shop_page', category='Mèo cảnh') }}" class="btn btn-teal btn-lg">&#128049; Chọn Boss Mèo</a>
-                <a href="{{ url_for('spa_page') }}" class="btn btn-outline btn-lg">&#128134; Đặt lịch Spa cho Boss</a>
+                <a href="{{ url_for('shop_page', pet_type='Chó', category='Chó cảnh') }}" class="btn btn-primary btn-lg">🐶 Chọn Boss Chó (20 giống)</a>
+                <a href="{{ url_for('shop_page', pet_type='Mèo', category='Mèo cảnh') }}" class="btn btn-teal btn-lg">🐱 Chọn Boss Mèo (12 giống)</a>
+                <a href="{{ url_for('spa_page') }}" class="btn btn-outline btn-lg">🛁 Đặt lịch Spa 5 Sao</a>
+            </div>
+            <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:24px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.08);">
+                <div style="display:flex; align-items:center; gap:6px; font-size:13px; color:#cbd5e1; font-weight:600;">
+                    <span style="color:#fbbf24;">⭐⭐⭐⭐⭐</span>
+                    <span><strong>4.9/5</strong> (1,500+ Sen tin chọn)</span>
+                </div>
+                <div style="font-size:13px; color:#cbd5e1; font-weight:600;">
+                    🐾 <strong>32 Giống</strong> thuần chủng
+                </div>
+                <div style="font-size:13px; color:#cbd5e1; font-weight:600;">
+                    ⚡ Giao hỏa tốc <strong>2 Giờ</strong>
+                </div>
             </div>
         </div>
 
-        <div class="hero-illustration">
-            <svg width="220" height="170" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="10" y="15" width="220" height="150" rx="22" fill="#FFF5F7" stroke="#FFCCD5" stroke-width="2"/>
-                <path d="M58 68L48 42L72 54H92L116 42L106 68" fill="#FFB3C1" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round"/>
-                <circle cx="82" cy="86" r="30" fill="#FFE3E8" stroke="#E03131" stroke-width="2.5"/>
-                <circle cx="72" cy="81" r="3.5" fill="#18181B"/>
-                <circle cx="92" cy="81" r="3.5" fill="#18181B"/>
-                <path d="M78 90L82 94L86 90" stroke="#E03131" stroke-width="2.5" stroke-linecap="round"/>
-                <ellipse cx="140" cy="75" rx="9" ry="18" transform="rotate(15 140 75)" fill="#12B886"/>
-                <ellipse cx="192" cy="75" rx="9" ry="18" transform="rotate(-15 192 75)" fill="#12B886"/>
-                <circle cx="166" cy="84" r="28" fill="#E6FCF5" stroke="#12B886" stroke-width="2.5"/>
-                <circle cx="156" cy="79" r="3.5" fill="#18181B"/>
-                <circle cx="176" cy="79" r="3.5" fill="#18181B"/>
-                <ellipse cx="166" cy="88" rx="5" ry="3.5" fill="#18181B"/>
-                <text x="120" y="146" text-anchor="middle" fill="#18181B" font-size="14" font-weight="800">Meow &amp; Woof Vibe &#10024;</text>
-            </svg>
+        <!-- Thẻ Thú Cưng Xu Hướng Tương Tác Cực Xinh (Gen Z Spotlight Showcase) -->
+        <div class="hero-pet-spotlight" id="heroPetSpotlight">
+            <div class="spotlight-top-badge">
+                <span class="spotlight-pulse-dot"></span>
+                <span id="spotlightStatusText">🔥 Top 1 Trending Hôm Nay</span>
+            </div>
+
+            <a id="spotlightPetLink" href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Corgi') }}" style="text-decoration:none; display:block;">
+                <div class="spotlight-img-wrap">
+                    <img id="spotlightPetImg" src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600&auto=format&fit=crop&q=80" alt="Chó Corgi" class="spotlight-img">
+                    <div class="spotlight-overlay-tag" id="spotlightTag">✨ Bé Cưng Đang Có Sẵn</div>
+                </div>
+
+                <div class="spotlight-info">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:8px;">
+                        <h3 id="spotlightPetName" class="spotlight-name">Chó Corgi Chân Ngắn 2 Tháng</h3>
+                        <span id="spotlightPetPrice" class="spotlight-price">15.000.000 đ</span>
+                    </div>
+                    <div id="spotlightPetSub" class="spotlight-sub">Giống: Corgi Pembroke • Thuần chủng 100% • Sổ tiêm đủ</div>
+                </div>
+            </a>
+
+            <!-- Nút chọn nhanh bé cưng xem ngay -->
+            <div class="spotlight-tabs">
+                <button type="button" class="spotlight-tab-btn active" onclick="switchSpotlightPet(0)">🐶 Corgi</button>
+                <button type="button" class="spotlight-tab-btn" onclick="switchSpotlightPet(1)">🐱 Mèo ALN</button>
+                <button type="button" class="spotlight-tab-btn" onclick="switchSpotlightPet(2)">🐶 Poodle</button>
+                <button type="button" class="spotlight-tab-btn" onclick="switchSpotlightPet(3)">🐱 Scottish</button>
+            </div>
         </div>
     </div>
 
+    <!-- 4 Khối Đặc Quyền Cho Thú Cưng (Dark Glass Cards) -->
     <div class="features-grid">
         <div class="feature-box">
-            <div class="feature-icon">&#128062;</div>
+            <div class="feature-icon" style="background:rgba(255,93,143,0.18); color:#ff5d8f;">🐾</div>
             <div>
                 <h3>Boss Thuần Chủng 100%</h3>
-                <p>Đầy đủ 32 giống Poodle, Schnauzer, Corgi, ALN, Munchkin siêu quấn chủ, sổ tiêm đầy đủ.</p>
+                <p>Đầy đủ 32 giống Chó &amp; Mèo cảnh siêu quấn chủ, sổ tiêm ngừa đầy đủ, bảo hành sức khỏe 15 ngày.</p>
             </div>
         </div>
         <div class="feature-box">
-            <div class="feature-icon">&#129387;</div>
+            <div class="feature-icon" style="background:rgba(52,211,153,0.18); color:#34d399;">🥩</div>
             <div>
                 <h3>Menu Pate &amp; Phụ Kiện Xịn</h3>
-                <p>Gợi ý thức ăn hạt, súp thưởng, cát đậu nành và balo phi hành gia hợp chuẩn từng giống.</p>
+                <p>Thức ăn hạt cao cấp, pate tươi dinh dưỡng, súp thưởng Ciao, cát đậu nành và balo phi hành gia.</p>
             </div>
         </div>
         <div class="feature-box">
-            <div class="feature-icon">&#10024;</div>
+            <div class="feature-icon" style="background:rgba(139,92,246,0.18); color:#a78bfa;">🛁</div>
             <div>
                 <h3>Spa Grooming Thư Giãn</h3>
-                <p>Tắm sấy ion âm êm ái, cắt tỉa tạo form Teddy cực xinh, xác nhận lịch hẹn qua Email tức thì.</p>
+                <p>Tắm sấy ion âm êm ái, cắt tỉa form Teddy xinh xắn, massage thảo mộc, email xác nhận lịch hẹn tức thì.</p>
             </div>
         </div>
         <div class="feature-box">
-            <div class="feature-icon">&#128150;</div>
+            <div class="feature-icon" style="background:rgba(96,165,250,0.18); color:#60a5fa;">🛡️</div>
             <div>
-                <h3>Bảo Hành &amp; Đồng Hành 24/7</h3>
-                <p>Bảo hành sức khỏe 15 ngày rõ ràng, tư vấn chăm Boss trọn đời và giao tận nhà toàn quốc.</p>
+                <h3>Bác Sĩ Đồng Hành 24/7</h3>
+                <p>Bác sĩ thú y đồng hành tư vấn trọn đời, hỗ trợ chăm sóc bé cưng và giao tận giường toàn quốc.</p>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+var spotlightPets = [
+    {
+        name: "Chó Corgi Chân Ngắn 2 Tháng",
+        price: "15.000.000 đ",
+        sub: "Giống: Corgi Pembroke • Thuần chủng 100% • Sổ tiêm đủ",
+        img: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600&auto=format&fit=crop&q=80",
+        tag: "🔥 Bé Hot Nhất Tuần Này",
+        link: "{{ url_for('shop_page', pet_type='Chó', breed='Chó Corgi') }}"
+    },
+    {
+        name: "Mèo Anh Lông Ngắn (ALN) Xám",
+        price: "8.500.000 đ",
+        sub: "Giống: Mèo Anh Lông Ngắn • Má bánh bao • Cực nũng nịu",
+        img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&auto=format&fit=crop&q=80",
+        tag: "🐱 Best-Seller Siêu Cưng",
+        link: "{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Anh Lông Ngắn (ALN)') }}"
+    },
+    {
+        name: "Chó Poodle Tiny Nâu Đỏ",
+        price: "6.800.000 đ",
+        sub: "Giống: Poodle Tiny • Thông minh số 1 • Không rụng lông",
+        img: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&auto=format&fit=crop&q=80",
+        tag: "⭐ Bé Ngoan Dễ Nuôi",
+        link: "{{ url_for('shop_page', pet_type='Chó', breed='Chó Poodle') }}"
+    },
+    {
+        name: "Mèo Scottish Fold Tai Cụp",
+        price: "11.000.000 đ",
+        sub: "Giống: Scottish Fold • Tai cụp tròn xoe • Mắt to tròn",
+        img: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600&auto=format&fit=crop&q=80",
+        tag: "✨ Siêu Phẩm Quý Tộc",
+        link: "{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Scottish Fold') }}"
+    }
+];
+
+function switchSpotlightPet(idx) {
+    var p = spotlightPets[idx];
+    if (!p) return;
+    var img = document.getElementById('spotlightPetImg');
+    if (img) {
+        img.style.opacity = '0.3';
+        setTimeout(function() {
+            img.src = p.img;
+            img.style.opacity = '1';
+        }, 150);
+    }
+    var nameEl = document.getElementById('spotlightPetName');
+    var priceEl = document.getElementById('spotlightPetPrice');
+    var subEl = document.getElementById('spotlightPetSub');
+    var tagEl = document.getElementById('spotlightTag');
+    var linkEl = document.getElementById('spotlightPetLink');
+
+    if (nameEl) nameEl.innerText = p.name;
+    if (priceEl) priceEl.innerText = p.price;
+    if (subEl) subEl.innerText = p.sub;
+    if (tagEl) tagEl.innerText = p.tag;
+    if (linkEl) linkEl.href = p.link;
+
+    var btns = document.querySelectorAll('.spotlight-tab-btn');
+    btns.forEach(function(b, i) {
+        if (i === idx) b.classList.add('active');
+        else b.classList.remove('active');
+    });
+}
+</script>
 
 <!-- CHÓ MÈO CẢNH & SẢN PHẨM NỔI BẬT -->
 <section style="margin-bottom: 42px;">
@@ -103,15 +196,15 @@
 
     {% if lookup_result %}
     <div class="grid-2" style="margin-top:18px;">
-        <div class="card" style="margin-bottom:0; background:#f8fafc;">
-            <h3 style="font-size:16px; margin-bottom:10px;">Đơn mua hàng ({{ lookup_result.orders|length }})</h3>
+        <div class="card" style="margin-bottom:0; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.08);">
+            <h3 style="font-size:16px; margin-bottom:12px; color:#ffffff;">📦 Đơn mua hàng ({{ lookup_result.orders|length }})</h3>
             {% if lookup_result.orders %}
                 {% for o in lookup_result.orders %}
-                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:10px;">
-                    <div><strong>Đơn hàng #{{ o.id }}</strong> — <span style="color:#64748b;">{{ o.created_at }}</span></div>
-                    <div>Khách hàng: {{ o.customer_name }} ({{ o.phone }})</div>
-                    <div>Địa chỉ: {{ o.address }}</div>
-                    <div>Tổng tiền: <strong style="color:var(--primary);">{{ "{:,.0f}".format(o.total_amount) }} đ</strong></div>
+                <div style="background:rgba(18,14,40,0.7); border:1px solid rgba(139,92,246,0.25); border-radius:12px; padding:14px; margin-bottom:10px;">
+                    <div><strong style="color:#ffffff;">Đơn hàng #{{ o.id }}</strong> — <span style="color:#94a3b8; font-size:12.5px;">{{ o.created_at }}</span></div>
+                    <div style="font-size:13.5px; color:#cbd5e1; margin-top:4px;">Khách hàng: <strong>{{ o.customer_name }}</strong> (<code>{{ o.phone }}</code>)</div>
+                    <div style="font-size:13px; color:#94a3b8; margin-top:2px;">Địa chỉ: {{ o.address }}</div>
+                    <div style="font-size:14px; margin-top:6px;">Tổng thanh toán: <strong style="color:#34d399;">{{ "{:,.0f}".format(o.total_amount) }} đ</strong></div>
                 </div>
                 {% endfor %}
             {% else %}
@@ -119,16 +212,19 @@
             {% endif %}
         </div>
 
-        <div class="card" style="margin-bottom:0; background:#f8fafc;">
-            <h3 style="font-size:16px; margin-bottom:10px;">Lịch hẹn Spa ({{ lookup_result.bookings|length }})</h3>
+        <div class="card" style="margin-bottom:0; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.08);">
+            <h3 style="font-size:16px; margin-bottom:12px; color:#ffffff;">🛁 Lịch hẹn Spa ({{ lookup_result.bookings|length }})</h3>
             {% if lookup_result.bookings %}
                 {% for b in lookup_result.bookings %}
-                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:10px;">
-                    <div><strong>Lịch hẹn #{{ b.id }}</strong> — <span class="badge badge-stock-ok">{{ b.status }}</span></div>
-                    <div>Thú cưng: <strong>{{ b.pet_name }}</strong> ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)</div>
-                    <div>Dịch vụ: {{ b.service_name }}</div>
-                    <div>Thời gian: {{ b.appointment_date }} lúc {{ b.appointment_time }}</div>
-                    <div>Chi phí: <strong style="color:var(--primary);">{{ "{:,.0f}".format(b.total_price) }} đ</strong></div>
+                <div style="background:rgba(18,14,40,0.7); border:1px solid rgba(139,92,246,0.25); border-radius:12px; padding:14px; margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong style="color:#ffffff;">Lịch hẹn #{{ b.id }}</strong>
+                        <span class="badge badge-stock-ok">{{ b.status }}</span>
+                    </div>
+                    <div style="font-size:13.5px; color:#cbd5e1; margin-top:4px;">Bé cưng: <strong>{{ b.pet_name }}</strong> ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)</div>
+                    <div style="font-size:13px; color:#a5b4fc; margin-top:2px;">Dịch vụ: {{ b.service_name }}</div>
+                    <div style="font-size:13px; color:#94a3b8; margin-top:2px;">Thời gian: {{ b.appointment_date }} lúc {{ b.appointment_time }}</div>
+                    <div style="font-size:14px; margin-top:6px;">Chi phí dịch vụ: <strong style="color:#34d399;">{{ "{:,.0f}".format(b.total_price) }} đ</strong></div>
                 </div>
                 {% endfor %}
             {% else %}
