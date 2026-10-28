@@ -43,9 +43,12 @@ from services.email_service import (
     build_booking_html_email,
     build_marketing_html_email,
     build_order_html_email,
+    get_smtp_credentials,
+    save_smtp_credentials,
     send_and_log_email,
     send_booking_confirmation_email,
     send_order_confirmation_email,
+    send_test_email,
 )
 from services.network_service import (
     export_products_to_xml,
@@ -367,11 +370,19 @@ def cart_page():
                 )
                 session["cart"] = {}
                 session.modified = True
-                flash(
-                    f"Đặt hàng thành công! Mã đơn hàng #{order_dict['id']} — "
-                    f"Tổng thanh toán: {order_dict['total_amount']:,.0f} đ. Đã gửi Email xác nhận đơn hàng!",
-                    "success",
-                )
+                target_email = order_dict.get("email")
+                if target_email:
+                    flash(
+                        f"🎉 Đặt hàng thành công! Mã đơn hàng #{order_dict['id']} — "
+                        f"Tổng thanh toán: {order_dict['total_amount']:,.0f} đ. Đã gửi Email xác nhận đơn hàng tới '{target_email}'!",
+                        "success",
+                    )
+                else:
+                    flash(
+                        f"Đặt hàng thành công! Mã đơn hàng #{order_dict['id']} — "
+                        f"Tổng thanh toán: {order_dict['total_amount']:,.0f} đ.",
+                        "success",
+                    )
                 return redirect(url_for("home_page", lookup_phone=order_dict["phone"]))
             except ValidationError as exc:
                 flash(str(exc), "error")
@@ -643,6 +654,7 @@ def admin_page():
         python_version=sys.version.split()[0],
         edit_product=edit_product,
         product_form=ProductForm(),
+        smtp_creds=get_smtp_credentials(),
     )
 
 
@@ -787,6 +799,36 @@ def admin_resync_seed():
     init_db_and_seed()
     flash("Đã đồng bộ và kiểm tra toàn bộ 42 sản phẩm chuẩn trong SEED_CATALOG thành công!", "success")
     return redirect(url_for("admin_page", tab="system_settings"))
+
+
+@app.route("/admin/system/save-smtp", methods=["POST"])
+@admin_required
+def admin_save_smtp():
+    """Lưu thông tin tài khoản SMTP gửi mail thật và hỗ trợ gửi mail kiểm tra kết nối ngay."""
+    smtp_user = request.form.get("smtp_user", "").strip()
+    smtp_pass = request.form.get("smtp_pass", "").strip()
+    smtp_host = request.form.get("smtp_host", "smtp.gmail.com").strip() or "smtp.gmail.com"
+    smtp_port_raw = request.form.get("smtp_port", "587").strip() or "587"
+    test_recipient = request.form.get("test_recipient", "").strip()
+
+    try:
+        smtp_port = int(smtp_port_raw)
+    except ValueError:
+        smtp_port = 587
+
+    save_smtp_credentials(smtp_user, smtp_pass, smtp_host, smtp_port)
+
+    if test_recipient and "@" in test_recipient:
+        res = send_test_email(test_recipient)
+        if "thành công" in res.get("delivery_status", "").lower():
+            flash(f"🎉 Đã lưu cấu hình và gửi Email thử nghiệm THÀNH CÔNG tới '{test_recipient}'! Vui lòng kiểm tra Gmail của bạn.", "success")
+        else:
+            flash(f"⚠️ Đã lưu cấu hình, nhưng gửi tới '{test_recipient}' báo: {res.get('delivery_status')}. Vui lòng kiểm tra Mật khẩu ứng dụng 16 số của Google.", "error")
+    else:
+        flash("Đã lưu cấu hình tài khoản gửi Gmail SMTP thành công!", "success")
+
+    return redirect(url_for("admin_page", tab="emails"))
+
 
 
 @app.route("/admin/emails/preview-sample/<sample_type>")

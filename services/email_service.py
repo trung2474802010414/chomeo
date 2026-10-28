@@ -9,10 +9,132 @@ services/email_service.py
 """
 
 from email.message import EmailMessage
+import json
 import os
 import smtplib
 from typing import Any, Dict, Optional
 from models.email_log import EmailLog
+
+
+def get_smtp_credentials() -> Dict[str, Any]:
+    """Lấy thông tin tài khoản SMTP từ Environment, file .env hoặc file data/smtp_config.json."""
+    host = os.environ.get("SMTP_HOST", "smtp.gmail.com").strip()
+    try:
+        port = int(os.environ.get("SMTP_PORT", "587"))
+    except (ValueError, TypeError):
+        port = 587
+    user = os.environ.get("SMTP_USER", "").strip()
+    pwd = os.environ.get("SMTP_PASS", "").strip()
+
+    # 1. Đọc từ file .env nếu chưa có trong biến môi trường
+    if not user or not pwd:
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        for env_path in (os.path.join(base_dir, ".env"), os.path.join(os.path.dirname(base_dir), ".env")):
+            if os.path.exists(env_path):
+                try:
+                    with open(env_path, "r", encoding="utf-8") as f:
+                        for line in f:
+                            line = line.strip()
+                            if not line or line.startswith("#") or "=" not in line:
+                                continue
+                            k, v = line.split("=", 1)
+                            k = k.strip()
+                            v = v.strip().strip('"').strip("'")
+                            if k == "SMTP_USER" and not user:
+                                user = v
+                            elif k == "SMTP_PASS" and not pwd:
+                                pwd = v
+                            elif k == "SMTP_HOST" and host == "smtp.gmail.com":
+                                host = v
+                            elif k == "SMTP_PORT":
+                                try:
+                                    port = int(v)
+                                except ValueError:
+                                    pass
+                except Exception:
+                    pass
+
+    # 2. Đọc từ data/smtp_config.json nếu đã lưu từ giao diện Quản trị Admin
+    if not user or not pwd:
+        cfg_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "smtp_config.json")
+        if os.path.exists(cfg_path):
+            try:
+                with open(cfg_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+                    user = user or cfg.get("smtp_user", "").strip()
+                    pwd = pwd or cfg.get("smtp_pass", "").strip()
+                    host = cfg.get("smtp_host", host) or host
+                    port = int(cfg.get("smtp_port", port) or port)
+            except Exception:
+                pass
+
+    return {
+        "smtp_host": host or "smtp.gmail.com",
+        "smtp_port": port or 587,
+        "smtp_user": user,
+        "smtp_pass": pwd.replace(" ", ""),
+    }
+
+
+def save_smtp_credentials(smtp_user: str, smtp_pass: str, smtp_host: str = "smtp.gmail.com", smtp_port: int = 587) -> None:
+    """Lưu cấu hình SMTP vào file data/smtp_config.json và cập nhật biến môi trường tức thì."""
+    cfg_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+    os.makedirs(cfg_dir, exist_ok=True)
+    cfg_path = os.path.join(cfg_dir, "smtp_config.json")
+    clean_pass = smtp_pass.strip().replace(" ", "")
+    data = {
+        "smtp_host": smtp_host.strip() or "smtp.gmail.com",
+        "smtp_port": int(smtp_port) if smtp_port else 587,
+        "smtp_user": smtp_user.strip(),
+        "smtp_pass": clean_pass,
+    }
+    with open(cfg_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    # Cập nhật biến môi trường bộ nhớ để có hiệu lực ngay
+    os.environ["SMTP_USER"] = data["smtp_user"]
+    os.environ["SMTP_PASS"] = clean_pass
+    os.environ["SMTP_HOST"] = data["smtp_host"]
+    os.environ["SMTP_PORT"] = str(data["smtp_port"])
+
+
+def send_test_email(recipient: str) -> Dict[str, Any]:
+    """Gửi email HTML kiểm tra kết nối SMTP tới Gmail của người dùng."""
+    subject = "[Meow & Woof] Kiểm tra kết nối SMTP gửi Email thành công! 🎉"
+    body = (
+        f"Xin chào,\n\n"
+        f"Chúc mừng bạn! Máy chủ SMTP của Meow & Woof Pet House đã kết nối thành công và gửi được email tới {recipient}.\n"
+        f"Kể từ bây giờ, mọi lịch hẹn Spa và đơn mua hàng tại website sẽ tự động gửi email xác nhận trực tiếp về Gmail của bạn!\n\n"
+        f"Trân trọng,\nĐội ngũ Meow & Woof"
+    )
+    html_body = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0; padding:0; background-color:#0b081d; font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:#ffffff;">
+<div style="max-width:600px; margin:0 auto; padding:24px 16px;">
+  <div style="background:linear-gradient(135deg, #10b981 0%, #3b82f6 100%); border-radius:24px 24px 0 0; padding:32px 24px; text-align:center;">
+    <div style="display:inline-block; width:52px; height:52px; border-radius:16px; background:#ffffff; line-height:52px; font-size:26px; margin-bottom:12px;">✅</div>
+    <h1 style="margin:0; font-size:22px; font-weight:800; color:#ffffff;">KẾT NỐI SMTP THÀNH CÔNG!</h1>
+    <p style="margin:6px 0 0; font-size:13.5px; color:#dbeafe; font-weight:700;">HỆ THỐNG EMAIL TỰ ĐỘNG ĐÃ SẴN SÀNG HOẠT ĐỘNG</p>
+  </div>
+  <div style="background:#15102d; border:1px solid rgba(59,130,246,0.3); border-top:none; border-radius:0 0 24px 24px; padding:28px 24px;">
+    <p style="margin:0 0 16px; font-size:14.5px; color:#e2e8f0; line-height:1.6;">
+      Xin chào Admin Meow &amp; Woof,<br>
+      Email này được gửi thử nghiệm thành công tới <strong>{recipient}</strong>. Cấu hình gửi mail qua máy chủ Google SMTP của bạn đã hoàn tất chuẩn chỉnh 100%!
+    </p>
+    <div style="background:#1d173e; border-radius:16px; padding:16px; margin:18px 0; font-size:13px; color:#cbd5e1; line-height:1.6;">
+      <div>🐾 <strong>Đơn hàng mới:</strong> Tự động gửi hóa đơn và mã vận chuyển đến khách.</div>
+      <div>🐾 <strong>Lịch hẹn Spa:</strong> Tự động gửi vé điện tử 5 sao kèm mã giữ chỗ.</div>
+    </div>
+    <div style="text-align:center; margin-top:20px; font-size:12px; color:#94a3b8;">
+      Meow &amp; Woof Pet House &amp; Spa Chó Mèo
+    </div>
+  </div>
+</div>
+</body>
+</html>"""
+    return send_and_log_email(recipient, subject, body, html_body=html_body)
+
 
 
 def build_booking_html_email(booking_dict: Dict[str, Any]) -> str:
@@ -253,12 +375,13 @@ def send_and_log_email(
     và lưu lịch sử vào bảng `email_logs`.
     """
     recipient_addr = recipient.strip() if recipient and recipient.strip() else "khachhang@petshop.local"
-    smtp_host = os.environ.get("SMTP_HOST", "smtp.gmail.com")
-    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
-    smtp_user = os.environ.get("SMTP_USER", "")
-    smtp_pass = os.environ.get("SMTP_PASS", "")
+    creds = get_smtp_credentials()
+    smtp_host = creds["smtp_host"]
+    smtp_port = creds["smtp_port"]
+    smtp_user = creds["smtp_user"]
+    smtp_pass = creds["smtp_pass"]
 
-    status = "Đã lưu vào hộp thư hệ thống (Chế độ Local Demo)"
+    status = "Đã lưu vào hộp thư hệ thống (Chưa cấu hình tài khoản gửi Gmail SMTP)"
 
     if smtp_user and smtp_pass and "@petshop.local" not in recipient_addr:
         try:
@@ -270,13 +393,13 @@ def send_and_log_email(
             if html_body:
                 msg.add_alternative(html_body, subtype="html")
 
-            with smtplib.SMTP(smtp_host, smtp_port, timeout=8) as server:
+            with smtplib.SMTP(smtp_host, smtp_port, timeout=12) as server:
                 server.starttls()
                 server.login(smtp_user, smtp_pass)
                 server.send_message(msg)
             status = f"Đã gửi SMTP thành công tới {recipient_addr}"
         except Exception as exc:
-            status = f"Lưu hộp thư hệ thống (Lỗi SMTP: {exc})"
+            status = f"Lỗi gửi SMTP: {exc}"
 
     log_entry = EmailLog(
         recipient=recipient_addr,
