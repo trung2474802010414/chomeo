@@ -1647,3 +1647,352 @@ body {
     margin-left: 18px;
     margin-bottom: 4px;
 }
+
+
+/* ==========================================================================
+   ADMIN THEME GEN Z PRO (GHI ĐÈ GIAO DIỆN ADMIN: CHUYÊN NGHIỆP + TRẺ TRUNG + CHUYỂN ĐỘNG MƯỢT)
+   ========================================================================== */
+.admin-body {
+    --adm-bg: #f6f4ff;
+    --adm-card: #ffffff;
+    --adm-border: #ebe7fa;
+    --adm-ink: #1e1b3a;
+    --adm-muted: #7a7799;
+    --adm-brand: #7950f2;
+    --adm-brand-2: #ff5d73;
+    --adm-mint: #12b886;
+    --adm-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+    background: var(--adm-bg);
+    background-image:
+        radial-gradient(at 0% 0%, rgba(121, 80, 242, 0.08) 0px, transparent 40%),
+        radial-gradient(at 100% 0%, rgba(255, 93, 115, 0.07) 0px, transparent 40%);
+    color: var(--adm-ink);
+    color-scheme: light;
+}
+
+/* Hiệu ứng vào trang mượt */
+@keyframes admFadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes admSlideIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.admin-content-area > * {
+    animation: admFadeUp 0.55s var(--adm-ease) both;
+}
+
+.admin-content-area > *:nth-child(2) { animation-delay: 0.05s; }
+.admin-content-area > *:nth-child(3) { animation-delay: 0.1s; }
+.admin-content-area > *:nth-child(4) { animation-delay: 0.15s; }
+.admin-content-area > *:nth-child(5) { animation-delay: 0.2s; }
+.admin-content-area > *:nth-child(6) { animation-delay: 0.25s; }
+
+.admin-kpi-card,
+.admin-status-card {
+    animation: admFadeUp 0.6s var(--adm-ease) both;
+}
+
+.admin-kpi-grid > *:nth-child(1), .admin-status-grid > *:nth-child(1) { animation-delay: 0.08s; }
+.admin-kpi-grid > *:nth-child(2), .admin-status-grid > *:nth-child(2) { animation-delay: 0.14s; }
+.admin-kpi-grid > *:nth-child(3), .admin-status-grid > *:nth-child(3) { animation-delay: 0.2s; }
+.admin-kpi-grid > *:nth-child(4), .admin-status-grid > *:nth-child(4) { animation-delay: 0.26s; }
+
+/* Sidebar */
+.admin-sidebar {
+    width: 268px;
+    background: linear-gradient(180deg, #2b2161 0%, #1d1747 55%, #150f36 100%);
+    color: #ddd9ff;
+    border-right: none;
+    box-shadow: 4px 0 28px rgba(43, 33, 97, 0.18);
+}
+
+.admin-sidebar::-webkit-scrollbar { width: 6px; }
+.admin-sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 99px; }
+
+.admin-brand-box {
+    padding: 22px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background-color 0.3s var(--adm-ease);
+}
+
+.admin-brand-box:hover { background-color: rgba(255, 255, 255, 0.04); }
+
+.admin-brand-logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff5d73 0%, #ff9f43 100%);
+    border: none;
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(255, 93, 115, 0.4);
+    transition: transform 0.4s var(--adm-ease);
+}
+
+.admin-brand-logo svg circle, .admin-brand-logo svg path { fill: #ffffff; }
+.admin-brand-box:hover .admin-brand-logo { transform: rotate(-10deg) scale(1.06); }
+
+.admin-brand-name {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 16.5px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+}
+
+.admin-brand-sub { color: #a9a4d6; font-size: 10px; font-weight: 600; }
+
+.admin-nav-group-title {
+    color: #8f8ac2;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+
+.admin-nav-link {
+    position: relative;
+    padding: 11px 14px;
+    border-radius: 14px;
+    color: #cfcbf3;
+    font-weight: 600;
+    transition: background-color 0.3s var(--adm-ease), color 0.3s var(--adm-ease), transform 0.3s var(--adm-ease);
+}
+
+.admin-nav-link svg { transition: transform 0.3s var(--adm-ease), color 0.3s var(--adm-ease); }
+
+.admin-nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    transform: translateX(4px);
+}
+
+.admin-nav-link:hover svg { transform: scale(1.15); }
+
+.admin-nav-link.active {
+    background: linear-gradient(135deg, rgba(121, 80, 242, 0.95) 0%, rgba(255, 93, 115, 0.85) 100%);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(121, 80, 242, 0.35);
+}
+
+.admin-nav-link.active svg { color: #ffffff; }
+
+.admin-sidebar-footer {
+    background: rgba(0, 0, 0, 0.22);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-role-pill {
+    background: linear-gradient(90deg, #12b886, #20c997);
+    color: #ffffff;
+    border-radius: 99px;
+    padding: 2px 10px;
+    font-weight: 700;
+}
+
+.admin-logout-icon { color: #ff8fa0; transition: background-color 0.25s, transform 0.25s var(--adm-ease); }
+.admin-logout-icon:hover { transform: scale(1.1); background-color: rgba(255, 93, 115, 0.2); }
+
+/* Topbar kính mờ */
+.admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--adm-border);
+    padding: 15px 30px;
+}
+
+.admin-page-heading {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: var(--adm-ink);
+}
+
+.btn-view-site {
+    border: 1.5px solid var(--adm-border);
+    border-radius: 99px;
+    padding: 8px 16px;
+    background: #ffffff;
+    color: var(--adm-ink);
+    transition: all 0.3s var(--adm-ease);
+}
+
+.btn-view-site:hover {
+    border-color: var(--adm-brand);
+    color: var(--adm-brand);
+    background: #f3efff;
+    transform: translateY(-2px);
+}
+
+.admin-content-area { padding: 24px 30px 44px; }
+
+/* Banner chào mừng */
+.admin-welcome-banner {
+    background: linear-gradient(90deg, #e9e3ff 0%, #ffe3ea 100%);
+    border: 1px solid #ddd3ff;
+    color: #3d2c8d;
+    border-radius: 16px;
+    font-weight: 600;
+}
+
+.admin-welcome-close { color: #3d2c8d; transition: transform 0.3s var(--adm-ease); }
+.admin-welcome-close:hover { transform: rotate(90deg); }
+
+/* Thanh kỳ báo cáo */
+.admin-period-bar {
+    background: var(--adm-card);
+    border: 1px solid var(--adm-border);
+    border-radius: 18px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 16px rgba(121, 80, 242, 0.05);
+}
+
+.period-btn-group {
+    border: none;
+    background: #f3f0ff;
+    padding: 4px;
+    border-radius: 99px;
+    gap: 2px;
+}
+
+.period-btn {
+    border: none !important;
+    border-radius: 99px;
+    padding: 7px 15px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #6b6890;
+    text-decoration: none;
+    background: transparent;
+    transition: all 0.3s var(--adm-ease);
+}
+
+.period-btn:hover { color: var(--adm-brand); background: rgba(121, 80, 242, 0.1); }
+
+.period-btn.active {
+    background: linear-gradient(135deg, #7950f2 0%, #ff5d73 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(121, 80, 242, 0.35);
+}
+
+/* Thẻ KPI */
+.admin-kpi-card,
+.admin-status-card,
+.admin-body .card {
+    background: var(--adm-card);
+    border: 1px solid var(--adm-border);
+    border-radius: 20px;
+    box-shadow: 0 4px 18px rgba(43, 33, 97, 0.05);
+    transition: transform 0.4s var(--adm-ease), box-shadow 0.4s var(--adm-ease), border-color 0.4s var(--adm-ease);
+}
+
+.admin-kpi-card:hover,
+.admin-status-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 34px rgba(121, 80, 242, 0.14);
+    border-color: #d9ceff;
+}
+
+.admin-body .card:hover { box-shadow: 0 10px 26px rgba(43, 33, 97, 0.08); }
+
+.kpi-label { font-weight: 700; color: var(--adm-muted); }
+.kpi-value { font-weight: 800; letter-spacing: -0.5px; }
+.kpi-sub { color: var(--adm-muted); }
+
+.kpi-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    transition: transform 0.4s var(--adm-ease);
+}
+
+.admin-kpi-card:hover .kpi-icon-box { transform: rotate(-8deg) scale(1.1); }
+
+.admin-status-card { border-width: 2px; }
+.status-card-title { font-weight: 700; }
+.status-card-link { transition: letter-spacing 0.3s var(--adm-ease); }
+.status-card-link:hover { text-decoration: none; letter-spacing: 0.3px; }
+
+/* Biểu đồ: đường vẽ dần */
+@keyframes admDraw { from { stroke-dashoffset: 1200; } to { stroke-dashoffset: 0; } }
+.admin-charts-grid svg path[stroke="#14532d"] {
+    stroke: #7950f2;
+    stroke-dasharray: 1200;
+    animation: admDraw 2s var(--adm-ease) 0.3s both;
+}
+.admin-charts-grid svg circle[fill="#14532d"] { fill: #ff5d73; }
+.admin-charts-grid svg circle[stroke="#15803d"] { stroke: #12b886; transition: stroke-dasharray 1.4s var(--adm-ease); }
+
+/* Bảng */
+.admin-body .clean-table th {
+    background: #f6f3ff;
+    color: #5b5782;
+    font-weight: 800;
+    border-bottom: 1px solid var(--adm-border);
+}
+
+.admin-body .clean-table tbody tr { transition: background-color 0.25s ease, transform 0.25s var(--adm-ease); }
+.admin-body .clean-table tbody tr:hover { background-color: #faf8ff; }
+.admin-body .clean-table td { border-bottom: 1px solid #f1eefc; }
+.admin-body .clean-table img { transition: transform 0.35s var(--adm-ease); }
+.admin-body .clean-table tr:hover img { transform: scale(1.12) rotate(-2deg); }
+
+/* Nút & input trong admin */
+.admin-body .btn { border-radius: 99px; transition: all 0.3s var(--adm-ease); }
+.admin-body .btn:active:not(:disabled) { transform: scale(0.96); }
+
+.admin-body .btn-primary {
+    background: linear-gradient(135deg, #7950f2 0%, #ff5d73 100%);
+    box-shadow: 0 6px 16px rgba(121, 80, 242, 0.28);
+}
+
+.admin-body .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(121, 80, 242, 0.38);
+}
+
+.admin-body .btn-outline { border-color: var(--adm-border); }
+.admin-body .btn-outline:hover:not(:disabled) { border-color: var(--adm-brand); color: var(--adm-brand); background: #f6f3ff; }
+
+.admin-body .form-control {
+    border: 1.5px solid var(--adm-border);
+    border-radius: 14px;
+    background: #fdfcff;
+    transition: border-color 0.3s var(--adm-ease), box-shadow 0.3s var(--adm-ease), background-color 0.3s;
+}
+
+.admin-body .form-control:hover { border-color: #d3c9fb; }
+
+.admin-body .form-control:focus {
+    border-color: var(--adm-brand);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(121, 80, 242, 0.14);
+}
+
+.admin-body .form-label { font-weight: 700; color: var(--adm-ink); }
+
+.admin-body .alert {
+    border-radius: 16px;
+    animation: admFadeUp 0.5s var(--adm-ease) both;
+}
+
+.admin-body .badge { font-weight: 800; }
+
+/* Thanh cuộn đẹp */
+.admin-body ::-webkit-scrollbar { height: 8px; width: 8px; }
+.admin-body ::-webkit-scrollbar-thumb { background: #d6cdf7; border-radius: 99px; }
+.admin-body ::-webkit-scrollbar-thumb:hover { background: #b9a9f3; }
+
+/* Tôn trọng người dùng tắt hiệu ứng chuyển động */
+@media (prefers-reduced-motion: reduce) {
+    .admin-body *, .admin-body *::before, .admin-body *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
