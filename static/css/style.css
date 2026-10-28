@@ -999,27 +999,68 @@ body {
 .form-label {
     display: block;
     font-size: 13.5px;
-    font-weight: 600;
-    color: var(--navy);
-    margin-bottom: 6px;
+    font-weight: 700;
+    color: #f1f0fb !important;
+    margin-bottom: 7px;
 }
 
 .form-control {
     width: 100%;
-    padding: 10px 12px;
+    padding: 11px 14px;
     font-size: 14px;
     font-family: inherit;
-    color: var(--text-main);
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: var(--radius-sm);
-    transition: border-color 0.15s ease;
+    font-weight: 600;
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 14px;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+.form-control::placeholder {
+    color: #94a3b8 !important;
+    opacity: 0.85;
+}
+
+.form-control:hover {
+    border-color: rgba(139, 92, 246, 0.5) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .form-control:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(224, 90, 71, 0.12);
+    border-color: #8b5cf6 !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.28) !important;
+}
+
+/* Quan trọng: Khắc phục triệt để lỗi chữ bị chìm trong dropdown select */
+select.form-control option,
+select.form-control optgroup {
+    background-color: #171133 !important;
+    color: #f8fafc !important;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+select.form-control optgroup {
+    color: #c4b5fd !important;
+    font-weight: 800;
+    background-color: #1f1747 !important;
+    padding-top: 8px;
+}
+
+input[type="date"].form-control,
+input[type="time"].form-control {
+    color-scheme: dark;
+}
+
+input[type="date"].form-control::-webkit-calendar-picker-indicator,
+input[type="time"].form-control::-webkit-calendar-picker-indicator {
+    filter: invert(1) opacity(0.85);
+    cursor: pointer;
 }
 
 .form-error {
@@ -2922,4 +2963,170 @@ body {
     align-items: center;
     gap: 8px;
     flex-wrap: nowrap;
+}
+
+/* ==========================================================================
+   GIAO DIỆN SPA 5 SAO & CẨM NANG GIỐNG THÚ CƯNG QUỐC TẾ (CHUYÊN NGHIỆP, GEN Z)
+   ========================================================================== */
+.spa-hero-banner {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.16) 0%, rgba(255, 93, 143, 0.12) 50%, rgba(52, 211, 153, 0.08) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 26px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.spa-service-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    transition: all 0.25s ease;
+}
+
+.spa-service-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(139, 92, 246, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.15);
+}
+
+.spa-service-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.spa-service-name {
+    font-size: 15.5px;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.spa-price-tiers {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.spa-tier-pill {
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+}
+
+.spa-tier-pill.tier-small {
+    color: #93c5fd;
+    border-color: rgba(147, 197, 253, 0.3);
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.spa-tier-pill.tier-medium {
+    color: #c4b5fd;
+    border-color: rgba(196, 181, 253, 0.3);
+    background: rgba(139, 92, 246, 0.14);
+}
+
+.spa-tier-pill.tier-large {
+    color: #6ee7b7;
+    border-color: rgba(110, 231, 183, 0.35);
+    background: rgba(16, 185, 129, 0.14);
+}
+
+.spa-step-journey {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.spa-step-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 18px;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.spa-step-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 93, 143, 0.4);
+    background: rgba(255, 255, 255, 0.065);
+}
+
+.spa-step-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #8b5cf6 0%, #ff5d8f 100%);
+    color: #ffffff;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.35);
+}
+
+/* Thẻ Bách Khoa Toàn Thư Giống Chó Mèo (Network Breed Card) */
+.breed-card-modern {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 22px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.breed-card-modern:hover {
+    transform: translateY(-5px);
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 18px 40px rgba(139, 92, 246, 0.25);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.breed-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.breed-origin-pill {
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e2e8f0;
+}
+
+.temperament-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11.5px;
+    font-weight: 700;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #c4b5fd;
+    margin: 2px 3px 2px 0;
 }
