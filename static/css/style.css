@@ -1996,3 +1996,145 @@ body {
         transition: none !important;
     }
 }
+
+
+/* ==========================================================================
+   ADMIN: CĂN CHỈNH BẢNG, NÚT HÀNH ĐỘNG & BỐ CỤC 2 CỘT (CHỐNG NHẢY CHỮ)
+   ========================================================================== */
+.admin-body .btn,
+.admin-body .badge,
+.admin-body .period-btn,
+.admin-body .btn-view-site {
+    white-space: nowrap;
+}
+
+/* Bố cục 2 cột (danh sách + form): cột form có độ rộng tối thiểu, tự xuống hàng khi màn hình hẹp */
+.admin-body .grid-2 {
+    grid-template-columns: minmax(0, 1.6fr) minmax(340px, 1fr) !important;
+    gap: 22px;
+}
+
+@media (max-width: 1280px) {
+    .admin-body .grid-2 {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
+
+/* Bảng: không xuống dòng ở các cột ngắn, cuộn ngang gọn gàng khi thiếu chỗ */
+.admin-body .table-wrap {
+    border-radius: 14px;
+}
+
+.admin-body .clean-table {
+    min-width: 640px;
+}
+
+.admin-body .clean-table th {
+    white-space: nowrap;
+    padding: 12px 12px;
+    font-size: 12px;
+}
+
+.admin-body .clean-table td {
+    padding: 12px;
+}
+
+.admin-body .clean-table td code {
+    white-space: nowrap;
+    background: #f3f0ff;
+    color: #5b3fd1;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-body .clean-table td.text-right,
+.admin-body .clean-table td.text-center {
+    white-space: nowrap;
+}
+
+/* Cột hành động: Sửa / Xóa luôn nằm trên 1 hàng, 1 ô gọn gàng */
+.admin-body .clean-table td .btn-sm {
+    padding: 6px 13px;
+    font-size: 12.5px;
+    line-height: 1.2;
+    gap: 5px;
+}
+
+.admin-body .clean-table td div[style*="inline-flex"] {
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.admin-body .clean-table td form {
+    margin: 0;
+}
+
+/* Ô chọn trạng thái + nút Lưu trong bảng lịch hẹn */
+.admin-body .clean-table td select.form-control {
+    min-width: 128px;
+    border-radius: 99px;
+    padding: 6px 12px;
+}
+
+/* Tên sản phẩm trong bảng: gọn, không quá cao */
+.admin-body .clean-table td strong {
+    line-height: 1.4;
+}
+
+.admin-body .clean-table td:nth-child(3) {
+    min-width: 190px;
+}
+
+/* Khung form thêm / sửa sản phẩm: dính trên cùng khi cuộn danh sách dài */
+@media (min-width: 1281px) {
+    .admin-body #form-san-pham {
+        position: sticky;
+        top: 86px;
+        max-height: calc(100vh - 106px);
+        overflow-y: auto;
+    }
+}
+
+.admin-body #form-san-pham {
+    border-radius: 22px;
+}
+
+/* Tiêu đề thẻ trong admin gọn gàng */
+.admin-body .card-title {
+    font-size: 17.5px;
+    font-weight: 800;
+}
+
+.admin-body .section-subtitle {
+    font-size: 13px;
+}
+
+/* Hộp preview ảnh & ô chọn file */
+.admin-body input[type="file"] {
+    font-size: 12px;
+    max-width: 100%;
+}
+
+.admin-body input[type="file"]::file-selector-button {
+    border: none;
+    background: linear-gradient(135deg, #7950f2 0%, #ff5d73 100%);
+    color: #ffffff;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 99px;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: transform 0.25s var(--adm-ease);
+}
+
+.admin-body input[type="file"]::file-selector-button:hover {
+    transform: translateY(-1px);
+}
+
+/* Trang khách hàng thân thiết: số liệu thẳng hàng, dễ đọc */
+.admin-body .clean-table td strong[style*="color:#15803d"] {
+    color: #0ca678 !important;
+    font-weight: 800;
+}
