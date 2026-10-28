@@ -605,6 +605,18 @@ def admin_page():
     email_logs = [e.to_dict() for e in EmailLog.iter_all(order_by="id DESC")] if admin_tab == "emails" else []
     xml_preview = export_products_to_xml() if admin_tab == "import_export" else ""
 
+    low_stock_products = []
+    if admin_tab == "inventory_alerts":
+        all_prods = [p.to_dict() for p in Product.iter_all(order_by="stock ASC, id ASC")]
+        low_stock_products = [p for p in all_prods if int(p.get("stock", 0)) <= 10]
+
+    breed_api_preview = None
+    if admin_tab == "system_settings":
+        species_test = request.args.get("test_species", "cat")
+        api_key_test = request.args.get("test_api_key", "").strip()
+        if request.args.get("run_api_test") == "1":
+            breed_api_preview = fetch_pet_breeds_via_urllib(species=species_test, api_key=api_key_test, limit=4)
+
     return render_template(
         "admin.html",
         active_page="admin",
@@ -618,6 +630,10 @@ def admin_page():
         orders=orders,
         email_logs=email_logs,
         xml_preview=xml_preview,
+        low_stock_products=low_stock_products,
+        spa_services=SPA_SERVICES,
+        breed_api_preview=breed_api_preview,
+        python_version=sys.version.split()[0],
         edit_product=edit_product,
         product_form=ProductForm(),
     )
@@ -707,6 +723,69 @@ def admin_import_csv():
         "success",
     )
     return redirect(url_for("admin_page", tab="products"))
+
+
+@app.route("/admin/products/<int:product_id>/restock", methods=["POST"])
+@admin_required
+def admin_restock_product(product_id: int):
+    prod = Product.get_by_id(product_id)
+    if not prod:
+        flash(f"Không tìm thấy sản phẩm #{product_id}.", "error")
+        return redirect(url_for("admin_page", tab="inventory_alerts"))
+
+    try:
+        add_qty = int(request.form.get("add_qty", "0"))
+    except ValueError:
+        add_qty = 0
+
+    new_price_raw = request.form.get("new_price", "").strip()
+    if add_qty <= 0 and not new_price_raw:
+        flash("Vui lòng nhập số lượng nhập thêm (> 0) hoặc mức giá mới.", "error")
+        return redirect(url_for("admin_page", tab="inventory_alerts"))
+
+    if add_qty > 0:
+        prod.stock = int(prod.stock) + add_qty
+    if new_price_raw:
+        try:
+            val_price = float(new_price_raw)
+            if val_price >= 1000:
+                prod.price = val_price
+        except ValueError:
+            pass
+
+    prod.save()
+    flash(f"Đã cập nhật kho cho '{prod.name}' (Tồn kho hiện tại: {prod.stock}).", "success")
+    return redirect(url_for("admin_page", tab="inventory_alerts"))
+
+
+@app.route("/admin/marketing/send-email", methods=["POST"])
+@admin_required
+def admin_send_marketing_email():
+    recipient = request.form.get("recipient", "").strip()
+    subject = request.form.get("subject", "").strip()
+    body = request.form.get("body", "").strip()
+    if not recipient or "@" not in recipient or not subject or not body:
+        flash("Vui lòng nhập đầy đủ Email người nhận hợp lệ, Tiêu đề và Nội dung chương trình khuyến mãi.", "error")
+        return redirect(url_for("admin_page", tab="spa_pricing"))
+
+    log = EmailLog(
+        recipient=recipient,
+        subject=subject,
+        body=body,
+        delivery_status="Đã gửi (Chiến dịch Marketing VIP)",
+        created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    )
+    log.save()
+    flash(f"Đã phát hành Email ưu đãi VIP tới '{recipient}' và lưu vào Hộp thư hệ thống!", "success")
+    return redirect(url_for("admin_page", tab="spa_pricing"))
+
+
+@app.route("/admin/system/resync-seed", methods=["POST"])
+@admin_required
+def admin_resync_seed():
+    init_db_and_seed()
+    flash("Đã đồng bộ và kiểm tra toàn bộ 42 sản phẩm chuẩn trong SEED_CATALOG thành công!", "success")
+    return redirect(url_for("admin_page", tab="system_settings"))
 
 
 # ============================================================================

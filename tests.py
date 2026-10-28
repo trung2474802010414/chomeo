@@ -196,12 +196,27 @@ class TestAdvancedPythonPetShop(unittest.TestCase):
         breed_resp = self.client.get("/shop?pet_type=Chó&breed=Chó+Schnauzer")
         self.assertEqual(breed_resp.status_code, 200)
 
-        # Kiểm tra lọc kỳ báo cáo trong Admin Dashboard
+        # Kiểm tra lọc kỳ báo cáo & các tab quản trị mới trong Admin Dashboard
         with self.client.session_transaction() as sess:
             sess["admin_logged_in"] = True
         for p in ("today", "7d", "30d", "month", "all"):
             r = self.client.get(f"/admin?tab=dashboard&period={p}")
             self.assertEqual(r.status_code, 200)
+
+        for new_tab in ("inventory_alerts", "spa_pricing", "system_settings"):
+            tab_resp = self.client.get(f"/admin?tab={new_tab}")
+            self.assertEqual(tab_resp.status_code, 200)
+
+        # Kiểm tra nhập nhanh tồn kho (Quick Restock)
+        old_stock = first_prod.stock
+        restock_resp = self.client.post(
+            f"/admin/products/{first_prod.id}/restock",
+            data={"add_qty": "3"},
+            follow_redirects=True,
+        )
+        self.assertEqual(restock_resp.status_code, 200)
+        updated_prod = Product.get_by_id(first_prod.id)
+        self.assertEqual(updated_prod.stock, old_stock + 3)
 
         # Kiểm tra ràng buộc chéo trong ProductForm (Loài Chó nhưng chọn giống Mèo hoặc danh mục Mèo cảnh phải bị chặn)
         bad_form = ProductForm(

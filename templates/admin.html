@@ -62,6 +62,13 @@
                     <span>Sản phẩm &amp; Kho ({{ stats.total_products }})</span>
                 </a>
 
+                <a href="{{ url_for('admin_page', tab='inventory_alerts') }}" class="admin-nav-link {% if admin_tab == 'inventory_alerts' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Cảnh báo Kho &amp; Nhập nhanh ({{ stats.low_stock_count }})</span>
+                </a>
+
                 <a href="{{ url_for('admin_page', tab='import_export') }}" class="admin-nav-link {% if admin_tab == 'import_export' %}active{% endif %}">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
@@ -78,11 +85,27 @@
                     <span>Khách hàng ({{ stats.unique_customers_count }})</span>
                 </a>
 
+                <a href="{{ url_for('admin_page', tab='spa_pricing') }}" class="admin-nav-link {% if admin_tab == 'spa_pricing' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    <span>Bảng giá Spa &amp; Hạng VIP</span>
+                </a>
+
                 <a href="{{ url_for('admin_page', tab='emails') }}" class="admin-nav-link {% if admin_tab == 'emails' %}active{% endif %}">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
                     </svg>
                     <span>Hộp thư Email</span>
+                </a>
+
+                <div class="admin-nav-group-title">HỆ THỐNG &amp; BẢO MẬT</div>
+
+                <a href="{{ url_for('admin_page', tab='system_settings') }}" class="admin-nav-link {% if admin_tab == 'system_settings' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>Cấu hình &amp; API Hệ thống</span>
                 </a>
             </nav>
 
@@ -109,11 +132,14 @@
                 <h1 class="admin-page-heading">
                     {% if admin_tab == 'dashboard' %}Tổng Quan Kinh Doanh
                     {% elif admin_tab == 'products' %}Quản Lý Sản Phẩm &amp; Tồn Kho (Thêm / Sửa / Xóa)
+                    {% elif admin_tab == 'inventory_alerts' %}Cảnh Báo Tồn Kho &amp; Nhập Hàng Nhanh (Quick Restock)
                     {% elif admin_tab == 'bookings' %}Quản Lý Lịch Hẹn Spa &amp; Khám
                     {% elif admin_tab == 'orders' %}Quản Lý Đơn Hàng Bán Lẻ
                     {% elif admin_tab == 'import_export' %}Xuất / Nhập Dữ Liệu Chuẩn XML, CSV &amp; JSON
                     {% elif admin_tab == 'customers' %}Danh Sách Khách Hàng Thân Thiết
+                    {% elif admin_tab == 'spa_pricing' %}Bảng Giá Dịch Vụ Spa &amp; Chăm Sóc Khách Hàng VIP
                     {% elif admin_tab == 'emails' %}Nhật Ký Email Xác Nhận Hệ Thống (SMTP)
+                    {% elif admin_tab == 'system_settings' %}Cấu Hình Hệ Thống, Đồng Bộ Kho &amp; Cổng REST API
                     {% endif %}
                 </h1>
 
@@ -871,6 +897,101 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                     </div>
                 </div>
 
+                {% elif admin_tab == 'inventory_alerts' %}
+                <!-- ==========================================================
+                     TAB MỚI 1: CẢNH BÁO TỒN KHO & NHẬP HÀNG NHANH (RESTOCK)
+                     ========================================================== -->
+                <div class="admin-kpi-grid" style="margin-bottom:20px;">
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">SẢN PHẨM CẦN CHÚ Ý (≤ 10)</span>
+                            <div class="kpi-icon-box kpi-icon-orange">⚠️</div>
+                        </div>
+                        <div class="kpi-value" style="color:#fbbf24;">{{ low_stock_products|length }} mặt hàng</div>
+                        <div class="kpi-sub">Các mã có tồn kho từ 10 trở xuống</div>
+                    </div>
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">SẮP CHÁY HÀNG (≤ 5)</span>
+                            <div class="kpi-icon-box kpi-icon-cyan">🔥</div>
+                        </div>
+                        <div class="kpi-value" style="color:#f87171;">{{ stats.low_stock_count }} mặt hàng</div>
+                        <div class="kpi-sub">Khuyến nghị nhập bổ sung ngay</div>
+                    </div>
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">TỔNG TỒN KHO TOÀN SHOP</span>
+                            <div class="kpi-icon-box kpi-icon-green">📦</div>
+                        </div>
+                        <div class="kpi-value" style="color:#34d399;">{{ stats.total_stock_units }} đơn vị</div>
+                        <div class="kpi-sub">Trên tổng số {{ stats.total_products }} mã SKU</div>
+                    </div>
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">GIÁ TRỊ HÀNG TỒN KHO</span>
+                            <div class="kpi-icon-box kpi-icon-blue">💎</div>
+                        </div>
+                        <div class="kpi-value" style="color:#60a5fa;">{{ "{:,.0f}".format(stats.total_inventory_value) }} đ</div>
+                        <div class="kpi-sub">Tổng vốn hàng hóa sẵn sàng bán</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Bàn Điều Phối Nhập Hàng Nhanh (1-Click Quick Restock &amp; Điều Chỉnh Giá)</h2>
+                        <a href="{{ url_for('admin_page', tab='products') }}" class="btn btn-outline btn-sm">Xem toàn bộ {{ stats.total_products }} sản phẩm</a>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="clean-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã SKU</th>
+                                    <th>Sản phẩm / Thú cưng</th>
+                                    <th>Phân loại</th>
+                                    <th class="text-right">Giá bán hiện tại</th>
+                                    <th class="text-center">Tồn kho</th>
+                                    <th>Nhập nhanh tồn kho &amp; Cập nhật giá</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in low_stock_products %}
+                                <tr>
+                                    <td><code>{{ p.sku }}</code></td>
+                                    <td>
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy" decoding="async" style="width:42px; height:42px; border-radius:10px; object-fit:cover; border:1px solid rgba(148,163,184,0.2);">
+                                            <div>
+                                                <strong>{{ p.name }}</strong>
+                                                {% if p.breed %}<div style="font-size:12px; color:#a5b4fc;">Giống: {{ p.breed }}</div>{% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}">{{ p.pet_type }}</span>
+                                        <span style="font-size:12.5px; color:#94a3b8; margin-left:4px;">{{ p.category }}</span>
+                                    </td>
+                                    <td class="text-right"><strong style="color:#34d399; white-space:nowrap;">{{ "{:,.0f}".format(p.price) }} đ</strong></td>
+                                    <td class="text-center">
+                                        <span class="badge {% if p.stock == 0 %}badge-cancelled{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
+                                            {% if p.stock == 0 %}Hết hàng (0){% else %}Còn {{ p.stock }}{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin_restock_product', product_id=p.id) }}" style="display:flex; gap:8px; align-items:center; flex-wrap:nowrap;">
+                                            <input type="number" name="add_qty" value="5" min="1" max="500" class="form-control" style="width:82px; padding:6px 10px; font-size:13px;" title="Số lượng nhập thêm">
+                                            <input type="number" name="new_price" placeholder="Giá mới (tùy chọn)" min="1000" step="1000" class="form-control" style="width:145px; padding:6px 10px; font-size:13px;">
+                                            <button type="submit" class="btn btn-teal btn-sm">+ Nhập kho</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="6" class="text-center">Tuyệt vời! Toàn bộ sản phẩm trong kho đều có số lượng dồi dào (&gt; 10).</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 {% elif admin_tab == 'customers' %}
                 <!-- ==========================================================
                      TAB 6: KHÁCH HÀNG THÂN THIẾT
@@ -878,6 +999,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">Danh sách Khách hàng ({{ stats.customers_list|length }} khách hàng duy nhất)</h2>
+                        <a href="{{ url_for('admin_page', tab='spa_pricing') }}" class="btn btn-primary btn-sm">💎 Chính sách VIP &amp; Gửi Ưu Đãi</a>
                     </div>
                     <div class="table-wrap">
                         <table class="clean-table">
@@ -886,6 +1008,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                     <th>Họ tên khách hàng</th>
                                     <th>Số điện thoại</th>
                                     <th>Email</th>
+                                    <th class="text-center">Hạng Thành Viên</th>
                                     <th class="text-center">Số đơn mua</th>
                                     <th class="text-center">Số lịch hẹn Spa</th>
                                     <th class="text-right">Tổng chi tiêu</th>
@@ -897,15 +1020,113 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                     <td><strong>{{ c.name }}</strong></td>
                                     <td><code>{{ c.phone }}</code></td>
                                     <td>{{ c.email or '-' }}</td>
+                                    <td class="text-center">
+                                        {% if c.total_spent >= 15000000 %}
+                                            <span class="badge" style="background:rgba(139,92,246,0.22); color:#c4b5fd; border:1px solid rgba(139,92,246,0.4);">💎 Kim Cương</span>
+                                        {% elif c.total_spent >= 5000000 %}
+                                            <span class="badge" style="background:rgba(245,158,11,0.2); color:#fde68a; border:1px solid rgba(245,158,11,0.4);">🥇 Hạng Vàng</span>
+                                        {% elif c.total_spent >= 1000000 %}
+                                            <span class="badge" style="background:rgba(56,189,248,0.18); color:#bae6fd; border:1px solid rgba(56,189,248,0.35);">🥈 Hạng Bạc</span>
+                                        {% else %}
+                                            <span class="badge badge-both">🌱 Thành viên mới</span>
+                                        {% endif %}
+                                    </td>
                                     <td class="text-center">{{ c.orders_count }}</td>
                                     <td class="text-center">{{ c.bookings_count }}</td>
-                                    <td class="text-right"><strong style="color:#15803d;">{{ "{:,.0f}".format(c.total_spent) }} đ</strong></td>
+                                    <td class="text-right"><strong style="color:#34d399; white-space:nowrap;">{{ "{:,.0f}".format(c.total_spent) }} đ</strong></td>
                                 </tr>
                                 {% else %}
-                                <tr><td colspan="6" class="text-center">Chưa có dữ liệu khách hàng.</td></tr>
+                                <tr><td colspan="7" class="text-center">Chưa có dữ liệu khách hàng.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                {% elif admin_tab == 'spa_pricing' %}
+                <!-- ==========================================================
+                     TAB MỚI 2: BẢNG GIÁ SPA & CHĂM SÓC KHÁCH HÀNG VIP
+                     ========================================================== -->
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">1. Bảng Giá Niêm Yết Dịch Vụ Spa Theo Cân Nặng</h2>
+                            <span class="badge badge-confirmed">Tự động tính phí</span>
+                        </div>
+                        <p style="font-size:13.5px; color:#94a3b8; margin-bottom:14px;">
+                            Hệ thống tự động nhân hệ số theo cân nặng của bé cưng: <strong>Dưới 5kg (x1.0)</strong> • <strong>Từ 5–15kg (x1.25)</strong> • <strong>Trên 15kg (x1.5)</strong>.
+                        </p>
+                        <div class="table-wrap">
+                            <table class="clean-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên Gói Dịch Vụ Spa</th>
+                                        <th class="text-right">Bé &lt; 5kg (x1.0)</th>
+                                        <th class="text-right">Bé 5–15kg (x1.25)</th>
+                                        <th class="text-right">Bé &gt; 15kg (x1.5)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for svc_name, base_price in spa_services.items() %}
+                                    <tr>
+                                        <td><strong>✨ {{ svc_name }}</strong></td>
+                                        <td class="text-right"><span style="color:#e2e8f0; white-space:nowrap;">{{ "{:,.0f}".format(base_price) }} đ</span></td>
+                                        <td class="text-right"><span style="color:#a5b4fc; white-space:nowrap;">{{ "{:,.0f}".format(base_price * 1.25) }} đ</span></td>
+                                        <td class="text-right"><strong style="color:#34d399; white-space:nowrap;">{{ "{:,.0f}".format(base_price * 1.5) }} đ</strong></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="margin-top:20px; padding:16px; border-radius:14px; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.22);">
+                            <div style="font-weight:700; color:#c7d2fe; margin-bottom:8px;">👑 Quyền Lợi Hạng Thành Viên Tự Động (Loyalty Tiers)</div>
+                            <ul style="margin:0; padding-left:18px; color:#94a3b8; font-size:13px; line-height:1.7;">
+                                <li><strong style="color:#c4b5fd;">💎 Hạng Kim Cương (Chi tiêu ≥ 15.000.000đ):</strong> Giảm 15% trọn đời gói Spa Hoàng Gia + Tặng đưa đón thú cưng tận nhà.</li>
+                                <li><strong style="color:#fde68a;">🥇 Hạng Vàng (Chi tiêu ≥ 5.000.000đ):</strong> Giảm 10% dịch vụ Cắt tỉa lông tạo kiểu &amp; Vệ sinh răng miệng.</li>
+                                <li><strong style="color:#bae6fd;">🥈 Hạng Bạc (Chi tiêu ≥ 1.000.000đ):</strong> Tặng gói Cắt mài móng &amp; Vệ sinh tai miễn phí khi tắm Spa.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">2. Phát Hành Voucher &amp; Gửi Email Chăm Sóc VIP</h2>
+                            <span class="badge badge-cat">SMTP Marketing</span>
+                        </div>
+                        <p style="font-size:13.5px; color:#94a3b8; margin-bottom:14px;">
+                            Gửi thông báo tặng mã giảm giá hoặc nhắc lịch tiêm phòng / Spa định kỳ trực tiếp tới Email khách hàng:
+                        </p>
+                        <form method="POST" action="{{ url_for('admin_send_marketing_email') }}">
+                            <div class="form-group">
+                                <label class="form-label">Chọn nhanh Khách hàng thân thiết hoặc nhập Email:</label>
+                                <input type="email" name="recipient" id="vip-email-input" required placeholder="Nhập email khách hàng (VD: khachhang@gmail.com)" class="form-control">
+                                {% if stats.customers_list %}
+                                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+                                    {% for c in stats.customers_list[:5] if c.email %}
+                                    <button type="button" class="btn btn-outline btn-sm" style="font-size:11.5px; padding:4px 10px;" onclick="document.getElementById('vip-email-input').value='{{ c.email }}'">
+                                        {{ c.name }} ({{ c.email }})
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tiêu đề chiến dịch ưu đãi (*):</label>
+                                <input type="text" name="subject" required value="[Meow & Woof VIP] Tặng bạn Voucher giảm 20% Gói Spa Thú Cưng tuần này!" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nội dung thông điệp &amp; Mã Voucher (*):</label>
+                                <textarea name="body" rows="6" required class="form-control">Xin chào Quý khách thân thiết của Meow & Woof Pet Shop!
+
+Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Nhân dịp cuối tuần, Meow & Woof dành tặng riêng cho bé cưng của bạn mã ưu đãi đặc biệt:
+🎁 Mã Voucher: GENZVIP20 (Giảm ngay 20% mọi gói Spa & Cắt tỉa tạo kiểu)
+⏰ Thời hạn áp dụng: Trong vòng 7 ngày kể từ hôm nay.
+
+Hẹn gặp lại bạn và bé cưng tại cửa hàng nhé!</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">🚀 Gửi Email Ưu Đãi &amp; Lưu Nhật Ký Hệ Thống</button>
+                        </form>
                     </div>
                 </div>
 
@@ -918,19 +1139,154 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                         <h2 class="card-title">Nhật ký Email đã gửi cho khách ({{ email_logs|length }} thư)</h2>
                     </div>
                     {% for log in email_logs %}
-                    <div style="border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:14px; background:#ffffff;">
+                    <div style="border:1px solid rgba(148,163,184,0.18); border-radius:14px; padding:18px; margin-bottom:14px; background:rgba(15,23,42,0.65);">
                         <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
-                            <strong>{{ log.subject }}</strong>
+                            <strong style="color:#f8fafc; font-size:15px;">✉️ {{ log.subject }}</strong>
                             <span class="badge badge-stock-ok">{{ log.delivery_status }}</span>
                         </div>
-                        <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:10px;">
-                            Tới: <code>{{ log.recipient }}</code> | Lúc: {{ log.created_at }}
+                        <div style="font-size:12.5px; color:#94a3b8; margin-bottom:12px;">
+                            Người nhận: <code>{{ log.recipient }}</code> • Thời gian: {{ log.created_at }}
                         </div>
-                        <pre style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:6px; font-family:inherit; font-size:13.5px; white-space:pre-wrap;">{{ log.body }}</pre>
+                        <pre style="background:rgba(9,13,26,0.85); border:1px solid rgba(99,102,241,0.2); color:#e2e8f0; padding:14px; border-radius:10px; font-family:inherit; font-size:13.5px; white-space:pre-wrap; margin:0;">{{ log.body }}</pre>
                     </div>
                     {% else %}
                     <p style="color:var(--text-muted);">Chưa có email nào trong nhật ký.</p>
                     {% endfor %}
+                </div>
+
+                {% elif admin_tab == 'system_settings' %}
+                <!-- ==========================================================
+                     TAB MỚI 3: CẤU HÌNH HỆ THỐNG, ĐỒNG BỘ SEED & CỔNG REST API
+                     ========================================================== -->
+                <div class="admin-kpi-grid" style="margin-bottom:20px;">
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">TRẠNG THÁI DATABASE</span>
+                            <div class="kpi-icon-box kpi-icon-green">🟢</div>
+                        </div>
+                        <div class="kpi-value" style="color:#34d399;">SQLite3 Online</div>
+                        <div class="kpi-sub">Giao dịch ACID &amp; WAL an toàn</div>
+                    </div>
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">BỘ NHỚ ĐỆM (CACHE)</span>
+                            <div class="kpi-icon-box kpi-icon-cyan">⚡</div>
+                        </div>
+                        <div class="kpi-value" style="color:#a855f7;">TTL 15 Phút</div>
+                        <div class="kpi-sub">Tăng tốc tải trang &amp; chống đơ API</div>
+                    </div>
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">DANH MỤC GỐC (SEED)</span>
+                            <div class="kpi-icon-box kpi-icon-blue">🐾</div>
+                        </div>
+                        <div class="kpi-value" style="color:#60a5fa;">42 Sản Phẩm</div>
+                        <div class="kpi-sub">20 giống Chó • 12 giống Mèo • 10 Phụ kiện</div>
+                    </div>
+                    <div class="admin-kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">MÔI TRƯỜNG PYTHON</span>
+                            <div class="kpi-icon-box kpi-icon-orange">🐍</div>
+                        </div>
+                        <div class="kpi-value" style="color:#fbbf24;">Python {{ python_version }}</div>
+                        <div class="kpi-sub">Flask + Custom ORM + Jinja2</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">1. Đồng Bộ Kho Dữ Liệu Gốc &amp; Cổng RESTful JSON API</h2>
+                        </div>
+                        <p style="font-size:13.5px; color:#94a3b8; margin-bottom:14px;">
+                            Nếu bạn vừa chỉnh sửa danh sách <code>SEED_CATALOG</code> hoặc muốn khôi phục các giống thú cưng mặc định bị xóa nhầm, nhấn nút bên dưới để đồng bộ lại ngay mà không làm mất đơn hàng:
+                        </p>
+                        <form method="POST" action="{{ url_for('admin_resync_seed') }}" style="margin-bottom:22px;">
+                            <button type="submit" class="btn btn-teal btn-block">🔄 Đồng Bộ &amp; Kiểm Tra 42 Sản Phẩm Chuẩn (SEED_CATALOG)</button>
+                        </form>
+
+                        <h3 style="font-size:14px; font-weight:700; color:#f8fafc; margin-bottom:10px;">Danh sách Cổng REST API Nội Bộ (JSON Endpoints):</h3>
+                        <div class="table-wrap">
+                            <table class="clean-table">
+                                <thead>
+                                    <tr>
+                                        <th>Phương thức</th>
+                                        <th>Endpoint URL</th>
+                                        <th>Mô tả dữ liệu trả về</th>
+                                        <th class="text-right">Kiểm thử</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="badge badge-confirmed">GET</span></td>
+                                        <td><code>/api/stats</code></td>
+                                        <td>Chỉ số KPI, doanh thu &amp; tồn kho</td>
+                                        <td class="text-right"><a href="/api/stats" target="_blank" class="btn btn-outline btn-sm">Mở JSON</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-confirmed">GET</span></td>
+                                        <td><code>/api/products</code></td>
+                                        <td>Danh sách 42+ sản phẩm &amp; thú cưng</td>
+                                        <td class="text-right"><a href="/api/products" target="_blank" class="btn btn-outline btn-sm">Mở JSON</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-confirmed">GET</span></td>
+                                        <td><code>/api/bookings</code></td>
+                                        <td>Danh sách lịch hẹn Spa thú cưng</td>
+                                        <td class="text-right"><a href="/api/bookings" target="_blank" class="btn btn-outline btn-sm">Mở JSON</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-confirmed">GET</span></td>
+                                        <td><code>/api/orders</code></td>
+                                        <td>Danh sách đơn hàng bán lẻ</td>
+                                        <td class="text-right"><a href="/api/orders" target="_blank" class="btn btn-outline btn-sm">Mở JSON</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">2. Kiểm Thử Kết Nối TheCatAPI / TheDogAPI (urllib + Header x-api-key)</h2>
+                        </div>
+                        <p style="font-size:13.5px; color:#94a3b8; margin-bottom:14px;">
+                            Công cụ dành riêng cho Quản trị viên kiểm tra kết nối mạng <code>urllib.request</code> tới máy chủ giống thú cưng quốc tế (kèm cơ chế tự động Fallback khi ngoại tuyến):
+                        </p>
+                        <form method="GET" action="{{ url_for('admin_page') }}" style="margin-bottom:16px;">
+                            <input type="hidden" name="tab" value="system_settings">
+                            <input type="hidden" name="run_api_test" value="1">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label class="form-label">Loài thú cưng cần truy vấn:</label>
+                                    <select name="test_species" class="form-control">
+                                        <option value="cat" {% if request.args.get('test_species') == 'cat' %}selected{% endif %}>🐱 TheCatAPI (Giống Mèo)</option>
+                                        <option value="dog" {% if request.args.get('test_species') == 'dog' %}selected{% endif %}>🐶 TheDogAPI (Giống Chó)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Header <code>x-api-key</code> (Tùy chọn):</label>
+                                    <input type="text" name="test_api_key" value="{{ request.args.get('test_api_key', '') }}" placeholder="Để trống dùng chế độ mặc định..." class="form-control">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">⚡ Gửi Request HTTP GET &amp; Kiểm Tra Phản Hồi</button>
+                        </form>
+
+                        {% if breed_api_preview %}
+                        <div style="padding:14px; border-radius:12px; background:rgba(15,23,42,0.8); border:1px solid rgba(99,102,241,0.3);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <strong style="color:#a5b4fc; font-size:13px;">Nguồn phản hồi: {{ breed_api_preview.source }}</strong>
+                                <span class="badge badge-stock-ok">x-api-key: {{ breed_api_preview.api_key_used }}</span>
+                            </div>
+                            <div style="font-size:12.5px; color:#cbd5e1;">
+                                Đã tải thành công <strong>{{ breed_api_preview.breeds|length }}</strong> giống mẫu:
+                                {% for b in breed_api_preview.breeds %}
+                                    <span class="badge badge-both" style="margin-right:4px;">{{ b.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endif %}
             </main>
