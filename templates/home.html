@@ -163,22 +163,225 @@ function switchSpotlightPet(idx) {
 }
 </script>
 
-<!-- CHÓ MÈO CẢNH & SẢN PHẨM NỔI BẬT -->
+<!-- ================= BỘ SƯU TẬP GIỐNG CHÓ MÈO ĐƯỢC YÊU THÍCH (GEN Z BREED DISCOVERY) ================= -->
+<section class="breed-showcase-section">
+    <div class="section-header">
+        <div>
+            <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:rgba(139,92,246,0.18); border:1px solid rgba(139,92,246,0.35); font-size:11.5px; font-weight:800; color:#c4b5fd; margin-bottom:8px;">
+                <span>✨ KHÁM PHÁ THEO GIỐNG THUẦN CHỦNG 🐾</span>
+            </div>
+            <h2 class="section-title">Chọn Boss Theo Giống Được Yêu Thích Nhất</h2>
+            <p class="section-subtitle">Chạm vào giống bạn yêu thích để xem các bé cưng thuần chủng và phụ kiện chăm sóc tương ứng</p>
+        </div>
+        <a href="{{ url_for('shop_page', category='Chó cảnh') }}" class="btn btn-outline" style="font-size:13px; font-weight:700;">
+            Khám phá 32 giống Boss &rarr;
+        </a>
+    </div>
+
+    <div class="breed-scroll-wrap">
+        <!-- Chó Poodle -->
+        <a href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Poodle') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1616149562385-1d84e79478bb?auto=format&fit=crop&w=250&q=80" alt="Chó Poodle" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐶 Chó Poodle</span>
+            <span class="breed-desc-tag">Lông xoăn • Không rụng</span>
+        </a>
+
+        <!-- Chó Corgi -->
+        <a href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Corgi Chân Lùn') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1612536057832-2ff7ead58194?auto=format&fit=crop&w=250&q=80" alt="Chó Corgi" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐶 Chó Corgi</span>
+            <span class="breed-desc-tag">Mông tim • Chân lùn</span>
+        </a>
+
+        <!-- Chó Schnauzer -->
+        <a href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Schnauzer') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?auto=format&fit=crop&w=250&q=80" alt="Chó Schnauzer" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐶 Chó Schnauzer</span>
+            <span class="breed-desc-tag">Mặt bác học • Quấn chủ</span>
+        </a>
+
+        <!-- Chó Phốc Sóc -->
+        <a href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Phốc Sóc (Pomeranian)') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=250&q=80" alt="Chó Phốc Sóc" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐶 Chó Phốc Sóc</span>
+            <span class="breed-desc-tag">Bông xù mặt gấu</span>
+        </a>
+
+        <!-- Chó Golden Retriever -->
+        <a href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Golden Retriever') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=250&q=80" alt="Chó Golden" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐶 Chó Golden</span>
+            <span class="breed-desc-tag">Hiền lành • Bạn trẻ nhỏ</span>
+        </a>
+
+        <!-- Chó Shiba Inu -->
+        <a href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Shiba Inu') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=250&q=80" alt="Chó Shiba Inu" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐶 Chó Shiba Inu</span>
+            <span class="breed-desc-tag">Mặt cười • Chuẩn Nhật</span>
+        </a>
+
+        <!-- Mèo Anh Lông Ngắn -->
+        <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Anh Lông Ngắn (ALN)') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=250&q=80" alt="Mèo ALN" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐱 Mèo ALN</span>
+            <span class="breed-desc-tag">Má bánh bao • Siêu nịnh</span>
+        </a>
+
+        <!-- Mèo Munchkin Chân Ngắn -->
+        <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Chân Ngắn Munchkin') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=250&q=80" alt="Mèo Munchkin" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐱 Mèo Munchkin</span>
+            <span class="breed-desc-tag">Chân lùn cute • Quấn chủ</span>
+        </a>
+
+        <!-- Mèo Scottish Fold -->
+        <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Tai Cụp Scottish Fold') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=250&q=80" alt="Mèo Scottish" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐱 Mèo Scottish</span>
+            <span class="breed-desc-tag">Tai cụp tròn xoe</span>
+        </a>
+
+        <!-- Mèo Ragdoll -->
+        <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Ragdoll') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&w=250&q=80" alt="Mèo Ragdoll" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐱 Mèo Ragdoll</span>
+            <span class="breed-desc-tag">Mắt xanh công chúa</span>
+        </a>
+
+        <!-- Mèo Ba Tư -->
+        <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Ba Tư (Persian)') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=250&q=80" alt="Mèo Ba Tư" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐱 Mèo Ba Tư</span>
+            <span class="breed-desc-tag">Mặt tịt đáng yêu</span>
+        </a>
+
+        <!-- Mèo Bengal -->
+        <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Bengal') }}" class="breed-card-mini">
+            <div class="breed-avatar-wrap">
+                <img src="https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=250&q=80" alt="Mèo Bengal" class="breed-avatar-img" loading="lazy">
+            </div>
+            <span class="breed-name-title">🐱 Mèo Bengal</span>
+            <span class="breed-desc-tag">Vân hoa hồng báo rừng</span>
+        </a>
+    </div>
+</section>
+
+<!-- ================= SẢN PHẨM & THÚ CƯNG NỔI BẬT VỚI TAB LỌC NHANH ================= -->
 <section style="margin-bottom: 42px;">
     <div class="section-header">
         <div>
-            <h2 class="section-title">Thú Cưng &amp; Sản Phẩm Nổi Bật</h2>
-            <p class="section-subtitle">Bấm vào từng bé thú cưng hoặc sản phẩm để xem thông tin chi tiết và các đồ vật liên quan</p>
+            <h2 class="section-title">Thú Cưng &amp; Đồ Dùng Nổi Bật</h2>
+            <p class="section-subtitle">Chạm vào phân loại để lọc nhanh các bé thú cưng hoặc thức ăn, đồ dùng đang có sẵn tại shop</p>
         </div>
-        <a href="{{ url_for('shop_page') }}" class="btn btn-outline">Xem toàn bộ cửa hàng ({{ stats.total_products }}) &rarr;</a>
+        <a href="{{ url_for('shop_page') }}" class="btn btn-outline" style="font-weight:700;">Xem tất cả ({{ stats.total_products }}) &rarr;</a>
     </div>
 
-    <div class="product-grid">
+    <!-- Thanh chuyển đổi nhanh phân loại trực tiếp trên trang chủ -->
+    <div class="home-filter-nav">
+        <button type="button" class="home-filter-tab active" onclick="filterHomeProducts('ALL', this)">
+            ✨ Tất Cả Nổi Bật
+        </button>
+        <button type="button" class="home-filter-tab" onclick="filterHomeProducts('Chó cảnh', this)">
+            🐶 Chó Cảnh Thuần Chủng
+        </button>
+        <button type="button" class="home-filter-tab" onclick="filterHomeProducts('Mèo cảnh', this)">
+            🐱 Mèo Cảnh Siêu Cưng
+        </button>
+        <button type="button" class="home-filter-tab" onclick="filterHomeProducts('Thức ăn', this)">
+            🍖 Thức Ăn &amp; Pate
+        </button>
+        <button type="button" class="home-filter-tab" onclick="filterHomeProducts('Vệ sinh & Chăm sóc', this)">
+            🧼 Vệ Sinh &amp; Chăm Sóc
+        </button>
+        <button type="button" class="home-filter-tab" onclick="filterHomeProducts('Y tế & Vitamin', this)">
+            🩺 Y Tế &amp; Vitamin
+        </button>
+    </div>
+
+    <div class="product-grid" id="homeProductGrid">
         {% for p in featured_products %}
             {{ render_product_card(p, request.path) }}
         {% endfor %}
     </div>
+
+    <div id="homeFilterNotice" style="display:none; text-align:center; padding:32px 16px; background:rgba(255,255,255,0.03); border:1px dashed rgba(255,255,255,0.1); border-radius:18px; margin-top:16px;">
+        <p style="font-size:15px; color:#cbd5e1; margin-bottom:12px;">Đang xem danh mục phân loại này. Bạn có thể xem toàn bộ các sản phẩm khác trong gian hàng.</p>
+        <a href="{{ url_for('shop_page') }}" class="btn btn-primary" style="font-weight:800;">
+            🛒 Khám Phá Thêm Tại Cửa Hàng
+        </a>
+    </div>
 </section>
+
+<script>
+function filterHomeProducts(cat, btnEl) {
+    // 1. Cập nhật nút active
+    var tabs = document.querySelectorAll('.home-filter-tab');
+    tabs.forEach(function(b) { b.classList.remove('active'); });
+    if (btnEl) btnEl.classList.add('active');
+
+    // 2. Lọc các thẻ sản phẩm trong grid
+    var grid = document.getElementById('homeProductGrid');
+    if (!grid) return;
+    var cards = grid.querySelectorAll('.product-card');
+    var visibleCount = 0;
+
+    cards.forEach(function(card) {
+        var cardCat = card.getAttribute('data-category') || '';
+        var cardType = card.getAttribute('data-pet-type') || '';
+
+        var match = false;
+        if (cat === 'ALL') {
+            match = true;
+        } else if (cat === 'Chó cảnh') {
+            match = (cardCat === 'Chó cảnh' || cardType === 'Chó');
+        } else if (cat === 'Mèo cảnh') {
+            match = (cardCat === 'Mèo cảnh' || cardType === 'Mèo');
+        } else if (cat === 'Thức ăn') {
+            match = (cardCat === 'Thức ăn');
+        } else if (cat === 'Vệ sinh & Chăm sóc') {
+            match = (cardCat === 'Vệ sinh & Chăm sóc' || cardCat === 'Phụ kiện' || cardCat === 'Đồ chơi');
+        } else if (cat === 'Y tế & Vitamin') {
+            match = (cardCat === 'Y tế & Vitamin');
+        }
+
+        if (match) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // 3. Hiển thị thông báo nếu không có sản phẩm nào
+    var notice = document.getElementById('homeFilterNotice');
+    if (notice) {
+        notice.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+}
+</script>
 
 <!-- TRA CỨU NHANH ĐƠN HÀNG & LỊCH HẸN -->
 <section class="card">

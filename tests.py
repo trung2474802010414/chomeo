@@ -136,6 +136,15 @@ class TestAdvancedPythonPetShop(unittest.TestCase):
         # Đăng xuất sau khi kiểm tra
         self.client.get("/logout", follow_redirects=True)
 
+        # Kiểm tra Đăng nhập tài khoản Khách hàng mẫu (khachhang / 123456)
+        cust_login_resp = self.client.post(
+            "/login",
+            data={"username": "khachhang", "password": "123456"},
+            follow_redirects=True,
+        )
+        self.assertEqual(cust_login_resp.status_code, 200)
+        self.client.get("/logout", follow_redirects=True)
+
         # Kiểm tra Form Validation bắt lỗi SĐT sai
         bad_form = SpaBookingForm({"customer_name": "A", "phone": "abc"})
         self.assertFalse(bad_form.validate())

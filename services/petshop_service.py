@@ -579,6 +579,31 @@ def init_db_and_seed() -> None:
         for b in seed_bookings:
             SpaBooking(**b).save()
 
+    # Tự động nạp tài khoản khách hàng mẫu để kiểm tra tính năng mua sắm & đăng nhập
+    first_user = next(User.iter_all(), None)
+    if first_user is None:
+        from models.user import hash_password
+        seed_users = [
+            {
+                "username": "khachhang",
+                "fullname": "Nguyễn Minh Anh",
+                "email": "minhanh@gmail.com",
+                "phone": "0905123456",
+                "password_hash": hash_password("123456"),
+                "role": "customer",
+            },
+            {
+                "username": "petlover",
+                "fullname": "Trần Thu Hà",
+                "email": "thuha@gmail.com",
+                "phone": "0908888999",
+                "password_hash": hash_password("123456"),
+                "role": "customer",
+            },
+        ]
+        for u in seed_users:
+            User(**u).save()
+
 
 def query_products(
     keyword: Optional[str] = None,

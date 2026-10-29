@@ -40,7 +40,7 @@
 {%- endmacro %}
 
 {% macro render_product_card(p, next_url) -%}
-<article class="product-card">
+<article class="product-card" data-category="{{ p.category }}" data-pet-type="{{ p.pet_type }}">
     <a href="{{ url_for('product_detail_page', product_id=p.id) }}" class="product-card-link">
         <div class="product-visual {% if p.image_url %}has-photo{% endif %}">
             <div class="product-badges-top" style="z-index:2;">

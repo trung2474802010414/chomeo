@@ -80,6 +80,10 @@ app = Flask(
     static_folder=os.path.join(BASE_DIR, "static"),
 )
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "meow-woof-petshop-secret-2026")
+# Duy trì phiên đăng nhập 30 ngày kể cả khi tắt và mở lại trình duyệt
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = False
 
 # Tự động khởi tạo bảng và dữ liệu mẫu ngay khi Vercel WSGI import `app`
 init_db_and_seed()
@@ -180,7 +184,8 @@ def admin_required(view_func: Callable) -> Callable:
 def home_page():
     """Trang chủ: Banner, Sản phẩm nổi bật và Tra cứu nhanh Đơn hàng / Lịch hẹn."""
     all_prods = [p.to_dict() for p in Product.iter_all(order_by="id DESC")]
-    featured_products = all_prods[:6]
+    # Hiển thị 12 sản phẩm & thú cưng tiêu biểu nhất trên trang chủ
+    featured_products = all_prods[:12] if len(all_prods) >= 12 else all_prods
     stats = {"total_products": len(all_prods)}
     lookup_phone = request.args.get("lookup_phone", "").strip()
     lookup_result = None
@@ -589,6 +594,7 @@ def login_page():
                         role="customer",
                     )
                     new_user.save()
+                    session.permanent = True
                     session.pop("admin_logged_in", None)
                     session.pop("admin_user", None)
                     session["customer_logged_in"] = True
@@ -611,6 +617,7 @@ def login_page():
 
             # A. Kiểm tra tài khoản Quản trị Admin -> Vào Dashboard
             if input_user == expected_user and input_pass == expected_pass:
+                session.permanent = True
                 session.pop("customer_logged_in", None)
                 session["admin_logged_in"] = True
                 session["admin_user"] = expected_user
@@ -621,7 +628,37 @@ def login_page():
 
             # B. Kiểm tra tài khoản Thành viên Khách hàng -> Vào Trang bán hàng
             customer_user = User.find_by_identifier(input_user)
+
+            # Nếu tài khoản chưa có trong SQLite (VD: do Vercel Serverless cold-start khởi động container mới),
+            # tự động phục hồi từ bản sao lưu an toàn client_user_backup do trình duyệt gửi kèm
+            if not customer_user:
+                backup_raw = request.form.get("client_user_backup", "").strip()
+                if backup_raw:
+                    try:
+                        b_data = json.loads(backup_raw)
+                        if isinstance(b_data, dict):
+                            b_user = b_data.get("username", "").strip()
+                            b_email = b_data.get("email", "").strip()
+                            b_phone = b_data.get("phone", "").strip()
+                            b_hash = b_data.get("password_hash", "").strip()
+                            b_fullname = b_data.get("fullname", b_user).strip()
+                            ident = input_user.lower()
+                            if (b_user.lower() == ident or b_email.lower() == ident or b_phone == ident) and (b_hash == hash_password(input_pass)):
+                                restored = User(
+                                    username=b_user,
+                                    fullname=b_fullname,
+                                    email=b_email,
+                                    phone=b_phone,
+                                    password_hash=b_hash,
+                                    role="customer",
+                                )
+                                restored.save()
+                                customer_user = restored
+                    except Exception:
+                        pass
+
             if customer_user and customer_user.verify_password(input_pass):
+                session.permanent = True
                 session.pop("admin_logged_in", None)
                 session.pop("admin_user", None)
                 session["customer_logged_in"] = True
