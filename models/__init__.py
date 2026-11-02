@@ -4,12 +4,14 @@ from models.entities import (
     CAT_BREEDS,
     DOG_BREEDS,
     EmailLog,
+    ORDER_STATUSES,
     Order,
     PET_TYPES,
     Product,
     SPA_SERVICES,
     SpaBooking,
     User,
+    Voucher,
     hash_password,
 )
 
@@ -19,6 +21,7 @@ __all__ = [
     "Order",
     "EmailLog",
     "User",
+    "Voucher",
     "hash_password",
     "CATEGORIES",
     "PET_TYPES",
@@ -26,4 +29,5 @@ __all__ = [
     "CAT_BREEDS",
     "SPA_SERVICES",
     "BOOKING_STATUSES",
+    "ORDER_STATUSES",
 ]

@@ -12,7 +12,7 @@ from datetime import datetime
 import hashlib
 import json
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from core.database import resolve_writable_json_path
 from core.orm import BaseModel, FloatField, IntField, StringField
 
@@ -80,6 +80,7 @@ ORDER_STATUSES = ["Chờ xác nhận", "Đang đóng gói", "Đang giao hàng", 
 USERS_STORE_PATH = resolve_writable_json_path("users_store.json")
 ORDERS_STORE_PATH = resolve_writable_json_path("orders_store.json")
 BOOKINGS_STORE_PATH = resolve_writable_json_path("bookings_store.json")
+VOUCHERS_STORE_PATH = resolve_writable_json_path("vouchers_store.json")
 
 
 def hash_password(password: str) -> str:
@@ -288,6 +289,8 @@ class Order(BaseModel):
     address = StringField(max_length=255)
     items_json = StringField(max_length=4000)
     total_amount = FloatField(min_value=0.0)
+    voucher_code = StringField(max_length=40, nullable=True, default="")
+    discount_amount = FloatField(min_value=0.0, default=0.0)
     status = StringField(max_length=40, nullable=True, default="Chờ xác nhận")
     payment_method = StringField(max_length=30, nullable=True, default="cod")
     created_at = StringField(
@@ -422,6 +425,8 @@ class Order(BaseModel):
                     address=str(od.get("address", "Đà Nẵng")).strip(),
                     items_json=str(raw_items),
                     total_amount=total_amt,
+                    voucher_code=str(od.get("voucher_code", "") or "").strip(),
+                    discount_amount=float(od.get("discount_amount", 0) or 0),
                     status=status_val,
                     payment_method=pay_val,
                     created_at=created_at,
@@ -456,9 +461,9 @@ class EmailLog(BaseModel):
 
     id = IntField(primary_key=True)
     recipient = StringField(max_length=150)
-    subject = StringField(max_length=200)
+    subject = StringField(max_length=250)
     body = StringField(max_length=15000)
-    delivery_status = StringField(max_length=80, default="Đã lưu & Gửi")
+    delivery_status = StringField(max_length=250, default="Đã lưu & Gửi")
     created_at = StringField(
         max_length=40,
         default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -624,4 +629,197 @@ class User(BaseModel):
             ):
                 return u
         return None
+
+
+class Voucher(BaseModel):
+    """Mã giảm giá / Voucher do Admin tự thiết lập chữ, mức giảm và thời gian áp dụng."""
+
+    __tablename__ = "vouchers"
+
+    id = IntField(primary_key=True)
+    code = StringField(max_length=40)
+    title = StringField(max_length=160, default="Voucher Ưu Đãi Meow & Woof")
+    discount_type = StringField(max_length=20, default="fixed")  # "fixed" (VNĐ) hoặc "percent" (%)
+    discount_value = FloatField(min_value=0.0, default=50000.0)
+    min_order_value = FloatField(min_value=0.0, default=0.0)
+    max_discount = FloatField(min_value=0.0, default=0.0)
+    start_date = StringField(
+        max_length=40,
+        default=lambda: datetime.now().strftime("%Y-%m-%d"),
+    )
+    expiry_date = StringField(
+        max_length=40,
+        default="2027-12-31",
+    )
+    usage_limit = IntField(min_value=1, default=100)
+    used_count = IntField(min_value=0, default=0)
+    is_active = IntField(min_value=0, default=1)
+    created_at = StringField(
+        max_length=40,
+        default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    )
+
+    def is_currently_valid(self) -> Tuple[bool, str]:
+        """Kiểm tra trạng thái hoạt động, số lượt dùng và thời hạn áp dụng của Voucher."""
+        if int(self.is_active or 0) <= 0:
+            return False, f"Mã Voucher '{self.code}' hiện đang tạm ngưng áp dụng."
+        if int(self.used_count or 0) >= int(self.usage_limit or 100):
+            return False, f"Mã Voucher '{self.code}' đã hết lượt sử dụng ({self.used_count}/{self.usage_limit})."
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        s_date = str(self.start_date or "").strip()[:10]
+        e_date = str(self.expiry_date or "").strip()[:10]
+        if s_date and today_str < s_date:
+            return False, f"Mã Voucher '{self.code}' sẽ bắt đầu có hiệu lực từ ngày {s_date}."
+        if e_date and today_str > e_date:
+            return False, f"Mã Voucher '{self.code}' đã hết hạn vào ngày {e_date}."
+        return True, "Hợp lệ"
+
+    def calculate_discount(self, subtotal: float) -> Tuple[bool, str, float]:
+        """Tính số tiền được giảm trên tổng tạm tính giỏ hàng `subtotal`."""
+        ok, msg = self.is_currently_valid()
+        if not ok:
+            return False, msg, 0.0
+        min_val = float(self.min_order_value or 0.0)
+        if subtotal < min_val:
+            return (
+                False,
+                f"Mã '{self.code}' yêu cầu đơn hàng tối thiểu {min_val:,.0f} đ (Giỏ hiện tại: {subtotal:,.0f} đ).",
+                0.0,
+            )
+        dtype = str(self.discount_type or "fixed").strip().lower()
+        dval = float(self.discount_value or 0.0)
+        if dtype == "percent":
+            pct = max(0.0, min(100.0, dval))
+            disc = round(subtotal * (pct / 100.0), 0)
+            max_cap = float(self.max_discount or 0.0)
+            if max_cap > 0 and disc > max_cap:
+                disc = max_cap
+        else:
+            disc = round(dval, 0)
+
+        disc = min(subtotal, max(0.0, disc))
+        return True, f"Áp dụng mã '{self.code}' thành công (-{disc:,.0f} đ)!", disc
+
+    def to_dict(self) -> Dict[str, Any]:
+        data = super().to_dict()
+        ok, status_msg = self.is_currently_valid()
+        data["is_valid_now"] = ok
+        data["status_label"] = "Đang hoạt động" if ok else status_msg
+        if str(self.discount_type).lower() == "percent":
+            cap_txt = f" (Tối đa {self.max_discount:,.0f}đ)" if float(self.max_discount or 0) > 0 else ""
+            data["discount_display"] = f"Giảm {self.discount_value:.0f}%{cap_txt}"
+        else:
+            data["discount_display"] = f"Giảm {self.discount_value:,.0f} đ"
+        return data
+
+    def save(self) -> "Voucher":
+        self.code = str(self.code or "").strip().upper()
+        super().save()
+        self._persist_to_json_file()
+        return self
+
+    def _persist_to_json_file(self) -> None:
+        try:
+            os.makedirs(os.path.dirname(VOUCHERS_STORE_PATH), exist_ok=True)
+            records: List[Dict[str, Any]] = []
+            if os.path.exists(VOUCHERS_STORE_PATH):
+                with open(VOUCHERS_STORE_PATH, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                    if isinstance(loaded, list):
+                        records = loaded
+
+            entry = self.to_dict()
+            code_upper = str(self.code).strip().upper()
+            updated = False
+            for idx, item in enumerate(records):
+                if str(item.get("code", "")).strip().upper() == code_upper:
+                    records[idx] = entry
+                    updated = True
+                    break
+            if not updated:
+                records.append(entry)
+
+            with open(VOUCHERS_STORE_PATH, "w", encoding="utf-8") as f:
+                json.dump(records, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    @classmethod
+    def sync_all_to_json_file(cls) -> List[Dict[str, Any]]:
+        all_vouchers = [v.to_dict() for v in cls.iter_all(order_by="id DESC")]
+        try:
+            os.makedirs(os.path.dirname(VOUCHERS_STORE_PATH), exist_ok=True)
+            with open(VOUCHERS_STORE_PATH, "w", encoding="utf-8") as f:
+                json.dump(all_vouchers, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        return all_vouchers
+
+    @classmethod
+    def sync_from_json_store(cls) -> None:
+        if not os.path.exists(VOUCHERS_STORE_PATH):
+            return
+        try:
+            with open(VOUCHERS_STORE_PATH, "r", encoding="utf-8") as f:
+                records = json.load(f)
+            if isinstance(records, list):
+                cls.restore_vouchers_list(records)
+        except Exception:
+            pass
+
+    @classmethod
+    def restore_vouchers_list(cls, vouchers: List[Dict[str, Any]]) -> None:
+        try:
+            existing_map = {str(v.code).strip().upper(): v for v in cls.iter_all()}
+            for vd in vouchers:
+                if not isinstance(vd, dict):
+                    continue
+                code_str = str(vd.get("code", "")).strip().upper()
+                if not code_str:
+                    continue
+                if code_str in existing_map:
+                    ex = existing_map[code_str]
+                    ex.title = str(vd.get("title", ex.title)).strip()
+                    ex.discount_type = str(vd.get("discount_type", ex.discount_type)).strip()
+                    ex.discount_value = float(vd.get("discount_value", ex.discount_value) or 0)
+                    ex.min_order_value = float(vd.get("min_order_value", ex.min_order_value) or 0)
+                    ex.max_discount = float(vd.get("max_discount", ex.max_discount) or 0)
+                    ex.start_date = str(vd.get("start_date", ex.start_date)).strip()
+                    ex.expiry_date = str(vd.get("expiry_date", ex.expiry_date)).strip()
+                    ex.usage_limit = max(1, int(vd.get("usage_limit", ex.usage_limit) or 100))
+                    ex.used_count = max(int(ex.used_count or 0), int(vd.get("used_count", 0) or 0))
+                    ex.is_active = int(vd.get("is_active", ex.is_active) if vd.get("is_active") is not None else 1)
+                    super(Voucher, ex).save()
+                    continue
+
+                new_v = cls(
+                    code=code_str,
+                    title=str(vd.get("title", "Voucher Ưu Đãi Meow & Woof")).strip(),
+                    discount_type=str(vd.get("discount_type", "fixed")).strip(),
+                    discount_value=float(vd.get("discount_value", 50000) or 50000),
+                    min_order_value=float(vd.get("min_order_value", 0) or 0),
+                    max_discount=float(vd.get("max_discount", 0) or 0),
+                    start_date=str(vd.get("start_date", datetime.now().strftime("%Y-%m-%d"))).strip(),
+                    expiry_date=str(vd.get("expiry_date", "2027-12-31")).strip(),
+                    usage_limit=max(1, int(vd.get("usage_limit", 100) or 100)),
+                    used_count=max(0, int(vd.get("used_count", 0) or 0)),
+                    is_active=int(vd.get("is_active", 1) if vd.get("is_active") is not None else 1),
+                    created_at=str(vd.get("created_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))).strip(),
+                )
+                super(Voucher, new_v).save()
+                existing_map[code_str] = new_v
+        except Exception:
+            pass
+
+    @classmethod
+    def find_by_code(cls, code: str) -> Optional["Voucher"]:
+        cls.sync_from_json_store()
+        c_upper = str(code or "").strip().upper()
+        if not c_upper:
+            return None
+        for v in cls.iter_all():
+            if str(v.code).strip().upper() == c_upper:
+                return v
+        return None
+
 

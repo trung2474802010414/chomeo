@@ -42,11 +42,13 @@ from models.entities import (
     CAT_BREEDS,
     DOG_BREEDS,
     EmailLog,
+    ORDER_STATUSES,
     Order,
     Product,
     SPA_SERVICES,
     SpaBooking,
     User,
+    Voucher,
     hash_password,
 )
 from services.email_service import (
@@ -333,6 +335,26 @@ def _sync_bookings_vault_cookie(resp: Response, all_bookings: List[Dict[str, Any
     return resp
 
 
+def _read_cookie_vouchers_vault() -> List[Dict[str, Any]]:
+    """Đọc danh sách mã giảm giá Voucher từ Cookie trình duyệt."""
+    return _decode_compressed_vault(request.cookies.get("mw_vouchers_vault", ""))
+
+
+def _sync_vouchers_vault_cookie(resp: Response, all_vouchers: List[Dict[str, Any]]) -> Response:
+    """Đồng bộ danh sách Voucher vào Cookie bền vững 365 ngày."""
+    try:
+        resp.set_cookie(
+            "mw_vouchers_vault",
+            _encode_compressed_vault(all_vouchers[-30:]),
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+    except Exception:
+        pass
+    return resp
+
+
 @app.before_request
 def restore_persistent_accounts_before_request() -> None:
     """Tự động đồng bộ tài khoản, đơn hàng, lịch Spa, ngân hàng và email Admin từ JSON & Cookie trước mỗi request."""
@@ -355,6 +377,12 @@ def restore_persistent_accounts_before_request() -> None:
     bookings_vault = _read_cookie_bookings_vault()
     if bookings_vault:
         SpaBooking.restore_bookings_list(bookings_vault)
+
+    # Khôi phục danh sách mã giảm giá Voucher từ file JSON & Cookie
+    Voucher.sync_from_json_store()
+    vouchers_vault = _read_cookie_vouchers_vault()
+    if vouchers_vault:
+        Voucher.restore_vouchers_list(vouchers_vault)
 
     # Khôi phục cấu hình ngân hàng từ Cookie nếu trên Serverless cold-start
     if not os.environ.get("PETSHOP_BANK_CONFIG"):
@@ -665,9 +693,81 @@ def spa_page():
     )
 
 
+@app.route("/cart/voucher", methods=["POST"])
+def apply_cart_voucher_route():
+    """Khách hàng nhập hoặc chọn mã giảm giá Voucher tại trang Giỏ hàng & Thanh toán."""
+    _, cart_total, _ = build_cart_view_data()
+    action = request.form.get("voucher_action", "apply").strip()
+    if action == "remove":
+        session.pop("applied_voucher", None)
+        session.modified = True
+        flash("Đã gỡ mã giảm giá Voucher khỏi đơn hàng.", "success")
+        return redirect(url_for("cart_page"))
+
+    code = request.form.get("voucher_code", "").strip().upper()
+    if not code:
+        flash("Vui lòng nhập mã giảm giá Voucher.", "error")
+        return redirect(url_for("cart_page"))
+
+    v_obj = Voucher.find_by_code(code)
+    if not v_obj:
+        session.pop("applied_voucher", None)
+        flash(f"Mã Voucher '{code}' không tồn tại trong hệ thống.", "error")
+        return redirect(url_for("cart_page"))
+
+    ok, msg, disc_val = v_obj.calculate_discount(cart_total)
+    if not ok:
+        session.pop("applied_voucher", None)
+        flash(msg, "error")
+        return redirect(url_for("cart_page"))
+
+    session["applied_voucher"] = v_obj.code
+    session.modified = True
+    flash(f"🎟️ {msg}", "success")
+    return redirect(url_for("cart_page"))
+
+
+@app.route("/api/voucher/check", methods=["POST"])
+def api_check_voucher():
+    """API kiểm tra nhanh mã Voucher bằng AJAX trên trang Giỏ hàng & Thanh toán."""
+    payload = request.get_json(silent=True) or {}
+    code = str(
+        payload.get("code")
+        or payload.get("voucher_code")
+        or request.form.get("code")
+        or request.form.get("voucher_code")
+        or ""
+    ).strip().upper()
+    _, cart_total, _ = build_cart_view_data()
+    if not code:
+        session.pop("applied_voucher", None)
+        return jsonify({"ok": False, "message": "Đã gỡ mã giảm giá.", "discount": 0, "discount_amount": 0, "final_total": cart_total})
+
+    v_obj = Voucher.find_by_code(code)
+    if not v_obj:
+        return jsonify({"ok": False, "message": f"Mã Voucher '{code}' không tồn tại.", "discount": 0, "discount_amount": 0, "final_total": cart_total})
+
+    ok, msg, disc_val = v_obj.calculate_discount(cart_total)
+    if not ok:
+        return jsonify({"ok": False, "message": msg, "discount": 0, "discount_amount": 0, "final_total": cart_total})
+
+    session["applied_voucher"] = v_obj.code
+    session.modified = True
+    final_total = max(0.0, round(cart_total - disc_val, 0))
+    return jsonify({
+        "ok": True,
+        "message": msg,
+        "code": v_obj.code,
+        "title": v_obj.title,
+        "discount": disc_val,
+        "discount_amount": disc_val,
+        "final_total": final_total,
+    })
+
+
 @app.route("/cart", methods=["GET", "POST"])
 def cart_page():
-    """Trang Giỏ hàng & Thanh toán: Bắt buộc đăng nhập tài khoản, Đặt hàng theo Transaction và gửi Email về Admin."""
+    """Trang Giỏ hàng & Thanh toán: Bắt buộc đăng nhập tài khoản, hỗ trợ áp dụng Voucher, Đặt hàng theo Transaction và gửi Email về Admin."""
     is_logged_in = bool(session.get("customer_logged_in") or session.get("admin_logged_in"))
     if not is_logged_in:
         # Không lưu lại giỏ hàng từ các thao tác trước khi chưa đăng nhập
@@ -675,6 +775,26 @@ def cart_page():
 
     cart_items, cart_total, _ = build_cart_view_data()
     form = CheckoutForm()
+
+    all_vouchers = [v.to_dict() for v in Voucher.iter_all(order_by="id DESC")]
+    active_vouchers = [v for v in all_vouchers if v.get("is_valid_now")]
+
+    applied_code = str(session.get("applied_voucher", "") or "").strip().upper()
+    applied_voucher = None
+    discount_amount = 0.0
+    if applied_code and cart_total > 0:
+        v_obj = Voucher.find_by_code(applied_code)
+        if v_obj:
+            ok_v, _, disc_val = v_obj.calculate_discount(cart_total)
+            if ok_v and disc_val > 0:
+                applied_voucher = v_obj.to_dict()
+                discount_amount = disc_val
+            else:
+                session.pop("applied_voucher", None)
+        else:
+            session.pop("applied_voucher", None)
+
+    final_cart_total = max(0.0, round(cart_total - discount_amount, 2))
 
     if request.method == "POST":
         if not is_logged_in:
@@ -688,6 +808,7 @@ def cart_page():
         if form.validate_on_submit():
             try:
                 payment_method = form.data.get("payment_method", "cod")
+                submitted_voucher = (request.form.get("voucher_code") or applied_code or "").strip().upper()
                 order_dict = create_order_transactional(
                     {
                         "customer_name": form.data["customer_name"],
@@ -695,6 +816,7 @@ def cart_page():
                         "email": form.data["email"],
                         "address": form.data["address"],
                         "payment_method": payment_method,
+                        "voucher_code": submitted_voucher,
                         "status": "Chờ xác nhận",
                         "items": [
                             {"product_id": i["product_id"], "quantity": i["quantity"]}
@@ -703,16 +825,23 @@ def cart_page():
                     }
                 )
                 session["last_payment_method"] = payment_method
-                # Xóa sạch toàn bộ dữ liệu giỏ hàng & thao tác đặt hàng trước đó
+                # Xóa sạch toàn bộ dữ liệu giỏ hàng & voucher sau khi đặt thành công
                 session["cart"] = {}
+                session.pop("applied_voucher", None)
                 session.modified = True
                 admin_email = get_admin_notification_email()
+                voucher_note = (
+                    f" (Đã áp dụng Voucher {order_dict.get('voucher_code')}: -{order_dict.get('discount_amount', 0):,.0f} đ)"
+                    if order_dict.get("voucher_code")
+                    else ""
+                )
                 flash(
-                    f"🎉 Đặt hàng thành công! Mã đơn hàng #{order_dict['id']} — "
+                    f"🎉 Đặt hàng thành công! Mã đơn hàng #{order_dict['id']}{voucher_note} — "
                     f"Tổng thanh toán: {order_dict['total_amount']:,.0f} đ. Đã gửi thông báo đơn hàng về hộp thư Admin ({admin_email})!",
                     "order_success",
                 )
                 resp = make_response(redirect(url_for("order_success_page", order_id=order_dict["id"])))
+                resp = _sync_vouchers_vault_cookie(resp, Voucher.sync_all_to_json_file())
                 return _attach_order_to_vault_cookie(resp, order_dict)
             except ValidationError as exc:
                 flash(str(exc), "error")
@@ -724,6 +853,10 @@ def cart_page():
         active_page="cart",
         cart_items=cart_items,
         cart_total=cart_total,
+        discount_amount=discount_amount,
+        final_cart_total=final_cart_total,
+        applied_voucher=applied_voucher,
+        active_vouchers=active_vouchers,
         form=form,
         bank_config=get_bank_config(),
     )
@@ -1280,6 +1413,9 @@ def admin_page():
         if request.args.get("run_api_test") == "1":
             breed_api_preview = fetch_pet_breeds_via_urllib(species=species_test, api_key=api_key_test, limit=4)
 
+    vouchers = [v.to_dict() for v in Voucher.iter_all(order_by="id DESC")]
+    pending_marketing_relay = session.pop("pending_marketing_relay", None)
+
     return render_template(
         "admin.html",
         active_page="admin",
@@ -1291,6 +1427,9 @@ def admin_page():
         products=products,
         bookings=bookings,
         orders=orders,
+        order_statuses=ORDER_STATUSES,
+        vouchers=vouchers,
+        pending_marketing_relay=pending_marketing_relay,
         email_logs=email_logs,
         xml_preview=xml_preview,
         low_stock_products=low_stock_products,
@@ -1563,20 +1702,178 @@ def admin_restock_product(product_id: int):
     return redirect(url_for("admin_page", tab="inventory_alerts"))
 
 
+@app.route("/admin/vouchers/save", methods=["POST"])
+@admin_required
+def admin_save_voucher():
+    """Admin tự tạo hoặc chỉnh sửa mã giảm giá Voucher (thiết lập chữ mã, mức giá giảm, thời hạn áp dụng)."""
+    voucher_id = request.form.get("voucher_id", "").strip()
+    raw_code = request.form.get("code", "").strip().upper()
+    code = re.sub(r"[^A-Z0-9_-]", "", raw_code)
+    title = request.form.get("title", "").strip() or f"Ưu đãi mã {code}"
+    discount_type = request.form.get("discount_type", "fixed").strip().lower()
+    if discount_type not in ("fixed", "percent"):
+        discount_type = "fixed"
+
+    try:
+        discount_value = max(0.0, float(request.form.get("discount_value", "50000") or 50000))
+    except ValueError:
+        discount_value = 50000.0
+
+    try:
+        min_order_value = max(0.0, float(request.form.get("min_order_value", "0") or 0))
+    except ValueError:
+        min_order_value = 0.0
+
+    try:
+        max_discount = max(0.0, float(request.form.get("max_discount", "0") or 0))
+    except ValueError:
+        max_discount = 0.0
+
+    start_date = request.form.get("start_date", "").strip() or datetime.now().strftime("%Y-%m-%d")
+    expiry_date = request.form.get("expiry_date", "").strip() or "2027-12-31"
+    if start_date and expiry_date and start_date > expiry_date:
+        start_date, expiry_date = expiry_date, start_date
+
+    try:
+        usage_limit = max(1, int(request.form.get("usage_limit", "100") or 100))
+    except ValueError:
+        usage_limit = 100
+
+    is_active = 1 if request.form.get("is_active", "1") == "1" else 0
+
+    if len(code) < 3:
+        flash("Mã chữ Voucher phải có từ 3 ký tự chữ/số trở lên (VD: GENZVIP20, MEOW50K).", "error")
+        return redirect(url_for("admin_page", tab="spa_pricing"))
+
+    v_obj = None
+    if voucher_id.isdigit() and int(voucher_id) > 0:
+        v_obj = Voucher.get_by_id(int(voucher_id))
+
+    if not v_obj:
+        v_obj = Voucher.find_by_code(code)
+
+    if v_obj:
+        v_obj.code = code
+        v_obj.title = title
+        v_obj.discount_type = discount_type
+        v_obj.discount_value = discount_value
+        v_obj.min_order_value = min_order_value
+        v_obj.max_discount = max_discount
+        v_obj.start_date = start_date
+        v_obj.expiry_date = expiry_date
+        v_obj.usage_limit = usage_limit
+        v_obj.is_active = is_active
+        v_obj.save()
+        flash(f"✅ Đã cập nhật mã Voucher '{code}' ({v_obj.to_dict()['discount_display']}, hạn đến {expiry_date})!", "success")
+    else:
+        new_v = Voucher(
+            code=code,
+            title=title,
+            discount_type=discount_type,
+            discount_value=discount_value,
+            min_order_value=min_order_value,
+            max_discount=max_discount,
+            start_date=start_date,
+            expiry_date=expiry_date,
+            usage_limit=usage_limit,
+            used_count=0,
+            is_active=is_active,
+        )
+        new_v.save()
+        flash(f"🎉 Đã tạo mới mã Voucher '{code}' ({new_v.to_dict()['discount_display']}, hạn từ {start_date} đến {expiry_date})!", "success")
+
+    all_vouchers = Voucher.sync_all_to_json_file()
+    resp = make_response(redirect(url_for("admin_page", tab="spa_pricing")))
+    return _sync_vouchers_vault_cookie(resp, all_vouchers)
+
+
+@app.route("/admin/vouchers/<int:voucher_id>/delete", methods=["POST"])
+@admin_required
+def admin_delete_voucher(voucher_id: int):
+    """Admin xóa mã Voucher khỏi hệ thống."""
+    if Voucher.delete_by_id(voucher_id):
+        flash(f"Đã xóa mã Voucher #{voucher_id}.", "success")
+    else:
+        flash(f"Không tìm thấy mã Voucher #{voucher_id}.", "error")
+    all_vouchers = Voucher.sync_all_to_json_file()
+    resp = make_response(redirect(url_for("admin_page", tab="spa_pricing")))
+    return _sync_vouchers_vault_cookie(resp, all_vouchers)
+
+
 @app.route("/admin/marketing/send-email", methods=["POST"])
 @admin_required
 def admin_send_marketing_email():
-    recipient = request.form.get("recipient", "").strip()
+    """Phát hành Voucher & gửi trực tiếp về hộp thư Gmail của khách hàng (kèm tự động tạo/cập nhật mã Voucher để khách dùng khi thanh toán)."""
+    recipient = (request.form.get("recipient") or request.form.get("recipient_email") or "").strip()
     subject = request.form.get("subject", "").strip()
-    body = request.form.get("body", "").strip()
+    body = (request.form.get("body") or request.form.get("message") or "").strip()
+
+    # Hỗ trợ Admin thiết lập luôn Mã chữ Voucher, Giá giảm và Thời hạn ngay khi gửi Email
+    raw_vcode = request.form.get("voucher_code", "").strip().upper()
+    vcode = re.sub(r"[^A-Z0-9_-]", "", raw_vcode)
+    v_type = request.form.get("voucher_discount_type", "fixed").strip().lower()
+    if v_type not in ("fixed", "percent"):
+        v_type = "fixed"
+    try:
+        v_val = max(0.0, float(request.form.get("voucher_discount_value", "0") or 0))
+    except ValueError:
+        v_val = 0.0
+    try:
+        v_min = max(0.0, float(request.form.get("voucher_min_order", "0") or 0))
+    except ValueError:
+        v_min = 0.0
+    v_start = request.form.get("voucher_start_date", "").strip() or datetime.now().strftime("%Y-%m-%d")
+    v_expiry = request.form.get("voucher_expiry_date", "").strip() or "2027-12-31"
+
+    if len(vcode) >= 3 and v_val > 0:
+        existing_v = Voucher.find_by_code(vcode)
+        v_title = subject or f"Voucher Ưu Đãi VIP {vcode}"
+        if existing_v:
+            existing_v.discount_type = v_type
+            existing_v.discount_value = v_val
+            existing_v.min_order_value = v_min
+            existing_v.start_date = v_start
+            existing_v.expiry_date = v_expiry
+            existing_v.is_active = 1
+            existing_v.save()
+        else:
+            Voucher(
+                code=vcode,
+                title=v_title[:150],
+                discount_type=v_type,
+                discount_value=v_val,
+                min_order_value=v_min,
+                max_discount=0.0,
+                start_date=v_start,
+                expiry_date=v_expiry,
+                usage_limit=200,
+                used_count=0,
+                is_active=1,
+            ).save()
+
     if not recipient or "@" not in recipient or not subject or not body:
         flash("Vui lòng nhập đầy đủ Email người nhận hợp lệ, Tiêu đề và Nội dung chương trình khuyến mãi.", "error")
         return redirect(url_for("admin_page", tab="spa_pricing"))
 
     html_body = build_marketing_html_email(recipient, subject, body)
     send_and_log_email(recipient, subject, body, html_body=html_body)
-    flash(f"Đã phát hành Email ưu đãi VIP chuẩn Brand tới '{recipient}' và lưu vào Hộp thư hệ thống!", "success")
-    return redirect(url_for("admin_page", tab="spa_pricing"))
+
+    # Lưu thông tin để trình duyệt Admin kích hoạt luôn FormSubmit AJAX Relay gửi thẳng tới Gmail người nhận
+    session["pending_marketing_relay"] = {
+        "recipient": recipient,
+        "subject": subject,
+        "body": body,
+        "voucher_code": vcode,
+    }
+    session.modified = True
+
+    all_vouchers = Voucher.sync_all_to_json_file()
+    flash(
+        f"🚀 Đã phát hành Voucher {('[' + vcode + '] ') if vcode else ''}& gửi Email ưu đãi trực tiếp tới Gmail '{recipient}' thành công!",
+        "success",
+    )
+    resp = make_response(redirect(url_for("admin_page", tab="spa_pricing")))
+    return _sync_vouchers_vault_cookie(resp, all_vouchers)
 
 
 @app.route("/admin/system/resync-seed", methods=["POST"])

@@ -77,13 +77,80 @@
             {% endfor %}
         </div>
 
-        <!-- TỔNG TIỀN THANH TOÁN NỔI BẬT -->
-        <div style="margin-top:20px; padding:18px 22px; background:linear-gradient(135deg, rgba(139,92,246,0.22) 0%, rgba(236,72,153,0.16) 100%); border:1.5px dashed rgba(139,92,246,0.5); border-radius:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-            <div>
-                <span style="font-size:14px; font-weight:800; color:#ffffff; text-transform:uppercase; letter-spacing:0.5px;">TỔNG TIỀN THANH TOÁN:</span>
-                <div style="font-size:12px; color:#c4b5fd; margin-top:2px;">(Đã bao gồm thuế VAT &amp; phí kiểm định sức khỏe thú cưng)</div>
+        <!-- KHUNG NHẬP & CHỌN NHANH MÃ GIẢM GIÁ VOUCHER -->
+        <div style="margin-top:18px; padding:18px 20px; background:rgba(15,23,42,0.85); border:1.5px solid rgba(236,72,153,0.4); border-radius:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:20px;">🎟️</span>
+                    <strong style="color:#ffffff; font-size:15px;">Mã Giảm Giá / Voucher Ưu Đãi</strong>
+                </div>
+                <span style="font-size:11.5px; color:#f472b6; font-weight:700;">Nhập mã nhận từ Gmail hoặc chọn bên dưới</span>
             </div>
-            <strong style="font-size:28px; font-weight:900; color:#34d399; letter-spacing:-0.5px;">{{ "{:,.0f}".format(cart_total) }} đ</strong>
+
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <input
+                    type="text"
+                    id="cartVoucherCodeInput"
+                    value="{{ applied_voucher.code if applied_voucher else '' }}"
+                    placeholder="Nhập mã chữ Voucher (VD: GENZVIP20, MEOW50K)..."
+                    class="form-control"
+                    style="flex:1; min-width:200px; height:44px; background:rgba(9,13,28,0.9) !important; color:#fde047 !important; font-weight:900; text-transform:uppercase; letter-spacing:0.8px; border:1.5px solid rgba(236,72,153,0.45) !important; border-radius:12px;"
+                    oninput="this.value=this.value.toUpperCase()"
+                >
+                <button type="button" onclick="applyVoucherAjax()" class="btn btn-primary" style="height:44px; padding:0 22px; font-weight:800; border-radius:12px;">
+                    ✨ Áp Dụng Mã
+                </button>
+                <button type="button" id="removeVoucherBtn" onclick="removeVoucherAjax()" class="btn btn-outline" style="height:44px; padding:0 14px; border-radius:12px; display:{% if applied_voucher %}inline-flex{% else %}none{% endif %};">
+                    ✕ Gỡ mã
+                </button>
+            </div>
+
+            <div id="voucherStatusMsg" style="margin-top:8px; font-size:12.5px; font-weight:700; color:{% if applied_voucher %}#34d399{% else %}#cbd5e1{% endif %};">
+                {% if applied_voucher %}
+                    ✅ Đang áp dụng mã <strong>{{ applied_voucher.code }}</strong> ({{ applied_voucher.discount_display }}) — Tiết kiệm ngay <strong>{{ "{:,.0f}".format(discount_amount) }} đ</strong>!
+                {% endif %}
+            </div>
+
+            {% if active_vouchers %}
+            <div style="margin-top:12px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.12);">
+                <div style="font-size:11.5px; color:#a5b4fc; font-weight:700; margin-bottom:8px;">🎁 Mã Voucher đang có hiệu lực (Bấm để áp dụng ngay):</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    {% for v in active_vouchers %}
+                    <button
+                        type="button"
+                        onclick="quickApplyVoucherCode('{{ v.code|e }}')"
+                        style="display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:10px; background:linear-gradient(135deg, rgba(139,92,246,0.22), rgba(236,72,153,0.18)); border:1px dashed rgba(236,72,153,0.55); color:#ffffff; font-size:12px; cursor:pointer; transition:transform 0.15s ease;"
+                        title="Hạn dùng: {{ v.start_date }} đến {{ v.expiry_date }}"
+                    >
+                        <strong style="color:#fde047;">🏷️ {{ v.code }}</strong>
+                        <span style="color:#34d399; font-weight:800;">{{ v.discount_display }}</span>
+                        {% if v.min_order_value > 0 %}
+                        <span style="font-size:11px; color:#cbd5e1;">(Đơn &ge; {{ "{:,.0f}".format(v.min_order_value) }}đ)</span>
+                        {% endif %}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- TỔNG TIỀN THANH TOÁN NỔI BẬT (CÓ TẠM TÍNH & TRỪ VOUCHER) -->
+        <div style="margin-top:16px; padding:18px 22px; background:linear-gradient(135deg, rgba(139,92,246,0.22) 0%, rgba(236,72,153,0.16) 100%); border:1.5px dashed rgba(139,92,246,0.5); border-radius:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13.5px; color:#cbd5e1; margin-bottom:6px;">
+                <span>Tạm tính ({{ cart_items|length }} mặt hàng):</span>
+                <strong style="color:#ffffff;">{{ "{:,.0f}".format(cart_total) }} đ</strong>
+            </div>
+            <div id="voucherDiscountRow" style="display:{% if discount_amount and discount_amount > 0 %}flex{% else %}none{% endif %}; justify-content:space-between; align-items:center; font-size:13.5px; color:#f472b6; margin-bottom:8px;">
+                <span>🎟️ Giảm giá Voucher (<strong id="voucherAppliedCodeText">{{ applied_voucher.code if applied_voucher else '' }}</strong>):</span>
+                <strong id="voucherDiscountValueText">-{{ "{:,.0f}".format(discount_amount|default(0)) }} đ</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.12);">
+                <div>
+                    <span style="font-size:14px; font-weight:800; color:#ffffff; text-transform:uppercase; letter-spacing:0.5px;">TỔNG TIỀN THANH TOÁN:</span>
+                    <div style="font-size:12px; color:#c4b5fd; margin-top:2px;">(Đã bao gồm thuế VAT &amp; ưu đãi Voucher)</div>
+                </div>
+                <strong id="finalCartTotalText" style="font-size:28px; font-weight:900; color:#34d399; letter-spacing:-0.5px;">{{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</strong>
+            </div>
         </div>
         {% else %}
         <!-- GIỎ HÀNG TRỐNG -->
@@ -132,6 +199,7 @@
         {% else %}
         <form method="POST" action="{{ url_for('cart_page') }}" id="checkoutForm" autocomplete="off">
             <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}">
+            <input type="hidden" name="voucher_code" id="checkoutVoucherHidden" value="{{ applied_voucher.code if applied_voucher else '' }}">
 
             <!-- 1. Họ và tên người nhận -->
             <div class="form-group" style="margin-bottom:14px;">
@@ -279,7 +347,7 @@
 
                             <!-- Khung trắng vuông vắn tuyệt đối (không có chữ dài làm lệch khung) -->
                             <div onclick="openQrZoomModal()" title="Bấm để phóng to mã QR" style="position:relative; width:178px; height:178px; background:#ffffff; padding:10px; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,0.5); cursor:zoom-in; display:flex; align-items:center; justify-content:center; border:2px solid #34d399;">
-                                <img id="vietqrImage" src="https://api.vietqr.io/image/{{ bank_config.bank_bin|default('970422') }}-{{ bank_config.account_number|default('0905123456') }}-qr_only.png?amount={{ cart_total|int }}&addInfo={{ bank_config.syntax_prefix|default('MEOW') }}%20{{ customer_phone or '0905123456' }}&accountName={{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE')|urlencode }}" alt="Mã VietQR Thanh Toán" style="width:154px; height:154px; display:block; object-fit:contain;" onerror="reloadFallbackQR();">
+                                <img id="vietqrImage" src="https://api.vietqr.io/image/{{ bank_config.bank_bin|default('970422') }}-{{ bank_config.account_number|default('0905123456') }}-qr_only.png?amount={{ (final_cart_total|default(cart_total))|int }}&addInfo={{ bank_config.syntax_prefix|default('MEOW') }}%20{{ customer_phone or '0905123456' }}&accountName={{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE')|urlencode }}" alt="Mã VietQR Thanh Toán" style="width:154px; height:154px; display:block; object-fit:contain;" onerror="reloadFallbackQR();">
                             </div>
 
                             <button type="button" onclick="openQrZoomModal()" style="margin-top:10px; width:100%; padding:6px 10px; border-radius:9px; background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.45); color:#e2e8f0; font-size:11.5px; font-weight:700; cursor:pointer;">
@@ -321,9 +389,9 @@
                                 <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(52,211,153,0.3); border-radius:11px; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; gap:4px;">
                                     <div>
                                         <div style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Số tiền</div>
-                                        <strong style="color:#34d399; font-size:14.5px; font-weight:900;">{{ "{:,.0f}".format(cart_total) }} đ</strong>
+                                        <strong id="qrAmountDisplay" style="color:#34d399; font-size:14.5px; font-weight:900;">{{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</strong>
                                     </div>
-                                    <button type="button" onclick="copyToClipboard('{{ cart_total|int }}', this)" class="btn btn-outline btn-sm" style="padding:3px 7px; font-size:10.5px; height:auto; color:#ffffff;">📋</button>
+                                    <button type="button" onclick="copyToClipboard(String(window.CURRENT_FINAL_TOTAL || {{ (final_cart_total|default(cart_total))|int }}), this)" class="btn btn-outline btn-sm" style="padding:3px 7px; font-size:10.5px; height:auto; color:#ffffff;">📋</button>
                                 </div>
 
                                 <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(139,92,246,0.35); border-radius:11px; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; gap:4px;">
@@ -382,15 +450,116 @@
         <div style="margin-top:14px; font-size:13.5px; color:#e2e8f0; line-height:1.6;">
             <div><strong style="color:#fde047; font-size:16px;">{{ bank_config.account_number|default('0905123456') }}</strong> • {{ bank_config.bank_name|default('MB Bank') }}</div>
             <div style="color:#ffffff; font-weight:700;">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</div>
-            <div style="color:#34d399; font-weight:900; font-size:18px; margin-top:4px;">Số tiền: {{ "{:,.0f}".format(cart_total) }} đ</div>
+            <div id="qrZoomAmountText" style="color:#34d399; font-weight:900; font-size:18px; margin-top:4px;">Số tiền: {{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</div>
         </div>
     </div>
 </div>
 
 <!-- ==============================================================
-     JAVASCRIPT ĐIỀU KHIỂN QUÉT MÃ QR & SAO CHÉP
+     JAVASCRIPT ĐIỀU KHIỂN VOUCHER, QUÉT MÃ QR & SAO CHÉP
      ============================================================== -->
 <script>
+window.RAW_CART_SUBTOTAL = {{ cart_total|int }};
+window.CURRENT_FINAL_TOTAL = {{ (final_cart_total|default(cart_total))|int }};
+
+function quickApplyVoucherCode(code) {
+    var inp = document.getElementById('cartVoucherCodeInput');
+    if (inp) {
+        inp.value = code;
+        applyVoucherAjax();
+    }
+}
+
+function applyVoucherAjax() {
+    var inp = document.getElementById('cartVoucherCodeInput');
+    var code = (inp ? inp.value : '').trim().toUpperCase();
+    var msgEl = document.getElementById('voucherStatusMsg');
+    if (!code) {
+        if (msgEl) {
+            msgEl.style.color = '#f87171';
+            msgEl.innerHTML = '⚠️ Vui lòng nhập mã chữ Voucher trước khi bấm Áp dụng!';
+        }
+        return;
+    }
+    fetch("{{ url_for('api_check_voucher') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var hiddenEl = document.getElementById('checkoutVoucherHidden');
+        var discRow = document.getElementById('voucherDiscountRow');
+        var codeTxt = document.getElementById('voucherAppliedCodeText');
+        var discValTxt = document.getElementById('voucherDiscountValueText');
+        var finalTxt = document.getElementById('finalCartTotalText');
+        var rmBtn = document.getElementById('removeVoucherBtn');
+        var qrAmt = document.getElementById('qrAmountDisplay');
+        var qrZoomAmt = document.getElementById('qrZoomAmountText');
+
+        if (data.ok) {
+            window.CURRENT_FINAL_TOTAL = Math.round(data.final_total || 0);
+            if (hiddenEl) hiddenEl.value = data.code;
+            if (msgEl) {
+                msgEl.style.color = '#34d399';
+                msgEl.innerHTML = '✅ ' + data.message;
+            }
+            if (discRow) discRow.style.display = 'flex';
+            if (codeTxt) codeTxt.textContent = data.code;
+            if (discValTxt) discValTxt.textContent = '-' + Math.round(data.discount).toLocaleString('vi-VN') + ' đ';
+            if (finalTxt) finalTxt.textContent = window.CURRENT_FINAL_TOTAL.toLocaleString('vi-VN') + ' đ';
+            if (qrAmt) qrAmt.textContent = window.CURRENT_FINAL_TOTAL.toLocaleString('vi-VN') + ' đ';
+            if (qrZoomAmt) qrZoomAmt.textContent = 'Số tiền: ' + window.CURRENT_FINAL_TOTAL.toLocaleString('vi-VN') + ' đ';
+            if (rmBtn) rmBtn.style.display = 'inline-flex';
+            refreshQRMemo();
+        } else {
+            window.CURRENT_FINAL_TOTAL = window.RAW_CART_SUBTOTAL;
+            if (hiddenEl) hiddenEl.value = '';
+            if (msgEl) {
+                msgEl.style.color = '#f87171';
+                msgEl.innerHTML = '❌ ' + (data.message || 'Mã Voucher không hợp lệ.');
+            }
+            if (discRow) discRow.style.display = 'none';
+            if (finalTxt) finalTxt.textContent = window.RAW_CART_SUBTOTAL.toLocaleString('vi-VN') + ' đ';
+            if (qrAmt) qrAmt.textContent = window.RAW_CART_SUBTOTAL.toLocaleString('vi-VN') + ' đ';
+            if (qrZoomAmt) qrZoomAmt.textContent = 'Số tiền: ' + window.RAW_CART_SUBTOTAL.toLocaleString('vi-VN') + ' đ';
+            if (rmBtn) rmBtn.style.display = 'none';
+            refreshQRMemo();
+        }
+    })
+    .catch(function() {});
+}
+
+function removeVoucherAjax() {
+    var inp = document.getElementById('cartVoucherCodeInput');
+    if (inp) inp.value = '';
+    fetch("{{ url_for('api_check_voucher') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: "" })
+    })
+    .then(function() {
+        window.CURRENT_FINAL_TOTAL = window.RAW_CART_SUBTOTAL;
+        var hiddenEl = document.getElementById('checkoutVoucherHidden');
+        var discRow = document.getElementById('voucherDiscountRow');
+        var finalTxt = document.getElementById('finalCartTotalText');
+        var msgEl = document.getElementById('voucherStatusMsg');
+        var rmBtn = document.getElementById('removeVoucherBtn');
+        var qrAmt = document.getElementById('qrAmountDisplay');
+        var qrZoomAmt = document.getElementById('qrZoomAmountText');
+        if (hiddenEl) hiddenEl.value = '';
+        if (discRow) discRow.style.display = 'none';
+        if (finalTxt) finalTxt.textContent = window.RAW_CART_SUBTOTAL.toLocaleString('vi-VN') + ' đ';
+        if (qrAmt) qrAmt.textContent = window.RAW_CART_SUBTOTAL.toLocaleString('vi-VN') + ' đ';
+        if (qrZoomAmt) qrZoomAmt.textContent = 'Số tiền: ' + window.RAW_CART_SUBTOTAL.toLocaleString('vi-VN') + ' đ';
+        if (msgEl) {
+            msgEl.style.color = '#cbd5e1';
+            msgEl.innerHTML = 'Đã gỡ mã giảm giá Voucher.';
+        }
+        if (rmBtn) rmBtn.style.display = 'none';
+        refreshQRMemo();
+    });
+}
 var BANK_INFO = {
     bin: '{{ bank_config.bank_bin|default("970422") }}',
     name: '{{ bank_config.bank_name|default("MB Bank (Ngân hàng Quân Đội)") }}',
@@ -463,7 +632,7 @@ function refreshQRMemo() {
 
     var qrImg = document.getElementById('vietqrImage');
     if (qrImg) {
-        var total = '{{ cart_total|int }}';
+        var total = String(window.CURRENT_FINAL_TOTAL || '{{ (final_cart_total|default(cart_total))|int }}');
         var url = 'https://api.vietqr.io/image/' + BANK_INFO.bin + '-' + BANK_INFO.accountNumber + '-' + BANK_INFO.template + '.png?amount=' + total + '&addInfo=' + encodeURIComponent(note) + '&accountName=' + encodeURIComponent(BANK_INFO.accountName);
         qrImg.src = url;
     }
@@ -472,7 +641,7 @@ function refreshQRMemo() {
 function reloadFallbackQR() {
     var qrImg = document.getElementById('vietqrImage');
     if (qrImg) {
-        var total = '{{ cart_total|int }}';
+        var total = String(window.CURRENT_FINAL_TOTAL || '{{ (final_cart_total|default(cart_total))|int }}');
         var note = document.getElementById('qrTransferDesc') ? document.getElementById('qrTransferDesc').textContent : 'MEOW';
         qrImg.src = 'https://quickchart.io/qr?text=2|99|' + BANK_INFO.accountNumber + '|' + encodeURIComponent(BANK_INFO.accountName) + '|0|0|' + total + '|' + encodeURIComponent(note) + '&size=200';
     }

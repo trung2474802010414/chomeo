@@ -3897,3 +3897,358 @@ table, thead, tbody, th, td {
     background-color: transparent !important;
     color: #e2e8f0 !important;
 }
+
+
+/* ==========================================================================
+   ADMIN ORDER CARDS V2 & VOUCHER SYSTEM (TẤM 1 & TẤM 2 LUXURY DESIGN)
+   ========================================================================== */
+.admin-order-card-v2 {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.admin-order-card-v2:hover {
+    transform: translateY(-3px);
+    border-color: rgba(139, 92, 246, 0.55) !important;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.5), 0 0 28px rgba(139, 92, 246, 0.18) !important;
+}
+
+.order-status-pill:hover {
+    transform: translateY(-1px);
+    border-color: rgba(167, 139, 250, 0.65) !important;
+    color: #ffffff !important;
+}
+
+@media (max-width: 960px) {
+    .admin-order-card-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ==========================================================================
+   MOBILE-FIRST LUXURY RESPONSIVE OVERHAUL (GIAO DIỆN ĐIỆN THOẠI CHUẨN APP 5 SAO)
+   ========================================================================== */
+@media (max-width: 960px) {
+    /* 1. Khung Container & Khoảng cách chung */
+    .container {
+        padding: 0 14px !important;
+    }
+
+    .page-section {
+        padding: 18px 0 40px !important;
+    }
+
+    /* 2. Thanh Topbar gọn gàng trên Mobile */
+    .topbar {
+        padding: 6px 0 !important;
+        font-size: 11.5px !important;
+    }
+
+    .topbar-inner {
+        justify-content: center !important;
+        text-align: center;
+        gap: 6px !important;
+    }
+
+    .topbar-badges {
+        display: none !important;
+    }
+
+    /* 3. Thanh Navbar Khách hàng: Chuyển Menu thành thanh vuốt ngang mượt như App */
+    .navbar-inner {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 10px 0 8px !important;
+        gap: 10px !important;
+    }
+
+    .brand-link {
+        justify-content: center;
+    }
+
+    .nav-menu {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 8px !important;
+        padding: 4px 2px 6px !important;
+        justify-content: flex-start !important;
+    }
+
+    .nav-menu::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-item,
+    .nav-cart-btn {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        font-size: 13px !important;
+        padding: 8px 14px !important;
+    }
+
+    /* 4. Thanh Mega-Menu vuốt ngang trên Mobile */
+    .mega-nav-container {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 6px !important;
+        padding: 6px 14px !important;
+    }
+
+    .mega-nav-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mega-trigger {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        padding: 7px 13px !important;
+        font-size: 12.5px !important;
+    }
+
+    /* 5. Admin Dashboard trên Mobile: Biến Sidebar dọc thành Thanh Tab Ngang Sticky gọn đẹp */
+    .admin-shell {
+        flex-direction: column !important;
+    }
+
+    .admin-sidebar {
+        width: 100% !important;
+        height: auto !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 100 !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+        background: rgba(15, 11, 36, 0.96) !important;
+        backdrop-filter: blur(18px) !important;
+    }
+
+    .admin-brand-box {
+        padding: 12px 16px !important;
+        justify-content: space-between;
+    }
+
+    .admin-nav-group-title {
+        display: none !important;
+    }
+
+    .admin-nav-scroll {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 10px 14px !important;
+    }
+
+    .admin-nav-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .admin-nav-link {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        margin-bottom: 0 !important;
+        padding: 8px 14px !important;
+        font-size: 13px !important;
+        border-radius: 99px !important;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .admin-sidebar-footer {
+        display: none !important;
+    }
+
+    .admin-topbar {
+        position: relative !important;
+        padding: 12px 16px !important;
+        gap: 10px !important;
+    }
+
+    .admin-page-heading {
+        font-size: 18px !important;
+    }
+
+    .admin-content-area {
+        padding: 16px 14px 36px !important;
+    }
+
+    /* 6. Bố cục 2 cột / 3 cột tự động xếp 1 cột trên Mobile & Tablet */
+    .grid-2,
+    .grid-3,
+    .admin-body .grid-2 {
+        grid-template-columns: 1fr !important;
+        gap: 18px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Chống tự động phóng to (Auto-Zoom) trên iPhone / iOS khi chạm vào ô nhập liệu */
+    input.form-control,
+    select.form-control,
+    textarea.form-control {
+        font-size: 16px !important;
+    }
+
+    /* Card & Khung nội dung gọn gàng hơn trên màn hình điện thoại */
+    .card,
+    .detail-card,
+    .filter-panel,
+    .spa-ticket-luxury {
+        padding: 18px 15px !important;
+        border-radius: 18px !important;
+    }
+
+    /* Hero Banner Trang Chủ trên Điện Thoại */
+    .hero-section {
+        padding: 14px 0 18px !important;
+    }
+
+    .hero-card {
+        padding: 20px 16px !important;
+        gap: 22px !important;
+        border-radius: 22px !important;
+    }
+
+    .hero-title {
+        font-size: 25px !important;
+        line-height: 1.28 !important;
+    }
+
+    .hero-desc {
+        font-size: 14px !important;
+        margin-bottom: 18px !important;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .spotlight-img-wrap {
+        height: 195px !important;
+    }
+
+    /* Lưới Sản Phẩm & Thú Cưng trên Điện Thoại */
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+        gap: 16px !important;
+    }
+
+    .product-visual,
+    .product-visual.has-photo {
+        height: 200px !important;
+    }
+
+    /* Giỏ Hàng & Thanh Toán VietQR trên Điện Thoại */
+    .cart-item-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 14px !important;
+        gap: 12px !important;
+    }
+
+    .cart-item-main {
+        min-width: 0 !important;
+    }
+
+    .cart-item-pricing {
+        justify-content: space-between !important;
+        width: 100%;
+        padding-top: 10px;
+        border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .cart-item-subtotal {
+        min-width: auto !important;
+    }
+
+    /* Thẻ KPI Admin 2 cột gọn đẹp trên Điện Thoại */
+    .admin-kpi-grid,
+    .admin-status-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    .admin-kpi-card,
+    .admin-status-card {
+        padding: 14px 12px !important;
+        border-radius: 16px !important;
+    }
+
+    .kpi-value,
+    .status-card-num {
+        font-size: 19px !important;
+    }
+
+    .kpi-icon-box {
+        width: 34px !important;
+        height: 34px !important;
+    }
+
+    /* Thẻ Đơn Hàng Admin V2 trên Điện Thoại */
+    .admin-order-card-v2 > div {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    .admin-order-card-v2 form {
+        width: 100%;
+    }
+
+    .admin-order-card-v2 form select.form-control {
+        flex: 1;
+        min-width: 0 !important;
+    }
+
+    /* Toast & Popup Modal vừa vặn màn hình Điện Thoại */
+    #toastNotificationContainer {
+        top: 12px !important;
+        right: 12px !important;
+        left: 12px !important;
+        width: auto !important;
+        max-width: none !important;
+    }
+
+    .success-popup-card {
+        padding: 24px 18px !important;
+        border-radius: 20px !important;
+    }
+
+    .success-popup-title {
+        font-size: 19px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-kpi-grid,
+    .admin-status-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .section-title {
+        font-size: 20px !important;
+    }
+
+    .detail-title {
+        font-size: 21px !important;
+    }
+
+    .detail-price {
+        font-size: 22px !important;
+    }
+
+    .detail-image-box {
+        min-height: 240px !important;
+    }
+}

@@ -1019,13 +1019,15 @@
 
                 {% elif admin_tab == 'orders' %}
                 <!-- ==========================================================
-                     TAB 4: QUẢN LÝ ĐƠN HÀNG BÁN LẺ CHUYÊN NGHIỆP (ERP ORDER CENTER)
+                     TAB 4: QUẢN LÝ ĐƠN HÀNG BÁN LẺ CAO CẤP (LUXURY ORDER CARDS V2)
                      ========================================================== -->
-                <div class="admin-kpi-grid" style="margin-bottom:20px;">
+                <div class="admin-kpi-grid" style="margin-bottom:22px;">
                     <div class="admin-kpi-card">
                         <div class="kpi-top">
                             <span class="kpi-label">TỔNG ĐƠN ĐẶT HÀNG</span>
-                            <div class="kpi-icon-box kpi-icon-blue">📦</div>
+                            <div class="kpi-icon-box kpi-icon-blue">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                            </div>
                         </div>
                         <div class="kpi-value" style="color:#38bdf8;">{{ orders|length }} đơn</div>
                         <div class="kpi-sub">Đồng bộ thời gian thực với Hồ sơ Khách hàng</div>
@@ -1033,23 +1035,29 @@
                     <div class="admin-kpi-card">
                         <div class="kpi-top">
                             <span class="kpi-label">DOANH THU ĐƠN HÀNG</span>
-                            <div class="kpi-icon-box kpi-icon-green">💰</div>
+                            <div class="kpi-icon-box kpi-icon-green">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                            </div>
                         </div>
                         <div class="kpi-value" style="color:#34d399;">{{ "{:,.0f}".format(stats.order_revenue) }} đ</div>
-                        <div class="kpi-sub">Tổng giá trị thanh toán từ các đơn đã đặt</div>
+                        <div class="kpi-sub">Tổng giá trị thanh toán thực thu</div>
                     </div>
                     <div class="admin-kpi-card">
                         <div class="kpi-top">
                             <span class="kpi-label">SẢN PHẨM ĐÃ BÁN RA</span>
-                            <div class="kpi-icon-box kpi-icon-purple">🛍️</div>
+                            <div class="kpi-icon-box kpi-icon-cyan">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                            </div>
                         </div>
-                        <div class="kpi-value" style="color:#c084fc;">{{ stats.total_items_sold|default(0) }} sản phẩm</div>
-                        <div class="kpi-sub">Đã tự động trừ kho &amp; cập nhật biểu đồ</div>
+                        <div class="kpi-value" style="color:#c084fc;">{{ stats.total_items_sold|default(0) }} món</div>
+                        <div class="kpi-sub">Đã tự động khấu trừ kho &amp; lên biểu đồ</div>
                     </div>
                     <div class="admin-kpi-card">
                         <div class="kpi-top">
                             <span class="kpi-label">GIÁ TRỊ TRUNG BÌNH / ĐƠN</span>
-                            <div class="kpi-icon-box kpi-icon-orange">📊</div>
+                            <div class="kpi-icon-box kpi-icon-yellow">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            </div>
                         </div>
                         <div class="kpi-value" style="color:#fbbf24;">
                             {{ "{:,.0f}".format((stats.order_revenue / (orders|length)) if orders else 0) }} đ
@@ -1058,134 +1066,214 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header" style="flex-wrap:wrap; gap:14px;">
+                <!-- THANH CÔNG CỤ LỌC TRẠNG THÁI PILLS & TÌM KIẾM ĐƠN HÀNG -->
+                <div class="card" style="padding:20px 24px; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:16px;">
                         <div>
-                            <h2 class="card-title">📋 Trung Tâm Điều Phối &amp; Quản Lý Đơn Hàng ({{ orders|length }} đơn)</h2>
-                            <p class="section-subtitle" style="margin:4px 0 0;">Cập nhật trạng thái xử lý đơn hàng, kiểm tra thanh toán VietQR/COD và xuất biên lai cho khách hàng.</p>
+                            <h2 class="card-title" style="margin:0; font-size:19px;">📋 Trung Tâm Điều Phối &amp; Quản Lý Đơn Hàng ({{ orders|length }} đơn)</h2>
+                            <p class="section-subtitle" style="margin:4px 0 0;">Giao diện thẻ đơn hàng thông minh — theo dõi tiến độ xử lý, mã giảm giá Voucher, phương thức thanh toán và in hóa đơn QR.</p>
                         </div>
-                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                            <input type="text" id="orderSearchInput" oninput="filterAdminOrders()" placeholder="🔍 Tìm mã ĐH, tên khách, SĐT, sản phẩm..." class="form-control" style="width:270px; height:38px; font-size:13px;">
-                            <select id="orderStatusFilter" onchange="filterAdminOrders()" class="form-control" style="width:170px; height:38px; font-size:13px;">
-                                <option value="ALL">Tất cả trạng thái</option>
-                                {% for st_opt in order_statuses|default(['Chờ xác nhận', 'Đang đóng gói', 'Đang giao hàng', 'Hoàn thành', 'Đã hủy']) %}
-                                <option value="{{ st_opt }}">{{ st_opt }}</option>
-                                {% endfor %}
-                            </select>
+                        <div style="position:relative; min-width:290px; flex:0 1 360px;">
+                            <input type="text" id="orderSearchInput" oninput="filterAdminOrders()" placeholder="🔍 Tìm mã #DH, tên khách, SĐT, email, sản phẩm..." class="form-control" style="height:42px; padding-left:16px; border-radius:99px; font-size:13.5px;">
                         </div>
                     </div>
 
-                    <div class="table-wrap">
-                        <table class="clean-table" id="adminOrdersTable">
-                            <thead>
-                                <tr>
-                                    <th style="width:130px;">Mã Đơn &amp; TT</th>
-                                    <th style="width:230px;">Thông Tin Khách Hàng</th>
-                                    <th style="width:190px;">Địa Chỉ Giao Nhận</th>
-                                    <th>Chi Tiết Sản Phẩm Đã Mua</th>
-                                    <th class="text-right" style="width:135px;">Tổng Thanh Toán</th>
-                                    <th style="width:195px;">Trạng Thái Đơn Hàng</th>
-                                    <th class="text-center" style="width:115px;">Thao Tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for o in orders %}
-                                {% set cur_st = o.status|default('Chờ xác nhận') %}
-                                <tr class="admin-order-row" data-status="{{ cur_st }}">
-                                    <td>
-                                        <div style="display:flex; flex-direction:column; gap:5px;">
-                                            <span style="display:inline-block; width:fit-content; padding:4px 10px; border-radius:8px; background:rgba(139,92,246,0.22); border:1px solid rgba(139,92,246,0.45); color:#e9d5ff; font-weight:900; font-size:13.5px;">
-                                                #DH{{ o.id }}
-                                            </span>
-                                            <span style="font-size:11.5px; color:#94a3b8;">🕒 {{ o.created_at }}</span>
-                                            {% if o.payment_method == 'COD' %}
-                                            <span style="display:inline-block; width:fit-content; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:800; background:rgba(245,158,11,0.18); color:#fde047; border:1px solid rgba(245,158,11,0.35);">💵 Tiền mặt COD</span>
-                                            {% else %}
-                                            <span style="display:inline-block; width:fit-content; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:800; background:rgba(56,189,248,0.18); color:#38bdf8; border:1px solid rgba(56,189,248,0.35);">💳 VietQR 24/7</span>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div style="display:flex; align-items:flex-start; gap:10px;">
-                                            <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #ec4899, #8b5cf6); color:#fff; font-weight:900; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                                {{ (o.customer_name[:1] or 'K')|upper }}
-                                            </div>
-                                            <div style="line-height:1.45;">
-                                                <strong style="color:#ffffff; font-size:14px;">{{ o.customer_name }}</strong>
-                                                <div style="font-size:12px; color:#38bdf8; font-weight:700;">📞 {{ o.phone }}</div>
-                                                {% if o.email %}
-                                                <div style="font-size:11.5px; color:#fde047; word-break:break-all;">✉️ {{ o.email }}</div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div style="font-size:12.5px; color:#e2e8f0; background:rgba(15,23,42,0.55); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:8px 10px; line-height:1.45;">
-                                            📍 {{ o.address }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div style="display:flex; flex-direction:column; gap:6px;">
-                                            {% for item in o['items'] %}
-                                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:rgba(15,23,42,0.65); border:1px solid rgba(148,163,184,0.14); border-radius:9px; padding:6px 10px; font-size:12.5px;">
-                                                <div>
-                                                    <strong style="color:#ffffff;">{{ item.name }}</strong>
-                                                    {% if item.sku %}
-                                                    <code style="font-size:10.5px; color:#94a3b8; margin-left:4px;">[{{ item.sku }}]</code>
-                                                    {% endif %}
-                                                </div>
-                                                <div style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-                                                    <span style="padding:1px 7px; border-radius:6px; background:rgba(139,92,246,0.25); color:#c4b5fd; font-weight:800; font-size:11.5px;">x{{ item.quantity }}</span>
-                                                    <span style="color:#34d399; font-weight:700;">{{ "{:,.0f}".format(item.subtotal|default(item.price * item.quantity)) }}đ</span>
-                                                </div>
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                    </td>
-                                    <td class="text-right">
-                                        <div style="font-size:16px; font-weight:900; color:#34d399; white-space:nowrap;">
-                                            {{ "{:,.0f}".format(o.total_amount) }} đ
-                                        </div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:2px;">{{ o['items']|length }} mặt hàng</div>
-                                    </td>
-                                    <td>
-                                        <form method="POST" action="{{ url_for('admin_update_order_status', order_id=o.id) }}" style="display:flex; flex-direction:column; gap:6px;">
-                                            <select name="status" class="form-control" style="padding:5px 8px; font-size:12px; height:32px; font-weight:700;">
-                                                {% for st_opt in order_statuses|default(['Chờ xác nhận', 'Đang đóng gói', 'Đang giao hàng', 'Hoàn thành', 'Đã hủy']) %}
-                                                <option value="{{ st_opt }}" {% if cur_st == st_opt %}selected{% endif %}>{{ st_opt }}</option>
-                                                {% endfor %}
-                                            </select>
-                                            <button type="submit" class="btn btn-teal btn-sm" style="padding:4px 10px; font-size:11.5px; width:100%;">💾 Cập nhật TT</button>
-                                        </form>
-                                    </td>
-                                    <td class="text-center">
-                                        <div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
-                                            <a href="{{ url_for('order_success_page', order_id=o.id) }}" target="_blank" class="btn btn-outline btn-sm" style="font-size:11.5px; padding:5px 8px;">
-                                                🧾 Hóa đơn
-                                            </a>
-                                            <form method="POST" action="{{ url_for('admin_delete_order', order_id=o.id) }}" onsubmit="return confirm('Xóa đơn hàng #DH{{ o.id }} của {{ o.customer_name }}?');">
-                                                <button type="submit" class="btn btn-danger btn-sm" style="width:100%; font-size:11.5px; padding:5px 8px;">&#128465; Xóa</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="7" class="text-center" style="padding:36px 16px; color:#94a3b8;">
-                                        Chưa có đơn hàng nào được đặt.
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <!-- Bộ nút lọc nhanh theo trạng thái -->
+                    <div class="admin-filter-pills" id="orderStatusPillBar">
+                        <button type="button" class="admin-filter-pill active" data-st="ALL" onclick="setOrderStatusPill(this, 'ALL')">
+                            Tất cả đơn ({{ orders|length }})
+                        </button>
+                        {% for st_opt in order_statuses|default(['Chờ xác nhận', 'Đang đóng gói', 'Đang giao hàng', 'Hoàn thành', 'Đã hủy']) %}
+                        <button type="button" class="admin-filter-pill" data-st="{{ st_opt }}" onclick="setOrderStatusPill(this, '{{ st_opt }}')">
+                            {% if st_opt == 'Chờ xác nhận' %}⏳{% elif st_opt == 'Đang đóng gói' %}📦{% elif st_opt == 'Đang giao hàng' %}🚚{% elif st_opt == 'Hoàn thành' %}✅{% else %}❌{% endif %}
+                            {{ st_opt }}
+                        </button>
+                        {% endfor %}
                     </div>
                 </div>
 
+                <!-- DANH SÁCH THẺ ĐƠN HÀNG CAO CẤP (KHÔNG BỊ ÉP CỘT, KHÔNG VỠ CHỮ EMAIL) -->
+                <div id="adminOrdersCardList" style="display:flex; flex-direction:column; gap:18px;">
+                    {% for o in orders %}
+                    {% set cur_st = o.status|default('Chờ xác nhận') %}
+                    {% set step_idx = 1 if cur_st == 'Chờ xác nhận' else (2 if cur_st == 'Đang đóng gói' else (3 if cur_st == 'Đang giao hàng' else (4 if cur_st == 'Hoàn thành' else 0))) %}
+                    <div class="admin-order-row admin-order-card-v2" data-status="{{ cur_st }}" style="background:linear-gradient(145deg, rgba(22,17,50,0.92) 0%, rgba(14,11,34,0.96) 100%); border:1px solid {% if cur_st == 'Hoàn thành' %}rgba(52,211,153,0.4){% elif cur_st == 'Đã hủy' %}rgba(248,113,113,0.35){% else %}rgba(139,92,246,0.35){% endif %}; border-radius:22px; overflow:hidden; box-shadow:0 14px 34px rgba(0,0,0,0.35); transition:border-color 0.2s ease, transform 0.2s ease;">
+
+                        <!-- 1. HEADER ĐƠN HÀNG: MÃ ĐƠN + THỜI GIAN + PHƯƠNG THỨC TT + THANH TIẾN ĐỘ 4 BƯỚC -->
+                        <div style="padding:16px 22px; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                <span style="padding:6px 14px; border-radius:10px; background:linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color:#ffffff; font-weight:900; font-size:15px; letter-spacing:0.3px; box-shadow:0 4px 14px rgba(139,92,246,0.4);">
+                                    #DH{{ o.id }}
+                                </span>
+                                <span style="padding:5px 12px; border-radius:99px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); font-size:12.5px; color:#cbd5e1; font-weight:600;">
+                                    🕒 {{ o.created_at }}
+                                </span>
+                                {% if o.payment_method|lower in ('cod', 'tiền mặt') %}
+                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:rgba(245,158,11,0.16); color:#fde047; border:1px solid rgba(245,158,11,0.35);">
+                                    💵 Thanh toán COD khi nhận
+                                </span>
+                                {% else %}
+                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:rgba(56,189,248,0.16); color:#38bdf8; border:1px solid rgba(56,189,248,0.35);">
+                                    💳 Chuyển khoản VietQR 24/7
+                                </span>
+                                {% endif %}
+                                {% if o.voucher_code %}
+                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:rgba(236,72,153,0.18); color:#f472b6; border:1px solid rgba(236,72,153,0.4);">
+                                    🎟️ Voucher: {{ o.voucher_code }} (-{{ "{:,.0f}".format(o.discount_amount|default(0)) }}đ)
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Thanh tiến độ trực quan -->
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                {% if cur_st == 'Đã hủy' %}
+                                <span style="padding:6px 14px; border-radius:99px; font-size:12.5px; font-weight:800; background:rgba(239,68,68,0.2); color:#fca5a5; border:1px solid rgba(239,68,68,0.45);">
+                                    ❌ Đơn hàng đã hủy
+                                </span>
+                                {% else %}
+                                <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(15,23,42,0.75); border:1px solid rgba(255,255,255,0.08); padding:5px 12px; border-radius:99px; font-size:11.5px; font-weight:700;">
+                                    <span style="color:{% if step_idx >= 1 %}#fde047{% else %}#64748b{% endif %};">1. Chờ duyệt</span>
+                                    <span style="color:#475569;">&rarr;</span>
+                                    <span style="color:{% if step_idx >= 2 %}#c084fc{% else %}#64748b{% endif %};">2. Đóng gói</span>
+                                    <span style="color:#475569;">&rarr;</span>
+                                    <span style="color:{% if step_idx >= 3 %}#38bdf8{% else %}#64748b{% endif %};">3. Đang giao</span>
+                                    <span style="color:#475569;">&rarr;</span>
+                                    <span style="color:{% if step_idx >= 4 %}#34d399{% else %}#64748b{% endif %};">4. Hoàn thành</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- 2. BODY ĐƠN HÀNG: 2 CỘT RỘNG RÃI (KHÁCH HÀNG & ĐỊA CHỈ | DANH SÁCH SẢN PHẨM) -->
+                        <div style="padding:20px 22px; display:grid; grid-template-columns:minmax(280px, 1fr) minmax(320px, 1.45fr); gap:20px; align-items:stretch;" class="admin-order-card-grid">
+                            <!-- Cột trái: Thông tin khách hàng & Địa chỉ nhận -->
+                            <div style="background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:16px 18px; display:flex; flex-direction:column; justify-content:space-between; gap:12px;">
+                                <div style="display:flex; align-items:center; gap:14px;">
+                                    <div style="width:48px; height:48px; border-radius:14px; background:linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color:#ffffff; font-weight:900; font-size:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 6px 16px rgba(236,72,153,0.3);">
+                                        {{ (o.customer_name[:1] or 'K')|upper }}
+                                    </div>
+                                    <div style="min-width:0; flex:1;">
+                                        <div style="font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight:800; letter-spacing:0.4px;">Người nhận hàng</div>
+                                        <strong style="color:#ffffff; font-size:16px; display:block; margin-top:1px;">{{ o.customer_name }}</strong>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; flex-direction:column; gap:7px; font-size:13px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span style="color:#94a3b8; min-width:70px;">📞 Điện thoại:</span>
+                                        <code style="color:#38bdf8; background:rgba(56,189,248,0.15); padding:2px 8px; border-radius:6px; font-weight:800; font-size:13px;">{{ o.phone }}</code>
+                                    </div>
+                                    {% if o.email %}
+                                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                        <span style="color:#94a3b8; min-width:70px;">✉️ Email:</span>
+                                        <span style="color:#fde047; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">{{ o.email }}</span>
+                                    </div>
+                                    {% endif %}
+                                    <div style="display:flex; align-items:flex-start; gap:8px;">
+                                        <span style="color:#94a3b8; min-width:70px; flex-shrink:0;">📍 Giao tới:</span>
+                                        <strong style="color:#e2e8f0; font-weight:600; line-height:1.45;">{{ o.address }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cột phải: Chi tiết mặt hàng trong đơn -->
+                            <div style="background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:16px 18px; display:flex; flex-direction:column; justify-content:space-between;">
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                        <span style="font-size:11.5px; color:#a5b4fc; text-transform:uppercase; font-weight:800; letter-spacing:0.4px;">
+                                            🛍️ Danh sách sản phẩm đã đặt ({{ o['items']|length }} mặt hàng)
+                                        </span>
+                                        <span style="font-size:12px; color:#94a3b8;">Đơn giá &times; Số lượng</span>
+                                    </div>
+                                    <div style="display:flex; flex-direction:column; gap:8px;">
+                                        {% for item in o['items'] %}
+                                        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 14px; border-radius:12px; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07); flex-wrap:wrap;">
+                                            <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:200px;">
+                                                <span style="width:32px; height:32px; border-radius:8px; background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.4); display:inline-flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;">🐾</span>
+                                                <div>
+                                                    <strong style="color:#ffffff; font-size:14px; display:block; line-height:1.35;">{{ item.name }}</strong>
+                                                    {% if item.sku %}
+                                                    <span style="font-size:11.5px; color:#94a3b8;">Mã SKU: <code style="color:#c4b5fd; background:rgba(139,92,246,0.18); padding:1px 6px; border-radius:4px;">{{ item.sku }}</code></span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div style="display:flex; align-items:center; gap:12px; white-space:nowrap;">
+                                                <span style="font-size:12.5px; color:#cbd5e1;">{{ "{:,.0f}".format(item.price) }} đ</span>
+                                                <span style="padding:3px 10px; border-radius:99px; background:rgba(139,92,246,0.28); color:#e9d5ff; font-weight:800; font-size:12px;">
+                                                    &times; {{ item.quantity }}
+                                                </span>
+                                                <strong style="color:#34d399; font-size:14.5px; min-width:95px; text-align:right;">
+                                                    {{ "{:,.0f}".format(item.subtotal|default(item.price * item.quantity)) }} đ
+                                                </strong>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. FOOTER ĐƠN HÀNG: TỔNG TIỀN THANH TOÁN & THANH ĐIỀU KHIỂN 1 HÀNG NGANG -->
+                        <div style="padding:14px 22px; background:rgba(0,0,0,0.28); border-top:1px solid rgba(255,255,255,0.07); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+                            <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
+                                <span style="font-size:13px; color:#cbd5e1; font-weight:700;">TỔNG THANH TOÁN:</span>
+                                <strong style="font-size:22px; font-weight:900; color:#34d399; letter-spacing:-0.3px;">
+                                    {{ "{:,.0f}".format(o.total_amount) }} đ
+                                </strong>
+                                {% if o.discount_amount and o.discount_amount > 0 %}
+                                <span style="font-size:12px; color:#f472b6; font-weight:700;">
+                                    (Đã giảm {{ "{:,.0f}".format(o.discount_amount) }} đ từ mã {{ o.voucher_code }})
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Cụm nút thao tác nằm ngang gọn đẹp -->
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                <form method="POST" action="{{ url_for('admin_update_order_status', order_id=o.id) }}" style="display:inline-flex; align-items:center; gap:8px; margin:0;">
+                                    <select name="status" class="form-control" style="width:auto; min-width:155px; height:38px; padding:6px 14px; border-radius:99px; font-size:13px; font-weight:700;">
+                                        {% for st_opt in order_statuses|default(['Chờ xác nhận', 'Đang đóng gói', 'Đang giao hàng', 'Hoàn thành', 'Đã hủy']) %}
+                                        <option value="{{ st_opt }}" {% if cur_st == st_opt %}selected{% endif %}>{{ st_opt }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-teal btn-sm" style="height:38px; padding:0 16px; border-radius:99px; font-weight:800; white-space:nowrap;">
+                                        💾 Lưu trạng thái
+                                    </button>
+                                </form>
+
+                                <a href="{{ url_for('order_success_page', order_id=o.id) }}" target="_blank" class="btn btn-outline btn-sm" style="height:38px; padding:0 16px; border-radius:99px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;">
+                                    🧾 Xem Hóa đơn &amp; QR
+                                </a>
+
+                                <form method="POST" action="{{ url_for('admin_delete_order', order_id=o.id) }}" onsubmit="return confirm('Xóa đơn hàng #DH{{ o.id }} của {{ o.customer_name }}?');" style="margin:0;">
+                                    <button type="submit" class="btn btn-danger btn-sm" style="height:38px; padding:0 14px; border-radius:99px; white-space:nowrap;">
+                                        &#128465; Xóa
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="card text-center" style="padding:48px 20px; color:#94a3b8;">
+                        <div style="font-size:44px; margin-bottom:10px;">📦</div>
+                        <h3 style="color:#ffffff; font-size:18px; margin-bottom:6px;">Chưa có đơn hàng nào</h3>
+                        <p style="margin:0; font-size:13.5px;">Khi khách hàng đặt mua thú cưng hoặc phụ kiện, đơn hàng sẽ hiển thị tức thì tại đây.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
                 <script>
+                var currentOrderPillStatus = 'ALL';
+                function setOrderStatusPill(btn, st) {
+                    currentOrderPillStatus = st || 'ALL';
+                    var pills = document.querySelectorAll('#orderStatusPillBar .admin-filter-pill');
+                    pills.forEach(function(p) { p.classList.remove('active'); });
+                    if (btn) btn.classList.add('active');
+                    filterAdminOrders();
+                }
                 function filterAdminOrders() {
                     var q = (document.getElementById('orderSearchInput').value || '').toLowerCase().trim();
-                    var st = document.getElementById('orderStatusFilter').value || 'ALL';
-                    var rows = document.querySelectorAll('#adminOrdersTable tbody .admin-order-row');
+                    var st = currentOrderPillStatus || 'ALL';
+                    var rows = document.querySelectorAll('#adminOrdersCardList .admin-order-row');
                     rows.forEach(function(r) {
                         var rowStatus = r.getAttribute('data-status') || '';
                         var text = (r.innerText || '').toLowerCase();
@@ -1640,17 +1728,239 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
 
                 {% elif admin_tab == 'spa_pricing' %}
                 <!-- ==========================================================
-                     TAB MỚI 2: BẢNG GIÁ SPA & CHĂM SÓC KHÁCH HÀNG VIP
+                     TAB MỚI 2: TẠO MÃ GIẢM GIÁ VOUCHER, GỬI GMAIL VIP & BẢNG GIÁ SPA
                      ========================================================== -->
-                <div class="grid-2">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">1. Bảng Giá Niêm Yết Dịch Vụ Spa Theo Cân Nặng</h2>
-                            <span class="badge badge-confirmed">Tự động tính phí</span>
+
+                <!-- PHẦN A: TRUNG TÂM TẠO & QUẢN LÝ MÃ VOUCHER + PHÁT HÀNH QUA GMAIL KHÁCH HÀNG -->
+                <div class="grid-2" style="align-items:start; margin-bottom:24px;">
+                    <!-- CỘT TRÁI: ADMIN TỰ TẠO & THIẾT LẬP MÃ VOUCHER (CHỮ, GIÁ GIẢM, THỜI GIAN) -->
+                    <div class="card" style="border:1px solid rgba(139,92,246,0.45);">
+                        <div class="card-header" style="flex-wrap:wrap; gap:10px;">
+                            <div>
+                                <h2 class="card-title" id="voucherFormHeading">🎟️ 1. Tạo &amp; Thiết Lập Mã Giảm Giá Voucher</h2>
+                                <p class="section-subtitle" style="margin:3px 0 0;">Tự đặt chữ mã Voucher, mức tiền/% giảm, đơn tối thiểu và thời gian áp dụng để khách nhập khi thanh toán.</p>
+                            </div>
+                            <span class="badge badge-stock-ok">Đồng bộ Giỏ hàng</span>
                         </div>
-                        <p style="font-size:13.5px; color:#94a3b8; margin-bottom:14px;">
-                            Hệ thống tự động nhân hệ số theo cân nặng của bé cưng: <strong>Dưới 5kg (x1.0)</strong> • <strong>Từ 5–15kg (x1.25)</strong> • <strong>Trên 15kg (x1.5)</strong>.
-                        </p>
+
+                        <form method="POST" action="{{ url_for('admin_save_voucher') }}" id="adminVoucherForm">
+                            <input type="hidden" name="voucher_id" id="vFormId" value="">
+                            <input type="hidden" name="is_active" id="vFormActive" value="1">
+
+                            <div style="display:grid; grid-template-columns:1fr 1.3fr; gap:12px; margin-bottom:12px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Mã chữ Voucher (*) <span style="font-size:11px; color:#fde047;">(Tự đặt chữ)</span></label>
+                                    <input type="text" name="code" id="vFormCode" required placeholder="VD: GENZVIP20, TRUNG50K" class="form-control" style="text-transform:uppercase; font-weight:900; color:#fde047; letter-spacing:0.8px;" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_-]/g,'')">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Tên chương trình ưu đãi (*)</label>
+                                    <input type="text" name="title" id="vFormTitle" required placeholder="VD: Giảm 50,000đ mừng thành viên VIP" class="form-control">
+                                </div>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Loại giảm giá (*)</label>
+                                    <select name="discount_type" id="vFormType" class="form-control" onchange="updateVoucherHint()">
+                                        <option value="fixed">💵 Giảm số tiền (VNĐ)</option>
+                                        <option value="percent">📊 Giảm phần trăm (%)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label" id="vFormValueLabel">Mức giá giảm (VNĐ) (*)</label>
+                                    <input type="number" name="discount_value" id="vFormValue" value="50000" min="1" step="any" required class="form-control" style="font-weight:800; color:#34d399;">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Đơn tối thiểu (VNĐ)</label>
+                                    <input type="number" name="min_order_value" id="vFormMinOrder" value="0" min="0" step="1000" class="form-control" placeholder="0 = Không giới hạn">
+                                </div>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr 0.8fr; gap:12px; margin-bottom:10px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">📅 Ngày bắt đầu (*)</label>
+                                    <input type="date" name="start_date" id="vFormStart" value="{{ end_date }}" required class="form-control">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">⏰ Ngày hết hạn (*)</label>
+                                    <input type="date" name="expiry_date" id="vFormExpiry" value="2026-12-31" required class="form-control">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Số lượt tối đa</label>
+                                    <input type="number" name="usage_limit" id="vFormLimit" value="100" min="1" max="10000" class="form-control">
+                                </div>
+                            </div>
+
+                            <!-- Nút chọn nhanh thời hạn -->
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; font-size:12px; color:#94a3b8;">
+                                <span>⚡ Chọn nhanh thời hạn:</span>
+                                <button type="button" class="quick-chip-btn" onclick="setVoucherQuickDays(3)">+3 ngày</button>
+                                <button type="button" class="quick-chip-btn" onclick="setVoucherQuickDays(7)">+7 ngày</button>
+                                <button type="button" class="quick-chip-btn" onclick="setVoucherQuickDays(15)">+15 ngày</button>
+                                <button type="button" class="quick-chip-btn" onclick="setVoucherQuickDays(30)">+30 ngày</button>
+                                <button type="button" class="quick-chip-btn" onclick="setVoucherQuickDays(90)">+3 tháng</button>
+                            </div>
+
+                            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                                <button type="button" id="vFormResetBtn" onclick="resetVoucherForm()" class="btn btn-outline btn-sm" style="display:none;">Hủy sửa</button>
+                                <button type="submit" class="btn btn-teal btn-block" style="font-weight:800;">
+                                    💾 Lưu Mã Voucher &amp; Kích Hoạt Trên Trang Thanh Toán
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- DANH SÁCH CÁC MÃ VOUCHER ĐÃ TẠO -->
+                        <div style="margin-top:22px; padding-top:18px; border-top:1px dashed rgba(255,255,255,0.12);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <strong style="color:#ffffff; font-size:14.5px;">🎫 Danh Sách Mã Voucher Đang Có ({{ vouchers|default([])|length }} mã)</strong>
+                                <span style="font-size:12px; color:#a5b4fc;">Bấm "Đưa vào Gmail" để gửi cho khách</span>
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; gap:10px; max-height:360px; overflow-y:auto; padding-right:4px;">
+                                {% for v in vouchers|default([]) %}
+                                <div style="background:rgba(15,23,42,0.78); border:1px dashed {% if v.is_valid_now %}rgba(52,211,153,0.45){% else %}rgba(248,113,113,0.4){% endif %}; border-radius:14px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                                    <div style="flex:1; min-width:210px;">
+                                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                            <code style="padding:3px 10px; border-radius:8px; background:linear-gradient(135deg, rgba(236,72,153,0.25), rgba(139,92,246,0.25)); border:1px solid rgba(236,72,153,0.5); color:#fde047; font-weight:900; font-size:14px;">
+                                                {{ v.code }}
+                                            </code>
+                                            <strong style="color:#34d399; font-size:13.5px;">{{ v.discount_display }}</strong>
+                                            {% if v.is_valid_now %}
+                                            <span style="font-size:11px; color:#6ee7b7; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:99px; font-weight:700;">● Đang hoạt động</span>
+                                            {% else %}
+                                            <span style="font-size:11px; color:#fca5a5; background:rgba(239,68,68,0.15); padding:2px 8px; border-radius:99px; font-weight:700;">● {{ v.status_label }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <div style="font-size:12.5px; color:#e2e8f0; margin-top:4px; font-weight:600;">{{ v.title }}</div>
+                                        <div style="font-size:11.5px; color:#94a3b8; margin-top:3px;">
+                                            📦 Đơn tối thiểu: <strong>{{ "{:,.0f}".format(v.min_order_value) }}đ</strong>
+                                            &bull; ⏰ Hạn: <strong>{{ v.start_date }} &rarr; {{ v.expiry_date }}</strong>
+                                            &bull; Đã dùng: <strong>{{ v.used_count }}/{{ v.usage_limit }}</strong>
+                                        </div>
+                                    </div>
+
+                                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                        <button type="button" class="btn btn-primary btn-sm" style="font-size:11.5px; padding:5px 10px;" onclick="selectVoucherForEmail('{{ v.code|e }}', '{{ v.title|e }}', '{{ v.discount_type|e }}', '{{ v.discount_value }}', '{{ v.min_order_value }}', '{{ v.start_date|e }}', '{{ v.expiry_date|e }}', '{{ v.discount_display|e }}')">
+                                            📧 Đưa vào Gmail
+                                        </button>
+                                        <button type="button" class="btn btn-outline btn-sm" style="font-size:11.5px; padding:5px 9px;" onclick="editVoucherForm('{{ v.id }}', '{{ v.code|e }}', '{{ v.title|e }}', '{{ v.discount_type|e }}', '{{ v.discount_value }}', '{{ v.min_order_value }}', '{{ v.start_date|e }}', '{{ v.expiry_date|e }}', '{{ v.usage_limit }}')">
+                                            ✏️ Sửa
+                                        </button>
+                                        <form method="POST" action="{{ url_for('admin_delete_voucher', voucher_id=v.id) }}" onsubmit="return confirm('Xóa mã Voucher {{ v.code }}?');" style="margin:0;">
+                                            <button type="submit" class="btn btn-danger btn-sm" style="font-size:11.5px; padding:5px 9px;">&#128465;</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CỘT PHẢI: PHÁT HÀNH VOUCHER & GỬI TRỰC TIẾP VỀ GMAIL KHÁCH HÀNG -->
+                    <div class="card" style="border:1px solid rgba(236,72,153,0.45);">
+                        <div class="card-header" style="flex-wrap:wrap; gap:10px;">
+                            <div>
+                                <h2 class="card-title">🚀 2. Phát Hành Voucher &amp; Gửi Thẳng Tới Gmail Khách Hàng</h2>
+                                <p class="section-subtitle" style="margin:3px 0 0;">Gửi mã giảm giá trực tiếp về hộp thư Gmail của khách hàng (kết hợp SMTP + Cổng Relay Gmail tức thì).</p>
+                            </div>
+                            <span class="badge badge-cat">Direct Gmail Delivery</span>
+                        </div>
+
+                        <form method="POST" action="{{ url_for('admin_send_marketing_email') }}" id="marketingEmailForm">
+                            <!-- 1. Chọn hoặc nhập Gmail người nhận -->
+                            <div class="form-group">
+                                <label class="form-label">📬 Chọn nhanh Khách hàng hoặc nhập địa chỉ Gmail nhận Voucher (*):</label>
+                                <input type="email" name="recipient" id="vip-email-input" required placeholder="Nhập Gmail khách hàng (VD: trungvt040106@gmail.com)" class="form-control" style="font-weight:700; color:#fde047;">
+                                {% if stats.customers_list %}
+                                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+                                    {% for c in stats.customers_list[:8] if c.email %}
+                                    <button type="button" class="btn btn-outline btn-sm" style="font-size:11.5px; padding:4px 10px;" onclick="document.getElementById('vip-email-input').value='{{ c.email }}'">
+                                        👤 {{ c.name }} ({{ c.email }})
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- 2. Gắn kèm cấu hình Voucher trực tiếp khi gửi mail -->
+                            <div style="background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.35); border-radius:14px; padding:14px; margin-bottom:14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                                    <strong style="color:#c4b5fd; font-size:13px;">🎁 Thiết lập nhanh Mã Voucher gửi kèm trong Email:</strong>
+                                    <select id="quickPickVoucherSelect" class="form-control" style="width:auto; height:32px; padding:3px 10px; font-size:12px;" onchange="onQuickPickVoucherDropdown(this)">
+                                        <option value="">-- Chọn từ Voucher đã tạo --</option>
+                                        {% for v in vouchers|default([]) %}
+                                        <option value="{{ v.code }}" data-title="{{ v.title|e }}" data-type="{{ v.discount_type }}" data-val="{{ v.discount_value }}" data-min="{{ v.min_order_value }}" data-start="{{ v.start_date }}" data-exp="{{ v.expiry_date }}" data-disp="{{ v.discount_display|e }}">
+                                            {{ v.code }} ({{ v.discount_display }} - Hạn {{ v.expiry_date }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px;">
+                                    <div>
+                                        <label style="font-size:11.5px; color:#cbd5e1; display:block; margin-bottom:3px;">Mã chữ Voucher:</label>
+                                        <input type="text" name="voucher_code" id="mailVoucherCode" value="GENZVIP20" class="form-control" style="height:36px; font-weight:900; color:#fde047; text-transform:uppercase;" oninput="this.value=this.value.toUpperCase(); syncEmailTemplateFromVoucher();">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:11.5px; color:#cbd5e1; display:block; margin-bottom:3px;">Loại giảm:</label>
+                                        <select name="voucher_discount_type" id="mailVoucherType" class="form-control" style="height:36px; padding:4px 8px;" onchange="syncEmailTemplateFromVoucher()">
+                                            <option value="percent" selected>Giảm theo %</option>
+                                            <option value="fixed">Giảm tiền (VNĐ)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="font-size:11.5px; color:#cbd5e1; display:block; margin-bottom:3px;">Giá trị giảm:</label>
+                                        <input type="number" name="voucher_discount_value" id="mailVoucherValue" value="20" min="1" step="any" class="form-control" style="height:36px; font-weight:800; color:#34d399;" oninput="syncEmailTemplateFromVoucher()">
+                                    </div>
+                                </div>
+
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                                    <div>
+                                        <label style="font-size:11.5px; color:#cbd5e1; display:block; margin-bottom:3px;">Đơn tối thiểu (đ):</label>
+                                        <input type="number" name="voucher_min_order" id="mailVoucherMin" value="100000" min="0" step="1000" class="form-control" style="height:36px;" oninput="syncEmailTemplateFromVoucher()">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:11.5px; color:#cbd5e1; display:block; margin-bottom:3px;">Từ ngày:</label>
+                                        <input type="date" name="voucher_start_date" id="mailVoucherStart" value="{{ end_date }}" class="form-control" style="height:36px;" onchange="syncEmailTemplateFromVoucher()">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:11.5px; color:#cbd5e1; display:block; margin-bottom:3px;">Đến ngày (Hết hạn):</label>
+                                        <input type="date" name="voucher_expiry_date" id="mailVoucherExpiry" value="2026-12-31" class="form-control" style="height:36px;" onchange="syncEmailTemplateFromVoucher()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Tiêu đề Email gửi tới khách hàng (*):</label>
+                                <input type="text" name="subject" id="mailSubjectInput" required value="[Meow & Woof VIP] Tặng bạn Mã Voucher GENZVIP20 (Giảm 20%) khi mua sắm & đặt lịch Spa!" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Nội dung thông điệp &amp; Hướng dẫn dùng mã tại trang Thanh toán (*):</label>
+                                <textarea name="body" id="mailBodyInput" rows="6" required class="form-control">Xin chào Quý khách thân thiết của Meow & Woof Pet House & Spa!
+
+Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành tặng riêng cho bạn mã giảm giá đặc biệt:
+🎁 Mã chữ Voucher: GENZVIP20
+💰 Mức ưu đãi: Giảm 20% (Đơn tối thiểu: 100,000 đ)
+⏰ Thời gian áp dụng: Từ hôm nay đến hết ngày 2026-12-31.
+
+👉 Cách sử dụng: Khi mua thú cưng hoặc phụ kiện tại Website, tới bước Giỏ hàng & Thanh toán bạn chỉ cần nhập mã "GENZVIP20" vào ô Mã Giảm Giá là được trừ tiền ngay lập tức!</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block" style="padding:12px 20px; font-weight:800; font-size:14.5px;">
+                                🚀 Phát Hành Voucher &amp; Gửi Thẳng Về Gmail Khách Hàng
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- PHẦN B: BẢNG GIÁ NIÊM YẾT DỊCH VỤ SPA & CHÍNH SÁCH VIP -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">🛁 3. Bảng Giá Niêm Yết Dịch Vụ Spa Theo Cân Nặng &amp; Quyền Lợi Hạng VIP</h2>
+                        <span class="badge badge-confirmed">Tự động tính phí</span>
+                    </div>
+                    <div class="grid-2" style="align-items:center;">
                         <div class="table-wrap">
                             <table class="clean-table">
                                 <thead>
@@ -1674,56 +1984,137 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                             </table>
                         </div>
 
-                        <div style="margin-top:20px; padding:16px; border-radius:14px; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.22);">
-                            <div style="font-weight:700; color:#c7d2fe; margin-bottom:8px;">👑 Quyền Lợi Hạng Thành Viên Tự Động (Loyalty Tiers)</div>
-                            <ul style="margin:0; padding-left:18px; color:#94a3b8; font-size:13px; line-height:1.7;">
+                        <div style="padding:18px; border-radius:16px; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.22);">
+                            <div style="font-weight:800; color:#c7d2fe; margin-bottom:10px; font-size:15px;">👑 Quyền Lợi Hạng Thành Viên Tự Động (Loyalty Tiers)</div>
+                            <ul style="margin:0; padding-left:18px; color:#cbd5e1; font-size:13.5px; line-height:1.8;">
                                 <li><strong style="color:#c4b5fd;">💎 Hạng Kim Cương (Chi tiêu ≥ 15.000.000đ):</strong> Giảm 15% trọn đời gói Spa Hoàng Gia + Tặng đưa đón thú cưng tận nhà.</li>
                                 <li><strong style="color:#fde68a;">🥇 Hạng Vàng (Chi tiêu ≥ 5.000.000đ):</strong> Giảm 10% dịch vụ Cắt tỉa lông tạo kiểu &amp; Vệ sinh răng miệng.</li>
                                 <li><strong style="color:#bae6fd;">🥈 Hạng Bạc (Chi tiêu ≥ 1.000.000đ):</strong> Tặng gói Cắt mài móng &amp; Vệ sinh tai miễn phí khi tắm Spa.</li>
                             </ul>
                         </div>
                     </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">2. Phát Hành Voucher &amp; Gửi Email Chăm Sóc VIP</h2>
-                            <span class="badge badge-cat">SMTP Marketing</span>
-                        </div>
-                        <p style="font-size:13.5px; color:#94a3b8; margin-bottom:14px;">
-                            Gửi thông báo tặng mã giảm giá hoặc nhắc lịch tiêm phòng / Spa định kỳ trực tiếp tới Email khách hàng:
-                        </p>
-                        <form method="POST" action="{{ url_for('admin_send_marketing_email') }}">
-                            <div class="form-group">
-                                <label class="form-label">Chọn nhanh Khách hàng thân thiết hoặc nhập Email:</label>
-                                <input type="email" name="recipient" id="vip-email-input" required placeholder="Nhập email khách hàng (VD: khachhang@gmail.com)" class="form-control">
-                                {% if stats.customers_list %}
-                                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
-                                    {% for c in stats.customers_list[:5] if c.email %}
-                                    <button type="button" class="btn btn-outline btn-sm" style="font-size:11.5px; padding:4px 10px;" onclick="document.getElementById('vip-email-input').value='{{ c.email }}'">
-                                        {{ c.name }} ({{ c.email }})
-                                    </button>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Tiêu đề chiến dịch ưu đãi (*):</label>
-                                <input type="text" name="subject" required value="[Meow & Woof VIP] Tặng bạn Voucher giảm 20% Gói Spa Thú Cưng tuần này!" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Nội dung thông điệp &amp; Mã Voucher (*):</label>
-                                <textarea name="body" rows="6" required class="form-control">Xin chào Quý khách thân thiết của Meow & Woof Pet Shop!
-
-Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Nhân dịp cuối tuần, Meow & Woof dành tặng riêng cho bé cưng của bạn mã ưu đãi đặc biệt:
-🎁 Mã Voucher: GENZVIP20 (Giảm ngay 20% mọi gói Spa & Cắt tỉa tạo kiểu)
-⏰ Thời hạn áp dụng: Trong vòng 7 ngày kể từ hôm nay.
-
-Hẹn gặp lại bạn và bé cưng tại cửa hàng nhé!</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">🚀 Gửi Email Ưu Đãi &amp; Lưu Nhật Ký Hệ Thống</button>
-                        </form>
-                    </div>
                 </div>
+
+                <script>
+                function updateVoucherHint() {
+                    var tp = document.getElementById('vFormType').value;
+                    var lbl = document.getElementById('vFormValueLabel');
+                    var inp = document.getElementById('vFormValue');
+                    if (tp === 'percent') {
+                        lbl.innerText = 'Mức giảm (%) (*)';
+                        if (parseFloat(inp.value) > 100) inp.value = 20;
+                    } else {
+                        lbl.innerText = 'Mức giá giảm (VNĐ) (*)';
+                        if (parseFloat(inp.value) <= 100) inp.value = 50000;
+                    }
+                }
+                function setVoucherQuickDays(days) {
+                    var now = new Date();
+                    var startStr = now.toISOString().slice(0, 10);
+                    var endDt = new Date(now.getTime() + days * 24 * 3600 * 1000);
+                    var endStr = endDt.toISOString().slice(0, 10);
+                    document.getElementById('vFormStart').value = startStr;
+                    document.getElementById('vFormExpiry').value = endStr;
+                }
+                function editVoucherForm(id, code, title, dtype, dval, minOrd, sDate, eDate, limit) {
+                    document.getElementById('vFormId').value = id;
+                    document.getElementById('vFormCode').value = code;
+                    document.getElementById('vFormTitle').value = title;
+                    document.getElementById('vFormType').value = dtype;
+                    document.getElementById('vFormValue').value = dval;
+                    document.getElementById('vFormMinOrder').value = minOrd;
+                    document.getElementById('vFormStart').value = sDate;
+                    document.getElementById('vFormExpiry').value = eDate;
+                    document.getElementById('vFormLimit').value = limit;
+                    document.getElementById('voucherFormHeading').innerText = '✏️ Đang Chỉnh Sửa Mã Voucher: ' + code;
+                    document.getElementById('vFormResetBtn').style.display = 'inline-flex';
+                    updateVoucherHint();
+                    document.getElementById('adminVoucherForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                function resetVoucherForm() {
+                    document.getElementById('vFormId').value = '';
+                    document.getElementById('vFormCode').value = '';
+                    document.getElementById('vFormTitle').value = '';
+                    document.getElementById('vFormType').value = 'fixed';
+                    document.getElementById('vFormValue').value = '50000';
+                    document.getElementById('vFormMinOrder').value = '0';
+                    document.getElementById('voucherFormHeading').innerText = '🎟️ 1. Tạo & Thiết Lập Mã Giảm Giá Voucher';
+                    document.getElementById('vFormResetBtn').style.display = 'none';
+                    updateVoucherHint();
+                }
+                function selectVoucherForEmail(code, title, dtype, dval, minOrd, sDate, eDate, disp) {
+                    document.getElementById('mailVoucherCode').value = code;
+                    document.getElementById('mailVoucherType').value = dtype;
+                    document.getElementById('mailVoucherValue').value = dval;
+                    document.getElementById('mailVoucherMin').value = minOrd;
+                    document.getElementById('mailVoucherStart').value = sDate;
+                    document.getElementById('mailVoucherExpiry').value = eDate;
+                    syncEmailTemplateFromVoucher();
+                    document.getElementById('marketingEmailForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                function onQuickPickVoucherDropdown(sel) {
+                    var opt = sel.options[sel.selectedIndex];
+                    if (!opt || !opt.value) return;
+                    selectVoucherForEmail(
+                        opt.value,
+                        opt.getAttribute('data-title') || '',
+                        opt.getAttribute('data-type') || 'fixed',
+                        opt.getAttribute('data-val') || '50000',
+                        opt.getAttribute('data-min') || '0',
+                        opt.getAttribute('data-start') || '',
+                        opt.getAttribute('data-exp') || '',
+                        opt.getAttribute('data-disp') || ''
+                    );
+                }
+                function syncEmailTemplateFromVoucher() {
+                    var code = (document.getElementById('mailVoucherCode').value || 'VOUCHER').trim().toUpperCase();
+                    var dtype = document.getElementById('mailVoucherType').value;
+                    var dval = parseFloat(document.getElementById('mailVoucherValue').value || '0');
+                    var minOrd = parseFloat(document.getElementById('mailVoucherMin').value || '0');
+                    var sDate = document.getElementById('mailVoucherStart').value || 'hôm nay';
+                    var eDate = document.getElementById('mailVoucherExpiry').value || '2026-12-31';
+                    var dispTxt = (dtype === 'percent')
+                        ? ('Giảm ' + dval + '%')
+                        : ('Giảm ' + dval.toLocaleString('vi-VN') + ' đ');
+                    var minTxt = minOrd > 0 ? ('Đơn tối thiểu: ' + minOrd.toLocaleString('vi-VN') + ' đ') : 'Áp dụng cho mọi đơn hàng';
+
+                    document.getElementById('mailSubjectInput').value =
+                        '[Meow & Woof VIP] Tặng bạn Mã Voucher ' + code + ' (' + dispTxt + ') khi mua sắm & đặt lịch Spa!';
+                    document.getElementById('mailBodyInput').value =
+                        'Xin chào Quý khách thân thiết của Meow & Woof Pet House & Spa!\n\n' +
+                        'Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành tặng riêng cho bạn mã giảm giá đặc biệt:\n' +
+                        '🎁 Mã chữ Voucher: ' + code + '\n' +
+                        '💰 Mức ưu đãi: ' + dispTxt + ' (' + minTxt + ')\n' +
+                        '⏰ Thời gian áp dụng: Từ ngày ' + sDate + ' đến hết ngày ' + eDate + '.\n\n' +
+                        '👉 Cách sử dụng: Khi mua thú cưng hoặc phụ kiện tại Website, tới bước Giỏ hàng & Thanh toán bạn chỉ cần nhập mã "' + code + '" vào ô Mã Giảm Giá là được trừ tiền ngay lập tức!';
+                }
+                </script>
+
+                {% if pending_marketing_relay %}
+                <!-- TỰ ĐỘNG KÍCH HOẠT CỔNG RELAY GMAIL CLIENT-SIDE ĐỂ THƯ VOUCHER BAY THẲNG TỚI GMAIL KHÁCH HÀNG -->
+                <script>
+                (function() {
+                    var targetMail = {{ pending_marketing_relay.recipient|tojson }};
+                    var mailSubj = {{ pending_marketing_relay.subject|tojson }};
+                    var mailBody = {{ pending_marketing_relay.body|tojson }};
+                    var vCode = {{ pending_marketing_relay.voucher_code|tojson }};
+                    if (targetMail && targetMail.indexOf('@') !== -1) {
+                        fetch("https://formsubmit.co/ajax/" + encodeURIComponent(targetMail), {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                            body: JSON.stringify({
+                                _subject: mailSubj,
+                                _template: "box",
+                                _captcha: "false",
+                                "Cửa hàng": "Meow & Woof Pet House & Spa",
+                                "Mã Voucher Ưu Đãi": vCode || "VIP VOUCHER",
+                                "Thông điệp chi tiết": mailBody
+                            })
+                        }).catch(function() {});
+                    }
+                })();
+                </script>
+                {% endif %}
 
                 {% elif admin_tab == 'emails' %}
                 <!-- ==========================================================

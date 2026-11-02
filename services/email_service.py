@@ -318,10 +318,10 @@ def send_and_log_email(
             status = f"Đã lưu thông báo ({recipient_addr}) — Điền Mật khẩu ứng dụng Gmail để gửi thẳng SMTP"
 
     log_entry = EmailLog(
-        recipient=recipient_addr,
-        subject=subject,
-        body=body,
-        delivery_status=status,
+        recipient=recipient_addr[:145],
+        subject=subject[:240],
+        body=body[:14500],
+        delivery_status=status[:240],
     )
     log_entry.save()
     return log_entry.to_dict()

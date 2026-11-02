@@ -37,6 +37,7 @@ from models.entities import (
     SPA_SERVICES,
     SpaBooking,
     User,
+    Voucher,
 )
 from services.email_service import send_order_confirmation_email
 
@@ -148,6 +149,7 @@ def init_db_and_seed() -> None:
     Order.create_table()
     EmailLog.create_table()
     User.create_table()
+    Voucher.create_table()
 
     with DatabaseSession() as db:
         for tbl in ("spa_bookings", "orders"):
@@ -160,6 +162,10 @@ def init_db_and_seed() -> None:
             db.execute("ALTER TABLE orders ADD COLUMN status TEXT DEFAULT 'Chờ xác nhận'")
         if "payment_method" not in order_cols:
             db.execute("ALTER TABLE orders ADD COLUMN payment_method TEXT DEFAULT 'cod'")
+        if "voucher_code" not in order_cols:
+            db.execute("ALTER TABLE orders ADD COLUMN voucher_code TEXT DEFAULT ''")
+        if "discount_amount" not in order_cols:
+            db.execute("ALTER TABLE orders ADD COLUMN discount_amount REAL DEFAULT 0.0")
 
         prod_cols = [r["name"] for r in db.execute("PRAGMA table_info(products)").fetchall()]
         if "breed" not in prod_cols:
@@ -197,6 +203,53 @@ def init_db_and_seed() -> None:
     if first_user is None:
         for u in get_seed_users():
             User(**u).save()
+
+    Voucher.sync_from_json_store()
+    first_voucher = next(Voucher.iter_all(), None)
+    if first_voucher is None:
+        seed_vouchers = [
+            {
+                "code": "GENZVIP20",
+                "title": "Ưu đãi VIP Giảm 20% Toàn Bộ Đơn Hàng & Spa",
+                "discount_type": "percent",
+                "discount_value": 20.0,
+                "min_order_value": 100000.0,
+                "max_discount": 500000.0,
+                "start_date": "2026-01-01",
+                "expiry_date": "2027-12-31",
+                "usage_limit": 200,
+                "used_count": 0,
+                "is_active": 1,
+            },
+            {
+                "code": "MEOW50K",
+                "title": "Tặng 50,000đ Cho Đơn Hàng Từ 200,000đ",
+                "discount_type": "fixed",
+                "discount_value": 50000.0,
+                "min_order_value": 200000.0,
+                "max_discount": 0.0,
+                "start_date": "2026-01-01",
+                "expiry_date": "2027-12-31",
+                "usage_limit": 300,
+                "used_count": 0,
+                "is_active": 1,
+            },
+            {
+                "code": "FREESHIP30K",
+                "title": "Trợ giá vận chuyển 30,000đ mọi đơn hàng",
+                "discount_type": "fixed",
+                "discount_value": 30000.0,
+                "min_order_value": 0.0,
+                "max_discount": 0.0,
+                "start_date": "2026-01-01",
+                "expiry_date": "2027-12-31",
+                "usage_limit": 500,
+                "used_count": 0,
+                "is_active": 1,
+            },
+        ]
+        for sv in seed_vouchers:
+            Voucher(**sv).save()
 
 
 def query_products(
@@ -359,7 +412,27 @@ def create_order_transactional(payload: Dict[str, Any]) -> Dict[str, Any]:
                 }
             )
 
-        total_amount = sum(item["subtotal"] for item in order_lines)
+        subtotal_sum = sum(item["subtotal"] for item in order_lines)
+        voucher_code = str(payload.get("voucher_code", "") or "").strip().upper()
+        discount_amount = 0.0
+        applied_voucher_obj = None
+        if voucher_code:
+            row_v = db.execute("SELECT * FROM vouchers WHERE UPPER(code) = ?", (voucher_code,)).fetchone()
+            if row_v:
+                v_dict = dict(row_v)
+                temp_v = Voucher(**v_dict)
+                ok_v, _, disc_val = temp_v.calculate_discount(subtotal_sum)
+                if ok_v and disc_val > 0:
+                    discount_amount = disc_val
+                    applied_voucher_obj = temp_v
+                    new_used = int(v_dict.get("used_count", 0) or 0) + 1
+                    db.execute("UPDATE vouchers SET used_count = ? WHERE id = ?", (new_used, v_dict["id"]))
+                else:
+                    voucher_code = ""
+            else:
+                voucher_code = ""
+
+        total_amount = max(0.0, round(subtotal_sum - discount_amount, 2))
         payment_method = str(payload.get("payment_method", "cod") or "cod").strip()
         status_val = str(payload.get("status", "Chờ xác nhận") or "Chờ xác nhận").strip()
 
@@ -370,12 +443,14 @@ def create_order_transactional(payload: Dict[str, Any]) -> Dict[str, Any]:
             address=address,
             items_json=json.dumps(order_lines, ensure_ascii=False),
             total_amount=total_amount,
+            voucher_code=voucher_code,
+            discount_amount=discount_amount,
             status=status_val,
             payment_method=payment_method,
         )
         db.execute(
-            "INSERT INTO orders (customer_name, phone, email, address, items_json, total_amount, status, payment_method, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO orders (customer_name, phone, email, address, items_json, total_amount, voucher_code, discount_amount, status, payment_method, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 order.customer_name,
                 order.phone,
@@ -383,6 +458,8 @@ def create_order_transactional(payload: Dict[str, Any]) -> Dict[str, Any]:
                 order.address,
                 order.items_json,
                 order.total_amount,
+                order.voucher_code,
+                order.discount_amount,
                 order.status,
                 order.payment_method,
                 order.created_at,
@@ -390,8 +467,11 @@ def create_order_transactional(payload: Dict[str, Any]) -> Dict[str, Any]:
         )
         order.id = db.cursor.lastrowid if db.cursor else None
 
+    if applied_voucher_obj is not None:
+        Voucher.sync_all_to_json_file()
     order._persist_to_json_file()
     order_dict = order.to_dict()
+    order_dict["subtotal_before_discount"] = subtotal_sum
     send_order_confirmation_email(order_dict)
     return order_dict
 
