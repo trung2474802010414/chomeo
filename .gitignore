@@ -1,6 +1,5 @@
 # ==============================================================================
 # .gitignore - Meow & Woof Pet Shop Project
-# Tuân thủ quy chuẩn bảo mật theo .claude/rules/hooks/precomit.md & AGENT.MD
 # ==============================================================================
 
 # 1. Môi trường & Biến nhạy cảm (Environment & Secrets)
@@ -45,4 +44,8 @@ dist/
 build/
 .vercel/
 *.log
+.claude/
+AGENT.MD
+CLAUDE.MD
+check_rules.py
 

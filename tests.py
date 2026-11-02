@@ -16,9 +16,7 @@ from app import app, router
 from core.orm import ValidationError
 from core.paginator import PageIterator, parse_csv_stream, stream_csv_export
 from forms.petshop_forms import ProductForm, SpaBookingForm
-from models.booking import SpaBooking
-from models.email_log import EmailLog
-from models.product import Product
+from models.entities import EmailLog, Product, SpaBooking
 from services.network_service import (
     export_products_to_xml,
     fetch_pet_breeds_via_urllib,

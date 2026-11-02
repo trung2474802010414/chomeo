@@ -1,7 +1,8 @@
 """
 services/network_service.py
-Đáp ứng CLO3 (10% - Lập trình mạng: urllib, API key, JSON/XML, lập trình mạng Internet)
-và CLO4 (Sử dụng thành thạo thư viện Python: urllib, json, xml.etree.ElementTree).
+Lập trình mạng (CLO3 & CLO4):
+- Gọi REST API tra cứu giống thú cưng qua `urllib.request` kèm `API Key` trong HTTP Header.
+- Xuất và nhập danh mục sản phẩm định dạng XML bằng `xml.etree.ElementTree`.
 """
 
 import json
@@ -10,21 +11,15 @@ from typing import Any, Dict, List, Tuple
 import urllib.error
 import urllib.parse
 import urllib.request
+from xml.dom import minidom
+import xml.etree.ElementTree as ET
 
-from services.xml_service import export_products_to_xml, import_products_from_xml
+from core.orm import ValidationError
+from models.entities import Product
 
-__all__ = [
-    "FALLBACK_BREEDS",
-    "fetch_pet_breeds_via_urllib",
-    "export_products_to_xml",
-    "import_products_from_xml",
-]
-
-# Bộ nhớ đệm (In-Memory Cache) cho kết quả gọi API qua urllib để trang tải tức thì (< 5ms)
 _BREED_API_CACHE: Dict[Tuple[str, str], Tuple[float, List[Dict[str, Any]], str]] = {}
-_CACHE_TTL_SECONDS = 900.0  # Lưu cache 15 phút
+_CACHE_TTL_SECONDS = 900.0
 
-# Dữ liệu dự phòng khi máy tính chấm bài không kết nối Internet
 FALLBACK_BREEDS: Dict[str, List[Dict[str, str]]] = {
     "cat": [
         {
@@ -103,12 +98,6 @@ def fetch_pet_breeds_via_urllib(
     search_breed: str = "",
     limit: int = 8,
 ) -> Dict[str, Any]:
-    """
-    Minh họa Lập trình mạng (CLO3):
-    - Dùng `urllib.request.Request` gửi HTTP GET tới REST API trên Internet.
-    - Truyền `x-api-key` trong HTTP Request Headers.
-    - Giải mã dữ liệu phản hồi JSON bằng `json.loads()`.
-    """
     species_key = "dog" if species == "dog" else "cat"
     endpoint = (
         "https://api.thedogapi.com/v1/breeds"
@@ -181,3 +170,80 @@ def fetch_pet_breeds_via_urllib(
         "total_matched": len(normalized),
         "breeds": normalized[:limit],
     }
+
+
+def export_products_to_xml() -> str:
+    root = ET.Element("petshop_catalog")
+    root.set("version", "1.0")
+    root.set("generator", "Python xml.etree.ElementTree")
+
+    products_el = ET.SubElement(root, "products")
+    for product in Product.iter_all(order_by="id ASC"):
+        item_el = ET.SubElement(products_el, "product")
+        item_el.set("id", str(product.id))
+        item_el.set("sku", str(product.sku))
+
+        for tag_name in ("name", "category", "pet_type", "price", "stock", "description"):
+            child = ET.SubElement(item_el, tag_name)
+            child.text = str(getattr(product, tag_name) or "")
+
+    raw_bytes = ET.tostring(root, encoding="utf-8")
+    parsed_dom = minidom.parseString(raw_bytes)
+    return parsed_dom.toprettyxml(indent="  ", encoding="utf-8").decode("utf-8")
+
+
+def import_products_from_xml(xml_text: str) -> Dict[str, Any]:
+    try:
+        root = ET.fromstring(xml_text.strip())
+    except ET.ParseError as exc:
+        raise ValidationError(f"Cú pháp XML không hợp lệ: {exc}")
+
+    existing_by_sku = {p.sku: p for p in Product.iter_all()}
+    imported = 0
+    updated = 0
+    errors: List[str] = []
+
+    product_nodes = root.findall(".//product")
+    if not product_nodes:
+        raise ValidationError("Không tìm thấy thẻ <product> nào trong tài liệu XML.")
+
+    for idx, node in enumerate(product_nodes, start=1):
+        try:
+            sku = (node.get("sku") or node.findtext("sku") or "").strip().upper()
+            if not sku:
+                raise ValidationError("Thiếu thuộc tính hoặc thẻ sku.")
+
+            name = (node.findtext("name") or "").strip()
+            category = (node.findtext("category") or "Thức ăn").strip()
+            pet_type = (node.findtext("pet_type") or "Chó & Mèo").strip()
+            price = float(node.findtext("price") or 0)
+            stock = int(node.findtext("stock") or 0)
+            description = (node.findtext("description") or "").strip()
+
+            if sku in existing_by_sku:
+                prod = existing_by_sku[sku]
+                prod.name = name or prod.name
+                prod.category = category
+                prod.pet_type = pet_type
+                prod.price = price
+                prod.stock = stock
+                prod.description = description
+                prod.save()
+                updated += 1
+            else:
+                new_prod = Product(
+                    sku=sku,
+                    name=name,
+                    category=category,
+                    pet_type=pet_type,
+                    price=price,
+                    stock=stock,
+                    description=description,
+                )
+                new_prod.save()
+                existing_by_sku[sku] = new_prod
+                imported += 1
+        except Exception as exc:
+            errors.append(f"Thẻ <product> #{idx}: {exc}")
+
+    return {"imported": imported, "updated": updated, "errors": errors}

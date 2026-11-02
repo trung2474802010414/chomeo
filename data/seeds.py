@@ -7,8 +7,7 @@ Dữ liệu khởi tạo mẫu (Seed Data) cho hệ thống PetShop:
 """
 
 from typing import Any, Dict, List
-from models.booking import SpaBooking
-from models.user import hash_password
+from models.entities import SpaBooking, hash_password
 
 
 SEED_CATALOG: List[Dict[str, Any]] = [

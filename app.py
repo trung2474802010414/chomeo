@@ -36,11 +36,18 @@ from core.orm import ValidationError
 from core.paginator import paginate_stream
 from core.router import Router
 from forms.petshop_forms import AdminLoginForm, CheckoutForm, ProductForm, SpaBookingForm
-from models.booking import SPA_SERVICES, SpaBooking
-from models.email_log import EmailLog
-from models.order import Order
-from models.product import CATEGORIES, CAT_BREEDS, DOG_BREEDS, Product
-from models.user import User, hash_password
+from models.entities import (
+    CATEGORIES,
+    CAT_BREEDS,
+    DOG_BREEDS,
+    EmailLog,
+    Order,
+    Product,
+    SPA_SERVICES,
+    SpaBooking,
+    User,
+    hash_password,
+)
 from services.email_service import (
     build_booking_html_email,
     build_marketing_html_email,
@@ -60,16 +67,18 @@ from services.network_service import (
     import_products_from_xml,
 )
 from services.petshop_service import (
+    SUPPORTED_BANKS,
     compute_dashboard_stats,
     create_order_transactional,
     export_products_csv_generator,
+    get_bank_config,
     get_product_detail_and_related,
     import_products_from_csv,
     init_db_and_seed,
     query_products,
+    save_bank_config,
+    search_pets_by_price,
 )
-from services.pet_service import search_pets_by_price
-from services.bank_service import SUPPORTED_BANKS, get_bank_config, save_bank_config
 
 # Tự động nhận diện thư mục chứa template ('templates' hoặc 'html')
 _TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")

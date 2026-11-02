@@ -1,0 +1,308 @@
+"""
+models/entities.py
+Toàn bộ các lớp thực thể (Models) của hệ thống Meow & Woof Pet House & Spa:
+- Product: Thú cưng (Chó cảnh, Mèo cảnh) & Sản phẩm (Thức ăn, Phụ kiện, Vệ sinh, Đồ chơi, Y tế)
+- SpaBooking: Lịch hẹn Spa & Grooming thú cưng
+- Order: Đơn đặt mua hàng của khách
+- EmailLog: Nhật ký gửi thông báo Email
+- User: Tài khoản thành viên & Quản trị viên (lưu trữ bền vững đa tầng SQLite + JSON Store)
+"""
+
+from datetime import datetime
+import hashlib
+import json
+import os
+from typing import Any, Dict, List, Optional
+from core.orm import BaseModel, FloatField, IntField, StringField
+
+CATEGORIES = [
+    "Chó cảnh",
+    "Mèo cảnh",
+    "Thức ăn",
+    "Phụ kiện",
+    "Vệ sinh & Chăm sóc",
+    "Đồ chơi",
+    "Y tế & Vitamin",
+]
+
+PET_TYPES = ["Chó", "Mèo", "Chó & Mèo"]
+
+DOG_BREEDS: List[str] = [
+    "Chó Phốc Sóc (Pomeranian)",
+    "Chó Poodle",
+    "Chó Chihuahua",
+    "Chó Corgi Chân Lùn",
+    "Chó Golden Retriever",
+    "Chó Labrador",
+    "Chó Alaska",
+    "Chó Husky",
+    "Chó Akita",
+    "Chó Shiba Inu",
+    "Chó Samoyed",
+    "Chó Chow Chow",
+    "Chó Pug Mặt Xệ",
+    "Chó Bull Pháp",
+    "Chó Schnauzer",
+    "Chó Phú Quốc",
+    "Chó Becgie Đức",
+    "Chó Beagle",
+    "Chó Bichon Frise",
+    "Chó Lạp Xưởng",
+]
+
+CAT_BREEDS: List[str] = [
+    "Mèo Anh Lông Ngắn (ALN)",
+    "Mèo Anh Lông Dài (ALD)",
+    "Mèo Tai Cụp Scottish Fold",
+    "Mèo Chân Ngắn Munchkin",
+    "Mèo Ba Tư (Persian)",
+    "Mèo Ragdoll",
+    "Mèo Bengal",
+    "Mèo Maine Coon",
+    "Mèo Xiêm (Siamese)",
+    "Mèo Nga Mắt Xanh",
+    "Mèo Sphynx Không Lông",
+    "Mèo Mỹ Lông Ngắn",
+]
+
+SPA_SERVICES: Dict[str, float] = {
+    "Tắm sấy & Vệ sinh tai móng": 150000.0,
+    "Cắt tỉa & Tạo kiểu lông (Grooming)": 280000.0,
+    "Cạo lông máu / Cạo vệ sinh": 180000.0,
+    "Khám sức khỏe & Tư vấn dinh dưỡng": 120000.0,
+    "Trông giữ thú cưng (1 ngày)": 200000.0,
+}
+
+BOOKING_STATUSES = ["Chờ xác nhận", "Đã xác nhận", "Hoàn thành", "Đã hủy"]
+
+USERS_STORE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "data",
+    "users_store.json",
+)
+
+
+def hash_password(password: str) -> str:
+    """Mã hóa mật khẩu bằng thuật toán an toàn SHA-256."""
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+
+class Product(BaseModel):
+    __tablename__ = "products"
+
+    id = IntField(primary_key=True)
+    sku = StringField(max_length=32)
+    name = StringField(max_length=150)
+    category = StringField(max_length=60, choices=CATEGORIES)
+    pet_type = StringField(max_length=30, choices=PET_TYPES)
+    breed = StringField(max_length=100, nullable=True, default="")
+    price = FloatField(min_value=1000.0)
+    stock = IntField(min_value=0, default=0)
+    image_url = StringField(max_length=250000, nullable=True, default="")
+    description = StringField(max_length=1000, nullable=True, default="")
+
+    @property
+    def stock_status(self) -> str:
+        """Thuộc tính tính toán động (@property) dựa trên số lượng tồn kho."""
+        if self.stock == 0:
+            return "Hết hàng"
+        if self.stock <= 5:
+            return "Sắp hết"
+        return "Còn hàng"
+
+    def to_dict(self) -> Dict[str, Any]:
+        data = super().to_dict()
+        data["stock_status"] = self.stock_status
+        return data
+
+
+class SpaBooking(BaseModel):
+    __tablename__ = "spa_bookings"
+
+    id = IntField(primary_key=True)
+    customer_name = StringField(max_length=100)
+    phone = StringField(max_length=20)
+    email = StringField(max_length=120, nullable=True, default="")
+    pet_name = StringField(max_length=60)
+    pet_type = StringField(max_length=20, choices=["Chó", "Mèo"])
+    pet_weight_kg = FloatField(min_value=0.2)
+    service_name = StringField(max_length=100, choices=list(SPA_SERVICES.keys()))
+    appointment_date = StringField(max_length=30)
+    appointment_time = StringField(max_length=20)
+    total_price = FloatField(min_value=0.0, default=0.0)
+    status = StringField(max_length=40, choices=BOOKING_STATUSES, default="Chờ xác nhận")
+    note = StringField(max_length=300, nullable=True, default="")
+    created_at = StringField(
+        max_length=40,
+        default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    )
+
+    @staticmethod
+    def calculate_service_price(service_name: str, weight_kg: float) -> float:
+        base_price = SPA_SERVICES.get(service_name, 150000.0)
+        if weight_kg > 10:
+            multiplier = 1.4
+        elif weight_kg >= 5:
+            multiplier = 1.2
+        else:
+            multiplier = 1.0
+        return round(base_price * multiplier, 0)
+
+
+class Order(BaseModel):
+    __tablename__ = "orders"
+
+    id = IntField(primary_key=True)
+    customer_name = StringField(max_length=100)
+    phone = StringField(max_length=20)
+    email = StringField(max_length=120, nullable=True, default="")
+    address = StringField(max_length=255)
+    items_json = StringField(max_length=4000)
+    total_amount = FloatField(min_value=0.0)
+    created_at = StringField(
+        max_length=40,
+        default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    )
+
+    @property
+    def items(self) -> List[Dict[str, Any]]:
+        try:
+            return json.loads(self.items_json)
+        except Exception:
+            return []
+
+    def to_dict(self) -> Dict[str, Any]:
+        data = super().to_dict()
+        data["items"] = self.items
+        return data
+
+
+class EmailLog(BaseModel):
+    __tablename__ = "email_logs"
+
+    id = IntField(primary_key=True)
+    recipient = StringField(max_length=150)
+    subject = StringField(max_length=200)
+    body = StringField(max_length=15000)
+    delivery_status = StringField(max_length=80, default="Đã lưu & Gửi")
+    created_at = StringField(
+        max_length=40,
+        default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    )
+
+
+class User(BaseModel):
+    __tablename__ = "users"
+
+    id = IntField(primary_key=True)
+    username = StringField(max_length=60)
+    fullname = StringField(max_length=100)
+    email = StringField(max_length=120)
+    phone = StringField(max_length=20)
+    password_hash = StringField(max_length=120)
+    role = StringField(max_length=20, default="customer")
+    created_at = StringField(
+        max_length=40,
+        default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    )
+
+    def save(self) -> "User":
+        """Lưu vào SQLite và đồng bộ xuống file JSON bền vững."""
+        super().save()
+        self._persist_to_json_file()
+        return self
+
+    def _persist_to_json_file(self) -> None:
+        """Lưu bản sao tài khoản vào data/users_store.json để không bao giờ mất khi tắt web."""
+        try:
+            os.makedirs(os.path.dirname(USERS_STORE_PATH), exist_ok=True)
+            records: List[Dict[str, str]] = []
+            if os.path.exists(USERS_STORE_PATH):
+                with open(USERS_STORE_PATH, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                    if isinstance(loaded, list):
+                        records = loaded
+
+            updated = False
+            u_lower = self.username.strip().lower()
+            entry = {
+                "username": self.username,
+                "fullname": self.fullname,
+                "email": self.email,
+                "phone": self.phone,
+                "password_hash": self.password_hash,
+                "role": self.role,
+                "created_at": self.created_at,
+            }
+            for idx, item in enumerate(records):
+                if str(item.get("username", "")).strip().lower() == u_lower:
+                    records[idx] = entry
+                    updated = True
+                    break
+            if not updated:
+                records.append(entry)
+
+            with open(USERS_STORE_PATH, "w", encoding="utf-8") as f:
+                json.dump(records, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    @classmethod
+    def sync_from_json_store(cls) -> None:
+        """Khôi phục danh sách tài khoản từ data/users_store.json vào SQLite khi khởi động."""
+        if not os.path.exists(USERS_STORE_PATH):
+            return
+        try:
+            with open(USERS_STORE_PATH, "r", encoding="utf-8") as f:
+                records = json.load(f)
+            if isinstance(records, list):
+                cls.restore_accounts_list(records)
+        except Exception:
+            pass
+
+    @classmethod
+    def restore_accounts_list(cls, accounts: List[Dict[str, str]]) -> None:
+        """Khôi phục danh sách tài khoản từ Cookie/LocalStorage/JSON vào SQLite."""
+        try:
+            existing_usernames = {u.username.strip().lower() for u in cls.iter_all()}
+            for acc in accounts:
+                if not isinstance(acc, dict):
+                    continue
+                uname = str(acc.get("username", "")).strip()
+                p_hash = str(acc.get("password_hash", "")).strip()
+                if not uname or not p_hash or uname.lower() in existing_usernames:
+                    continue
+                new_u = cls(
+                    username=uname,
+                    fullname=str(acc.get("fullname", uname)).strip(),
+                    email=str(acc.get("email", f"{uname}@gmail.com")).strip(),
+                    phone=str(acc.get("phone", "0905123456")).strip(),
+                    password_hash=p_hash,
+                    role=str(acc.get("role", "customer")).strip() or "customer",
+                    created_at=str(
+                        acc.get("created_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                    ),
+                )
+                super(User, new_u).save()
+                existing_usernames.add(uname.lower())
+        except Exception:
+            pass
+
+    def verify_password(self, password: str) -> bool:
+        """Kiểm tra mật khẩu nhập vào có khớp với hash trong DB hay không."""
+        return self.password_hash == hash_password(password)
+
+    @classmethod
+    def find_by_identifier(cls, identifier: str) -> Optional["User"]:
+        """Tìm user theo username, email hoặc số điện thoại (tự động đồng bộ từ JSON trước)."""
+        cls.sync_from_json_store()
+        ident = identifier.strip().lower()
+        for u in cls.iter_all():
+            if (
+                u.username.lower() == ident
+                or u.email.lower() == ident
+                or u.phone == ident
+            ):
+                return u
+        return None
+
