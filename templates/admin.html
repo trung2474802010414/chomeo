@@ -2147,7 +2147,13 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                                     <span>🔑 Mật khẩu ứng dụng Gmail 16 ký tự (Tùy chọn — Để gửi thẳng qua Google SMTP tức thì)</span>
                                     <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#38bdf8; text-decoration:underline; font-weight:700;">Lấy mã 16 ký tự của Google tại đây &rarr;</a>
                                 </label>
-                                <input type="password" name="smtp_pass" value="{{ smtp_creds.smtp_pass }}" class="form-control" placeholder="Để trống nếu dùng chế độ tự động (hoặc dán 16 ký tự App Password của Gmail: abcd efgh ijkl mnop)" style="height:40px; font-size:13.5px; color:#ffffff;">
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <input type="password" id="smtpPassInput" name="smtp_pass" value="{{ smtp_creds.smtp_pass }}" class="form-control" placeholder="Đã lưu rồi thì để nguyên, không cần nhập lại (hoặc dán 16 ký tự App Password của Gmail)" style="height:40px; font-size:13.5px; color:#ffffff; flex:1;">
+                                    <button type="button" class="btn btn-outline btn-sm" onclick="var i=document.getElementById('smtpPassInput'); i.type = i.type==='password' ? 'text' : 'password'; this.textContent = i.type==='password' ? '👁 Hiện' : '🙈 Ẩn';">👁 Hiện</button>
+                                </div>
+                                {% if smtp_creds.smtp_pass %}
+                                <div style="margin-top:6px; font-size:12px; color:#34d399; font-weight:700;">✅ Mật khẩu ứng dụng đã được lưu — không cần nhập lại. Bấm "Hiện" để xem lại bất cứ lúc nào.</div>
+                                {% endif %}
                             </div>
 
                             <!-- Hướng dẫn nhận thư vào hộp thư Gmail thật -->
@@ -2179,6 +2185,31 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                         } catch (e) {}
                     }
                     </script>
+                </div>
+
+                <!-- GHIM CẤU HÌNH ĐÃ LƯU VĨNH VIỄN (VERCEL ENVIRONMENT VARIABLES) -->
+                <div class="card" style="margin-bottom:22px; border:1.5px solid rgba(251,191,36,0.45);">
+                    <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:14px;">
+                        <h2 class="card-title" style="margin:0;">📌 Ghim cấu hình đã lưu — chỉ cần làm 1 lần, không bao giờ phải nhập lại</h2>
+                    </div>
+                    <p style="margin:0 0 12px; font-size:13px; color:#cbd5e1; line-height:1.6;">
+                        Máy chủ Vercel có thể "quên" cấu hình khi khởi động lại. Để lưu vĩnh viễn: vào <strong>Vercel &rarr; Project &rarr; Settings &rarr; Environment Variables</strong>, thêm đúng các biến dưới đây (bấm Sao chép để dán), rồi <strong>Redeploy</strong> một lần. Sau đó cấu hình luôn có sẵn, kể cả khi khách đặt hàng từ máy khác.
+                    </p>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        {% for env_name, env_val in persist_env %}
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 12px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:10px;">
+                            <code style="color:#fde047; font-weight:800; min-width:210px;">{{ env_name }}</code>
+                            <input type="{% if env_name == 'SMTP_PASS' %}password{% else %}text{% endif %}" readonly value="{{ env_val }}" id="envval_{{ loop.index }}" class="form-control" style="flex:1; min-width:200px; height:36px; font-size:12.5px; font-family:monospace;">
+                            {% if env_name == 'SMTP_PASS' %}
+                            <button type="button" class="btn btn-outline btn-sm" onclick="var i=document.getElementById('envval_{{ loop.index }}'); i.type = i.type==='password' ? 'text' : 'password';">👁</button>
+                            {% endif %}
+                            <button type="button" class="btn btn-teal btn-sm" onclick="var i=document.getElementById('envval_{{ loop.index }}'); navigator.clipboard.writeText(i.value); this.textContent='✓ Đã chép'; var b=this; setTimeout(function(){b.textContent='📋 Sao chép';},1500);">📋 Sao chép</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if not smtp_creds.smtp_pass %}
+                    <div style="margin-top:10px; font-size:12.5px; color:#fca5a5;">⚠️ Chưa có Mật khẩu ứng dụng Gmail trên máy chủ này. Hãy dán nó ở ô phía trên và bấm Lưu để biến SMTP_USER / SMTP_PASS xuất hiện ở đây.</div>
+                    {% endif %}
                 </div>
 
                 <div class="card">
@@ -2506,6 +2537,20 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
     .admin-live-toast { background:linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border:1.5px solid #34d399; border-radius:16px; padding:14px 16px; color:#fff; box-shadow:0 16px 40px rgba(0,0,0,0.55), 0 0 24px rgba(52,211,153,0.3); animation:adminToastIn .35s ease; display:flex; gap:12px; align-items:flex-start; cursor:pointer; }
     </style>
     <div id="adminLiveToasts"></div>
+    {% if just_logged_in %}
+    <script>
+    // Đăng nhập Admin thành công -> lưu hẳn tên + mật khẩu cho nút "Điền nhanh"
+    (function() {
+        try {
+            var pend = sessionStorage.getItem('mw_pending_login');
+            if (pend) {
+                localStorage.setItem('mw_saved_login', pend);
+                sessionStorage.removeItem('mw_pending_login');
+            }
+        } catch (e) {}
+    })();
+    </script>
+    {% endif %}
     <script>
     (function() {
         var KEY_O = 'mw_admin_seen_order', KEY_B = 'mw_admin_seen_booking';

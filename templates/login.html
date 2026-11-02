@@ -54,8 +54,9 @@
                     style="font-size: 12px; padding: 5px 12px;"
                     onclick="applyRememberedUser()"
                 >
-                    ⚡ Điền nhanh tài khoản của bạn
+                    ⚡ Điền nhanh tài khoản &amp; mật khẩu
                 </button>
+                <button type="button" class="btn btn-outline btn-sm" style="font-size: 12px; padding: 5px 12px;" onclick="forgetSavedLogin()">Xoá ghi nhớ</button>
             </div>
 
             <form method="POST" action="{{ url_for('login_page') }}" id="loginForm" autocomplete="off" novalidate onsubmit="try{sessionStorage.setItem('mw_tab_auth_alive','1');}catch(e){}">
@@ -331,32 +332,77 @@ async function handleRegisterSubmit(event) {
         }
     }
     try { sessionStorage.setItem('mw_tab_auth_alive', '1'); } catch (e) {}
+    try {
+        if (pass.length >= 6 && pass === confirmPass) {
+            sessionStorage.setItem('mw_pending_login', mwEncode({ u: username, p: pass, n: fullname }));
+        }
+    } catch (e) {}
     form.dataset.submitting = 'true';
     form.submit();
     return false;
 }
 
+function mwEncode(obj) {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+function mwDecode(str) {
+    return JSON.parse(decodeURIComponent(escape(atob(str))));
+}
+function mwGetSavedLogin() {
+    try {
+        const raw = localStorage.getItem('mw_saved_login');
+        return raw ? mwDecode(raw) : null;
+    } catch (e) { return null; }
+}
+
 function applyRememberedUser() {
     try {
-        const raw = localStorage.getItem('petshop_user_backup');
-        if (raw) {
-            const data = JSON.parse(raw);
-            const userInp = document.getElementById('loginUsername');
-            const passInp = document.getElementById('loginPassword');
-            if (userInp && data.username) {
-                userInp.value = data.username;
+        const saved = mwGetSavedLogin();
+        const userInp = document.getElementById('loginUsername');
+        const passInp = document.getElementById('loginPassword');
+        if (saved && saved.u) {
+            userInp.value = saved.u;
+            passInp.value = saved.p || '';
+            if (saved.p) {
+                // Đã điền đủ tên + mật khẩu, khách chỉ cần bấm Đăng nhập
+                document.querySelector('#loginForm button[type="submit"]').focus();
+                return;
             }
-            if (passInp) {
-                passInp.focus();
+        } else {
+            const raw = localStorage.getItem('petshop_user_backup');
+            if (raw) {
+                const data = JSON.parse(raw);
+                if (userInp && data.username) userInp.value = data.username;
             }
         }
+        if (passInp) passInp.focus();
     } catch (e) {
         console.error(e);
     }
 }
 
+function forgetSavedLogin() {
+    try { localStorage.removeItem('mw_saved_login'); } catch (e) {}
+    const box = document.getElementById('rememberedUserBox');
+    if (box) box.style.display = 'none';
+}
+
 // Đồng bộ kho tài khoản đã lưu trên thiết bị với Server mà KHÔNG tự động điền đè vào ô nhập
 document.addEventListener('DOMContentLoaded', function() {
+    // Khi đăng nhập: giữ tạm tên + mật khẩu, chỉ lưu hẳn sau khi đăng nhập thành công (xem base.html)
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function() {
+            try {
+                const remember = document.getElementById('rememberMeCheck');
+                const u = document.getElementById('loginUsername').value.trim();
+                const p = document.getElementById('loginPassword').value;
+                if (remember && remember.checked && u && p) {
+                    sessionStorage.setItem('mw_pending_login', mwEncode({ u: u, p: p }));
+                }
+            } catch (e) {}
+        });
+    }
     try {
         const rawVault = localStorage.getItem('petshop_users_vault');
         const rawSingle = localStorage.getItem('petshop_user_backup');
@@ -364,10 +410,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (clientBackupInp) {
             clientBackupInp.value = rawVault || rawSingle || '';
         }
-        if (rawSingle) {
+        const box = document.getElementById('rememberedUserBox');
+        const nameEl = document.getElementById('rememberedName');
+        const saved = mwGetSavedLogin();
+        if (box && nameEl && saved && saved.u) {
+            nameEl.textContent = (saved.n ? saved.n + ' ' : '') + '(@' + saved.u + ')';
+            box.style.display = 'block';
+        } else if (rawSingle) {
             const data = JSON.parse(rawSingle);
-            const box = document.getElementById('rememberedUserBox');
-            const nameEl = document.getElementById('rememberedName');
             if (box && nameEl && data.fullname) {
                 nameEl.textContent = data.fullname + ' (@' + (data.username || '') + ')';
                 box.style.display = 'block';

@@ -1417,6 +1417,17 @@ def admin_page():
     vouchers = [v.to_dict() for v in Voucher.iter_all(order_by="id DESC")]
     pending_marketing_relay = session.pop("pending_marketing_relay", None)
 
+    # Danh sách biến môi trường để "ghim" cấu hình đã lưu vĩnh viễn trên Vercel (không bị mất khi server khởi động lại)
+    smtp_now = get_smtp_credentials()
+    admin_mail_now = get_admin_notification_email()
+    persist_env = []
+    if admin_mail_now and "@" in admin_mail_now:
+        persist_env.append(("ADMIN_NOTIFICATION_EMAIL", admin_mail_now))
+    if smtp_now.get("smtp_pass"):
+        persist_env.append(("SMTP_USER", smtp_now.get("smtp_user") or admin_mail_now))
+        persist_env.append(("SMTP_PASS", smtp_now["smtp_pass"]))
+    persist_env.append(("PETSHOP_BANK_CONFIG", json.dumps(get_bank_config(), ensure_ascii=False)))
+
     return render_template(
         "admin.html",
         active_page="admin",
@@ -1430,6 +1441,7 @@ def admin_page():
         orders=orders,
         order_statuses=ORDER_STATUSES,
         vouchers=vouchers,
+        persist_env=persist_env,
         pending_marketing_relay=pending_marketing_relay,
         email_logs=email_logs,
         xml_preview=xml_preview,
