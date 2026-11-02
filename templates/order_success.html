@@ -52,40 +52,68 @@
         </div>
     </div>
 
-    <!-- BẢNG MÃ QR THANH TOÁN (NẾU CHỌN VIETQR) -->
+    <!-- BẢNG MÃ QR THANH TOÁN FINTECH CAO CẤP (NẾU CHỌN VIETQR) -->
     {% if payment_method == 'banking' %}
-    <div style="margin-bottom:28px; padding:20px; border-radius:18px; background:linear-gradient(135deg, rgba(17,24,39,0.98) 0%, rgba(30,27,75,0.95) 100%); border:1.5px solid #34d399; box-shadow:0 12px 35px rgba(52,211,153,0.25);">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1px dashed rgba(255,255,255,0.15); padding-bottom:10px;">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:24px;">📱</span>
+    <div style="margin-bottom:28px; padding:22px; border-radius:20px; background:linear-gradient(145deg, rgba(13,18,36,0.98) 0%, rgba(26,20,62,0.98) 100%); border:1.5px solid rgba(52,211,153,0.65); box-shadow:0 16px 40px rgba(0,0,0,0.55);">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); display:flex; align-items:center; justify-content:center; font-size:22px;">📱</div>
                 <div>
                     <strong style="color:#ffffff; font-size:16px;">Mã QR Thanh Toán Cho Đơn Hàng #DH{{ order.id }}</strong>
-                    <div style="font-size:12px; color:#34d399;">Hệ thống tự động ghi nhận thanh toán sau khi quét mã</div>
+                    <div style="font-size:12px; color:#34d399;">Quét bằng mọi ứng dụng Ngân hàng hoặc Ví điện tử Napas247</div>
                 </div>
             </div>
-            <span class="badge badge-stock-ok">VietQR Chuẩn</span>
+            <span class="badge badge-stock-ok" style="font-weight:800;">⚡ VietQR Napas 247</span>
         </div>
 
-        <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap; justify-content:center;">
-            <div style="background:#ffffff; padding:12px; border-radius:16px; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
-                <img src="https://api.vietqr.io/image/{{ bank_config.bank_bin|default('970422') }}-{{ bank_config.account_number|default('0905123456') }}-{{ bank_config.template|default('compact2') }}.png?amount={{ order.total_amount|int }}&addInfo={{ bank_config.syntax_prefix|default('MEOW') }}%20{{ order.id }}&accountName={{ bank_config.account_name|default('MEOW AND WOOF')|urlencode }}" alt="Mã VietQR Đơn Hàng #DH{{ order.id }}" style="width:180px; height:180px; display:block; object-fit:contain; border-radius:8px;" onerror="this.onerror=null; this.src='https://quickchart.io/qr?text=2|99|{{ bank_config.account_number|default('0905123456') }}|{{ bank_config.account_name|default('MEOW AND WOOF') }}|0|0|{{ order.total_amount|int }}|{{ bank_config.syntax_prefix|default('MEOW') }}{{ order.id }}&size=200';">
-                <div style="font-size:11px; font-weight:800; color:#1e1b4b; margin-top:4px;">VIETQR • {{ bank_config.bank_name|default('MB BANK') }}</div>
+        <div style="display:flex; gap:20px; align-items:stretch; flex-wrap:wrap; justify-content:center;">
+            <div style="width:206px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:12px;">
+                <div style="width:100%; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; padding:0 4px;">
+                    <span style="font-size:11px; font-weight:900; color:#f87171;">VIET<span style="color:#60a5fa;">QR</span></span>
+                    <span style="font-size:10.5px; font-weight:800; color:#34d399;">NAPAS 247</span>
+                </div>
+                <div style="width:178px; height:178px; background:#ffffff; padding:10px; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; border:2px solid #34d399;">
+                    <img src="https://api.vietqr.io/image/{{ bank_config.bank_bin|default('970422') }}-{{ bank_config.account_number|default('0905123456') }}-qr_only.png?amount={{ order.total_amount|int }}&addInfo={{ bank_config.syntax_prefix|default('MEOW') }}%20{{ order.id }}&accountName={{ bank_config.account_name|default('MEOW AND WOOF')|urlencode }}" alt="Mã VietQR Đơn Hàng #DH{{ order.id }}" style="width:154px; height:154px; display:block; object-fit:contain;" onerror="this.onerror=null; this.src='https://quickchart.io/qr?text=2|99|{{ bank_config.account_number|default('0905123456') }}|{{ bank_config.account_name|default('MEOW AND WOOF') }}|0|0|{{ order.total_amount|int }}|{{ bank_config.syntax_prefix|default('MEOW') }}{{ order.id }}&size=200';">
+                </div>
             </div>
 
-            <div style="flex:1; min-width:240px; font-size:13px; color:#cbd5e1; line-height:1.7;">
-                <div><span style="color:#94a3b8;">Ngân hàng:</span> <strong style="color:#ffffff;">{{ bank_config.bank_name|default('MB Bank (Ngân hàng Quân Đội)') }}</strong></div>
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <div><span style="color:#94a3b8;">Số tài khoản:</span> <strong style="color:#fde047; font-size:15px;">{{ bank_config.account_number|default('0905123456') }}</strong></div>
-                    <button type="button" onclick="copyText('{{ bank_config.account_number|default('0905123456') }}', this)" class="btn btn-outline btn-sm" style="padding:2px 8px; font-size:11px;">📋 Chép STK</button>
+            <div style="flex:1; min-width:250px; display:flex; flex-direction:column; gap:8px; justify-content:space-between;">
+                <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.09); border-radius:11px; padding:9px 14px; display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <div style="font-size:10.5px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Ngân hàng thụ hưởng</div>
+                        <strong style="color:#ffffff; font-size:14px;">{{ bank_config.bank_name|default('MB Bank (Ngân hàng Quân Đội)') }}</strong>
+                    </div>
+                    <span>🏦</span>
                 </div>
-                <div><span style="color:#94a3b8;">Chủ tài khoản:</span> <strong style="color:#ffffff;">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</strong></div>
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <div><span style="color:#94a3b8;">Số tiền cần chuyển:</span> <strong style="color:#34d399; font-size:16px;">{{ "{:,.0f}".format(order.total_amount) }} đ</strong></div>
-                    <button type="button" onclick="copyText('{{ order.total_amount|int }}', this)" class="btn btn-outline btn-sm" style="padding:2px 8px; font-size:11px;">📋 Chép tiền</button>
+                <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(250,204,21,0.3); border-radius:11px; padding:9px 14px; display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <div style="font-size:10.5px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Số tài khoản</div>
+                        <strong style="color:#fde047; font-size:16px; letter-spacing:0.6px;">{{ bank_config.account_number|default('0905123456') }}</strong>
+                    </div>
+                    <button type="button" onclick="copyText('{{ bank_config.account_number|default('0905123456') }}', this)" class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11.5px;">📋 Chép STK</button>
                 </div>
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <div><span style="color:#94a3b8;">Nội dung chuyển khoản:</span> <strong style="color:#c4b5fd; font-size:15px;">{{ bank_config.syntax_prefix|default('MEOW') }} {{ order.id }}</strong></div>
-                    <button type="button" onclick="copyText('{{ bank_config.syntax_prefix|default('MEOW') }} {{ order.id }}', this)" class="btn btn-outline btn-sm" style="padding:2px 8px; font-size:11px;">📋 Chép cú pháp</button>
+                <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.09); border-radius:11px; padding:9px 14px; display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <div style="font-size:10.5px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Chủ tài khoản</div>
+                        <strong style="color:#ffffff; font-size:14px;">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</strong>
+                    </div>
+                    <span style="font-size:11px; color:#34d399; font-weight:800;">✓ Chính chủ</span>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(52,211,153,0.3); border-radius:11px; padding:9px 12px; display:flex; align-items:center; justify-content:space-between;">
+                        <div>
+                            <div style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Số tiền</div>
+                            <strong style="color:#34d399; font-size:15px;">{{ "{:,.0f}".format(order.total_amount) }} đ</strong>
+                        </div>
+                        <button type="button" onclick="copyText('{{ order.total_amount|int }}', this)" class="btn btn-outline btn-sm" style="padding:3px 8px; font-size:11px;">📋</button>
+                    </div>
+                    <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(139,92,246,0.35); border-radius:11px; padding:9px 12px; display:flex; align-items:center; justify-content:space-between;">
+                        <div>
+                            <div style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Nội dung CK</div>
+                            <strong style="color:#c4b5fd; font-size:14px;">{{ bank_config.syntax_prefix|default('MEOW') }} {{ order.id }}</strong>
+                        </div>
+                        <button type="button" onclick="copyText('{{ bank_config.syntax_prefix|default('MEOW') }} {{ order.id }}', this)" class="btn btn-outline btn-sm" style="padding:3px 8px; font-size:11px;">📋</button>
+                    </div>
                 </div>
             </div>
         </div>
