@@ -219,6 +219,8 @@ def _attach_order_to_vault_cookie(resp: Response, order_dict: Dict[str, Any]) ->
             "address": order_dict.get("address", ""),
             "items": compact_items,
             "total_amount": order_dict.get("total_amount", 0),
+            "status": order_dict.get("status", "Chờ xác nhận"),
+            "payment_method": order_dict.get("payment_method", "cod"),
             "created_at": order_dict.get("created_at", ""),
         }
         vault = [
@@ -246,11 +248,27 @@ def _attach_order_to_vault_cookie(resp: Response, order_dict: Dict[str, Any]) ->
 
 
 def _sync_orders_vault_cookie(resp: Response, all_orders: List[Dict[str, Any]]) -> Response:
-    """Đồng bộ lại Cookie đơn hàng khi Admin xóa đơn hàng."""
+    """Đồng bộ lại Cookie đơn hàng khi Admin cập nhật trạng thái hoặc xóa đơn hàng."""
     try:
         resp.set_cookie(
             "mw_orders_vault",
             _encode_compressed_vault(all_orders[-15:]),
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+    except Exception:
+        pass
+    return resp
+
+
+def _sync_users_vault_cookie(resp: Response, all_users: List[Dict[str, str]]) -> Response:
+    """Đồng bộ lại Cookie tài khoản khi Khách hàng hoặc Admin cập nhật/xóa tài khoản."""
+    try:
+        encoded = urllib.parse.quote(json.dumps(all_users[-15:], ensure_ascii=False))
+        resp.set_cookie(
+            "mw_users_vault",
+            encoded,
             max_age=365 * 24 * 3600,
             samesite="Lax",
             httponly=False,
@@ -433,6 +451,7 @@ def inject_global_template_vars() -> Dict[str, Any]:
         "admin_user": session.get("admin_user", "admin"),
         "customer_logged_in": bool(session.get("customer_logged_in")),
         "customer_name": session.get("customer_name", ""),
+        "customer_username": session.get("customer_username", ""),
         "customer_email": session.get("customer_email", ""),
         "customer_phone": session.get("customer_phone", ""),
         "just_logged_in": just_logged_in,
@@ -668,19 +687,21 @@ def cart_page():
 
         if form.validate_on_submit():
             try:
+                payment_method = form.data.get("payment_method", "cod")
                 order_dict = create_order_transactional(
                     {
                         "customer_name": form.data["customer_name"],
                         "phone": form.data["phone"],
                         "email": form.data["email"],
                         "address": form.data["address"],
+                        "payment_method": payment_method,
+                        "status": "Chờ xác nhận",
                         "items": [
                             {"product_id": i["product_id"], "quantity": i["quantity"]}
                             for i in cart_items
                         ],
                     }
                 )
-                payment_method = form.data.get("payment_method", "cod")
                 session["last_payment_method"] = payment_method
                 # Xóa sạch toàn bộ dữ liệu giỏ hàng & thao tác đặt hàng trước đó
                 session["cart"] = {}
@@ -731,31 +752,185 @@ def order_success_page(order_id: int):
 
 @app.route("/orders/history")
 @app.route("/my-orders")
+@app.route("/profile")
 def order_history_page():
-    """Trang Tra cứu & Xem Lịch sử Mua hàng và Lịch hẹn Spa của khách hàng."""
-    phone = request.args.get("phone", "").strip()
-    if not phone and session.get("customer_logged_in"):
-        phone = session.get("customer_phone", "").strip()
+    """Trang Hồ Sơ Tài Khoản Khách Hàng & Lịch Sử Mua Hàng / Đặt Lịch Spa (Đồng bộ 100% với Admin)."""
+    query_phone = request.args.get("phone", "").strip()
+    if not session.get("customer_logged_in") and not session.get("admin_logged_in") and not query_phone:
+        flash("🔑 Vui lòng đăng nhập tài khoản để xem Hồ sơ khách hàng & Lịch sử mua hàng của bạn!", "error")
+        return redirect(url_for("login_page", next=url_for("order_history_page")))
 
-    orders: List[Dict[str, Any]] = []
-    bookings: List[Dict[str, Any]] = []
-    total_spent = 0.0
+    username_sess = str(session.get("customer_username", "")).strip()
+    phone_sess = query_phone or str(session.get("customer_phone", "")).strip()
+    email_sess = str(session.get("customer_email", "")).strip().lower()
+    name_sess = str(session.get("customer_name", "")).strip().lower()
 
-    if phone:
-        orders = [o.to_dict() for o in Order.filter_stream(lambda item: phone in item.phone)]
-        bookings = [b.to_dict() for b in SpaBooking.filter_stream(lambda item: phone in item.phone)]
-        total_spent = sum(o.get("total_amount", 0) for o in orders) + sum(
-            b.get("total_price", 0) for b in bookings if b.get("status") != "Đã hủy"
-        )
+    user_obj = None
+    if query_phone:
+        user_obj = User.find_by_identifier(query_phone)
+    if not user_obj and username_sess:
+        user_obj = User.find_by_identifier(username_sess)
+    if not user_obj and phone_sess:
+        user_obj = User.find_by_identifier(phone_sess)
+    if not user_obj and email_sess:
+        user_obj = User.find_by_identifier(email_sess)
+
+    if user_obj:
+        profile_data = {
+            "id": user_obj.id,
+            "username": user_obj.username,
+            "fullname": user_obj.fullname,
+            "full_name": user_obj.fullname,
+            "phone": user_obj.phone,
+            "email": user_obj.email,
+            "created_at": user_obj.created_at,
+            "role": user_obj.role,
+        }
+        u_phone = (user_obj.phone or "").strip()
+        u_email = (user_obj.email or "").strip().lower()
+        u_name = (user_obj.fullname or "").strip().lower()
+    else:
+        fname_val = session.get("customer_name") or ("Quản Trị Viên Admin" if session.get("admin_logged_in") else "Khách hàng")
+        profile_data = {
+            "id": 0,
+            "username": session.get("admin_user", "admin") if session.get("admin_logged_in") else (username_sess or "thanh_vien"),
+            "fullname": fname_val,
+            "full_name": fname_val,
+            "phone": phone_sess or "0905123456",
+            "email": email_sess or get_admin_notification_email(),
+            "created_at": datetime.now().strftime("%Y-%m-%d"),
+            "role": "admin" if session.get("admin_logged_in") else "customer",
+        }
+        u_phone = phone_sess
+        u_email = email_sess
+        u_name = name_sess
+
+    all_orders = list(Order.iter_all(order_by="id DESC"))
+    all_bookings = list(SpaBooking.iter_all(order_by="id DESC"))
+
+    if session.get("admin_logged_in") and not session.get("customer_logged_in") and not query_phone:
+        orders = [o.to_dict() for o in all_orders]
+        bookings = [b.to_dict() for b in all_bookings]
+    else:
+        orders = [
+            o.to_dict()
+            for o in all_orders
+            if (u_phone and u_phone in (o.phone or ""))
+            or (u_email and u_email == (o.email or "").strip().lower())
+            or (u_name and u_name == (o.customer_name or "").strip().lower())
+        ]
+        bookings = [
+            b.to_dict()
+            for b in all_bookings
+            if (u_phone and u_phone in (b.phone or ""))
+            or (u_email and u_email == (b.email or "").strip().lower())
+            or (u_name and u_name == (b.customer_name or "").strip().lower())
+        ]
+
+    total_spent = sum(
+        o.get("total_amount", 0) for o in orders if o.get("status") != "Đã hủy"
+    ) + sum(
+        b.get("total_price", 0) for b in bookings if b.get("status") != "Đã hủy"
+    )
+
+    if total_spent >= 15000000:
+        vip_tier = "💎 Hạng Kim Cương"
+        vip_color = "#c4b5fd"
+    elif total_spent >= 5000000:
+        vip_tier = "🥇 Hạng Vàng"
+        vip_color = "#fde047"
+    elif total_spent >= 1000000:
+        vip_tier = "🥈 Hạng Bạc"
+        vip_color = "#38bdf8"
+    else:
+        vip_tier = "🌱 Thành Viên Thân Thiết"
+        vip_color = "#6ee7b7"
 
     return render_template(
         "order_history.html",
         active_page="orders",
-        phone=phone,
+        profile=profile_data,
+        customer_profile=profile_data,
+        vip_tier=vip_tier,
+        vip_color=vip_color,
+        phone=profile_data["phone"],
         orders=orders,
         bookings=bookings,
         total_spent=total_spent,
+        bank_config=get_bank_config(),
     )
+
+
+@app.route("/profile/update", methods=["POST"])
+def update_customer_profile_route():
+    """Khách hàng tự cập nhật thông tin cá nhân trên trang Hồ sơ và đồng bộ ngay với Admin."""
+    if not session.get("customer_logged_in") and not session.get("admin_logged_in"):
+        return redirect(url_for("login_page"))
+
+    fullname = (request.form.get("fullname") or request.form.get("full_name") or "").strip()
+    phone = request.form.get("phone", "").strip()
+    email = request.form.get("email", "").strip()
+    new_password = request.form.get("new_password", "").strip()
+
+    if len(fullname) < 2 or len(fullname) > 80:
+        flash("Họ và tên phải từ 2 đến 80 ký tự.", "error")
+        return redirect(url_for("order_history_page"))
+    if not re.match(r"^0\d{8,10}$", phone):
+        flash("Số điện thoại phải bắt đầu bằng số 0 và gồm 9–11 chữ số.", "error")
+        return redirect(url_for("order_history_page"))
+    if not re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", email):
+        flash("Địa chỉ Email không đúng định dạng.", "error")
+        return redirect(url_for("order_history_page"))
+
+    username_sess = str(session.get("customer_username", "")).strip()
+    user_obj = User.find_by_identifier(username_sess) if username_sess else None
+    if not user_obj and session.get("customer_phone"):
+        user_obj = User.find_by_identifier(str(session.get("customer_phone")))
+
+    old_phone = str(session.get("customer_phone", "")).strip()
+    old_name = str(session.get("customer_name", "")).strip()
+
+    if user_obj:
+        old_phone = user_obj.phone
+        old_name = user_obj.fullname
+        user_obj.fullname = fullname
+        user_obj.phone = phone
+        user_obj.email = email
+        if new_password:
+            if len(new_password) < 6:
+                flash("Mật khẩu mới phải từ 6 ký tự trở lên.", "error")
+                return redirect(url_for("order_history_page"))
+            user_obj.password_hash = hash_password(new_password)
+        user_obj.save()
+
+    # Đồng bộ luôn thông tin khách hàng trên các đơn hàng & lịch Spa đã đặt để Admin thấy đồng nhất
+    for o in Order.iter_all():
+        if (old_phone and o.phone == old_phone) or (old_name and o.customer_name == old_name):
+            o.customer_name = fullname
+            o.phone = phone
+            o.email = email
+            super(Order, o).save()
+    all_orders = Order.sync_all_to_json_file()
+
+    for b in SpaBooking.iter_all():
+        if (old_phone and b.phone == old_phone) or (old_name and b.customer_name == old_name):
+            b.customer_name = fullname
+            b.phone = phone
+            b.email = email
+            super(SpaBooking, b).save()
+    all_bookings = SpaBooking.sync_all_to_json_file()
+
+    session["customer_name"] = fullname
+    session["customer_phone"] = phone
+    session["customer_email"] = email
+    session.modified = True
+
+    all_users = User.sync_all_to_json_file()
+    flash("✅ Đã cập nhật thông tin tài khoản và đồng bộ với hệ thống Quản trị Admin thành công!", "success")
+    resp = make_response(redirect(url_for("order_history_page")))
+    resp = _sync_users_vault_cookie(resp, all_users)
+    resp = _sync_orders_vault_cookie(resp, all_orders)
+    return _sync_bookings_vault_cookie(resp, all_bookings)
 
 
 @app.route("/cart/add", methods=["POST"])
@@ -1238,6 +1413,21 @@ def admin_delete_booking(booking_id: int):
     return _sync_bookings_vault_cookie(resp, all_bookings)
 
 
+@app.route("/admin/orders/<int:order_id>/status", methods=["POST"])
+@admin_required
+def admin_update_order_status(order_id: int):
+    """Admin cập nhật trạng thái xử lý đơn hàng và đồng bộ ngay với trang Lịch sử của Khách."""
+    new_status = request.form.get("status", "").strip()
+    order_obj = Order.get_by_id(order_id)
+    if order_obj and new_status:
+        order_obj.status = new_status
+        order_obj.save()
+        flash(f"Đã cập nhật trạng thái đơn hàng #{order_id} sang '{new_status}'.", "success")
+    all_orders = Order.sync_all_to_json_file()
+    resp = make_response(redirect(url_for("admin_page", tab="orders")))
+    return _sync_orders_vault_cookie(resp, all_orders)
+
+
 @app.route("/admin/orders/<int:order_id>/delete", methods=["POST"])
 @admin_required
 def admin_delete_order(order_id: int):
@@ -1248,6 +1438,81 @@ def admin_delete_order(order_id: int):
     all_orders = Order.sync_all_to_json_file()
     resp = make_response(redirect(url_for("admin_page", tab="orders")))
     return _sync_orders_vault_cookie(resp, all_orders)
+
+
+@app.route("/admin/customers/save", methods=["POST"])
+@admin_required
+def admin_save_customer():
+    """Admin thêm mới hoặc cập nhật toàn bộ thông tin tài khoản khách hàng."""
+    user_id = request.form.get("user_id", "").strip()
+    username = request.form.get("username", "").strip()
+    fullname = (request.form.get("fullname") or request.form.get("full_name") or "").strip()
+    phone = request.form.get("phone", "").strip()
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "").strip()
+
+    if len(fullname) < 2 or not phone:
+        flash("Vui lòng nhập đầy đủ Họ tên và Số điện thoại của khách hàng.", "error")
+        return redirect(url_for("admin_page", tab="customers"))
+
+    if user_id.isdigit() and int(user_id) > 0:
+        u_obj = User.get_by_id(int(user_id))
+        if u_obj:
+            old_phone = u_obj.phone
+            old_name = u_obj.fullname
+            u_obj.fullname = fullname
+            u_obj.phone = phone
+            u_obj.email = email
+            if username and len(username) >= 3:
+                u_obj.username = username
+            if password and len(password) >= 6:
+                u_obj.password_hash = hash_password(password)
+            u_obj.save()
+
+            # Đồng bộ thông tin khách trên các đơn hàng của khách đó
+            for o in Order.iter_all():
+                if (old_phone and o.phone == old_phone) or (old_name and o.customer_name == old_name):
+                    o.customer_name = fullname
+                    o.phone = phone
+                    o.email = email
+                    super(Order, o).save()
+            Order.sync_all_to_json_file()
+            flash(f"Đã cập nhật thông tin khách hàng '{fullname}' (@{u_obj.username}) thành công!", "success")
+    else:
+        if len(username) < 3:
+            flash("Tên đăng nhập phải có ít nhất 3 ký tự.", "error")
+            return redirect(url_for("admin_page", tab="customers"))
+        existing = User.find_by_identifier(username)
+        if existing:
+            flash(f"Tên đăng nhập '@{username}' đã tồn tại.", "error")
+            return redirect(url_for("admin_page", tab="customers"))
+        new_u = User(
+            username=username,
+            fullname=fullname,
+            phone=phone,
+            email=email,
+            password_hash=hash_password(password if len(password) >= 6 else "123456"),
+            role="customer",
+        )
+        new_u.save()
+        flash(f"Đã tạo tài khoản khách hàng mới '{fullname}' (@{username}) thành công!", "success")
+
+    all_users = User.sync_all_to_json_file()
+    resp = make_response(redirect(url_for("admin_page", tab="customers")))
+    return _sync_users_vault_cookie(resp, all_users)
+
+
+@app.route("/admin/customers/<int:user_id>/delete", methods=["POST"])
+@admin_required
+def admin_delete_customer(user_id: int):
+    """Admin xóa tài khoản khách hàng khỏi hệ thống."""
+    if User.delete_by_id(user_id):
+        flash(f"Đã xóa tài khoản khách hàng #{user_id} khỏi hệ thống.", "success")
+    else:
+        flash(f"Không tìm thấy tài khoản khách hàng #{user_id}.", "error")
+    all_users = User.sync_all_to_json_file()
+    resp = make_response(redirect(url_for("admin_page", tab="customers")))
+    return _sync_users_vault_cookie(resp, all_users)
 
 
 @app.route("/admin/products/import-csv", methods=["POST"])

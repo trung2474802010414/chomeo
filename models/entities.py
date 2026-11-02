@@ -75,6 +75,7 @@ SPA_SERVICES: Dict[str, float] = {
 }
 
 BOOKING_STATUSES = ["Chờ xác nhận", "Đã xác nhận", "Hoàn thành", "Đã hủy"]
+ORDER_STATUSES = ["Chờ xác nhận", "Đang đóng gói", "Đang giao hàng", "Hoàn thành", "Đã hủy"]
 
 USERS_STORE_PATH = resolve_writable_json_path("users_store.json")
 ORDERS_STORE_PATH = resolve_writable_json_path("orders_store.json")
@@ -287,6 +288,8 @@ class Order(BaseModel):
     address = StringField(max_length=255)
     items_json = StringField(max_length=4000)
     total_amount = FloatField(min_value=0.0)
+    status = StringField(max_length=40, nullable=True, default="Chờ xác nhận")
+    payment_method = StringField(max_length=30, nullable=True, default="cod")
     created_at = StringField(
         max_length=40,
         default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -375,12 +378,12 @@ class Order(BaseModel):
     def restore_orders_list(cls, orders: List[Dict[str, Any]]) -> None:
         """Khôi phục danh sách đơn hàng từ Cookie/JSON vào SQLite để Admin luôn nhìn thấy đầy đủ đơn hàng."""
         try:
-            existing_keys = {
+            existing_map = {
                 (
                     o.phone.strip(),
                     o.created_at.strip(),
                     round(float(o.total_amount), 0),
-                )
+                ): o
                 for o in cls.iter_all()
             }
             existing_emails_created = {e.created_at.strip() for e in EmailLog.iter_all()}
@@ -395,7 +398,15 @@ class Order(BaseModel):
                 if not phone or total_amt <= 0:
                     continue
                 key = (phone, created_at, round(total_amt, 0))
-                if key in existing_keys:
+                status_val = str(od.get("status", "Chờ xác nhận") or "Chờ xác nhận").strip()
+                if status_val not in ORDER_STATUSES:
+                    status_val = "Chờ xác nhận"
+                pay_val = str(od.get("payment_method", "cod") or "cod").strip()
+                if key in existing_map:
+                    ex = existing_map[key]
+                    if getattr(ex, "status", "Chờ xác nhận") != status_val:
+                        ex.status = status_val
+                        super(Order, ex).save()
                     continue
 
                 raw_items = od.get("items_json", "")
@@ -411,10 +422,12 @@ class Order(BaseModel):
                     address=str(od.get("address", "Đà Nẵng")).strip(),
                     items_json=str(raw_items),
                     total_amount=total_amt,
+                    status=status_val,
+                    payment_method=pay_val,
                     created_at=created_at,
                 )
                 super(Order, new_o).save()
-                existing_keys.add(key)
+                existing_map[key] = new_o
 
                 # Đồng bộ luôn bản ghi thông báo Email đơn hàng vào Hộp thư Admin nếu chưa có
                 if created_at not in existing_emails_created:
@@ -522,16 +535,61 @@ class User(BaseModel):
             pass
 
     @classmethod
-    def restore_accounts_list(cls, accounts: List[Dict[str, str]]) -> None:
-        """Khôi phục danh sách tài khoản từ Cookie/LocalStorage/JSON vào SQLite."""
+    def sync_all_to_json_file(cls) -> List[Dict[str, str]]:
+        """Đồng bộ toàn bộ danh sách tài khoản hiện tại trong SQLite xuống file JSON."""
+        all_users = [
+            {
+                "username": u.username,
+                "fullname": u.fullname,
+                "email": u.email,
+                "phone": u.phone,
+                "password_hash": u.password_hash,
+                "role": u.role,
+                "created_at": u.created_at,
+            }
+            for u in cls.iter_all(order_by="id ASC")
+        ]
         try:
-            existing_usernames = {u.username.strip().lower() for u in cls.iter_all()}
+            os.makedirs(os.path.dirname(USERS_STORE_PATH), exist_ok=True)
+            with open(USERS_STORE_PATH, "w", encoding="utf-8") as f:
+                json.dump(all_users, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        return all_users
+
+    @classmethod
+    def restore_accounts_list(cls, accounts: List[Dict[str, str]]) -> None:
+        """Khôi phục danh sách tài khoản từ Cookie/LocalStorage/JSON vào SQLite và cập nhật thông tin mới nhất."""
+        try:
+            existing_map = {u.username.strip().lower(): u for u in cls.iter_all()}
             for acc in accounts:
                 if not isinstance(acc, dict):
                     continue
                 uname = str(acc.get("username", "")).strip()
                 p_hash = str(acc.get("password_hash", "")).strip()
-                if not uname or not p_hash or uname.lower() in existing_usernames:
+                if not uname or not p_hash:
+                    continue
+                u_key = uname.lower()
+                if u_key in existing_map:
+                    ex_u = existing_map[u_key]
+                    changed = False
+                    new_fn = str(acc.get("fullname", ex_u.fullname)).strip()
+                    new_em = str(acc.get("email", ex_u.email)).strip()
+                    new_ph = str(acc.get("phone", ex_u.phone)).strip()
+                    if new_fn and ex_u.fullname != new_fn:
+                        ex_u.fullname = new_fn
+                        changed = True
+                    if new_em and ex_u.email != new_em:
+                        ex_u.email = new_em
+                        changed = True
+                    if new_ph and ex_u.phone != new_ph:
+                        ex_u.phone = new_ph
+                        changed = True
+                    if p_hash and ex_u.password_hash != p_hash:
+                        ex_u.password_hash = p_hash
+                        changed = True
+                    if changed:
+                        super(User, ex_u).save()
                     continue
                 new_u = cls(
                     username=uname,
@@ -545,7 +603,7 @@ class User(BaseModel):
                     ),
                 )
                 super(User, new_u).save()
-                existing_usernames.add(uname.lower())
+                existing_map[u_key] = new_u
         except Exception:
             pass
 

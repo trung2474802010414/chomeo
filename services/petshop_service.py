@@ -30,6 +30,7 @@ from models.entities import (
     CAT_BREEDS,
     DOG_BREEDS,
     EmailLog,
+    ORDER_STATUSES,
     Order,
     PET_TYPES,
     Product,
@@ -153,6 +154,12 @@ def init_db_and_seed() -> None:
             cols = [r["name"] for r in db.execute(f"PRAGMA table_info({tbl})").fetchall()]
             if "email" not in cols:
                 db.execute(f"ALTER TABLE {tbl} ADD COLUMN email TEXT DEFAULT ''")
+
+        order_cols = [r["name"] for r in db.execute("PRAGMA table_info(orders)").fetchall()]
+        if "status" not in order_cols:
+            db.execute("ALTER TABLE orders ADD COLUMN status TEXT DEFAULT 'Chờ xác nhận'")
+        if "payment_method" not in order_cols:
+            db.execute("ALTER TABLE orders ADD COLUMN payment_method TEXT DEFAULT 'cod'")
 
         prod_cols = [r["name"] for r in db.execute("PRAGMA table_info(products)").fetchall()]
         if "breed" not in prod_cols:
@@ -353,6 +360,8 @@ def create_order_transactional(payload: Dict[str, Any]) -> Dict[str, Any]:
             )
 
         total_amount = sum(item["subtotal"] for item in order_lines)
+        payment_method = str(payload.get("payment_method", "cod") or "cod").strip()
+        status_val = str(payload.get("status", "Chờ xác nhận") or "Chờ xác nhận").strip()
 
         order = Order(
             customer_name=customer_name,
@@ -361,10 +370,12 @@ def create_order_transactional(payload: Dict[str, Any]) -> Dict[str, Any]:
             address=address,
             items_json=json.dumps(order_lines, ensure_ascii=False),
             total_amount=total_amount,
+            status=status_val,
+            payment_method=payment_method,
         )
         db.execute(
-            "INSERT INTO orders (customer_name, phone, email, address, items_json, total_amount, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO orders (customer_name, phone, email, address, items_json, total_amount, status, payment_method, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 order.customer_name,
                 order.phone,
@@ -372,6 +383,8 @@ def create_order_transactional(payload: Dict[str, Any]) -> Dict[str, Any]:
                 order.address,
                 order.items_json,
                 order.total_amount,
+                order.status,
+                order.payment_method,
                 order.created_at,
             ),
         )
@@ -506,57 +519,224 @@ def compute_dashboard_stats(
     order_pct = round((len(orders) / total_transactions) * 100) if total_transactions > 0 else 0
     spa_pct = 100 - order_pct if total_transactions > 0 else 0
 
-    v1 = category_breakdown.get("Thức ăn", {}).get("inventory_value", 0.0)
-    v2 = category_breakdown.get("Phụ kiện", {}).get("inventory_value", 0.0)
-    v3 = category_breakdown.get("Vệ sinh & Chăm sóc", {}).get("inventory_value", 0.0)
-    v4 = category_breakdown.get("Đồ chơi", {}).get("inventory_value", 0.0) + category_breakdown.get("Y tế & Vitamin", {}).get("inventory_value", 0.0)
+    # Đồng bộ 100% biểu đồ với DỮ LIỆU KHÁCH HÀNG ĐÃ MUA (Orders & Spa Bookings)
+    prod_by_id = {p.id: p for p in products}
+    prod_by_sku = {p.sku: p for p in products}
+    sold_by_cat: Dict[str, Dict[str, float]] = {
+        cat: {"revenue": 0.0, "qty": 0} for cat in CATEGORIES
+    }
+    product_sales_map: Dict[str, Dict[str, Any]] = {}
+
+    for o in orders:
+        if getattr(o, "status", "") == "Đã hủy":
+            continue
+        for item in o.items:
+            pid = item.get("product_id")
+            sku = str(item.get("sku", "")).strip()
+            name = str(item.get("name", "Sản phẩm")).strip()
+            qty = int(item.get("quantity", 1) or 1)
+            sub = float(item.get("subtotal", 0) or (float(item.get("price", 0)) * qty))
+
+            p_obj = prod_by_id.get(pid) or prod_by_sku.get(sku)
+            cat_name = p_obj.category if p_obj else "Phụ kiện"
+            if not p_obj:
+                lower_n = name.lower()
+                if "chó" in lower_n and ("thuần chủng" in lower_n or "cảnh" in lower_n):
+                    cat_name = "Chó cảnh"
+                elif "mèo" in lower_n and ("thuần chủng" in lower_n or "cảnh" in lower_n):
+                    cat_name = "Mèo cảnh"
+                elif "tắm" in lower_n or "vệ sinh" in lower_n or "khử mùi" in lower_n or "cát" in lower_n:
+                    cat_name = "Vệ sinh & Chăm sóc"
+                elif "ve rận" in lower_n or "vitamin" in lower_n or "thuốc" in lower_n or "nhỏ gáy" in lower_n or "gel" in lower_n:
+                    cat_name = "Y tế & Vitamin"
+                elif "hạt" in lower_n or "pate" in lower_n or "súp" in lower_n or "thức ăn" in lower_n:
+                    cat_name = "Thức ăn"
+
+            sold_by_cat.setdefault(cat_name, {"revenue": 0.0, "qty": 0})
+            sold_by_cat[cat_name]["revenue"] += sub
+            sold_by_cat[cat_name]["qty"] += qty
+
+            ps_key = sku or name
+            ps = product_sales_map.setdefault(
+                ps_key,
+                {"sku": sku or "-", "name": name, "category": cat_name, "qty": 0, "revenue": 0.0},
+            )
+            ps["qty"] += qty
+            ps["revenue"] += sub
+
+    top_selling_products = sorted(
+        product_sales_map.values(),
+        key=lambda x: (x["revenue"], x["qty"]),
+        reverse=True,
+    )[:6]
+
+    # 4 nhóm doanh thu thực tế từ đơn mua của khách để vẽ biểu đồ đường & thanh tỷ trọng
+    s_pets = sold_by_cat.get("Chó cảnh", {}).get("revenue", 0.0) + sold_by_cat.get("Mèo cảnh", {}).get("revenue", 0.0)
+    s_food_acc = sold_by_cat.get("Thức ăn", {}).get("revenue", 0.0) + sold_by_cat.get("Phụ kiện", {}).get("revenue", 0.0)
+    s_care = sold_by_cat.get("Vệ sinh & Chăm sóc", {}).get("revenue", 0.0)
+    s_med_toy = sold_by_cat.get("Y tế & Vitamin", {}).get("revenue", 0.0) + sold_by_cat.get("Đồ chơi", {}).get("revenue", 0.0)
+
+    q_pets = int(sold_by_cat.get("Chó cảnh", {}).get("qty", 0) + sold_by_cat.get("Mèo cảnh", {}).get("qty", 0))
+    q_food_acc = int(sold_by_cat.get("Thức ăn", {}).get("qty", 0) + sold_by_cat.get("Phụ kiện", {}).get("qty", 0))
+    q_care = int(sold_by_cat.get("Vệ sinh & Chăm sóc", {}).get("qty", 0))
+    q_med_toy = int(sold_by_cat.get("Y tế & Vitamin", {}).get("qty", 0) + sold_by_cat.get("Đồ chơi", {}).get("qty", 0))
+
+    total_sold_rev = s_pets + s_food_acc + s_care + s_med_toy
+    if total_sold_rev > 0:
+        v1, v2, v3, v4 = s_pets, s_food_acc, s_care, s_med_toy
+    else:
+        v1 = category_breakdown.get("Chó cảnh", {}).get("inventory_value", 0.0) + category_breakdown.get("Mèo cảnh", {}).get("inventory_value", 0.0)
+        v2 = category_breakdown.get("Thức ăn", {}).get("inventory_value", 0.0) + category_breakdown.get("Phụ kiện", {}).get("inventory_value", 0.0)
+        v3 = category_breakdown.get("Vệ sinh & Chăm sóc", {}).get("inventory_value", 0.0)
+        v4 = category_breakdown.get("Đồ chơi", {}).get("inventory_value", 0.0) + category_breakdown.get("Y tế & Vitamin", {}).get("inventory_value", 0.0)
+
     max_v = max(v1, v2, v3, v4, 1.0)
     chart_y = {
-        "y1": round(160 - (v1 / max_v) * 110),
-        "y2": round(160 - (v2 / max_v) * 110),
-        "y3": round(160 - (v3 / max_v) * 110),
-        "y4": round(160 - (v4 / max_v) * 110),
+        "y1": round(155 - (v1 / max_v) * 115),
+        "y2": round(155 - (v2 / max_v) * 115),
+        "y3": round(155 - (v3 / max_v) * 115),
+        "y4": round(155 - (v4 / max_v) * 115),
+        "v1": s_pets,
+        "v2": s_food_acc,
+        "v3": s_care,
+        "v4": s_med_toy,
+        "q1": q_pets,
+        "q2": q_food_acc,
+        "q3": q_care,
+        "q4": q_med_toy,
+        "max_v": max(s_pets, s_food_acc, s_care, s_med_toy, 0.0),
     }
 
-    customers_map: Dict[str, Dict[str, Any]] = {}
-    for u in all_users:
-        key = u.phone or u.username
-        customers_map[key] = {
-            "username": u.username,
-            "name": u.fullname,
-            "phone": u.phone,
-            "email": u.email,
-            "created_at": u.created_at,
-            "orders_count": 0,
-            "bookings_count": 0,
-            "total_spent": 0.0,
-        }
-    for o in orders:
-        c = customers_map.setdefault(
-            o.phone,
-            {"username": "-", "name": o.customer_name, "phone": o.phone, "email": o.email, "created_at": o.created_at, "orders_count": 0, "bookings_count": 0, "total_spent": 0.0},
-        )
-        c["orders_count"] += 1
-        c["total_spent"] += o.total_amount
-    for b in bookings:
-        c = customers_map.setdefault(
-            b.phone,
-            {"username": "-", "name": b.customer_name, "phone": b.phone, "email": b.email, "created_at": b.created_at, "orders_count": 0, "bookings_count": 0, "total_spent": 0.0},
-        )
-        c["bookings_count"] += 1
-        if b.status != "Đã hủy":
-            c["total_spent"] += b.total_price
+    sales_bars = [
+        {
+            "label": "🐾 Thú cưng (Chó & Mèo)",
+            "revenue": s_pets,
+            "qty": q_pets,
+            "pct": round((s_pets / total_sold_rev) * 100) if total_sold_rev > 0 else 0,
+            "color": "#ec4899",
+        },
+        {
+            "label": "🍖 Thức ăn & Phụ kiện",
+            "revenue": s_food_acc,
+            "qty": q_food_acc,
+            "pct": round((s_food_acc / total_sold_rev) * 100) if total_sold_rev > 0 else 0,
+            "color": "#8b5cf6",
+        },
+        {
+            "label": "🛁 Vệ sinh & Chăm sóc",
+            "revenue": s_care,
+            "qty": q_care,
+            "pct": round((s_care / total_sold_rev) * 100) if total_sold_rev > 0 else 0,
+            "color": "#10b981",
+        },
+        {
+            "label": "💊 Y tế, Thuốc & Đồ chơi",
+            "revenue": s_med_toy,
+            "qty": q_med_toy,
+            "pct": round((s_med_toy / total_sold_rev) * 100) if total_sold_rev > 0 else 0,
+            "color": "#38bdf8",
+        },
+    ]
 
-    for c_info in customers_map.values():
-        spent = c_info["total_spent"]
-        if spent >= 15000000:
-            c_info["vip_tier"] = "Kim Cương"
-        elif spent >= 5000000:
-            c_info["vip_tier"] = "Vàng"
-        elif spent >= 1000000:
-            c_info["vip_tier"] = "Bạc"
+    # Đồng bộ 100% toàn bộ tài khoản khách hàng đã đăng ký + lịch sử mua hàng của từng khách
+    customers_list: List[Dict[str, Any]] = []
+    matched_order_ids = set()
+    matched_booking_ids = set()
+
+    for u in all_users:
+        u_phone = (u.phone or "").strip()
+        u_email = (u.email or "").strip().lower()
+        u_name = (u.fullname or "").strip().lower()
+
+        u_orders = [
+            o.to_dict()
+            for o in all_orders
+            if (u_phone and u_phone in (o.phone or ""))
+            or (u_email and u_email == (o.email or "").strip().lower())
+            or (u_name and u_name == (o.customer_name or "").strip().lower())
+        ]
+        u_bookings = [
+            b.to_dict()
+            for b in all_bookings
+            if (u_phone and u_phone in (b.phone or ""))
+            or (u_email and u_email == (b.email or "").strip().lower())
+            or (u_name and u_name == (b.customer_name or "").strip().lower())
+        ]
+        for o_d in u_orders:
+            matched_order_ids.add(o_d["id"])
+        for b_d in u_bookings:
+            matched_booking_ids.add(b_d["id"])
+
+        u_spent = sum(
+            o_d["total_amount"] for o_d in u_orders if o_d.get("status") != "Đã hủy"
+        ) + sum(
+            b_d["total_price"] for b_d in u_bookings if b_d.get("status") != "Đã hủy"
+        )
+
+        if u_spent >= 15000000:
+            tier = "Kim Cương"
+        elif u_spent >= 5000000:
+            tier = "Vàng"
+        elif u_spent >= 1000000:
+            tier = "Bạc"
         else:
-            c_info["vip_tier"] = "Đồng"
+            tier = "Đồng"
+
+        customers_list.append(
+            {
+                "id": u.id,
+                "username": u.username,
+                "name": u.fullname,
+                "phone": u.phone,
+                "email": u.email,
+                "created_at": u.created_at,
+                "is_registered": True,
+                "orders_count": len(u_orders),
+                "bookings_count": len(u_bookings),
+                "total_spent": u_spent,
+                "vip_tier": tier,
+                "orders_history": sorted(u_orders, key=lambda x: x["id"], reverse=True),
+                "bookings_history": sorted(u_bookings, key=lambda x: x["id"], reverse=True),
+            }
+        )
+
+    # Bổ sung khách đặt đơn mà thông tin SĐT chưa trùng với tài khoản nào
+    guest_map: Dict[str, Dict[str, Any]] = {}
+    for o in all_orders:
+        if o.id in matched_order_ids:
+            continue
+        g = guest_map.setdefault(
+            o.phone,
+            {
+                "id": 0,
+                "username": "khach_vang_lai",
+                "name": o.customer_name,
+                "phone": o.phone,
+                "email": o.email,
+                "created_at": o.created_at,
+                "is_registered": False,
+                "orders_count": 0,
+                "bookings_count": 0,
+                "total_spent": 0.0,
+                "vip_tier": "Đồng",
+                "orders_history": [],
+                "bookings_history": [],
+            },
+        )
+        g["orders_count"] += 1
+        if getattr(o, "status", "") != "Đã hủy":
+            g["total_spent"] += o.total_amount
+        g["orders_history"].append(o.to_dict())
+
+    for g_info in guest_map.values():
+        spent = g_info["total_spent"]
+        if spent >= 15000000:
+            g_info["vip_tier"] = "Kim Cương"
+        elif spent >= 5000000:
+            g_info["vip_tier"] = "Vàng"
+        elif spent >= 1000000:
+            g_info["vip_tier"] = "Bạc"
+        customers_list.append(g_info)
 
     return {
         "total_products": len(products),
@@ -565,6 +745,9 @@ def compute_dashboard_stats(
         "low_stock_count": len(low_stock_products),
         "low_stock_products": low_stock_products,
         "category_breakdown": category_breakdown,
+        "sold_by_cat": sold_by_cat,
+        "sales_bars": sales_bars,
+        "top_selling_products": top_selling_products,
         "total_orders": len(orders),
         "order_revenue": order_revenue,
         "total_bookings": len(bookings),
@@ -575,8 +758,8 @@ def compute_dashboard_stats(
         "pending_bookings_count": pending_bookings_count,
         "cancelled_bookings_count": cancelled_bookings_count,
         "total_items_sold": total_items_sold,
-        "unique_customers_count": len(unique_customer_phones),
-        "customers_list": list(customers_map.values()),
+        "unique_customers_count": len(customers_list),
+        "customers_list": customers_list,
         "order_pct": order_pct,
         "spa_pct": spa_pct,
         "chart_y": chart_y,
@@ -586,4 +769,5 @@ def compute_dashboard_stats(
         "cat_breeds": CAT_BREEDS,
         "spa_services": SPA_SERVICES,
         "booking_statuses": BOOKING_STATUSES,
+        "order_statuses": ORDER_STATUSES,
     }

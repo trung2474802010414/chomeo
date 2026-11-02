@@ -236,17 +236,18 @@
                 <a href="{{ url_for('home_page') }}" class="nav-item {% if active_page == 'home' %}active{% endif %}">Trang chủ</a>
                 <a href="{{ url_for('shop_page') }}" class="nav-item {% if active_page == 'shop' %}active{% endif %}">Cửa hàng</a>
                 <a href="{{ url_for('spa_page') }}" class="nav-item {% if active_page == 'spa' %}active{% endif %}">Đặt lịch Spa</a>
-                <a href="{{ url_for('order_history_page') }}" class="nav-item {% if active_page == 'orders' %}active{% endif %}">📋 Lịch sử đơn hàng</a>
                 <a href="{{ url_for('network_page') }}" class="nav-item {% if active_page == 'network' %}active{% endif %}">Cẩm nang Giống</a>
                 {% if is_admin %}
+                    <a href="{{ url_for('order_history_page') }}" class="nav-item {% if active_page == 'orders' %}active{% endif %}">👤 Hồ sơ &amp; Đơn mua</a>
                     <a href="{{ url_for('admin_page') }}" class="nav-item {% if active_page == 'admin' %}active{% endif %}">Dashboard Quản trị</a>
                     <a href="{{ url_for('logout_page') }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="nav-item" style="color:#ff8fb0;">Đăng xuất (admin)</a>
                 {% elif customer_logged_in %}
-                    <div style="display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:99px; background:linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(236,72,153,0.2) 100%); border:1px solid rgba(139,92,246,0.45); font-size:13px; font-weight:800; color:#ffffff;">
-                        <span>👋 Xin chào, <strong style="color:#fde047;">{{ customer_name }}</strong></span>
-                    </div>
+                    <a href="{{ url_for('order_history_page') }}" class="nav-item {% if active_page == 'orders' %}active{% endif %}" style="display:inline-flex; align-items:center; gap:7px; padding:6px 14px; border-radius:99px; background:{% if active_page == 'orders' %}linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%){% else %}linear-gradient(135deg, rgba(139,92,246,0.35) 0%, rgba(236,72,153,0.22) 100%){% endif %}; border:1px solid rgba(167,139,250,0.6); font-size:13px; font-weight:800; color:#ffffff; text-decoration:none; box-shadow:0 4px 12px rgba(139,92,246,0.2);">
+                        <span>👤 Hồ sơ: <strong style="color:#fde047;">{{ customer_name }}</strong> <span style="font-size:11.5px; color:#e2e8f0; opacity:0.9;">(Đơn mua)</span></span>
+                    </a>
                     <a href="{{ url_for('logout_page') }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="nav-item" style="color:#ff8fb0; font-size:13px;">Đăng xuất</a>
                 {% else %}
+                    <a href="{{ url_for('order_history_page') }}" class="nav-item {% if active_page == 'orders' %}active{% endif %}">👤 Hồ sơ &amp; Đơn mua</a>
                     <a href="{{ url_for('login_page') }}" class="nav-item {% if active_page == 'login' %}active{% endif %}">🔑 Đăng nhập / Đăng ký</a>
                 {% endif %}
                 <a href="{{ url_for('cart_page') }}" class="nav-cart-btn">
