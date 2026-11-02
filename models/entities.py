@@ -77,6 +77,8 @@ SPA_SERVICES: Dict[str, float] = {
 BOOKING_STATUSES = ["Chờ xác nhận", "Đã xác nhận", "Hoàn thành", "Đã hủy"]
 
 USERS_STORE_PATH = resolve_writable_json_path("users_store.json")
+ORDERS_STORE_PATH = resolve_writable_json_path("orders_store.json")
+BOOKINGS_STORE_PATH = resolve_writable_json_path("bookings_store.json")
 
 
 def hash_password(password: str) -> str:
@@ -145,6 +147,135 @@ class SpaBooking(BaseModel):
             multiplier = 1.0
         return round(base_price * multiplier, 0)
 
+    def save(self) -> "SpaBooking":
+        """Lưu vào SQLite và đồng bộ xuống file JSON bền vững."""
+        super().save()
+        self._persist_to_json_file()
+        return self
+
+    def _persist_to_json_file(self) -> None:
+        """Lưu bản sao lịch hẹn Spa vào bookings_store.json để không bao giờ mất khi đổi tài khoản / tắt web."""
+        try:
+            os.makedirs(os.path.dirname(BOOKINGS_STORE_PATH), exist_ok=True)
+            records: List[Dict[str, Any]] = []
+            if os.path.exists(BOOKINGS_STORE_PATH):
+                with open(BOOKINGS_STORE_PATH, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                    if isinstance(loaded, list):
+                        records = loaded
+
+            entry = self.to_dict()
+            key = (
+                str(self.phone).strip(),
+                str(self.pet_name).strip(),
+                str(self.appointment_date).strip(),
+                str(self.appointment_time).strip(),
+            )
+            updated = False
+            for idx, item in enumerate(records):
+                item_key = (
+                    str(item.get("phone", "")).strip(),
+                    str(item.get("pet_name", "")).strip(),
+                    str(item.get("appointment_date", "")).strip(),
+                    str(item.get("appointment_time", "")).strip(),
+                )
+                if item_key == key:
+                    records[idx] = entry
+                    updated = True
+                    break
+            if not updated:
+                records.append(entry)
+
+            with open(BOOKINGS_STORE_PATH, "w", encoding="utf-8") as f:
+                json.dump(records[-50:], f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    @classmethod
+    def sync_all_to_json_file(cls) -> List[Dict[str, Any]]:
+        """Đồng bộ toàn bộ danh sách lịch hẹn hiện tại trong SQLite xuống file JSON."""
+        all_items = [b.to_dict() for b in cls.iter_all(order_by="id ASC")]
+        try:
+            os.makedirs(os.path.dirname(BOOKINGS_STORE_PATH), exist_ok=True)
+            with open(BOOKINGS_STORE_PATH, "w", encoding="utf-8") as f:
+                json.dump(all_items[-50:], f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        return all_items
+
+    @classmethod
+    def sync_from_json_store(cls) -> None:
+        """Khôi phục danh sách lịch hẹn Spa từ bookings_store.json vào SQLite."""
+        if not os.path.exists(BOOKINGS_STORE_PATH):
+            return
+        try:
+            with open(BOOKINGS_STORE_PATH, "r", encoding="utf-8") as f:
+                records = json.load(f)
+            if isinstance(records, list):
+                cls.restore_bookings_list(records)
+        except Exception:
+            pass
+
+    @classmethod
+    def restore_bookings_list(cls, bookings: List[Dict[str, Any]]) -> None:
+        """Khôi phục danh sách lịch hẹn Spa từ Cookie/JSON vào SQLite mà không tạo trùng."""
+        try:
+            existing_map = {
+                (
+                    b.phone.strip(),
+                    b.pet_name.strip(),
+                    b.appointment_date.strip(),
+                    b.appointment_time.strip(),
+                ): b
+                for b in cls.iter_all()
+            }
+            for bd in bookings:
+                if not isinstance(bd, dict):
+                    continue
+                phone = str(bd.get("phone", "")).strip()
+                pet_name = str(bd.get("pet_name", "")).strip()
+                app_date = str(bd.get("appointment_date", "")).strip()
+                app_time = str(bd.get("appointment_time", "")).strip()
+                if not phone or not pet_name or not app_date:
+                    continue
+                key = (phone, pet_name, app_date, app_time)
+                status_val = str(bd.get("status", "Chờ xác nhận")).strip()
+                if status_val not in BOOKING_STATUSES:
+                    status_val = "Chờ xác nhận"
+                if key in existing_map:
+                    ex = existing_map[key]
+                    if ex.status != status_val:
+                        ex.status = status_val
+                        super(SpaBooking, ex).save()
+                    continue
+                svc = str(bd.get("service_name", "Tắm sấy & Vệ sinh tai móng")).strip()
+                if svc not in SPA_SERVICES:
+                    svc = "Tắm sấy & Vệ sinh tai móng"
+                p_type = str(bd.get("pet_type", "Mèo")).strip()
+                if p_type not in ("Chó", "Mèo"):
+                    p_type = "Mèo"
+                new_b = cls(
+                    customer_name=str(bd.get("customer_name", "Khách hàng")).strip(),
+                    phone=phone,
+                    email=str(bd.get("email", "")).strip(),
+                    pet_name=pet_name,
+                    pet_type=p_type,
+                    pet_weight_kg=max(0.2, float(bd.get("pet_weight_kg", 3.5) or 3.5)),
+                    service_name=svc,
+                    appointment_date=app_date,
+                    appointment_time=app_time or "09:00",
+                    total_price=float(bd.get("total_price", 150000.0) or 150000.0),
+                    status=status_val,
+                    note=str(bd.get("note", "")).strip(),
+                    created_at=str(
+                        bd.get("created_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                    ),
+                )
+                super(SpaBooking, new_b).save()
+                existing_map[key] = new_b
+        except Exception:
+            pass
+
 
 class Order(BaseModel):
     __tablename__ = "orders"
@@ -172,6 +303,139 @@ class Order(BaseModel):
         data = super().to_dict()
         data["items"] = self.items
         return data
+
+    def save(self) -> "Order":
+        """Lưu đơn hàng vào SQLite và đồng bộ xuống file JSON bền vững."""
+        super().save()
+        self._persist_to_json_file()
+        return self
+
+    def _persist_to_json_file(self) -> None:
+        """Lưu bản sao đơn hàng vào orders_store.json để không bao giờ mất khi đổi qua tài khoản Admin."""
+        try:
+            os.makedirs(os.path.dirname(ORDERS_STORE_PATH), exist_ok=True)
+            records: List[Dict[str, Any]] = []
+            if os.path.exists(ORDERS_STORE_PATH):
+                with open(ORDERS_STORE_PATH, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                    if isinstance(loaded, list):
+                        records = loaded
+
+            entry = self.to_dict()
+            key = (
+                str(self.phone).strip(),
+                str(self.created_at).strip(),
+                round(float(self.total_amount), 0),
+            )
+            updated = False
+            for idx, item in enumerate(records):
+                item_key = (
+                    str(item.get("phone", "")).strip(),
+                    str(item.get("created_at", "")).strip(),
+                    round(float(item.get("total_amount", 0)), 0),
+                )
+                if item_key == key:
+                    records[idx] = entry
+                    updated = True
+                    break
+            if not updated:
+                records.append(entry)
+
+            with open(ORDERS_STORE_PATH, "w", encoding="utf-8") as f:
+                json.dump(records[-50:], f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    @classmethod
+    def sync_all_to_json_file(cls) -> List[Dict[str, Any]]:
+        """Đồng bộ toàn bộ danh sách đơn hàng hiện tại trong SQLite xuống file JSON."""
+        all_orders = [o.to_dict() for o in cls.iter_all(order_by="id ASC")]
+        try:
+            os.makedirs(os.path.dirname(ORDERS_STORE_PATH), exist_ok=True)
+            with open(ORDERS_STORE_PATH, "w", encoding="utf-8") as f:
+                json.dump(all_orders[-50:], f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        return all_orders
+
+    @classmethod
+    def sync_from_json_store(cls) -> None:
+        """Khôi phục danh sách đơn hàng từ orders_store.json vào SQLite."""
+        if not os.path.exists(ORDERS_STORE_PATH):
+            return
+        try:
+            with open(ORDERS_STORE_PATH, "r", encoding="utf-8") as f:
+                records = json.load(f)
+            if isinstance(records, list):
+                cls.restore_orders_list(records)
+        except Exception:
+            pass
+
+    @classmethod
+    def restore_orders_list(cls, orders: List[Dict[str, Any]]) -> None:
+        """Khôi phục danh sách đơn hàng từ Cookie/JSON vào SQLite để Admin luôn nhìn thấy đầy đủ đơn hàng."""
+        try:
+            existing_keys = {
+                (
+                    o.phone.strip(),
+                    o.created_at.strip(),
+                    round(float(o.total_amount), 0),
+                )
+                for o in cls.iter_all()
+            }
+            existing_emails_created = {e.created_at.strip() for e in EmailLog.iter_all()}
+            for od in orders:
+                if not isinstance(od, dict):
+                    continue
+                phone = str(od.get("phone", "")).strip()
+                created_at = str(
+                    od.get("created_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                ).strip()
+                total_amt = float(od.get("total_amount", 0) or 0)
+                if not phone or total_amt <= 0:
+                    continue
+                key = (phone, created_at, round(total_amt, 0))
+                if key in existing_keys:
+                    continue
+
+                raw_items = od.get("items_json", "")
+                if not raw_items and isinstance(od.get("items"), list):
+                    raw_items = json.dumps(od["items"], ensure_ascii=False)
+                if not raw_items:
+                    raw_items = "[]"
+
+                new_o = cls(
+                    customer_name=str(od.get("customer_name", "Khách hàng")).strip(),
+                    phone=phone,
+                    email=str(od.get("email", "")).strip(),
+                    address=str(od.get("address", "Đà Nẵng")).strip(),
+                    items_json=str(raw_items),
+                    total_amount=total_amt,
+                    created_at=created_at,
+                )
+                super(Order, new_o).save()
+                existing_keys.add(key)
+
+                # Đồng bộ luôn bản ghi thông báo Email đơn hàng vào Hộp thư Admin nếu chưa có
+                if created_at not in existing_emails_created:
+                    admin_mail = os.environ.get(
+                        "PETSHOP_ADMIN_NOTIFY_EMAIL", "admin@meowwoof.vn"
+                    )
+                    log_entry = EmailLog(
+                        recipient=admin_mail,
+                        subject=f"[Meow & Woof - BÁO ĐƠN MỚI] Đơn hàng #{new_o.id} từ {new_o.customer_name} ({new_o.total_amount:,.0f}đ)",
+                        body=(
+                            f"Khách hàng: {new_o.customer_name} | SĐT: {new_o.phone} | "
+                            f"Email: {new_o.email} | Địa chỉ: {new_o.address} | "
+                            f"Tổng thanh toán: {new_o.total_amount:,.0f} VNĐ"
+                        ),
+                        delivery_status="Đã lưu vào Hộp thư Admin",
+                        created_at=created_at,
+                    )
+                    log_entry.save()
+                    existing_emails_created.add(created_at)
+        except Exception:
+            pass
 
 
 class EmailLog(BaseModel):

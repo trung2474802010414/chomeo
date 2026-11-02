@@ -143,8 +143,6 @@
                     value="{{ form.raw_data.get('customer_name') or (customer_name if customer_logged_in else '') }}"
                     minlength="2"
                     maxlength="80"
-                    pattern="^[a-zA-ZÀ-ỹ\s]{2,80}$"
-                    title="Họ và tên chỉ gồm chữ cái tiếng Việt, từ 2 đến 80 ký tự, không chứa số hoặc ký tự đặc biệt"
                     class="form-control"
                     style="background:rgba(15,23,42,0.85) !important; color:#ffffff !important; border:1.5px solid rgba(139,92,246,0.35) !important; border-radius:12px; font-size:14px; padding:11px 14px;"
                     placeholder="VD: Nguyễn Minh Anh"
@@ -208,13 +206,13 @@
 
             <!-- 4. Địa chỉ giao hàng chi tiết -->
             <div class="form-group" style="margin-bottom:14px;">
-                <label class="form-label" style="color:#ffffff; font-weight:700; font-size:13.5px;">Địa chỉ giao hàng chi tiết (*) (Tối thiểu 10 ký tự)</label>
+                <label class="form-label" style="color:#ffffff; font-weight:700; font-size:13.5px;">Địa chỉ giao hàng chi tiết (*)</label>
                 <input
                     type="text"
                     name="address"
                     autocomplete="off"
                     value="{{ form.raw_data.get('address', '') }}"
-                    minlength="10"
+                    minlength="3"
                     maxlength="250"
                     class="form-control"
                     style="background:rgba(15,23,42,0.85) !important; color:#ffffff !important; border:1.5px solid rgba(139,92,246,0.35) !important; border-radius:12px; font-size:14px; padding:11px 14px;"

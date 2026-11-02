@@ -154,15 +154,189 @@ def _attach_account_to_vault_cookie(resp: Response, user_obj: User) -> Response:
     return resp
 
 
+def _encode_compressed_vault(data: List[Dict[str, Any]]) -> str:
+    """Nén danh sách JSON bằng zlib + base64 an toàn URL để lưu nhiều đơn hàng/lịch hẹn trong Cookie < 4KB."""
+    import base64
+    import zlib
+
+    raw_bytes = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    compressed = zlib.compress(raw_bytes, level=9)
+    return "z:" + base64.urlsafe_b64encode(compressed).decode("ascii")
+
+
+def _decode_compressed_vault(raw_cookie: str) -> List[Dict[str, Any]]:
+    """Giải mã danh sách JSON từ Cookie (hỗ trợ cả chuẩn nén z: và chuẩn urllib.parse.unquote)."""
+    if not raw_cookie:
+        return []
+    try:
+        if raw_cookie.startswith("z:"):
+            import base64
+            import zlib
+
+            compressed = base64.urlsafe_b64decode(raw_cookie[2:].encode("ascii"))
+            decoded_str = zlib.decompress(compressed).decode("utf-8")
+            data = json.loads(decoded_str)
+        else:
+            decoded_str = urllib.parse.unquote(raw_cookie)
+            data = json.loads(decoded_str)
+        if isinstance(data, list):
+            return [x for x in data if isinstance(x, dict)]
+    except Exception:
+        pass
+    return []
+
+
+def _read_cookie_orders_vault() -> List[Dict[str, Any]]:
+    """Đọc danh sách đơn hàng đã lưu từ Cookie trình duyệt để không mất khi chuyển sang tài khoản Admin."""
+    return _decode_compressed_vault(request.cookies.get("mw_orders_vault", ""))
+
+
+def _attach_order_to_vault_cookie(resp: Response, order_dict: Dict[str, Any]) -> Response:
+    """Đính kèm đơn hàng mới vào Cookie bền vững 365 ngày."""
+    try:
+        vault = _read_cookie_orders_vault()
+        key = (
+            str(order_dict.get("phone", "")).strip(),
+            str(order_dict.get("created_at", "")).strip(),
+            round(float(order_dict.get("total_amount", 0)), 0),
+        )
+        compact_items = [
+            {
+                "product_id": i.get("product_id"),
+                "sku": i.get("sku", ""),
+                "name": i.get("name", ""),
+                "price": i.get("price", 0),
+                "quantity": i.get("quantity", 1),
+                "subtotal": i.get("subtotal", 0),
+            }
+            for i in order_dict.get("items", [])
+        ]
+        compact_order = {
+            "id": order_dict.get("id"),
+            "customer_name": order_dict.get("customer_name", ""),
+            "phone": order_dict.get("phone", ""),
+            "email": order_dict.get("email", ""),
+            "address": order_dict.get("address", ""),
+            "items": compact_items,
+            "total_amount": order_dict.get("total_amount", 0),
+            "created_at": order_dict.get("created_at", ""),
+        }
+        vault = [
+            x
+            for x in vault
+            if (
+                str(x.get("phone", "")).strip(),
+                str(x.get("created_at", "")).strip(),
+                round(float(x.get("total_amount", 0)), 0),
+            )
+            != key
+        ]
+        vault.append(compact_order)
+        vault = vault[-15:]
+        resp.set_cookie(
+            "mw_orders_vault",
+            _encode_compressed_vault(vault),
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+    except Exception:
+        pass
+    return resp
+
+
+def _sync_orders_vault_cookie(resp: Response, all_orders: List[Dict[str, Any]]) -> Response:
+    """Đồng bộ lại Cookie đơn hàng khi Admin xóa đơn hàng."""
+    try:
+        resp.set_cookie(
+            "mw_orders_vault",
+            _encode_compressed_vault(all_orders[-15:]),
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+    except Exception:
+        pass
+    return resp
+
+
+def _read_cookie_bookings_vault() -> List[Dict[str, Any]]:
+    """Đọc danh sách lịch hẹn Spa từ Cookie trình duyệt."""
+    return _decode_compressed_vault(request.cookies.get("mw_bookings_vault", ""))
+
+
+def _attach_booking_to_vault_cookie(resp: Response, booking_dict: Dict[str, Any]) -> Response:
+    """Đính kèm lịch hẹn Spa mới vào Cookie bền vững 365 ngày."""
+    try:
+        vault = _read_cookie_bookings_vault()
+        key = (
+            str(booking_dict.get("phone", "")).strip(),
+            str(booking_dict.get("pet_name", "")).strip(),
+            str(booking_dict.get("appointment_date", "")).strip(),
+            str(booking_dict.get("appointment_time", "")).strip(),
+        )
+        vault = [
+            x
+            for x in vault
+            if (
+                str(x.get("phone", "")).strip(),
+                str(x.get("pet_name", "")).strip(),
+                str(x.get("appointment_date", "")).strip(),
+                str(x.get("appointment_time", "")).strip(),
+            )
+            != key
+        ]
+        vault.append(booking_dict)
+        vault = vault[-15:]
+        resp.set_cookie(
+            "mw_bookings_vault",
+            _encode_compressed_vault(vault),
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+    except Exception:
+        pass
+    return resp
+
+
+def _sync_bookings_vault_cookie(resp: Response, all_bookings: List[Dict[str, Any]]) -> Response:
+    """Đồng bộ lại Cookie lịch hẹn Spa khi Admin đổi trạng thái hoặc xóa lịch hẹn."""
+    try:
+        resp.set_cookie(
+            "mw_bookings_vault",
+            _encode_compressed_vault(all_bookings[-15:]),
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+    except Exception:
+        pass
+    return resp
+
+
 @app.before_request
 def restore_persistent_accounts_before_request() -> None:
-    """Tự động đồng bộ tài khoản, cấu hình ngân hàng và email Admin từ JSON & Cookie trước mỗi request."""
+    """Tự động đồng bộ tài khoản, đơn hàng, lịch Spa, ngân hàng và email Admin từ JSON & Cookie trước mỗi request."""
+    User.sync_from_json_store()
     vault = _read_cookie_accounts_vault()
     cur_backup = session.get("current_user_backup")
     if isinstance(cur_backup, dict):
         vault.append(cur_backup)
     if vault:
         User.restore_accounts_list(vault)
+
+    # Khôi phục đơn hàng từ file JSON & Cookie để khi thoát khách sang Admin không bao giờ mất đơn
+    Order.sync_from_json_store()
+    orders_vault = _read_cookie_orders_vault()
+    if orders_vault:
+        Order.restore_orders_list(orders_vault)
+
+    # Khôi phục lịch hẹn Spa từ file JSON & Cookie
+    SpaBooking.sync_from_json_store()
+    bookings_vault = _read_cookie_bookings_vault()
+    if bookings_vault:
+        SpaBooking.restore_bookings_list(bookings_vault)
 
     # Khôi phục cấu hình ngân hàng từ Cookie nếu trên Serverless cold-start
     if not os.environ.get("PETSHOP_BANK_CONFIG"):
@@ -446,7 +620,8 @@ def spa_page():
                 f"(Chi phí: {fee:,.0f} đ). Trạng thái Email: {email_info['delivery_status']}.",
                 "booking_success",
             )
-            return redirect(url_for("spa_page", booking_id=booking.id))
+            resp = make_response(redirect(url_for("spa_page", booking_id=booking.id)))
+            return _attach_booking_to_vault_cookie(resp, booking_dict)
         else:
             flash("Vui lòng kiểm tra lại các thông tin báo đỏ trên biểu mẫu.", "error")
 
@@ -505,7 +680,8 @@ def cart_page():
                     f"Tổng thanh toán: {order_dict['total_amount']:,.0f} đ. Đã gửi thông báo đơn hàng về hộp thư Admin ({admin_email})!",
                     "order_success",
                 )
-                return redirect(url_for("order_success_page", order_id=order_dict["id"]))
+                resp = make_response(redirect(url_for("order_success_page", order_id=order_dict["id"])))
+                return _attach_order_to_vault_cookie(resp, order_dict)
             except ValidationError as exc:
                 flash(str(exc), "error")
         else:
@@ -525,6 +701,8 @@ def cart_page():
 def order_success_page(order_id: int):
     """Trang xác nhận đặt hàng thành công: Xem chi tiết đơn hàng, QR thanh toán và link lịch sử mua."""
     order_obj = Order.get_by_id(order_id)
+    if not order_obj:
+        order_obj = next(Order.iter_all(order_by="id DESC"), None)
     if not order_obj:
         flash(f"Không tìm thấy đơn hàng mã #{order_id}.", "error")
         return redirect(url_for("shop_page"))
@@ -1027,7 +1205,9 @@ def admin_update_booking_status(booking_id: int):
             flash(f"Đã cập nhật trạng thái lịch hẹn #{booking_id} sang '{new_status}'.", "success")
         except ValidationError as exc:
             flash(str(exc), "error")
-    return redirect(url_for("admin_page", tab="bookings"))
+    all_bookings = SpaBooking.sync_all_to_json_file()
+    resp = make_response(redirect(url_for("admin_page", tab="bookings")))
+    return _sync_bookings_vault_cookie(resp, all_bookings)
 
 
 @app.route("/admin/bookings/<int:booking_id>/delete", methods=["POST"])
@@ -1037,7 +1217,9 @@ def admin_delete_booking(booking_id: int):
         flash(f"Đã xóa lịch hẹn Spa #{booking_id}.", "success")
     else:
         flash(f"Không tìm thấy lịch hẹn #{booking_id}.", "error")
-    return redirect(url_for("admin_page", tab="bookings"))
+    all_bookings = SpaBooking.sync_all_to_json_file()
+    resp = make_response(redirect(url_for("admin_page", tab="bookings")))
+    return _sync_bookings_vault_cookie(resp, all_bookings)
 
 
 @app.route("/admin/orders/<int:order_id>/delete", methods=["POST"])
@@ -1047,7 +1229,9 @@ def admin_delete_order(order_id: int):
         flash(f"Đã xóa đơn hàng #{order_id}.", "success")
     else:
         flash(f"Không tìm thấy đơn hàng #{order_id}.", "error")
-    return redirect(url_for("admin_page", tab="orders"))
+    all_orders = Order.sync_all_to_json_file()
+    resp = make_response(redirect(url_for("admin_page", tab="orders")))
+    return _sync_orders_vault_cookie(resp, all_orders)
 
 
 @app.route("/admin/products/import-csv", methods=["POST"])

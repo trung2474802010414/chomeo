@@ -237,8 +237,8 @@ class CheckoutForm(BaseFlaskForm):
         payment_method = str(self.raw_data.get("payment_method", "cod")).strip()
         note = str(self.raw_data.get("note", "")).strip()
 
-        if len(address) < 6 or len(address) > 250:
-            self.add_error("address", "Địa chỉ giao hàng phải từ 6 đến 250 ký tự.")
+        if len(address) < 3 or len(address) > 250:
+            self.add_error("address", "Địa chỉ giao hàng phải từ 3 đến 250 ký tự.")
 
         self.data = {
             "customer_name": customer_name,

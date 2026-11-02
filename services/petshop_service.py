@@ -177,10 +177,13 @@ def init_db_and_seed() -> None:
             if changed:
                 existing.save()
 
+    SpaBooking.sync_from_json_store()
     first_booking = next(SpaBooking.iter_all(), None)
     if first_booking is None:
         for b in get_seed_bookings():
             SpaBooking(**b).save()
+
+    Order.sync_from_json_store()
 
     User.sync_from_json_store()
     first_user = next(User.iter_all(), None)
@@ -374,6 +377,7 @@ def create_order_transactional(payload: Dict[str, Any]) -> Dict[str, Any]:
         )
         order.id = db.cursor.lastrowid if db.cursor else None
 
+    order._persist_to_json_file()
     order_dict = order.to_dict()
     send_order_confirmation_email(order_dict)
     return order_dict
