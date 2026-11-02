@@ -66,7 +66,8 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
                     </svg>
-                    <span>Đơn hàng ({{ stats.total_orders }})</span>
+                    <span>Đơn hàng (<span id="navOrderTotal">{{ stats.total_orders }}</span>)</span>
+                    <span id="navOrderBadge" style="display:none; margin-left:auto; min-width:20px; height:20px; padding:0 6px; border-radius:99px; background:#ef4444; color:#fff; font-size:11.5px; font-weight:900; align-items:center; justify-content:center; box-shadow:0 0 0 3px rgba(239,68,68,0.25); animation:adminBadgePulse 1.4s infinite;">0</span>
                 </a>
 
                 <a href="{{ url_for('admin_page', tab='products') }}" class="admin-nav-link {% if admin_tab == 'products' %}active{% endif %}">
@@ -2090,31 +2091,7 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                 }
                 </script>
 
-                {% if pending_marketing_relay %}
-                <!-- TỰ ĐỘNG KÍCH HOẠT CỔNG RELAY GMAIL CLIENT-SIDE ĐỂ THƯ VOUCHER BAY THẲNG TỚI GMAIL KHÁCH HÀNG -->
-                <script>
-                (function() {
-                    var targetMail = {{ pending_marketing_relay.recipient|tojson }};
-                    var mailSubj = {{ pending_marketing_relay.subject|tojson }};
-                    var mailBody = {{ pending_marketing_relay.body|tojson }};
-                    var vCode = {{ pending_marketing_relay.voucher_code|tojson }};
-                    if (targetMail && targetMail.indexOf('@') !== -1) {
-                        fetch("https://formsubmit.co/ajax/" + encodeURIComponent(targetMail), {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", "Accept": "application/json" },
-                            body: JSON.stringify({
-                                _subject: mailSubj,
-                                _template: "box",
-                                _captcha: "false",
-                                "Cửa hàng": "Meow & Woof Pet House & Spa",
-                                "Mã Voucher Ưu Đãi": vCode || "VIP VOUCHER",
-                                "Thông điệp chi tiết": mailBody
-                            })
-                        }).catch(function() {});
-                    }
-                })();
-                </script>
-                {% endif %}
+                
 
                 {% elif admin_tab == 'emails' %}
                 <!-- ==========================================================
@@ -2151,7 +2128,7 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ url_for('admin_save_smtp') }}" id="adminEmailForm" onsubmit="pingFormSubmitOnSave()">
+                    <form method="POST" action="{{ url_for('admin_save_smtp') }}" id="adminEmailForm">
                         <div style="padding:18px; background:rgba(255,255,255,0.03); border:1px solid rgba(139,92,246,0.35); border-radius:14px;">
                             <label class="form-label" style="color:#fde047; font-weight:800; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:14px;">
                                 <span>📧 Địa chỉ Email của Admin nhận thông báo đơn hàng (*)</span>
@@ -2175,9 +2152,9 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
 
                             <!-- Hướng dẫn nhận thư vào hộp thư Gmail thật -->
                             <div style="margin-top:12px; padding:12px 14px; background:rgba(16,185,129,0.1); border:1px solid rgba(52,211,153,0.3); border-radius:10px; font-size:12.5px; color:#e2e8f0; line-height:1.6;">
-                                <strong style="color:#34d399;">💡 Làm sao để thông báo đơn hàng gửi thẳng về hộp thư Gmail thật (<code>{{ admin_notification_email }}</code>)?</strong><br>
-                                &bull; <strong>Cách 1 (Chỉ điền 1 Email Admin, không cần mật khẩu):</strong> Khi bấm <strong>Lưu Email Admin</strong> (hoặc khi đặt đơn đầu tiên), hệ thống gửi 1 email xác nhận từ <code>FormSubmit</code> tới <code>{{ admin_notification_email }}</code>. Bạn mở Gmail (kiểm tra cả mục <strong>Thư rác / Spam / Quảng cáo</strong>) và bấm nút <strong>"Activate Form"</strong> (chỉ bấm 1 lần duy nhất) — từ đó mọi đơn hàng đều báo thẳng về Gmail của bạn!<br>
-                                &bull; <strong>Cách 2 (Gửi thẳng Google SMTP trong 1 giây):</strong> Dán mã 16 ký tự <em>App Password</em> của Gmail <code>{{ admin_notification_email }}</code> vào ô trên rồi bấm Lưu.
+                                <strong style="color:#34d399;">💡 Để thư Voucher &amp; thông báo đơn gửi thẳng về Gmail (thư HTML đẹp, không bị yêu cầu "Activate")</strong><br>
+                                &bull; Dán <strong>Mật khẩu ứng dụng Gmail 16 ký tự</strong> của <code>{{ admin_notification_email }}</code> vào ô trên rồi bấm Lưu. Hệ thống gửi qua Google SMTP bằng chính Gmail của bạn.<br>
+                                &bull; Khi chưa có mật khẩu ứng dụng, thông báo đơn hàng mới vẫn hiện ngay trong Dashboard Admin (chuông + popup), nhưng thư Voucher gửi cho khách sẽ <strong>chưa gửi được</strong>.
                             </div>
                         </div>
                     </form>
@@ -2520,5 +2497,96 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
             </main>
         </div>
     </div>
+
+    <!-- THÔNG BÁO ĐƠN HÀNG MỚI THỜI GIAN THỰC CHO ADMIN -->
+    <style>
+    @keyframes adminBadgePulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.18);} }
+    @keyframes adminToastIn { from { opacity:0; transform: translateX(40px);} to { opacity:1; transform: translateX(0);} }
+    #adminLiveToasts { position:fixed; top:18px; right:18px; z-index:99999; display:flex; flex-direction:column; gap:10px; width:min(360px, calc(100vw - 36px)); }
+    .admin-live-toast { background:linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border:1.5px solid #34d399; border-radius:16px; padding:14px 16px; color:#fff; box-shadow:0 16px 40px rgba(0,0,0,0.55), 0 0 24px rgba(52,211,153,0.3); animation:adminToastIn .35s ease; display:flex; gap:12px; align-items:flex-start; cursor:pointer; }
+    </style>
+    <div id="adminLiveToasts"></div>
+    <script>
+    (function() {
+        var KEY_O = 'mw_admin_seen_order', KEY_B = 'mw_admin_seen_booking';
+        var feedUrl = "{{ url_for('admin_order_feed') }}";
+        var ordersUrl = "{{ url_for('admin_page', tab='orders') }}";
+        var bookingsUrl = "{{ url_for('admin_page', tab='bookings') }}";
+        var audioCtx = null;
+
+        function beep() {
+            try {
+                audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+                [880, 1175].forEach(function(f, i) {
+                    var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                    o.type = 'sine'; o.frequency.value = f;
+                    g.gain.setValueAtTime(0.0001, audioCtx.currentTime + i * 0.16);
+                    g.gain.exponentialRampToValueAtTime(0.25, audioCtx.currentTime + i * 0.16 + 0.02);
+                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + i * 0.16 + 0.22);
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.start(audioCtx.currentTime + i * 0.16); o.stop(audioCtx.currentTime + i * 0.16 + 0.25);
+                });
+            } catch (e) {}
+        }
+
+        function toast(icon, title, text, url) {
+            var box = document.getElementById('adminLiveToasts');
+            var el = document.createElement('div');
+            el.className = 'admin-live-toast';
+            el.innerHTML = '<div style="font-size:26px;">' + icon + '</div><div style="flex:1;min-width:0;"><div style="font-weight:900;font-size:14.5px;color:#34d399;">' + title + '</div><div style="font-size:13px;color:#e2e8f0;margin-top:3px;line-height:1.45;">' + text + '</div></div><button type="button" style="background:none;border:none;color:#cbd5e1;font-size:18px;cursor:pointer;">&times;</button>';
+            el.onclick = function(ev) { if (ev.target.tagName === 'BUTTON') { el.remove(); } else { location.href = url; } };
+            box.appendChild(el);
+            setTimeout(function() { if (el.parentNode) el.remove(); }, 12000);
+            beep();
+            if (window.Notification && Notification.permission === 'granted') {
+                try { new Notification(title, { body: text.replace(/<[^>]+>/g, '') }); } catch (e) {}
+            }
+        }
+
+        function money(n) { return Number(n || 0).toLocaleString('vi-VN') + ' đ'; }
+        function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+
+        function poll() {
+            fetch(feedUrl, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(d) {
+                    if (!d || !d.ok) return;
+                    var badge = document.getElementById('navOrderBadge');
+                    if (badge) {
+                        badge.textContent = d.pending_orders;
+                        badge.style.display = d.pending_orders > 0 ? 'inline-flex' : 'none';
+                    }
+                    var tot = document.getElementById('navOrderTotal');
+                    if (tot) tot.textContent = d.total_orders;
+
+                    var seenO = localStorage.getItem(KEY_O), seenB = localStorage.getItem(KEY_B);
+                    if (seenO === null) seenO = String(d.max_order_id);
+                    if (seenB === null) seenB = String(d.max_booking_id);
+
+                    if (d.max_order_id > parseInt(seenO, 10)) {
+                        d.latest_orders.filter(function(o) { return o.id > parseInt(seenO, 10); }).reverse().forEach(function(o) {
+                            toast('🛒', 'Có đơn hàng mới #DH' + o.id, '<b>' + esc(o.customer_name) + '</b> (' + esc(o.phone) + ')<br>Tổng: <b>' + money(o.total_amount) + '</b> — bấm để xem', ordersUrl);
+                        });
+                        if (location.search.indexOf('tab=orders') !== -1) {
+                            setTimeout(function() { location.reload(); }, 2500);
+                        }
+                    }
+                    if (d.latest_booking && d.max_booking_id > parseInt(seenB, 10)) {
+                        toast('🐾', 'Có lịch hẹn Spa mới #' + d.latest_booking.id, '<b>' + esc(d.latest_booking.customer_name) + '</b> — ' + esc(d.latest_booking.service_name), bookingsUrl);
+                    }
+                    localStorage.setItem(KEY_O, String(d.max_order_id));
+                    localStorage.setItem(KEY_B, String(d.max_booking_id));
+                })
+                .catch(function() {});
+        }
+
+        document.addEventListener('click', function once() {
+            if (window.Notification && Notification.permission === 'default') Notification.requestPermission();
+            document.removeEventListener('click', once);
+        });
+        poll();
+        setInterval(poll, 6000);
+    })();
+    </script>
 </body>
 </html>

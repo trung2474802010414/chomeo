@@ -81,16 +81,15 @@
             </select>
         </div>
         <div style="display:flex; gap:8px;">
-            <button type="submit" class="btn btn-primary" style="height:44px; padding:0 20px;">Lọc</button>
-            <a href="{{ url_for('shop_page') }}" class="btn btn-outline" style="height:44px; padding:0 16px;">Đặt lại</a>
+            <a href="{{ url_for('shop_page') }}" class="btn btn-outline" id="shopResetBtn" style="height:44px; padding:0 16px;">↺ Đặt lại</a>
         </div>
     </div>
 
     <!-- Thanh chọn nhanh Danh mục & Giống phổ biến -->
     <div class="quick-pills">
-        <a href="{{ url_for('shop_page') }}" class="pill-link {% if filters.pet_type == 'ALL' and filters.category == 'ALL' and filters.breed == 'ALL' %}active{% endif %}">Tất cả</a>
+        <a href="{{ url_for('shop_page') }}" data-cat="ALL" class="pill-link {% if filters.pet_type == 'ALL' and filters.category == 'ALL' and filters.breed == 'ALL' %}active{% endif %}">Tất cả</a>
         {% for cat in categories %}
-        <a href="{{ url_for('shop_page', category=cat) }}" class="pill-link {% if filters.category == cat %}active{% endif %}">{{ cat }}</a>
+        <a href="{{ url_for('shop_page', category=cat) }}" data-cat="{{ cat }}" class="pill-link {% if filters.category == cat %}active{% endif %}">{{ cat }}</a>
         {% endfor %}
     </div>
 </form>
@@ -191,41 +190,116 @@ function validateShopFilterForm(showAlert) {
     return true;
 }
 
-// Tự động lọc tức thì (Real-time Filter) khi khách gõ tìm kiếm hoặc đổi tiêu chí
+// Lọc tức thì bằng AJAX: không tải lại trang, chỉ thay phần danh sách sản phẩm
 var searchDebounceTimer = null;
+var shopFetchSeq = 0;
+
+function buildShopQuery(extra) {
+    var form = document.getElementById('shopFilterForm');
+    var params = new URLSearchParams(new FormData(form));
+    Array.from(params.keys()).forEach(function(k) {
+        var v = params.get(k);
+        if (v === '' || v === 'ALL') params.delete(k);
+    });
+    if (extra) Object.keys(extra).forEach(function(k) { params.set(k, extra[k]); });
+    return params.toString();
+}
+
+function loadShopResults(query, pushUrl) {
+    var box = document.getElementById('shopResults');
+    if (!box) return;
+    var seq = ++shopFetchSeq;
+    var url = "{{ url_for('shop_page') }}" + (query ? '?' + query : '');
+    box.style.opacity = '0.45';
+    box.style.transition = 'opacity .15s ease';
+    fetch(url, { headers: { 'X-Requested-With': 'fetch' }, credentials: 'same-origin' })
+        .then(function(r) { return r.text(); })
+        .then(function(html) {
+            if (seq !== shopFetchSeq) return;
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            var fresh = doc.getElementById('shopResults');
+            if (fresh) box.innerHTML = fresh.innerHTML;
+            box.style.opacity = '1';
+            if (pushUrl !== false) history.replaceState(null, '', url);
+            syncPills();
+        })
+        .catch(function() { box.style.opacity = '1'; });
+}
+
 function triggerAutoFilter(immediate) {
     clearTimeout(searchDebounceTimer);
-    if (immediate) {
-        if (validateShopFilterForm(false)) {
-            document.getElementById('shopFilterForm').submit();
-        }
-    } else {
-        searchDebounceTimer = setTimeout(function() {
-            if (validateShopFilterForm(false)) {
-                document.getElementById('shopFilterForm').submit();
-            }
-        }, 380);
-    }
+    var run = function() {
+        if (validateShopFilterForm(false)) loadShopResults(buildShopQuery());
+    };
+    if (immediate) run(); else searchDebounceTimer = setTimeout(run, 300);
 }
 
 function onShopInputFilter() {
     triggerAutoFilter(false);
 }
 
+function syncPills() {
+    var cat = document.getElementById('shopCategorySelect').value;
+    var pet = document.getElementById('shopPetTypeSelect').value;
+    var br = document.getElementById('shopBreedSelect').value;
+    document.querySelectorAll('.quick-pills .pill-link').forEach(function(a) {
+        var c = a.getAttribute('data-cat') || 'ALL';
+        var on = (c === 'ALL') ? (cat === 'ALL' && pet === 'ALL' && br === 'ALL') : (cat === c);
+        a.classList.toggle('active', on);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     syncShopFilters('init');
-    var kwInput = document.getElementById('shopKeywordInput');
-    if (kwInput && kwInput.value) {
-        if (window.location.search.indexOf('keyword=') !== -1) {
-            var val = kwInput.value;
-            kwInput.focus();
-            kwInput.setSelectionRange(val.length, val.length);
-        }
-    }
+    var form = document.getElementById('shopFilterForm');
+    form.onsubmit = function(e) { e.preventDefault(); triggerAutoFilter(true); return false; };
+
+    // Nút chọn nhanh danh mục
+    document.querySelectorAll('.quick-pills .pill-link').forEach(function(a) {
+        a.addEventListener('click', function(e) {
+            e.preventDefault();
+            var c = a.getAttribute('data-cat') || 'ALL';
+            if (c === 'ALL') {
+                form.reset();
+                ['shopPetTypeSelect', 'shopBreedSelect', 'shopCategorySelect'].forEach(function(id) { document.getElementById(id).value = 'ALL'; });
+                document.getElementById('shopKeywordInput').value = '';
+                document.getElementById('shopMinPrice').value = '';
+                document.getElementById('shopMaxPrice').value = '';
+            } else {
+                document.getElementById('shopCategorySelect').value = c;
+                syncShopFilters('category');
+            }
+            triggerAutoFilter(true);
+        });
+    });
+
+    // Đặt lại
+    document.getElementById('shopResetBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        ['shopPetTypeSelect', 'shopBreedSelect', 'shopCategorySelect'].forEach(function(id) { document.getElementById(id).value = 'ALL'; });
+        document.getElementById('shopSortSelect').value = 'id_desc';
+        document.getElementById('shopKeywordInput').value = '';
+        document.getElementById('shopMinPrice').value = '';
+        document.getElementById('shopMaxPrice').value = '';
+        syncShopFilters('init');
+        triggerAutoFilter(true);
+    });
+
+    // Phân trang cũng chạy AJAX (không tải lại trang)
+    document.getElementById('shopResults').addEventListener('click', function(e) {
+        var a = e.target.closest('.pagination-bar a');
+        if (!a) return;
+        e.preventDefault();
+        var q = a.getAttribute('href').split('?')[1] || '';
+        loadShopResults(q);
+        var top = document.getElementById('shopFilterForm');
+        if (top) top.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 });
 </script>
 
-<!-- Lưới sản phẩm / thú cưng khớp bộ lọc -->
+<!-- Lưới sản phẩm / thú cưng khớp bộ lọc (được thay thế bằng AJAX khi lọc) -->
+<div id="shopResults">
 {% if page_data['items'] %}
 <div class="product-grid">
     {% for p in page_data['items'] %}
@@ -273,4 +347,5 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 {% endif %}
+</div>
 {% endblock %}

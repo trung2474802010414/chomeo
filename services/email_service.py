@@ -238,11 +238,89 @@ def build_marketing_html_email(recipient: str, subject: str, body: str) -> str:
 </div></body></html>"""
 
 
+def build_voucher_html_email(recipient: str, subject: str, body: str, voucher: Optional[Dict[str, Any]] = None) -> str:
+    """Thư mời voucher dạng 'lá thư' giấy kem sang trọng: thương hiệu, mã voucher, mức giảm và thời hạn."""
+    from html import escape
+
+    v = voucher or {}
+    code = escape(str(v.get("code", "") or "MEOWWOOF-VIP"))
+    title = escape(str(v.get("title", "") or subject or "Ưu đãi dành riêng cho bạn"))
+    try:
+        val = float(v.get("discount_value", 0) or 0)
+    except (TypeError, ValueError):
+        val = 0.0
+    if v.get("discount_type") == "percent":
+        big = f"GIẢM {val:g}%"
+    else:
+        big = f"GIẢM {val:,.0f}đ"
+    try:
+        min_order = float(v.get("min_order_value", 0) or 0)
+    except (TypeError, ValueError):
+        min_order = 0.0
+    start = escape(str(v.get("start_date", "") or "Hôm nay"))
+    expiry = escape(str(v.get("expiry_date", "") or "Không giới hạn"))
+    min_txt = f"Đơn từ {min_order:,.0f}đ" if min_order > 0 else "Áp dụng cho mọi đơn hàng"
+    name_part = escape(recipient.split("@")[0]) if recipient else "bạn"
+
+    paras = "".join(
+        f"<p style='margin:0 0 12px;font-size:15px;line-height:1.7;color:#4a3f35;'>{escape(p.strip())}</p>"
+        for p in (body or "").split("\n")
+        if p.strip()
+    )
+
+    return f"""<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#efe7da;font-family:Georgia,'Times New Roman',serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#efe7da;padding:28px 12px;"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#fffdf8;border-radius:6px;border:1px solid #e0d3bd;box-shadow:0 10px 30px rgba(90,70,40,0.18);">
+  <tr><td style="padding:0;"><div style="height:8px;background:linear-gradient(90deg,#8b5cf6,#ec4899,#f59e0b);border-radius:6px 6px 0 0;"></div></td></tr>
+  <tr><td align="center" style="padding:30px 28px 8px;">
+    <div style="font-size:34px;line-height:1;">🐾</div>
+    <div style="font-family:Georgia,serif;font-size:26px;font-weight:bold;letter-spacing:3px;color:#3b2a5a;margin-top:8px;">MEOW &amp; WOOF</div>
+    <div style="font-size:12px;letter-spacing:4px;color:#b08a4a;margin-top:4px;text-transform:uppercase;">Pet House &amp; Spa</div>
+    <div style="width:70px;height:2px;background:#d9b873;margin:16px auto 0;"></div>
+  </td></tr>
+  <tr><td style="padding:18px 38px 4px;">
+    <p style="margin:0 0 14px;font-size:17px;color:#3b2a5a;font-style:italic;">Thân gửi {name_part},</p>
+    {paras}
+  </td></tr>
+  <tr><td align="center" style="padding:8px 30px 6px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fff7e6;border:2px dashed #d9a441;border-radius:14px;">
+      <tr><td align="center" style="padding:22px 16px 6px;">
+        <div style="font-size:11px;letter-spacing:3px;color:#a2762a;font-weight:bold;">VOUCHER ƯU ĐÃI</div>
+        <div style="font-size:15px;color:#6b5a45;margin-top:6px;">{title}</div>
+        <div style="font-family:Georgia,serif;font-size:38px;font-weight:bold;color:#c2255c;margin:10px 0 2px;">{big}</div>
+        <div style="font-size:12.5px;color:#8a7a62;">{min_txt}</div>
+      </td></tr>
+      <tr><td align="center" style="padding:10px 16px 8px;">
+        <div style="display:inline-block;background:#3b2a5a;color:#fde68a;font-family:'Courier New',monospace;font-size:26px;font-weight:bold;letter-spacing:5px;padding:10px 26px;border-radius:10px;">{code}</div>
+      </td></tr>
+      <tr><td align="center" style="padding:6px 16px 22px;">
+        <div style="font-size:13px;color:#6b5a45;">⏰ Hiệu lực: <b>{start}</b> &rarr; <b>{expiry}</b></div>
+      </td></tr>
+    </table>
+  </td></tr>
+  <tr><td style="padding:16px 38px 4px;">
+    <p style="margin:0;font-size:13.5px;line-height:1.7;color:#6b5a45;">👉 <b>Cách dùng:</b> chọn sản phẩm, vào <b>Giỏ hàng &amp; Thanh toán</b>, nhập mã <b>{code}</b> vào ô Mã giảm giá để được trừ tiền ngay.</p>
+  </td></tr>
+  <tr><td align="center" style="padding:20px 28px 8px;">
+    <a href="https://chomeo.vercel.app/shop" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#ffffff;text-decoration:none;font-family:'Segoe UI',Arial,sans-serif;font-weight:bold;font-size:14.5px;padding:13px 34px;border-radius:99px;">Mua sắm ngay &rarr;</a>
+  </td></tr>
+  <tr><td style="padding:22px 38px 8px;">
+    <p style="margin:0;font-size:15px;color:#3b2a5a;font-style:italic;">Trân trọng,</p>
+    <p style="margin:2px 0 0;font-size:16px;color:#3b2a5a;font-weight:bold;">Đội ngũ Meow &amp; Woof 🐶🐱</p>
+  </td></tr>
+  <tr><td align="center" style="padding:18px 28px 26px;border-top:1px solid #eadfca;">
+    <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11.5px;color:#a59880;line-height:1.7;">Meow &amp; Woof Pet House &amp; Spa • 245 Nguyễn Thị Minh Khai, Quận 1, TP.HCM<br>Hotline 0905.123.456 • Mở cửa 08:00 – 21:00</div>
+  </td></tr>
+</table></td></tr></table></body></html>"""
+
+
 def send_and_log_email(
     recipient: str,
     subject: str,
     body: str,
     html_body: Optional[str] = None,
+    allow_relay: bool = True,
 ) -> Dict[str, Any]:
     """Gửi email thật tới hộp thư Admin (qua Google SMTP hoặc FormSubmit Relay) và lưu lịch sử vào bảng `email_logs`."""
     import urllib.request
@@ -279,6 +357,11 @@ def send_and_log_email(
             status = f"Đã gửi Gmail SMTP thành công tới {recipient_addr}"
         except Exception as exc:
             status = f"Lỗi SMTP ({exc}) — Đã lưu bản sao tại Hộp thư Admin"
+    elif is_real_email and not allow_relay:
+        status = (
+            f"Chưa gửi tới {recipient_addr}: cần dán Mật khẩu ứng dụng Gmail (App Password) "
+            f"ở tab Hộp thư Email để gửi thư HTML đẹp"
+        )
     elif is_real_email:
         # Gửi qua cổng chuyển tiếp FormSubmit AJAX không cần mật khẩu
         try:

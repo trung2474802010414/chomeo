@@ -54,6 +54,7 @@ from models.entities import (
 from services.email_service import (
     build_booking_html_email,
     build_marketing_html_email,
+    build_voucher_html_email,
     build_order_html_email,
     get_admin_notification_email,
     get_smtp_credentials,
@@ -1445,6 +1446,38 @@ def admin_page():
     )
 
 
+@app.route("/admin/api/order-feed")
+@admin_required
+def admin_order_feed():
+    """Admin thăm dò (polling) đơn hàng / lịch Spa mới để hiện chuông + popup thông báo ngay trên Dashboard."""
+    orders = list(Order.iter_all(order_by="id DESC"))
+    bookings = list(SpaBooking.iter_all(order_by="id DESC"))
+    pending = sum(1 for o in orders if (o.status or "") == "Chờ xác nhận")
+    latest = [
+        {
+            "id": o.id,
+            "customer_name": o.customer_name,
+            "phone": o.phone,
+            "total_amount": o.total_amount,
+            "created_at": o.created_at,
+        }
+        for o in orders[:5]
+    ]
+    return jsonify({
+        "ok": True,
+        "max_order_id": orders[0].id if orders else 0,
+        "max_booking_id": bookings[0].id if bookings else 0,
+        "pending_orders": pending,
+        "total_orders": len(orders),
+        "latest_orders": latest,
+        "latest_booking": (
+            {"id": bookings[0].id, "customer_name": bookings[0].customer_name,
+             "service_name": bookings[0].service_name}
+            if bookings else None
+        ),
+    })
+
+
 @app.route("/admin/banking/save", methods=["POST"])
 @admin_required
 def admin_save_banking():
@@ -1855,23 +1888,27 @@ def admin_send_marketing_email():
         flash("Vui lòng nhập đầy đủ Email người nhận hợp lệ, Tiêu đề và Nội dung chương trình khuyến mãi.", "error")
         return redirect(url_for("admin_page", tab="spa_pricing"))
 
-    html_body = build_marketing_html_email(recipient, subject, body)
-    send_and_log_email(recipient, subject, body, html_body=html_body)
-
-    # Lưu thông tin để trình duyệt Admin kích hoạt luôn FormSubmit AJAX Relay gửi thẳng tới Gmail người nhận
-    session["pending_marketing_relay"] = {
-        "recipient": recipient,
-        "subject": subject,
-        "body": body,
-        "voucher_code": vcode,
-    }
-    session.modified = True
+    voucher_info = None
+    if vcode:
+        v_found = Voucher.find_by_code(vcode)
+        voucher_info = v_found.to_dict() if v_found else None
+    html_body = build_voucher_html_email(recipient, subject, body, voucher_info)
+    mail_res = send_and_log_email(recipient, subject, body, html_body=html_body, allow_relay=False)
+    mail_status = str(mail_res.get("delivery_status", ""))
+    sent_ok = mail_status.startswith("Đã gửi Gmail SMTP")
 
     all_vouchers = Voucher.sync_all_to_json_file()
-    flash(
-        f"🚀 Đã phát hành Voucher {('[' + vcode + '] ') if vcode else ''}& gửi Email ưu đãi trực tiếp tới Gmail '{recipient}' thành công!",
-        "success",
-    )
+    if sent_ok:
+        flash(
+            f"🚀 Đã gửi thư Voucher {('[' + vcode + '] ') if vcode else ''}tới Gmail '{recipient}' thành công!",
+            "success",
+        )
+    else:
+        flash(
+            f"⚠️ Voucher {('[' + vcode + '] ') if vcode else ''}đã lưu nhưng CHƯA gửi được thư tới '{recipient}'. "
+            f"{mail_status}",
+            "error",
+        )
     resp = make_response(redirect(url_for("admin_page", tab="spa_pricing")))
     return _sync_vouchers_vault_cookie(resp, all_vouchers)
 
@@ -1962,8 +1999,13 @@ def admin_email_preview_sample(sample_type: str):
         }
         return Response(build_order_html_email(sample_data), mimetype="text/html; charset=utf-8")
     else:
-        sample_body = "Cảm ơn bạn đã đồng hành cùng Meow & Woof Pet House!\nTặng bạn mã giảm giá 20% cho toàn bộ dịch vụ Spa và phụ kiện thú cưng trong tuần lễ khai trương cơ sở mới."
-        return Response(build_marketing_html_email("khachhang@vip.com", "[Meow & Woof] Tri ân khách hàng thân thiết", sample_body), mimetype="text/html; charset=utf-8")
+        sample_body = "Cảm ơn bạn đã đồng hành cùng Meow & Woof Pet House!\nTặng bạn một voucher đặc biệt cho lần mua sắm và chăm sóc Spa tiếp theo."
+        sample_voucher = {
+            "code": "GENZVIP20", "title": "Quà tri ân khách thân thiết", "discount_type": "percent",
+            "discount_value": 20, "min_order_value": 200000,
+            "start_date": datetime.now().strftime("%Y-%m-%d"), "expiry_date": "2027-12-31",
+        }
+        return Response(build_voucher_html_email("khachhang@vip.com", "[Meow & Woof] Tri ân khách hàng thân thiết", sample_body, sample_voucher), mimetype="text/html; charset=utf-8")
 
 
 
