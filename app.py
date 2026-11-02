@@ -25,6 +25,7 @@ from flask import (
     Response,
     flash,
     jsonify,
+    make_response,
     redirect,
     render_template,
     request,
@@ -155,13 +156,35 @@ def _attach_account_to_vault_cookie(resp: Response, user_obj: User) -> Response:
 
 @app.before_request
 def restore_persistent_accounts_before_request() -> None:
-    """Tự động đồng bộ tài khoản từ JSON & Cookie trước mỗi request để không bao giờ mất dữ liệu."""
+    """Tự động đồng bộ tài khoản, cấu hình ngân hàng và email Admin từ JSON & Cookie trước mỗi request."""
     vault = _read_cookie_accounts_vault()
     cur_backup = session.get("current_user_backup")
     if isinstance(cur_backup, dict):
         vault.append(cur_backup)
     if vault:
         User.restore_accounts_list(vault)
+
+    # Khôi phục cấu hình ngân hàng từ Cookie nếu trên Serverless cold-start
+    if not os.environ.get("PETSHOP_BANK_CONFIG"):
+        raw_bank = request.cookies.get("mw_bank_config", "")
+        if raw_bank:
+            try:
+                bank_data = json.loads(urllib.parse.unquote(raw_bank))
+                if isinstance(bank_data, dict) and bank_data.get("account_number"):
+                    save_bank_config(bank_data)
+            except Exception:
+                pass
+
+    # Khôi phục Email nhận thông báo của Admin từ Cookie nếu trên Serverless cold-start
+    if not os.environ.get("PETSHOP_ADMIN_NOTIFY_EMAIL"):
+        raw_mail = request.cookies.get("mw_admin_email", "")
+        if raw_mail:
+            try:
+                mail_str = urllib.parse.unquote(raw_mail).strip()
+                if "@" in mail_str:
+                    set_admin_notification_email(mail_str)
+            except Exception:
+                pass
 
 
 # ============================================================================
@@ -930,7 +953,7 @@ def admin_save_banking():
         flash("Vui lòng điền đầy đủ Số tài khoản và Tên chủ tài khoản ngân hàng.", "error")
         return redirect(url_for("admin_page", tab="banking"))
 
-    save_bank_config(
+    cleaned_bank = save_bank_config(
         {
             "bank_bin": bank_bin,
             "bank_name": bank_name,
@@ -942,7 +965,18 @@ def admin_save_banking():
         }
     )
     flash(f"Đã lưu thành công cấu hình ngân hàng '{bank_name}' (STK: {account_number})!", "success")
-    return redirect(url_for("admin_page", tab="banking"))
+    resp = make_response(redirect(url_for("admin_page", tab="banking")))
+    try:
+        resp.set_cookie(
+            "mw_bank_config",
+            urllib.parse.quote(json.dumps(cleaned_bank, ensure_ascii=False)),
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+    except Exception:
+        pass
+    return resp
 
 
 @app.route("/admin/products/save", methods=["POST"])
@@ -1105,6 +1139,18 @@ def admin_save_smtp():
             f"Mọi đơn đặt hàng và lịch Spa mới sẽ gửi thông báo về địa chỉ này.",
             "success",
         )
+        resp = make_response(redirect(url_for("admin_page", tab="emails")))
+        try:
+            resp.set_cookie(
+                "mw_admin_email",
+                urllib.parse.quote(admin_notify_mail),
+                max_age=365 * 24 * 3600,
+                samesite="Lax",
+                httponly=False,
+            )
+        except Exception:
+            pass
+        return resp
     else:
         flash("Vui lòng nhập địa chỉ Email Admin hợp lệ.", "error")
 

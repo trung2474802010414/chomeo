@@ -8,6 +8,7 @@ import json
 import os
 import smtplib
 from typing import Any, Dict, Optional
+from core.database import resolve_writable_json_path
 from models.entities import EmailLog
 
 FOOTER_HTML = """<div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:16px; margin-top:20px; font-size:12px; color:#94a3b8; text-align:center; line-height:1.6;">
@@ -53,7 +54,7 @@ def get_smtp_credentials() -> Dict[str, Any]:
                     pass
 
     if not user or not pwd:
-        cfg_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "smtp_config.json")
+        cfg_path = resolve_writable_json_path("smtp_config.json")
         if os.path.exists(cfg_path):
             try:
                 with open(cfg_path, "r", encoding="utf-8") as f:
@@ -74,31 +75,32 @@ def get_smtp_credentials() -> Dict[str, Any]:
 
 
 def save_smtp_credentials(smtp_user: str, smtp_pass: str, smtp_host: str = "smtp.gmail.com", smtp_port: int = 587) -> None:
-    """Lưu cấu hình SMTP vào data/smtp_config.json và cập nhật biến môi trường tức thì."""
-    cfg_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
-    os.makedirs(cfg_dir, exist_ok=True)
-    cfg_path = os.path.join(cfg_dir, "smtp_config.json")
-
+    """Lưu cấu hình SMTP an toàn (tương thích 100% với Vercel Serverless & Local)."""
     clean_pass = smtp_pass.strip().replace(" ", "")
-    data = {
-        "smtp_user": smtp_user.strip(),
-        "smtp_pass": clean_pass,
-        "smtp_host": smtp_host.strip() or "smtp.gmail.com",
-        "smtp_port": smtp_port,
-    }
-    with open(cfg_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
     os.environ["SMTP_USER"] = smtp_user.strip()
     os.environ["SMTP_PASS"] = clean_pass
     os.environ["SMTP_HOST"] = smtp_host.strip() or "smtp.gmail.com"
     os.environ["SMTP_PORT"] = str(smtp_port)
 
+    try:
+        cfg_path = resolve_writable_json_path("smtp_config.json")
+        os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
+        data = {
+            "smtp_user": smtp_user.strip(),
+            "smtp_pass": clean_pass,
+            "smtp_host": smtp_host.strip() or "smtp.gmail.com",
+            "smtp_port": smtp_port,
+        }
+        with open(cfg_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
 
 def get_admin_notification_email() -> str:
     """Lấy địa chỉ Email nhận thông báo của Admin."""
     admin_mail = os.environ.get("ADMIN_NOTIFICATION_EMAIL", "").strip()
-    cfg_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "admin_settings.json")
+    cfg_path = resolve_writable_json_path("admin_settings.json")
     if not admin_mail and os.path.exists(cfg_path):
         try:
             with open(cfg_path, "r", encoding="utf-8") as f:
@@ -112,23 +114,24 @@ def get_admin_notification_email() -> str:
 
 
 def set_admin_notification_email(email_addr: str) -> None:
-    """Lưu địa chỉ Email nhận thông báo của Admin vào data/admin_settings.json."""
+    """Lưu địa chỉ Email nhận thông báo của Admin an toàn (tương thích 100% với Vercel Serverless & Local)."""
     clean_mail = email_addr.strip()
-    cfg_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
-    os.makedirs(cfg_dir, exist_ok=True)
-    cfg_path = os.path.join(cfg_dir, "admin_settings.json")
-    data = {}
-    if os.path.exists(cfg_path):
-        try:
-            with open(cfg_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception:
-            data = {}
-    data["admin_notification_email"] = clean_mail
-    with open(cfg_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
     os.environ["ADMIN_NOTIFICATION_EMAIL"] = clean_mail
+    try:
+        cfg_path = resolve_writable_json_path("admin_settings.json")
+        os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
+        data = {}
+        if os.path.exists(cfg_path):
+            try:
+                with open(cfg_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception:
+                data = {}
+        data["admin_notification_email"] = clean_mail
+        with open(cfg_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
 
 
 def build_booking_html_email(booking: Dict[str, Any]) -> str:

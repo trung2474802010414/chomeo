@@ -15,7 +15,7 @@ import os
 from typing import Any, Dict, Generator, List, Optional, Tuple
 import urllib.parse
 
-from core.database import DatabaseSession
+from core.database import DatabaseSession, resolve_writable_json_path
 from core.orm import ValidationError
 from core.paginator import (
     build_filter_pipeline,
@@ -39,9 +39,7 @@ from models.entities import (
 )
 from services.email_service import send_order_confirmation_email
 
-BANK_CONFIG_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "bank_config.json"
-)
+BANK_CONFIG_PATH = resolve_writable_json_path("bank_config.json")
 
 SUPPORTED_BANKS: List[Dict[str, str]] = [
     {"bin": "970422", "code": "970422", "short_name": "MB", "name": "MB Bank (Ngân hàng Quân Đội)"},
@@ -72,22 +70,32 @@ DEFAULT_BANK_CONFIG: Dict[str, Any] = {
 
 
 def get_bank_config() -> Dict[str, Any]:
-    """Lấy cấu hình ngân hàng hiện tại, trả về mặc định nếu chưa cấu hình."""
-    if os.path.exists(BANK_CONFIG_PATH):
+    """Lấy cấu hình ngân hàng hiện tại (ưu tiên biến môi trường / file JSON, trả về mặc định nếu chưa có)."""
+    merged = dict(DEFAULT_BANK_CONFIG)
+    env_raw = os.environ.get("PETSHOP_BANK_CONFIG", "").strip()
+    if env_raw:
         try:
-            with open(BANK_CONFIG_PATH, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                merged = dict(DEFAULT_BANK_CONFIG)
+            data = json.loads(env_raw)
+            if isinstance(data, dict):
                 merged.update(data)
                 return merged
         except Exception:
             pass
-    return dict(DEFAULT_BANK_CONFIG)
+
+    if os.path.exists(BANK_CONFIG_PATH):
+        try:
+            with open(BANK_CONFIG_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    merged.update(data)
+                    return merged
+        except Exception:
+            pass
+    return merged
 
 
 def save_bank_config(payload: Dict[str, Any]) -> Dict[str, Any]:
-    """Lưu cấu hình ngân hàng do Quản trị viên tùy chỉnh vào file JSON."""
-    os.makedirs(os.path.dirname(BANK_CONFIG_PATH), exist_ok=True)
+    """Lưu cấu hình ngân hàng do Quản trị viên tùy chỉnh (tương thích 100% với Vercel Serverless & Local)."""
     current = get_bank_config()
     current["bank_bin"] = str(payload.get("bank_bin", current["bank_bin"])).strip()
     current["bank_name"] = str(payload.get("bank_name", current["bank_name"])).strip()
@@ -103,8 +111,13 @@ def save_bank_config(payload: Dict[str, Any]) -> Dict[str, Any]:
     current["template"] = str(payload.get("template", "compact2")).strip()
     current["is_active"] = bool(payload.get("is_active", True))
 
-    with open(BANK_CONFIG_PATH, "w", encoding="utf-8") as f:
-        json.dump(current, f, ensure_ascii=False, indent=2)
+    os.environ["PETSHOP_BANK_CONFIG"] = json.dumps(current, ensure_ascii=False)
+    try:
+        os.makedirs(os.path.dirname(BANK_CONFIG_PATH), exist_ok=True)
+        with open(BANK_CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(current, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
 
     return current
 

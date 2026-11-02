@@ -38,6 +38,28 @@ def _resolve_db_path() -> str:
 DB_PATH = _resolve_db_path()
 
 
+def resolve_writable_json_path(filename: str) -> str:
+    """
+    Trả về đường dẫn file JSON có quyền ghi an toàn:
+    - Trên máy Local: lưu tại `petshop/data/<filename>`.
+    - Trên Vercel Serverless (hệ thống file read-only): tự động lưu tại `/tmp/<filename>`
+      để không bao giờ bị lỗi 500 Read-only file system.
+    """
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(base_dir, "data")
+    if os.environ.get("VERCEL"):
+        return os.path.join(tempfile.gettempdir(), filename)
+    try:
+        os.makedirs(data_dir, exist_ok=True)
+        test_file = os.path.join(data_dir, ".write_test")
+        with open(test_file, "w", encoding="utf-8") as f:
+            f.write("ok")
+        os.remove(test_file)
+        return os.path.join(data_dir, filename)
+    except Exception:
+        return os.path.join(tempfile.gettempdir(), filename)
+
+
 class DatabaseSession:
     """
     Context Manager tự viết bằng class thông qua 2 magic methods:

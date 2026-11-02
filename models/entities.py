@@ -13,6 +13,7 @@ import hashlib
 import json
 import os
 from typing import Any, Dict, List, Optional
+from core.database import resolve_writable_json_path
 from core.orm import BaseModel, FloatField, IntField, StringField
 
 CATEGORIES = [
@@ -75,11 +76,7 @@ SPA_SERVICES: Dict[str, float] = {
 
 BOOKING_STATUSES = ["Chờ xác nhận", "Đã xác nhận", "Hoàn thành", "Đã hủy"]
 
-USERS_STORE_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "data",
-    "users_store.json",
-)
+USERS_STORE_PATH = resolve_writable_json_path("users_store.json")
 
 
 def hash_password(password: str) -> str:
