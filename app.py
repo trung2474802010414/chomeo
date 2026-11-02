@@ -421,7 +421,7 @@ def spa_page():
             flash(
                 f"Đặt lịch Spa thành công! Mã lịch hẹn #{booking.id} cho bé {booking.pet_name} "
                 f"(Chi phí: {fee:,.0f} đ). Trạng thái Email: {email_info['delivery_status']}.",
-                "success",
+                "booking_success",
             )
             return redirect(url_for("spa_page", booking_id=booking.id))
         else:
@@ -476,11 +476,11 @@ def cart_page():
                 # Xóa sạch toàn bộ dữ liệu giỏ hàng & thao tác đặt hàng trước đó
                 session["cart"] = {}
                 session.modified = True
-                admin_email = get_smtp_config().get("admin_notification_email", "boss_admin@gmail.com")
+                admin_email = get_admin_notification_email()
                 flash(
                     f"🎉 Đặt hàng thành công! Mã đơn hàng #{order_dict['id']} — "
                     f"Tổng thanh toán: {order_dict['total_amount']:,.0f} đ. Đã gửi thông báo đơn hàng về hộp thư Admin ({admin_email})!",
-                    "success",
+                    "order_success",
                 )
                 return redirect(url_for("order_success_page", order_id=order_dict["id"]))
             except ValidationError as exc:

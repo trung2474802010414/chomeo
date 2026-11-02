@@ -95,11 +95,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <!-- MODAL POPUP THÀNH CÔNG (XUẤT HIỆN Ở GIỮA MÀN HÌNH - KHÔNG DÙNG THANH ĐƠN SƠ) -->
+    <!-- MODAL POPUP THÀNH CÔNG (CHỈ HIỆN DUY NHẤT KHI ĐẶT ĐƠN HÀNG HOẶC ĐẶT LỊCH SPA THÀNH CÔNG) -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                {% if category == 'success' or 'thành công' in message.lower() %}
+                {% set msg_lower = message.lower() %}
+                {% set is_order_or_spa_popup = (category in ('order_success', 'booking_success') or 'đặt hàng thành công' in msg_lower or 'đặt lịch spa thành công' in msg_lower) %}
+                {% if is_order_or_spa_popup %}
                     <div id="successPopupModal" class="success-popup-backdrop show" onclick="if(event.target===this) closeSuccessModal();">
                         <div class="success-popup-card">
                             <button type="button" class="success-popup-close" onclick="closeSuccessModal()" title="Đóng">&times;</button>
@@ -107,16 +109,14 @@
                                 🎉
                             </div>
                             <h2 class="success-popup-title">
-                                {% if 'đặt hàng' in message.lower() %}
+                                {% if category == 'order_success' or 'đặt hàng' in msg_lower %}
                                     🎉 ĐẶT HÀNG THÀNH CÔNG!
-                                {% elif 'spa' in message.lower() %}
-                                    🐾 ĐẶT LỊCH SPA THÀNH CÔNG!
                                 {% else %}
-                                    ✨ THAO TÁC THÀNH CÔNG!
+                                    🐾 ĐẶT LỊCH SPA THÀNH CÔNG!
                                 {% endif %}
                             </h2>
                             <p class="success-popup-sub">
-                                Meow &amp; Woof đã ghi nhận yêu cầu và gửi email xác nhận chi tiết đến bạn!
+                                Meow &amp; Woof đã ghi nhận đơn và gửi thông báo chi tiết về hộp thư Email của Admin!
                             </p>
                             <div class="success-popup-msg-box">
                                 <div style="display:flex; align-items:flex-start; gap:8px;">
@@ -140,34 +140,36 @@
                 {% endif %}
             {% endfor %}
 
-            <!-- FLOATING TOAST CHO CÁC THÔNG BÁO KHÁC (HOẶC GIỎ HÀNG) -->
+            <!-- FLOATING TOAST GÓC PHẢI CHO CÁC THAO TÁC THƯỜNG (THÊM GIỎ HÀNG, ĐĂNG NHẬP, ĐĂNG XUẤT, LỖI...) -->
             <div id="toastNotificationContainer" style="position: fixed; top: 24px; right: 24px; z-index: 999999; display: flex; flex-direction: column; gap: 12px; max-width: 440px; width: calc(100% - 48px); pointer-events: none;">
                 {% for category, message in messages %}
-                    {% if category != 'success' and 'thành công' not in message.lower() %}
+                    {% set msg_lower = message.lower() %}
+                    {% set is_order_or_spa_popup = (category in ('order_success', 'booking_success') or 'đặt hàng thành công' in msg_lower or 'đặt lịch spa thành công' in msg_lower) %}
+                    {% if not is_order_or_spa_popup %}
                     <div class="floating-toast-card {% if category == 'error' %}toast-error{% else %}toast-success{% endif %}" style="pointer-events: auto;">
                         <div class="toast-icon-circle">
-                            {% if 'giỏ hàng' in message.lower() %}
+                            {% if 'giỏ hàng' in msg_lower %}
                                 🛒
                             {% elif category == 'error' %}
                                 ⚠️
                             {% else %}
-                                ℹ️
+                                ✨
                             {% endif %}
                         </div>
                         <div style="flex: 1; min-width: 0;">
                             <div class="toast-title">
-                                {% if 'giỏ hàng' in message.lower() %}
-                                    ĐÃ THÊM VÀO GIỎ HÀNG
+                                {% if 'giỏ hàng' in msg_lower %}
+                                    GIỎ HÀNG MEOW &amp; WOOF
                                 {% elif category == 'error' %}
                                     THÔNG BÁO TỪ HỆ THỐNG
                                 {% else %}
-                                    THÔNG TIN HỆ THỐNG
+                                    THÔNG BÁO THÀNH CÔNG
                                 {% endif %}
                             </div>
                             <div class="toast-msg">
                                 {{ message }}
                             </div>
-                            {% if 'giỏ hàng' in message.lower() %}
+                            {% if 'thêm' in msg_lower and 'giỏ hàng' in msg_lower %}
                             <div style="margin-top: 10px;">
                                 <a href="{{ url_for('cart_page') }}" class="toast-action-btn">
                                     <span>🛒 Xem Giỏ Hàng &amp; Thanh Toán ({{ cart_count|default(1) }})</span>
@@ -345,7 +347,7 @@
                 if (modal && modal.parentElement) {
                     modal.parentElement.removeChild(modal);
                 }
-            }, 300);
+            }, 250);
         }
     }
 
@@ -359,20 +361,33 @@
         }, 360);
     }
 
+    // Chặn hiện lại thông báo cũ khi người dùng bấm nút Back / Forward trên trình duyệt
+    window.addEventListener('pageshow', function(e) {
+        var navEntries = (window.performance && window.performance.getEntriesByType) ? window.performance.getEntriesByType('navigation') : [];
+        var isBackForward = e.persisted || (navEntries.length > 0 && navEntries[0].type === 'back_forward');
+        if (isBackForward) {
+            closeSuccessModal();
+            var toastBox = document.getElementById('toastNotificationContainer');
+            if (toastBox && toastBox.parentElement) {
+                toastBox.parentElement.removeChild(toastBox);
+            }
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         var toasts = document.querySelectorAll('.floating-toast-card');
         toasts.forEach(function(toast) {
             setTimeout(function() {
                 dismissToast(toast);
-            }, 4500);
+            }, 3500);
         });
 
-        // Tự động đóng popup thành công sau 8 giây (hoặc người dùng bấm đóng)
+        // Tự động đóng popup thành công sau 6 giây (hoặc người dùng bấm đóng)
         var successModal = document.getElementById('successPopupModal');
         if (successModal) {
             setTimeout(function() {
                 closeSuccessModal();
-            }, 8000);
+            }, 6000);
         }
     });
 
