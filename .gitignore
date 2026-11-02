@@ -44,8 +44,4 @@ dist/
 build/
 .vercel/
 *.log
-.claude/
-AGENT.MD
-CLAUDE.MD
-check_rules.py
 

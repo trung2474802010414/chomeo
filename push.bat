@@ -4,10 +4,14 @@ echo ========================================================
 echo        TIẾN TRÌNH ĐẨY CODE LÊN GITHUB TỰ ĐỘNG
 echo ========================================================
 
-:: Cấu hình bỏ qua lỗi dubious ownership và gỡ hook pre-commit lỗi cú pháp sh
+:: Cấu hình bỏ qua lỗi dubious ownership và gỡ toàn bộ rule/hook cũ nếu còn sót
 git config --global --add safe.directory * 2>nul
 git config --global --add safe.directory "D:/python nâng cao_TH/petshop" 2>nul
 if exist ".git\hooks\pre-commit" del /f /q ".git\hooks\pre-commit" 2>nul
+if exist ".claude" rmdir /s /q ".claude" 2>nul
+if exist "AGENT.MD" del /f /q "AGENT.MD" 2>nul
+if exist "CLAUDE.MD" del /f /q "CLAUDE.MD" 2>nul
+if exist "check_rules.py" del /f /q "check_rules.py" 2>nul
 
 :: 1. Loại bỏ các file rác và database khỏi git cache nếu lỡ theo dõi
 git rm --cached -r -f --ignore-unmatch *.db *.pyc __pycache__ */__pycache__ 2>nul
