@@ -101,6 +101,13 @@
 
                 <div class="admin-nav-group-title">HỆ THỐNG &amp; BẢO MẬT</div>
 
+                <a href="{{ url_for('admin_page', tab='banking') }}" class="admin-nav-link {% if admin_tab == 'banking' %}active{% endif %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                    <span>Tài khoản Ngân hàng &amp; QR</span>
+                </a>
+
                 <a href="{{ url_for('admin_page', tab='system_settings') }}" class="admin-nav-link {% if admin_tab == 'system_settings' %}active{% endif %}">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -140,6 +147,7 @@
                     {% elif admin_tab == 'spa_pricing' %}Bảng Giá Dịch Vụ Spa &amp; Chăm Sóc Khách Hàng VIP
                     {% elif admin_tab == 'emails' %}Nhật Ký Email Xác Nhận Hệ Thống (SMTP)
                     {% elif admin_tab == 'system_settings' %}Cấu Hình Hệ Thống, Đồng Bộ Kho &amp; Cổng REST API
+                    {% elif admin_tab == 'banking' %}Cấu Hình Tài Khoản Ngân Hàng &amp; Mã VietQR Thanh Toán
                     {% endif %}
                 </h1>
 
@@ -214,9 +222,9 @@
                 }
                 </script>
 
-                <!-- HÀNG 1: 4 THẺ KPI TRẮNG -->
+                <!-- HÀNG 1: 4 THẺ KPI TRẮNG (LIÊN KẾT TRỰC QUAN ĐẾN CÁC PHẦN DỮ LIỆU) -->
                 <div class="admin-kpi-grid">
-                    <div class="admin-kpi-card">
+                    <a href="{{ url_for('admin_page', tab='orders') }}" class="admin-kpi-card" style="text-decoration:none; display:block; transition:transform 0.2s ease, box-shadow 0.2s ease;" title="Xem chi tiết các đơn hàng tạo doanh thu">
                         <div class="kpi-top">
                             <span class="kpi-label">Doanh Thu Thuần</span>
                             <div class="kpi-icon-box kpi-icon-green">
@@ -226,10 +234,12 @@
                             </div>
                         </div>
                         <div class="kpi-value" style="color:#15803d;">{{ "{:,.0f}".format(stats.net_revenue) }} đ</div>
-                        <div class="kpi-sub">Đơn hàng &amp; dịch vụ Spa hoàn tất</div>
-                    </div>
+                        <div class="kpi-sub" style="color:#475569; font-weight:600;">
+                            🛒 Đơn: <strong>{{ "{:,.0f}".format(stats.order_revenue) }}đ</strong> • 🛁 Spa: <strong>{{ "{:,.0f}".format(stats.spa_revenue) }}đ</strong>
+                        </div>
+                    </a>
 
-                    <div class="admin-kpi-card">
+                    <a href="{{ url_for('admin_page', tab='products') }}" class="admin-kpi-card" style="text-decoration:none; display:block; transition:transform 0.2s ease, box-shadow 0.2s ease;" title="Xem toàn bộ kho hàng và sản phẩm">
                         <div class="kpi-top">
                             <span class="kpi-label">Giá Trị Tồn Kho</span>
                             <div class="kpi-icon-box kpi-icon-blue">
@@ -239,10 +249,10 @@
                             </div>
                         </div>
                         <div class="kpi-value" style="color:#1d4ed8;">{{ "{:,.0f}".format(stats.total_inventory_value) }} đ</div>
-                        <div class="kpi-sub">Tổng {{ stats.total_products }} mặt hàng ({{ stats.total_stock_units }} đơn vị)</div>
-                    </div>
+                        <div class="kpi-sub">Tổng <strong>{{ stats.total_products }}</strong> mặt hàng (<strong>{{ stats.total_stock_units }}</strong> đơn vị) &rarr;</div>
+                    </a>
 
-                    <div class="admin-kpi-card">
+                    <a href="{{ url_for('admin_page', tab='orders') }}" class="admin-kpi-card" style="text-decoration:none; display:block; transition:transform 0.2s ease, box-shadow 0.2s ease;" title="Xem danh sách đơn mua và lịch spa">
                         <div class="kpi-top">
                             <span class="kpi-label">Tổng Đơn &amp; Lịch Hẹn</span>
                             <div class="kpi-icon-box kpi-icon-cyan">
@@ -252,8 +262,8 @@
                             </div>
                         </div>
                         <div class="kpi-value" style="color:#0284c7;">{{ stats.total_transactions }}</div>
-                        <div class="kpi-sub">Đơn mua: <strong>{{ stats.total_orders }}</strong> | Lịch Spa: <strong>{{ stats.total_bookings }}</strong></div>
-                    </div>
+                        <div class="kpi-sub">Đơn mua: <strong>{{ stats.total_orders }}</strong> | Lịch Spa: <strong>{{ stats.total_bookings }}</strong> &rarr;</div>
+                    </a>
 
                     <div class="admin-kpi-card">
                         <div class="kpi-top">
@@ -265,7 +275,7 @@
                             </div>
                         </div>
                         <div class="kpi-value" style="color:#0f172a;">{{ "{:,.0f}".format(stats.avg_order_value) }} đ</div>
-                        <div class="kpi-sub">Doanh thu / Tổng giao dịch</div>
+                        <div class="kpi-sub">Doanh thu / {{ stats.total_transactions }} giao dịch</div>
                     </div>
                 </div>
 
@@ -286,17 +296,19 @@
                     <div class="admin-status-card status-border-red">
                         <div class="status-card-title">Cảnh Báo Tồn Kho Thấp (&le; 5)</div>
                         <div class="status-card-num" style="color:#dc2626;">{{ stats.low_stock_count }}</div>
-                        <a href="{{ url_for('admin_page', tab='products') }}" class="status-card-link" style="color:#dc2626;">Kiểm kê nhập kho &rarr;</a>
+                        <a href="{{ url_for('admin_page', tab='inventory_alerts') }}" class="status-card-link" style="color:#dc2626;">Kiểm kê nhập kho &rarr;</a>
                     </div>
 
                     <div class="admin-status-card status-border-green">
                         <div class="status-card-title">Tổng Đơn Vị Hàng Trong Kho</div>
                         <div class="status-card-num" style="color:#16a34a;">{{ stats.total_stock_units }}</div>
-                        <div style="font-size:12.5px; color:#64748b;">Khách hàng duy nhất: <strong>{{ stats.unique_customers_count }}</strong></div>
+                        <div style="font-size:12.5px; color:#64748b;">
+                            Khách hàng thân thiết: <a href="{{ url_for('admin_page', tab='customers') }}" style="color:#0284c7; font-weight:800; text-decoration:underline;">{{ stats.unique_customers_count }} khách</a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- HÀNG 3: 2 KHUNG BIỂU ĐỒ TRỰC QUAN GIỐNG HÌNH MẪU -->
+                <!-- HÀNG 3: 2 KHUNG BIỂU ĐỒ TRỰC QUAN LIÊN KẾT 100% VỚI DỮ LIỆU THỰC -->
                 <div class="admin-charts-grid">
                     <div class="card" style="margin-bottom:0;">
                         <div class="card-header">
@@ -312,13 +324,13 @@
                             <text x="42" y="79" text-anchor="end" font-size="11" fill="#64748b">TB</text>
                             <text x="42" y="169" text-anchor="end" font-size="11" fill="#64748b">0 đ</text>
 
-                            <!-- Đường biểu đồ xanh lá đậm giống mẫu -->
-                            <path d="M 90 60 Q 190 140, 230 125 T 360 45 T 490 95 L 540 70" fill="none" stroke="#14532d" stroke-width="3"/>
-                            <circle cx="90" cy="60" r="5" fill="#14532d"/>
-                            <circle cx="230" cy="125" r="5" fill="#14532d"/>
-                            <circle cx="360" cy="45" r="5" fill="#14532d"/>
-                            <circle cx="490" cy="95" r="5" fill="#14532d"/>
-                            <circle cx="540" cy="70" r="5" fill="#14532d"/>
+                            <!-- Đường biểu đồ tính toán động theo tỷ trọng kho thực tế -->
+                            <path d="M 90 {{ stats.chart_y.y1 }} Q 190 {{ stats.chart_y.y2 + 8 }}, 230 {{ stats.chart_y.y2 }} T 360 {{ stats.chart_y.y3 }} T 490 {{ stats.chart_y.y4 }} L 540 {{ stats.chart_y.y4 }}" fill="none" stroke="#15803d" stroke-width="3"/>
+                            <circle cx="90" cy="{{ stats.chart_y.y1 }}" r="5" fill="#15803d"/>
+                            <circle cx="230" cy="{{ stats.chart_y.y2 }}" r="5" fill="#15803d"/>
+                            <circle cx="360" cy="{{ stats.chart_y.y3 }}" r="5" fill="#15803d"/>
+                            <circle cx="490" cy="{{ stats.chart_y.y4 }}" r="5" fill="#15803d"/>
+                            <circle cx="540" cy="{{ stats.chart_y.y4 }}" r="5" fill="#15803d"/>
 
                             <text x="90" y="190" text-anchor="middle" font-size="11.5" fill="#334155" font-weight="600">Thức ăn</text>
                             <text x="230" y="190" text-anchor="middle" font-size="11.5" fill="#334155" font-weight="600">Phụ kiện</text>
@@ -333,15 +345,21 @@
                         </div>
                         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 0;">
                             <svg width="175" height="175" viewBox="0 0 42 42">
-                                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e2e8f0" stroke-width="6"></circle>
-                                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#15803d" stroke-width="6" stroke-dasharray="85 15" stroke-dashoffset="25"></circle>
+                                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#8b5cf6" stroke-width="6"></circle>
+                                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#15803d" stroke-width="6" stroke-dasharray="{{ stats.order_pct }} {{ stats.spa_pct }}" stroke-dashoffset="25"></circle>
                                 <text x="21" y="22.5" text-anchor="middle" font-size="6" font-weight="800" fill="#0f172a">
                                     {{ stats.total_transactions }} GD
                                 </text>
                             </svg>
-                            <div style="font-size:13px; color:#475569; margin-top:8px;">
-                                <span style="display:inline-block; width:10px; height:10px; background:#15803d; border-radius:2px; margin-right:4px;"></span>
-                                Đơn hàng ({{ stats.total_orders }}) &amp; Lịch Spa hoạt động ({{ stats.total_bookings - stats.cancelled_bookings_count }})
+                            <div style="font-size:12.5px; color:#475569; margin-top:8px; line-height:1.6;">
+                                <div>
+                                    <span style="display:inline-block; width:10px; height:10px; background:#15803d; border-radius:2px; margin-right:4px;"></span>
+                                    Đơn hàng: <strong>{{ stats.total_orders }} ({{ stats.order_pct }}%)</strong>
+                                </div>
+                                <div>
+                                    <span style="display:inline-block; width:10px; height:10px; background:#8b5cf6; border-radius:2px; margin-right:4px;"></span>
+                                    Lịch Spa: <strong>{{ stats.total_bookings - stats.cancelled_bookings_count }} ({{ stats.spa_pct }}%)</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1163,17 +1181,21 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
 
                 {% elif admin_tab == 'customers' %}
                 <!-- ==========================================================
-                     TAB 6: KHÁCH HÀNG THÂN THIẾT
+                     TAB 6: KHÁCH HÀNG & TÀI KHOẢN ĐÃ ĐĂNG KÝ
                      ========================================================== -->
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Danh sách Khách hàng ({{ stats.customers_list|length }} khách hàng duy nhất)</h2>
+                        <div>
+                            <h2 class="card-title">👥 Danh sách Tài khoản Thành viên &amp; Khách hàng ({{ stats.customers_list|length }} tài khoản)</h2>
+                            <p class="section-subtitle" style="margin:4px 0 0;">Toàn bộ tài khoản đăng ký đều được lưu trữ bền vững trong CSDL SQLite &amp; JSON Store, không bao giờ mất khi tắt trình duyệt.</p>
+                        </div>
                         <a href="{{ url_for('admin_page', tab='spa_pricing') }}" class="btn btn-primary btn-sm">💎 Chính sách VIP &amp; Gửi Ưu Đãi</a>
                     </div>
                     <div class="table-wrap">
                         <table class="clean-table">
                             <thead>
                                 <tr>
+                                    <th>Tài khoản</th>
                                     <th>Họ tên khách hàng</th>
                                     <th>Số điện thoại</th>
                                     <th>Email</th>
@@ -1186,6 +1208,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                             <tbody>
                                 {% for c in stats.customers_list %}
                                 <tr>
+                                    <td><code style="color:#38bdf8; font-weight:700;">@{{ c.username or 'khach' }}</code></td>
                                     <td><strong>{{ c.name }}</strong></td>
                                     <td><code>{{ c.phone }}</code></td>
                                     <td>{{ c.email or '-' }}</td>
@@ -1320,76 +1343,35 @@ Hẹn gặp lại bạn và bé cưng tại cửa hàng nhé!</textarea>
                     </div>
                 </div>
 
-                <!-- Khung Cấu Hình Máy Chủ Gửi Thư Thật Đến Gmail (Google SMTP) -->
-                <div class="card" style="margin-bottom:22px; border:1px solid rgba(16,185,129,0.35); box-shadow:0 12px 30px rgba(0,0,0,0.35);">
+                <!-- Khung Cấu Hình Duy Nhất 1 Ô Email Của Admin Nhận Thông Báo -->
+                <div class="card" style="margin-bottom:22px; border:1.5px solid rgba(16,185,129,0.45); box-shadow:0 12px 30px rgba(0,0,0,0.4);">
                     <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:14px; margin-bottom:16px;">
                         <div>
-                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                                <h2 class="card-title" style="margin:0;">⚙️ Cấu Hình Máy Chủ Gửi Thư Thật Đến Gmail (Google SMTP)</h2>
-                                {% if smtp_creds.smtp_user and smtp_creds.smtp_pass %}
-                                <span class="badge badge-stock-ok" style="font-size:12px;">🟢 Đã kết nối: {{ smtp_creds.smtp_user }}</span>
-                                {% else %}
-                                <span class="badge badge-stock-low" style="font-size:12px;">🟡 Chế độ Demo (Chưa cấu hình tài khoản gửi Gmail)</span>
-                                {% endif %}
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                <h2 class="card-title" style="margin:0;">📬 Email Của Admin Nhận Thông Báo Đơn Hàng &amp; Lịch Hẹn Spa</h2>
+                                <span class="badge badge-stock-ok" style="font-size:12px;">🟢 Đang nhận thông báo tại: {{ admin_notification_email }}</span>
                             </div>
-                            <p class="section-subtitle" style="margin:4px 0 0;">
-                                Nhập tài khoản Gmail và Mật khẩu ứng dụng 16 số của Google để hệ thống tự động gửi vé Spa &amp; hóa đơn Đơn hàng thẳng vào hộp thư Gmail của khách.
+                            <p class="section-subtitle" style="margin:6px 0 0;">
+                                Chỉ cần điền duy nhất địa chỉ Email của Admin tại đây. Khi khách hàng đặt hàng hoặc đặt lịch Spa, toàn bộ thông tin đơn hàng sẽ được gửi thông báo trực tiếp về Email này của Admin.
                             </p>
                         </div>
                     </div>
 
                     <form method="POST" action="{{ url_for('admin_save_smtp') }}">
-                        <div class="grid-2" style="gap:16px; margin-bottom:14px;">
-                            <div class="form-group" style="margin:0;">
-                                <label class="form-label">Tài khoản Gmail gửi đi (SMTP_USER) *</label>
-                                <input type="email" name="smtp_user" value="{{ smtp_creds.smtp_user }}" class="form-control" placeholder="VD: shopmeowwoof@gmail.com" required>
-                                <div style="font-size:11.5px; color:#94a3b8; margin-top:4px;">Gmail này sẽ đứng tên người gửi (From) trên toàn bộ email gửi đi.</div>
-                            </div>
-
-                            <div class="form-group" style="margin:0;">
-                                <label class="form-label">
-                                    <span>Mật khẩu ứng dụng 16 số của Google (App Password) *</span>
-                                    <a href="https://myaccount.google.com/apppasswords" target="_blank" style="font-size:11.5px; color:#38bdf8; text-decoration:underline;">(Lấy tại đây &rarr;)</a>
-                                </label>
-                                <div style="position:relative;">
-                                    <input type="password" id="smtpPassInput" name="smtp_pass" value="{{ smtp_creds.smtp_pass }}" class="form-control" placeholder="16 chữ cái (VD: abcd efgh ijkl mnop)" required style="padding-right:45px;">
-                                    <button type="button" onclick="const p = document.getElementById('smtpPassInput'); p.type = p.type === 'password' ? 'text' : 'password';" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#cbd5e1; cursor:pointer;">👁️</button>
-                                </div>
-                                <div style="font-size:11.5px; color:#facc15; margin-top:4px;">Lưu ý: Không dùng mật khẩu đăng nhập Gmail thường. Bắt buộc dùng Mật khẩu ứng dụng 16 ký tự của Google.</div>
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="margin-bottom:14px; padding:14px 16px; background:rgba(255,255,255,0.04); border:1px solid rgba(139,92,246,0.35); border-radius:14px;">
-                            <label class="form-label" style="color:#fde047; font-weight:800; display:flex; justify-content:space-between; align-items:center;">
-                                <span>📬 Email Của Admin Nhận Thông Báo Đơn Hàng &amp; Lịch Spa (Có Thể Thay Đổi) *</span>
-                                <span style="font-size:11.5px; color:#34d399; font-weight:700;">🔔 Tự động báo về email này</span>
+                        <div style="padding:18px; background:rgba(255,255,255,0.03); border:1px solid rgba(139,92,246,0.35); border-radius:14px;">
+                            <label class="form-label" style="color:#fde047; font-weight:800; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:14px;">
+                                <span>📧 Địa chỉ Email của Admin nhận thông báo đơn hàng (*)</span>
+                                <span style="font-size:12px; color:#34d399; font-weight:700;">🔔 Tự động gửi thông báo khi khách đặt</span>
                             </label>
-                            <input type="email" name="admin_notification_email" value="{{ admin_notification_email }}" class="form-control" placeholder="VD: admin@meowandwoof.vn hoặc gmail của bạn" required style="font-weight:700; color:#38bdf8;">
-                            <div style="font-size:11.5px; color:#cbd5e1; margin-top:4px;">
-                                Mỗi khi khách đặt lịch Spa hoặc đặt mua đơn hàng trên website, toàn bộ thông tin chi tiết sẽ được tự động gửi về địa chỉ Email này!
-                            </div>
-                        </div>
-
-                        <div class="grid-2" style="gap:16px; margin-bottom:18px;">
-                            <div class="form-group" style="margin:0;">
-                                <label class="form-label">Gửi thư kiểm tra kết nối tới Email:</label>
-                                <input type="email" name="test_recipient" value="{{ smtp_creds.smtp_user }}" class="form-control" placeholder="VD: email_cua_ban@gmail.com">
-                                <div style="font-size:11.5px; color:#94a3b8; margin-top:4px;">Hệ thống sẽ gửi ngay 1 email HTML kiểm tra tới địa chỉ này khi bạn bấm Lưu.</div>
-                            </div>
-
-                            <div class="form-group" style="margin:0; display:flex; align-items:flex-end;">
-                                <button type="submit" class="btn btn-teal btn-block" style="height:44px; font-weight:800; font-size:14px;">
-                                    💾 Lưu Cấu Hình &amp; Kiểm Tra Kết Nối Ngay
+                            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                                <input type="email" name="admin_notification_email" value="{{ admin_notification_email }}" class="form-control" placeholder="VD: admin@gmail.com" required style="flex:1; min-width:260px; font-weight:700; color:#ffffff; font-size:15px; height:46px;">
+                                <button type="submit" class="btn btn-teal" style="height:46px; padding:0 28px; font-weight:800; font-size:14.5px;">
+                                    💾 Lưu Email Admin Ngay
                                 </button>
                             </div>
-                        </div>
-
-                        <!-- Hướng dẫn 3 bước nhanh tạo App Password -->
-                        <div style="background:rgba(15,23,42,0.6); border:1px solid rgba(148,163,184,0.15); border-radius:12px; padding:12px 16px; font-size:12.5px; color:#cbd5e1; line-height:1.6;">
-                            <strong style="color:#ffffff;">📌 Hướng dẫn 3 bước lấy Mật khẩu ứng dụng 16 số của Gmail (chỉ mất 1 phút):</strong><br>
-                            1. Truy cập <a href="https://myaccount.google.com/security" target="_blank" style="color:#38bdf8;">Google Account &rarr; Bảo mật</a>, bật <strong>Xác minh 2 bước</strong> (nếu chưa bật).<br>
-                            2. Vào trang <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#38bdf8;">Mật khẩu ứng dụng (App Passwords)</a> &rarr; Đặt tên ứng dụng là <code>PetShop</code> &rarr; Bấm Tạo.<br>
-                            3. Sao chép <strong>16 ký tự</strong> mà Google cấp (VD: <code>abcd efgh ijkl mnop</code>), dán vào ô Mật khẩu ứng dụng ở trên và bấm <strong>Lưu Cấu Hình</strong>!
+                            <div style="font-size:12px; color:#cbd5e1; margin-top:8px;">
+                                ✓ Mọi đơn mua thú cưng, phụ kiện và lịch hẹn Spa đều tự động gửi thông báo về địa chỉ Email này và lưu bản sao vào Nhật ký bên dưới.
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -1583,6 +1565,129 @@ Hẹn gặp lại bạn và bé cưng tại cửa hàng nhé!</textarea>
                         {% endif %}
                     </div>
                 </div>
+                {% elif admin_tab == 'banking' %}
+                <div class="card" style="margin-bottom:24px;">
+                    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h2 class="card-title">🏦 Cấu Hình Tài Khoản Ngân Hàng &amp; Mã QR Tự Động (VietQR Napas247)</h2>
+                            <p class="section-subtitle">Tùy chỉnh thông tin ngân hàng nhận tiền. Khi khách đặt mua tại Giỏ hàng hoặc hoàn tất đơn, hệ thống sẽ tự động tạo mã QR VietQR chuẩn tương ứng để khách quét thanh toán tức thì.</p>
+                        </div>
+                        <span class="badge badge-both" style="font-size:12px; padding:6px 14px;">⚡ Tự động tính tiền &amp; điền cú pháp</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:24px; margin-top:16px;">
+                        <!-- Form cấu hình ngân hàng -->
+                        <form method="POST" action="{{ url_for('admin_save_banking') }}" style="background:rgba(255,255,255,0.02); padding:20px; border-radius:14px; border:1px solid rgba(255,255,255,0.08);">
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label class="form-label" style="font-weight:700;">Ngân Hàng Thụ Hưởng (*)</label>
+                                <select name="bank_bin" id="adminBankSelect" class="form-control" style="width:100%;" onchange="onAdminBankChange(this)">
+                                    {% for b in supported_banks %}
+                                    <option value="{{ b.bin }}" data-name="{{ b.name }}" data-short="{{ b.short_name }}" {% if b.bin == bank_config.bank_bin %}selected{% endif %}>
+                                        {{ b.short_name }} — {{ b.name }} (Mã BIN: {{ b.bin }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <input type="hidden" name="bank_name" id="adminBankNameInput" value="{{ bank_config.bank_name }}">
+                            </div>
+
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:16px;">
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight:700;">Số Tài Khoản (*)</label>
+                                    <input type="text" name="account_number" id="adminAccNumInput" class="form-control" value="{{ bank_config.account_number }}" placeholder="VD: 0905123456 hoặc 1903..." required oninput="updateAdminQRPreview()">
+                                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Số tài khoản hoặc số điện thoại đăng ký</div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight:700;">Tên Chủ Tài Khoản (In hoa, không dấu) (*)</label>
+                                    <input type="text" name="account_name" id="adminAccNameInput" class="form-control" value="{{ bank_config.account_name }}" placeholder="VD: MEOW AND WOOF PET HOUSE" required oninput="this.value = this.value.toUpperCase(); updateAdminQRPreview();">
+                                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Tên chủ thẻ/tài khoản hiển thị trên mã QR</div>
+                                </div>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:16px;">
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight:700;">Tiền Tố Cú Pháp Chuyển Khoản</label>
+                                    <input type="text" name="syntax_prefix" id="adminSyntaxInput" class="form-control" value="{{ bank_config.syntax_prefix }}" placeholder="VD: MEOW" oninput="this.value = this.value.toUpperCase(); updateAdminQRPreview();">
+                                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Cú pháp tạo: <code>[TIỀN TỐ] [SỐ ĐT KHÁCH]</code></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight:700;">Mẫu Giao Diện VietQR</label>
+                                    <select name="template" id="adminTemplateSelect" class="form-control" onchange="updateAdminQRPreview()">
+                                        <option value="compact2" {% if bank_config.template == 'compact2' %}selected{% endif %}>compact2 (Hiện đại - có khung &amp; logo Napas)</option>
+                                        <option value="compact" {% if bank_config.template == 'compact' %}selected{% endif %}>compact (Gọn gàng viền chuẩn)</option>
+                                        <option value="qr_only" {% if bank_config.template == 'qr_only' %}selected{% endif %}>qr_only (Chỉ mã QR vuông)</option>
+                                        <option value="print" {% if bank_config.template == 'print' %}selected{% endif %}>print (Khổ in hóa đơn)</option>
+                                    </select>
+                                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Giao diện khung ảnh QR gửi cho khách</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:20px;">
+                                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                    <input type="checkbox" name="is_active" value="1" {% if bank_config.is_active %}checked{% endif %} style="width:18px; height:18px; accent-color:#8b5cf6;">
+                                    <span style="font-weight:700; color:#ffffff; font-size:13.5px;">Kích hoạt phương thức quét mã QR VietQR trên trang Giỏ hàng &amp; Thanh toán</span>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="padding:12px 24px; font-weight:800; font-size:14px;">
+                                💾 Lưu Cấu Hình Ngân Hàng Mới
+                            </button>
+                        </form>
+
+                        <!-- Live Preview Thẻ QR phía khách hàng -->
+                        <div style="background:rgba(15,23,42,0.85); padding:20px; border-radius:14px; border:1px solid rgba(139,92,246,0.3); text-align:center;">
+                            <div style="font-size:12px; font-weight:800; color:#a5b4fc; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.5px;">
+                                📱 Xem Trước Trực Quan (Live Preview)
+                            </div>
+                            <div style="background:#ffffff; padding:12px; border-radius:12px; display:inline-block; box-shadow:0 10px 25px rgba(0,0,0,0.6); margin-bottom:12px;">
+                                <img id="adminQrPreviewImg" src="https://api.vietqr.io/image/{{ bank_config.bank_bin }}-{{ bank_config.account_number }}-{{ bank_config.template }}.png?amount=500000&addInfo={{ bank_config.syntax_prefix }}%20DEMO&accountName={{ bank_config.account_name|urlencode }}" alt="Preview VietQR" style="width:190px; height:190px; object-fit:contain; display:block;" onerror="this.onerror=null; this.src='https://quickchart.io/qr?text=DEMO_QR&size=200';">
+                            </div>
+
+                            <div style="font-size:12px; color:#cbd5e1; text-align:left; background:rgba(255,255,255,0.04); padding:12px; border-radius:10px; line-height:1.6;">
+                                <div><span style="color:#94a3b8;">Ngân hàng:</span> <strong id="previewBankNameText" style="color:#ffffff;">{{ bank_config.bank_name }}</strong></div>
+                                <div><span style="color:#94a3b8;">Số TK:</span> <strong id="previewAccNumText" style="color:#fde047;">{{ bank_config.account_number }}</strong></div>
+                                <div><span style="color:#94a3b8;">Chủ TK:</span> <strong id="previewAccNameText" style="color:#ffffff;">{{ bank_config.account_name }}</strong></div>
+                                <div><span style="color:#94a3b8;">Ví dụ nội dung CK:</span> <strong id="previewSyntaxText" style="color:#c4b5fd;">{{ bank_config.syntax_prefix }} 0905123456</strong></div>
+                            </div>
+                            <div style="margin-top:10px; font-size:11px; color:#34d399;">
+                                ✓ Tương thích 100% ứng dụng SmartBanking Vietcombank, Techcombank, MB, VPBank, ACB, BIDV, MoMo, VNPay...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                function onAdminBankChange(sel) {
+                    var opt = sel.options[sel.selectedIndex];
+                    var bankName = opt.getAttribute('data-name') || opt.text;
+                    document.getElementById('adminBankNameInput').value = bankName;
+                    updateAdminQRPreview();
+                }
+
+                function updateAdminQRPreview() {
+                    var sel = document.getElementById('adminBankSelect');
+                    var bin = sel ? sel.value : '{{ bank_config.bank_bin }}';
+                    var opt = sel ? sel.options[sel.selectedIndex] : null;
+                    var bName = opt ? (opt.getAttribute('data-name') || opt.text) : '{{ bank_config.bank_name }}';
+                    var accNum = (document.getElementById('adminAccNumInput') ? document.getElementById('adminAccNumInput').value.trim() : '') || '0905123456';
+                    var accName = (document.getElementById('adminAccNameInput') ? document.getElementById('adminAccNameInput').value.trim() : '') || 'MEOW AND WOOF';
+                    var syntax = (document.getElementById('adminSyntaxInput') ? document.getElementById('adminSyntaxInput').value.trim() : '') || 'MEOW';
+                    var tplEl = document.getElementById('adminTemplateSelect');
+                    var template = tplEl ? tplEl.value : 'compact2';
+
+                    var qrImg = document.getElementById('adminQrPreviewImg');
+                    if (qrImg) {
+                        qrImg.src = 'https://api.vietqr.io/image/' + bin + '-' + accNum + '-' + template + '.png?amount=500000&addInfo=' + encodeURIComponent(syntax + ' DEMO') + '&accountName=' + encodeURIComponent(accName);
+                    }
+                    var pBank = document.getElementById('previewBankNameText');
+                    if (pBank) pBank.textContent = bName;
+                    var pNum = document.getElementById('previewAccNumText');
+                    if (pNum) pNum.textContent = accNum;
+                    var pName = document.getElementById('previewAccNameText');
+                    if (pName) pName.textContent = accName;
+                    var pSyn = document.getElementById('previewSyntaxText');
+                    if (pSyn) pSyn.textContent = syntax + ' 0905123456';
+                }
+                </script>
                 {% endif %}
             </main>
         </div>

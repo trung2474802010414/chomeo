@@ -1,0 +1,9 @@
+{
+  "bank_bin": "970422",
+  "bank_name": "MB Bank (Ngân hàng Quân Đội)",
+  "account_number": "0905123456",
+  "account_name": "MEOW AND WOOF PET HOUSE",
+  "syntax_prefix": "MEOW",
+  "template": "compact2",
+  "is_active": true
+}

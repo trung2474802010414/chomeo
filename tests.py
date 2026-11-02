@@ -243,6 +243,29 @@ class TestAdvancedPythonPetShop(unittest.TestCase):
         self.assertIn("category", bad_form.errors)
         self.assertIn("breed", bad_form.errors)
 
+    def test_search_pets_by_price_api(self) -> None:
+        """Kiểm tra API tìm kiếm thú cưng theo mức giá (GET /api/pets) tuân thủ api-design.md."""
+        # 1. Tìm chó mèo trong tầm giá từ 4.000.000 đến 6.000.000 VNĐ
+        resp = self.client.get("/api/pets?min_price=4000000&max_price=6000000")
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.get_json()
+        self.assertTrue(json_data.get("success"))
+        self.assertEqual(json_data.get("code"), 200)
+        self.assertIn("data", json_data)
+        items = json_data["data"]["items"]
+        self.assertGreater(len(items), 0)
+        for pet in items:
+            self.assertIn(pet["category"], ["Chó cảnh", "Mèo cảnh"])
+            self.assertGreaterEqual(pet["price"], 4000000)
+            self.assertLessEqual(pet["price"], 6000000)
+
+        # 2. Kiểm tra validation khi min_price > max_price (phải trả về lỗi 400)
+        bad_resp = self.client.get("/api/pets?min_price=9000000&max_price=4000000")
+        self.assertEqual(bad_resp.status_code, 400)
+        bad_json = bad_resp.get_json()
+        self.assertFalse(bad_json.get("success"))
+        self.assertEqual(bad_json.get("code"), 400)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

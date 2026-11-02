@@ -58,7 +58,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ url_for('login_page') }}" id="loginForm" novalidate>
+            <form method="POST" action="{{ url_for('login_page') }}" id="loginForm" autocomplete="off" novalidate>
                 <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}">
                 <input type="hidden" name="next" value="{{ next_url }}">
                 <input type="hidden" name="auth_action" value="login">
@@ -70,7 +70,8 @@
                         type="text"
                         id="loginUsername"
                         name="username"
-                        value="{{ form.raw_data.get('username', '') }}"
+                        autocomplete="off"
+                        value=""
                         class="form-control"
                         placeholder="Nhập 'admin' hoặc tên tài khoản / email của bạn"
                         required
@@ -288,9 +289,13 @@ async function computeSha256Hex(str) {
     return '';
 }
 
-// Lưu thông tin người dùng vào localStorage khi đăng ký thành công
+// Lưu thông tin người dùng vào kho lưu trữ trình duyệt (localStorage) vĩnh viễn khi đăng ký
 async function handleRegisterSubmit(event) {
     const form = document.getElementById('registerForm');
+    if (form.dataset.submitting === 'true') {
+        return true;
+    }
+    event.preventDefault();
     const fullname = form.reg_fullname.value.trim();
     const username = form.reg_username.value.trim();
     const email = form.reg_email.value.trim();
@@ -305,16 +310,29 @@ async function handleRegisterSubmit(event) {
             fullname: fullname,
             email: email,
             phone: phone,
-            password_hash: hash
+            password_hash: hash,
+            role: 'customer'
         };
         try {
             localStorage.setItem('petshop_user_backup', JSON.stringify(userData));
-            localStorage.setItem('petshop_last_username', username);
+            let vault = [];
+            try {
+                const rawVault = localStorage.getItem('petshop_users_vault');
+                if (rawVault) {
+                    const parsed = JSON.parse(rawVault);
+                    if (Array.isArray(parsed)) vault = parsed;
+                }
+            } catch (err) {}
+            vault = vault.filter(u => u && u.username !== username && u.email !== email);
+            vault.push(userData);
+            localStorage.setItem('petshop_users_vault', JSON.stringify(vault));
         } catch (e) {
             console.error('Không thể lưu vào localStorage:', e);
         }
     }
-    return true;
+    form.dataset.submitting = 'true';
+    form.submit();
+    return false;
 }
 
 function applyRememberedUser() {
@@ -336,25 +354,22 @@ function applyRememberedUser() {
     }
 }
 
-// Khôi phục tự động tài khoản đã lưu khi mở lại trình duyệt
+// Đồng bộ kho tài khoản đã lưu trên thiết bị với Server mà KHÔNG tự động điền đè vào ô nhập
 document.addEventListener('DOMContentLoaded', function() {
     try {
-        const raw = localStorage.getItem('petshop_user_backup');
-        if (raw) {
-            const clientBackupInp = document.getElementById('clientUserBackup');
-            if (clientBackupInp) {
-                clientBackupInp.value = raw;
-            }
-            const data = JSON.parse(raw);
+        const rawVault = localStorage.getItem('petshop_users_vault');
+        const rawSingle = localStorage.getItem('petshop_user_backup');
+        const clientBackupInp = document.getElementById('clientUserBackup');
+        if (clientBackupInp) {
+            clientBackupInp.value = rawVault || rawSingle || '';
+        }
+        if (rawSingle) {
+            const data = JSON.parse(rawSingle);
             const box = document.getElementById('rememberedUserBox');
             const nameEl = document.getElementById('rememberedName');
             if (box && nameEl && data.fullname) {
                 nameEl.textContent = data.fullname + ' (@' + (data.username || '') + ')';
                 box.style.display = 'block';
-            }
-            const userInp = document.getElementById('loginUsername');
-            if (userInp && !userInp.value && data.username) {
-                userInp.value = data.username;
             }
         }
     } catch (e) {

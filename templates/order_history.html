@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Tra Cứu &amp; Lịch Sử Mua Hàng - Meow &amp; Woof Pet House{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom:24px;">
+    <div>
+        <h1 class="section-title">📋 Tra Cứu &amp; Lịch Sử Mua Hàng / Đặt Lịch Spa</h1>
+        <p class="section-subtitle">
+            Nhập số điện thoại đặt hàng để xem lại toàn bộ các đơn mua sắm, trạng thái xử lý và các lịch hẹn Spa của bạn
+        </p>
+    </div>
+    <a href="{{ url_for('shop_page') }}" class="btn btn-outline">&larr; Tiếp tục mua sắm</a>
+</div>
+
+<!-- Thanh tra cứu bằng Số điện thoại -->
+<div class="card" style="margin-bottom:28px; padding:20px 24px; border:1px solid rgba(139,92,246,0.4); background:linear-gradient(135deg, rgba(30,27,75,0.7) 0%, rgba(15,23,42,0.85) 100%);">
+    <form method="GET" action="{{ url_for('order_history_page') }}" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <div style="flex:1; min-width:260px;">
+            <label class="form-label" style="color:#ffffff; font-weight:700; margin-bottom:6px;">
+                📞 Nhập Số điện thoại của bạn:
+            </label>
+            <input
+                type="tel"
+                name="phone"
+                value="{{ phone }}"
+                pattern="^0[0-9]{8,10}$"
+                minlength="9"
+                maxlength="11"
+                class="form-control"
+                placeholder="VD: 0905123456 (hoặc SĐT bạn đã dùng khi đặt hàng)"
+                required
+                style="height:46px; font-size:15px;"
+            >
+        </div>
+        <div style="margin-top:24px;">
+            <button type="submit" class="btn btn-teal" style="height:46px; padding:0 28px; font-weight:800; font-size:15px;">
+                🔍 Tra Cứu Ngay
+            </button>
+        </div>
+    </form>
+</div>
+
+{% if phone %}
+    <!-- Tóm tắt hoạt động của khách hàng -->
+    <div class="stats-row" style="margin-bottom:28px;">
+        <div class="stat-card" style="background:rgba(18,14,40,0.7); border:1px solid rgba(139,92,246,0.3); border-radius:16px; padding:18px;">
+            <div style="font-size:12px; color:#c4b5fd; text-transform:uppercase; font-weight:700;">Số Đơn Mua Hàng</div>
+            <div style="font-size:26px; font-weight:900; color:#38bdf8; margin-top:4px;">{{ orders|length }} đơn</div>
+        </div>
+        <div class="stat-card" style="background:rgba(18,14,40,0.7); border:1px solid rgba(139,92,246,0.3); border-radius:16px; padding:18px;">
+            <div style="font-size:12px; color:#c4b5fd; text-transform:uppercase; font-weight:700;">Lịch Hẹn Spa &amp; Khám</div>
+            <div style="font-size:26px; font-weight:900; color:#a78bfa; margin-top:4px;">{{ bookings|length }} lịch</div>
+        </div>
+        <div class="stat-card" style="background:rgba(18,14,40,0.7); border:1px solid rgba(139,92,246,0.3); border-radius:16px; padding:18px;">
+            <div style="font-size:12px; color:#c4b5fd; text-transform:uppercase; font-weight:700;">Tổng Tích Lũy Chi Tiêu</div>
+            <div style="font-size:26px; font-weight:900; color:#34d399; margin-top:4px;">
+                {{ "{:,.0f}".format(total_spent) }} đ
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-2" style="align-items:start; gap:24px;">
+        <!-- CỘT 1: LỊCH SỬ ĐƠN HÀNG MUA SẮM -->
+        <div>
+            <div class="card" style="margin-bottom:0;">
+                <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:16px;">
+                    <div>
+                        <h2 class="card-title" style="color:#ffffff; font-size:18px;">📦 Đơn Mua Hàng ({{ orders|length }})</h2>
+                        <p class="section-subtitle" style="margin:2px 0 0;">Danh sách thú cưng và phụ kiện bạn đã đặt mua</p>
+                    </div>
+                </div>
+
+                {% if orders %}
+                    {% for o in orders %}
+                    <div style="background:rgba(15,23,42,0.8); border:1px solid rgba(139,92,246,0.25); border-radius:16px; padding:18px; margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:12px;">
+                            <div>
+                                <strong style="color:#ffffff; font-size:16px;">Đơn hàng #DH{{ o.id }}</strong>
+                                <div style="font-size:12px; color:#94a3b8; margin-top:2px;">⏰ {{ o.created_at }}</div>
+                            </div>
+                            <span class="badge badge-stock-ok" style="font-size:12px;">Đã tiếp nhận</span>
+                        </div>
+
+                        <div style="font-size:13px; color:#cbd5e1; margin-bottom:10px;">
+                            <div>👤 Người nhận: <strong style="color:#ffffff;">{{ o.customer_name }}</strong> (<code>{{ o.phone }}</code>)</div>
+                            <div style="margin-top:2px;">📍 Giao đến: {{ o.address }}</div>
+                        </div>
+
+                        <!-- Danh sách mặt hàng trong đơn -->
+                        <div style="background:rgba(0,0,0,0.3); border-radius:10px; padding:10px 12px; margin-bottom:12px;">
+                            <div style="font-size:11.5px; color:#94a3b8; text-transform:uppercase; margin-bottom:6px; font-weight:700;">Các mặt hàng:</div>
+                            {% for it in o['items'] %}
+                            <div style="display:flex; justify-content:space-between; font-size:13px; color:#e2e8f0; padding:3px 0;">
+                                <span>&bull; {{ it.name }} &times; <strong>{{ it.quantity }}</strong></span>
+                                <span style="color:#34d399; font-weight:700;">{{ "{:,.0f}".format(it.subtotal) }} đ</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:13px; color:#cbd5e1;">Tổng thanh toán:</span>
+                            <strong style="font-size:18px; color:#34d399;">{{ "{:,.0f}".format(o.total_amount) }} đ</strong>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center; padding:36px 16px; color:#94a3b8;">
+                        <div style="font-size:36px; margin-bottom:8px;">📦</div>
+                        <p style="margin:0 0 12px; font-size:14px;">Chưa có đơn mua hàng nào với số điện thoại này.</p>
+                        <a href="{{ url_for('shop_page') }}" class="btn btn-primary btn-sm">🐾 Khám phá cửa hàng</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- CỘT 2: LỊCH SỬ ĐẶT LỊCH SPA -->
+        <div>
+            <div class="card" style="margin-bottom:0;">
+                <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:16px;">
+                    <div>
+                        <h2 class="card-title" style="color:#ffffff; font-size:18px;">🛁 Lịch Hẹn Spa &amp; Khám ({{ bookings|length }})</h2>
+                        <p class="section-subtitle" style="margin:2px 0 0;">Danh sách lịch chăm sóc, tắm sấy và cắt tỉa cho Boss</p>
+                    </div>
+                </div>
+
+                {% if bookings %}
+                    {% for b in bookings %}
+                    <div style="background:rgba(15,23,42,0.8); border:1px solid rgba(139,92,246,0.25); border-radius:16px; padding:18px; margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:12px;">
+                            <div>
+                                <strong style="color:#ffffff; font-size:16px;">Lịch Spa #SPA{{ b.id }}</strong>
+                                <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Ngày đặt: {{ b.created_at[:10] }}</div>
+                            </div>
+                            <span class="badge {% if b.status == 'Đã hoàn tất' %}badge-stock-ok{% elif b.status == 'Đã hủy' %}badge-stock-low{% else %}badge-both{% endif %}" style="font-size:12px;">
+                                {{ b.status }}
+                            </span>
+                        </div>
+
+                        <div style="font-size:13.5px; color:#cbd5e1; line-height:1.6;">
+                            <div>🐾 Bé cưng: <strong style="color:#fde047;">{{ b.pet_name }}</strong> ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)</div>
+                            <div>✨ Gói dịch vụ: <strong style="color:#c4b5fd;">{{ b.service_name }}</strong></div>
+                            <div style="color:#6ee7b7; font-weight:700; margin-top:2px;">
+                                📅 Ngày hẹn: {{ b.appointment_date }} lúc ⏰ {{ b.appointment_time }}
+                            </div>
+                            {% if b.note %}
+                            <div style="font-size:12px; color:#94a3b8; margin-top:4px;">📝 Dặn dò: <em>{{ b.note }}</em></div>
+                            {% endif %}
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px;">
+                            <span style="font-size:13px; color:#cbd5e1;">Chi phí dịch vụ:</span>
+                            <strong style="font-size:18px; color:#34d399;">{{ "{:,.0f}".format(b.total_price) }} đ</strong>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center; padding:36px 16px; color:#94a3b8;">
+                        <div style="font-size:36px; margin-bottom:8px;">🛁</div>
+                        <p style="margin:0 0 12px; font-size:14px;">Chưa có lịch hẹn Spa nào với số điện thoại này.</p>
+                        <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-sm">✨ Đặt lịch Spa ngay</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% else %}
+    <!-- Khi khách chưa nhập số điện thoại -->
+    <div class="card text-center" style="padding:48px 20px; border:1px dashed rgba(255,255,255,0.15);">
+        <div style="font-size:52px; margin-bottom:14px;">🔍</div>
+        <h3 style="font-size:20px; color:#ffffff; margin-bottom:8px;">Bạn muốn kiểm tra đơn hàng hoặc lịch hẹn nào?</h3>
+        <p style="color:#cbd5e1; max-width:560px; margin:0 auto 20px; font-size:14.5px;">
+            Hãy nhập số điện thoại bạn đã dùng khi đặt hàng hoặc đặt lịch Spa ở ô tra cứu bên trên để hệ thống hiển thị toàn bộ lịch sử mua hàng nhé!
+        </p>
+        <div style="display:flex; justify-content:center; gap:12px;">
+            <a href="{{ url_for('shop_page') }}" class="btn btn-primary">🐾 Khám phá Cửa hàng</a>
+            <a href="{{ url_for('spa_page') }}" class="btn btn-teal">✨ Đặt lịch Spa</a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+

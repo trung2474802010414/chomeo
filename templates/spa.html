@@ -3,6 +3,58 @@
 {% block title %}Đặt lịch Spa &amp; Grooming 5 Sao - Meow &amp; Woof Pet House{% endblock %}
 
 {% block content %}
+<!-- THÔNG BÁO VÉ SPA XÁC NHẬN NỔI BẬT DỄ NHÌN (KHI KHÁCH VỪA ĐẶT THÀNH CÔNG) -->
+{% if booking_success %}
+<div class="card" style="margin-bottom:24px; padding:24px; border:2px solid #10b981; background:linear-gradient(135deg, rgba(16,185,129,0.2) 0%, rgba(30,27,75,0.95) 100%); box-shadow:0 16px 40px rgba(16,185,129,0.3); border-radius:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="font-size:36px;">🎟️</div>
+            <div>
+                <span class="badge badge-stock-ok" style="font-size:12px; font-weight:800;">✓ ĐẶT LỊCH SPA THÀNH CÔNG</span>
+                <h2 style="font-size:22px; color:#ffffff; margin:4px 0 0;">Mã Phiếu Hẹn: #SPA{{ booking_success.id }}</h2>
+            </div>
+        </div>
+        <div style="text-align:right;">
+            <span style="font-size:12px; color:#cbd5e1;">Tổng chi phí dịch vụ:</span>
+            <div style="font-size:24px; font-weight:900; color:#34d399;">{{ "{:,.0f}".format(booking_success.total_price) }} đ</div>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; font-size:13.5px; color:#e2e8f0; margin-bottom:20px;">
+        <div style="background:rgba(0,0,0,0.28); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="color:#94a3b8; font-size:11.5px; text-transform:uppercase;">Dịch vụ đã chọn:</div>
+            <strong style="color:#ffffff; font-size:15px;">{{ booking_success.service_name }}</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.28); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="color:#94a3b8; font-size:11.5px; text-transform:uppercase;">Bé cưng:</div>
+            <strong style="color:#fde047; font-size:15px;">{{ booking_success.pet_name }}</strong> ({{ booking_success.pet_type }}, {{ booking_success.pet_weight_kg }}kg)
+        </div>
+        <div style="background:rgba(0,0,0,0.28); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="color:#94a3b8; font-size:11.5px; text-transform:uppercase;">Thời gian hẹn:</div>
+            <strong style="color:#6ee7b7; font-size:15px;">📅 {{ booking_success.appointment_date }} ⏰ {{ booking_success.appointment_time }}</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.28); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="color:#94a3b8; font-size:11.5px; text-transform:uppercase;">Khách hàng &amp; SĐT:</div>
+            <strong style="color:#ffffff;">{{ booking_success.customer_name }}</strong> (<code>{{ booking_success.phone }}</code>)
+        </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-top:1px dashed rgba(255,255,255,0.15); padding-top:16px;">
+        <div style="font-size:12.5px; color:#cbd5e1;">
+            ✉️ Trạng thái: Vé điện tử đã gửi tới {% if booking_success.email %}<strong>{{ booking_success.email }}</strong>{% else %}hộp thư hệ thống{% endif %}.
+        </div>
+        <div style="display:flex; gap:10px;">
+            <a href="{{ url_for('order_history_page', phone=booking_success.phone) }}" class="btn btn-teal" style="font-weight:800; padding:10px 20px;">
+                📋 Xem Toàn Bộ Lịch Sử Hẹn &amp; Mua Hàng &rarr;
+            </a>
+            <a href="{{ url_for('spa_page') }}" class="btn btn-outline" style="padding:10px 16px;">
+                + Đặt thêm lịch khác
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Banner Giới Thiệu Dịch Vụ Spa 5 Sao Chuẩn Hoàng Gia -->
 <div class="spa-hero-banner">
     <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:99px; background:rgba(139,92,246,0.18); border:1px solid rgba(139,92,246,0.35); font-size:12.5px; font-weight:800; color:#c4b5fd; margin-bottom:12px;">

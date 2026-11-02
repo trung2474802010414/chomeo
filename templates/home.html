@@ -384,15 +384,18 @@ function filterHomeProducts(cat, btnEl) {
 </script>
 
 <!-- TRA CỨU NHANH ĐƠN HÀNG & LỊCH HẸN -->
-<section class="card">
-    <div class="card-header">
+<section class="card" id="lookupSection">
+    <div class="card-header" style="flex-wrap:wrap; gap:12px;">
         <div>
             <h2 class="card-title">Tra cứu nhanh Đơn hàng &amp; Lịch hẹn Spa</h2>
             <p class="section-subtitle">Nhập số điện thoại bạn đã đăng ký để kiểm tra trạng thái đơn mua hàng hoặc lịch hẹn Spa (Thử SĐT mẫu: <code>0905123456</code>)</p>
         </div>
+        <a href="{{ url_for('order_history_page') }}" class="btn btn-teal btn-sm" style="font-weight:700;">
+            📋 Xem Trang Lịch Sử Mua Hàng Đầy Đủ &rarr;
+        </a>
     </div>
 
-    <form method="GET" action="{{ url_for('home_page') }}" style="display:flex; gap:12px; max-width:520px; margin-bottom:16px;">
+    <form method="GET" action="{{ url_for('home_page') }}#lookupSection" style="display:flex; gap:12px; max-width:520px; margin-bottom:16px;">
         <input type="tel" name="lookup_phone" value="{{ lookup_phone }}" pattern="^0[0-9]{8,10}$" minlength="9" maxlength="11" title="Số điện thoại bắt đầu bằng số 0 và gồm 9-11 chữ số" class="form-control" placeholder="Nhập số điện thoại của bạn (VD: 0905123456)..." required>
         <button type="submit" class="btn btn-teal">Tra cứu</button>
     </form>

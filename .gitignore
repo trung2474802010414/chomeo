@@ -1,0 +1,48 @@
+# ==============================================================================
+# .gitignore - Meow & Woof Pet Shop Project
+# Tuân thủ quy chuẩn bảo mật theo .claude/rules/hooks/precomit.md & AGENT.MD
+# ==============================================================================
+
+# 1. Môi trường & Biến nhạy cảm (Environment & Secrets)
+.env
+.env.*
+!.env.example
+data/smtp_config.json
+
+# 2. Cơ sở dữ liệu SQLite cục bộ (Database)
+*.db
+*.sqlite
+*.sqlite3
+petshop.db
+data/*.db
+
+# 3. Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# 4. Môi trường ảo (Virtual Environments)
+venv/
+.venv/
+env/
+ENV/
+
+# 5. IDE & Editor Config
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# 6. Build, Node & Deployment artifacts
+node_modules/
+dist/
+build/
+.vercel/
+*.log
+

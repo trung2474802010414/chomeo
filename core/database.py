@@ -15,13 +15,24 @@ def _resolve_db_path() -> str:
     """
     Tự động chọn đường dẫn lưu file SQLite:
     - Khi chạy trên máy cá nhân (Local): lưu tại `petshop/petshop.db`.
-    - Khi deploy lên môi trường Serverless như Vercel (chỉ cho phép ghi trong `/tmp`):
-      tự động lưu tại `/tmp/petshop.db` để không bị lỗi Read-Only Filesystem.
+    - Khi deploy lên môi trường Serverless như Vercel (chỉ cho phép ghi trong `/tmp`)
+      hoặc khi thư mục hiện tại bị khóa quyền ghi (read-only):
+      tự động fallback sang thư mục tạm hệ thống để không bao giờ bị lỗi OperationalError.
     """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if os.environ.get("VERCEL") or not os.access(base_dir, os.W_OK):
+    target_path = os.path.join(base_dir, "petshop.db")
+    if os.environ.get("VERCEL"):
         return os.path.join(tempfile.gettempdir(), "petshop.db")
-    return os.path.join(base_dir, "petshop.db")
+
+    try:
+        if not os.access(base_dir, os.W_OK):
+            return os.path.join(tempfile.gettempdir(), "petshop.db")
+        test_conn = sqlite3.connect(target_path)
+        test_conn.execute("CREATE TABLE IF NOT EXISTS _perm_check (id INT)")
+        test_conn.close()
+        return target_path
+    except Exception:
+        return os.path.join(tempfile.gettempdir(), "petshop.db")
 
 
 DB_PATH = _resolve_db_path()

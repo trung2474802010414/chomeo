@@ -1,0 +1,20 @@
+[
+  {
+    "username": "khachhang",
+    "fullname": "Nguyễn Minh Anh",
+    "email": "minhanh@gmail.com",
+    "phone": "0905123456",
+    "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "role": "customer",
+    "created_at": "2026-11-02 14:37:31"
+  },
+  {
+    "username": "petlover",
+    "fullname": "Trần Thu Hà",
+    "email": "thuha@gmail.com",
+    "phone": "0908888999",
+    "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "role": "customer",
+    "created_at": "2026-11-02 14:37:31"
+  }
+]

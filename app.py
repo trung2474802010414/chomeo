@@ -68,6 +68,8 @@ from services.petshop_service import (
     init_db_and_seed,
     query_products,
 )
+from services.pet_service import search_pets_by_price
+from services.bank_service import SUPPORTED_BANKS, get_bank_config, save_bank_config
 
 # Tự động nhận diện thư mục chứa template ('templates' hoặc 'html')
 _TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
@@ -80,16 +82,77 @@ app = Flask(
     static_folder=os.path.join(BASE_DIR, "static"),
 )
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "meow-woof-petshop-secret-2026")
-# Duy trì phiên đăng nhập 30 ngày kể cả khi tắt và mở lại trình duyệt
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+# Duy trì phiên đăng nhập và tài khoản 365 ngày kể cả khi tắt và mở lại trình duyệt
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=365)
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = False
 
 # Tự động khởi tạo bảng và dữ liệu mẫu ngay khi Vercel WSGI import `app`
 init_db_and_seed()
+User.sync_from_json_store()
 
 # Giữ bộ Router Decorator phục vụ REST API & Unit Test
 router = Router()
+
+
+def _read_cookie_accounts_vault() -> List[Dict[str, str]]:
+    """Đọc danh sách tài khoản đã đăng ký lưu trong Cookie bền vững 365 ngày."""
+    raw = request.cookies.get("mw_users_vault", "")
+    if not raw:
+        return []
+    try:
+        import urllib.parse
+
+        decoded = urllib.parse.unquote(raw)
+        data = json.loads(decoded)
+        if isinstance(data, list):
+            return [x for x in data if isinstance(x, dict)]
+    except Exception:
+        pass
+    return []
+
+
+def _attach_account_to_vault_cookie(resp: Response, user_obj: User) -> Response:
+    """Lưu tài khoản vào Cookie bền vững 365 ngày để tắt web mở lại không bao giờ mất."""
+    try:
+        import urllib.parse
+
+        vault = _read_cookie_accounts_vault()
+        u_lower = user_obj.username.strip().lower()
+        entry = {
+            "username": user_obj.username,
+            "fullname": user_obj.fullname,
+            "email": user_obj.email,
+            "phone": user_obj.phone,
+            "password_hash": user_obj.password_hash,
+            "role": user_obj.role,
+            "created_at": user_obj.created_at,
+        }
+        vault = [x for x in vault if str(x.get("username", "")).strip().lower() != u_lower]
+        vault.append(entry)
+        vault = vault[-10:]
+        encoded = urllib.parse.quote(json.dumps(vault, ensure_ascii=False))
+        resp.set_cookie(
+            "mw_users_vault",
+            encoded,
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+    except Exception:
+        pass
+    return resp
+
+
+@app.before_request
+def restore_persistent_accounts_before_request() -> None:
+    """Tự động đồng bộ tài khoản từ JSON & Cookie trước mỗi request để không bao giờ mất dữ liệu."""
+    vault = _read_cookie_accounts_vault()
+    cur_backup = session.get("current_user_backup")
+    if isinstance(cur_backup, dict):
+        vault.append(cur_backup)
+    if vault:
+        User.restore_accounts_list(vault)
 
 
 # ============================================================================
@@ -97,7 +160,9 @@ router = Router()
 # ============================================================================
 
 def get_session_cart() -> Dict[str, int]:
-    """Lấy giỏ hàng dạng {product_id_str: quantity} từ Flask session."""
+    """Lấy giỏ hàng từ Flask session (chỉ trả về giỏ hàng của tài khoản đang đăng nhập)."""
+    if not session.get("customer_logged_in") and not session.get("admin_logged_in"):
+        return {}
     cart = session.get("cart")
     if not isinstance(cart, dict):
         cart = {}
@@ -316,6 +381,12 @@ def spa_page():
     """Trang Đặt lịch Spa & Khám thú cưng: Xử lý Form Validation + gửi Email xác nhận."""
     form = SpaBookingForm()
     default_date = datetime.now().strftime("%Y-%m-%d")
+    booking_id = request.args.get("booking_id", "").strip()
+    booking_success = None
+    if booking_id.isdigit():
+        b_obj = SpaBooking.get_by_id(int(booking_id))
+        if b_obj:
+            booking_success = b_obj.to_dict()
 
     if request.method == "POST":
         if form.validate_on_submit():
@@ -343,7 +414,7 @@ def spa_page():
                 f"(Chi phí: {fee:,.0f} đ). Trạng thái Email: {email_info['delivery_status']}.",
                 "success",
             )
-            return redirect(url_for("spa_page"))
+            return redirect(url_for("spa_page", booking_id=booking.id))
         else:
             flash("Vui lòng kiểm tra lại các thông tin báo đỏ trên biểu mẫu.", "error")
 
@@ -353,16 +424,26 @@ def spa_page():
         form=form,
         spa_services=SPA_SERVICES,
         default_date=default_date,
+        booking_success=booking_success,
     )
 
 
 @app.route("/cart", methods=["GET", "POST"])
 def cart_page():
-    """Trang Giỏ hàng & Thanh toán: Đặt hàng theo Transaction và gửi Email hóa đơn."""
+    """Trang Giỏ hàng & Thanh toán: Bắt buộc đăng nhập tài khoản, Đặt hàng theo Transaction và gửi Email về Admin."""
+    is_logged_in = bool(session.get("customer_logged_in") or session.get("admin_logged_in"))
+    if not is_logged_in:
+        # Không lưu lại giỏ hàng từ các thao tác trước khi chưa đăng nhập
+        session.pop("cart", None)
+
     cart_items, cart_total, _ = build_cart_view_data()
     form = CheckoutForm()
 
     if request.method == "POST":
+        if not is_logged_in:
+            flash("⚠️ Bắt buộc phải có tài khoản! Vui lòng đăng nhập hoặc đăng ký thành viên trước khi đặt hàng.", "error")
+            return redirect(url_for("login_page", next=url_for("cart_page")))
+
         if not cart_items:
             flash("Giỏ hàng đang trống, vui lòng chọn sản phẩm trước khi thanh toán.", "error")
             return redirect(url_for("shop_page"))
@@ -381,22 +462,18 @@ def cart_page():
                         ],
                     }
                 )
+                payment_method = form.data.get("payment_method", "cod")
+                session["last_payment_method"] = payment_method
+                # Xóa sạch toàn bộ dữ liệu giỏ hàng & thao tác đặt hàng trước đó
                 session["cart"] = {}
                 session.modified = True
-                target_email = order_dict.get("email")
-                if target_email:
-                    flash(
-                        f"🎉 Đặt hàng thành công! Mã đơn hàng #{order_dict['id']} — "
-                        f"Tổng thanh toán: {order_dict['total_amount']:,.0f} đ. Đã gửi Email xác nhận đơn hàng tới '{target_email}'!",
-                        "success",
-                    )
-                else:
-                    flash(
-                        f"Đặt hàng thành công! Mã đơn hàng #{order_dict['id']} — "
-                        f"Tổng thanh toán: {order_dict['total_amount']:,.0f} đ.",
-                        "success",
-                    )
-                return redirect(url_for("home_page", lookup_phone=order_dict["phone"]))
+                admin_email = get_smtp_config().get("admin_notification_email", "boss_admin@gmail.com")
+                flash(
+                    f"🎉 Đặt hàng thành công! Mã đơn hàng #{order_dict['id']} — "
+                    f"Tổng thanh toán: {order_dict['total_amount']:,.0f} đ. Đã gửi thông báo đơn hàng về hộp thư Admin ({admin_email})!",
+                    "success",
+                )
+                return redirect(url_for("order_success_page", order_id=order_dict["id"]))
             except ValidationError as exc:
                 flash(str(exc), "error")
         else:
@@ -408,12 +485,66 @@ def cart_page():
         cart_items=cart_items,
         cart_total=cart_total,
         form=form,
+        bank_config=get_bank_config(),
+    )
+
+
+@app.route("/order-success/<int:order_id>")
+def order_success_page(order_id: int):
+    """Trang xác nhận đặt hàng thành công: Xem chi tiết đơn hàng, QR thanh toán và link lịch sử mua."""
+    order_obj = Order.get_by_id(order_id)
+    if not order_obj:
+        flash(f"Không tìm thấy đơn hàng mã #{order_id}.", "error")
+        return redirect(url_for("shop_page"))
+    payment_method = session.get("last_payment_method", "cod")
+    order_dict = order_obj.to_dict()
+    return render_template(
+        "order_success.html",
+        active_page="cart",
+        order=order_dict,
+        order_items=order_dict.get("items", []),
+        payment_method=payment_method,
+        bank_config=get_bank_config(),
+    )
+
+
+@app.route("/orders/history")
+@app.route("/my-orders")
+def order_history_page():
+    """Trang Tra cứu & Xem Lịch sử Mua hàng và Lịch hẹn Spa của khách hàng."""
+    phone = request.args.get("phone", "").strip()
+    if not phone and session.get("customer_logged_in"):
+        phone = session.get("customer_phone", "").strip()
+
+    orders: List[Dict[str, Any]] = []
+    bookings: List[Dict[str, Any]] = []
+    total_spent = 0.0
+
+    if phone:
+        orders = [o.to_dict() for o in Order.filter_stream(lambda item: phone in item.phone)]
+        bookings = [b.to_dict() for b in SpaBooking.filter_stream(lambda item: phone in item.phone)]
+        total_spent = sum(o.get("total_amount", 0) for o in orders) + sum(
+            b.get("total_price", 0) for b in bookings if b.get("status") != "Đã hủy"
+        )
+
+    return render_template(
+        "order_history.html",
+        active_page="orders",
+        phone=phone,
+        orders=orders,
+        bookings=bookings,
+        total_spent=total_spent,
     )
 
 
 @app.route("/cart/add", methods=["POST"])
 def add_to_cart_route():
-    """Thêm 1 sản phẩm vào giỏ hàng trong session."""
+    """Thêm 1 sản phẩm vào giỏ hàng trong session (Bắt buộc đăng nhập tài khoản trước)."""
+    if not session.get("customer_logged_in") and not session.get("admin_logged_in"):
+        session.pop("cart", None)
+        flash("⚠️ Vui lòng đăng nhập hoặc tạo tài khoản thành viên trước khi thêm sản phẩm vào giỏ & đặt hàng!", "error")
+        return redirect(url_for("login_page", next=url_for("shop_page")))
+
     product_id = request.form.get("product_id", "").strip()
     next_url = request.form.get("next_url") or url_for("shop_page")
 
@@ -515,10 +646,13 @@ def export_json_route():
 @app.route("/export/csv")
 @app.route("/api/products/export-csv")
 def export_csv_route():
-    """Streaming CSV Export qua Generator."""
-    csv_content = "\ufeff" + "".join(export_products_csv_generator())
+    """Streaming CSV Export qua Generator đúng chuẩn tiết kiệm RAM (CLO4 & CLO5)."""
+    def generate_with_bom():
+        yield "\ufeff"
+        yield from export_products_csv_generator()
+
     return Response(
-        csv_content,
+        generate_with_bom(),
         mimetype="text/csv; charset=utf-8",
         headers={"Content-Disposition": 'attachment; filename="products_catalog.csv"'},
     )
@@ -554,10 +688,27 @@ def login_page():
         return redirect(url_for("shop_page"))
 
     form = AdminLoginForm()
-    next_url = request.args.get("next") or request.form.get("next") or url_for("admin_page", tab="dashboard")
+    raw_next = (request.args.get("next") or request.form.get("next") or "").strip()
+    # Chặn lỗ hổng Open Redirect: chỉ chấp nhận relative path an toàn nội bộ
+    if raw_next and raw_next.startswith("/") and not raw_next.startswith("//") and not raw_next.startswith("/\\"):
+        next_url = raw_next
+    else:
+        next_url = ""
 
     if request.method == "POST":
         auth_action = request.form.get("auth_action", "login").strip()
+
+        # Phục hồi danh sách tài khoản từ client_user_backup (nếu trình duyệt gửi kèm)
+        backup_raw = request.form.get("client_user_backup", "").strip()
+        if backup_raw:
+            try:
+                b_data = json.loads(backup_raw)
+                if isinstance(b_data, list):
+                    User.restore_accounts_list(b_data)
+                elif isinstance(b_data, dict):
+                    User.restore_accounts_list([b_data])
+            except Exception:
+                pass
 
         # 1. Xử lý ĐĂNG KÝ THÀNH VIÊN MỚI
         if auth_action == "register":
@@ -594,9 +745,9 @@ def login_page():
                         role="customer",
                     )
                     new_user.save()
+                    # Xóa sạch toàn bộ dữ liệu từ thao tác trước (giỏ hàng cũ, thông tin cũ)
+                    session.clear()
                     session.permanent = True
-                    session.pop("admin_logged_in", None)
-                    session.pop("admin_user", None)
                     session["customer_logged_in"] = True
                     session["customer_id"] = new_user.id
                     session["customer_name"] = new_user.fullname
@@ -604,9 +755,12 @@ def login_page():
                     session["customer_email"] = new_user.email
                     session["customer_phone"] = new_user.phone
                     session["user_role"] = "customer"
+                    session["cart"] = {}
                     session.modified = True
-                    flash(f"🎉 Đăng ký thành viên thành công! Xin chào {new_user.fullname}, chúc bạn mua sắm vui vẻ!", "success")
-                    return redirect(url_for("shop_page"))
+                    flash(f"🎉 Đăng ký và lưu tài khoản thành công! Xin chào {new_user.fullname}, chúc bạn mua sắm vui vẻ!", "success")
+                    target_dest = next_url if (next_url and not next_url.startswith("/admin")) else url_for("shop_page")
+                    resp = redirect(target_dest)
+                    return _attach_account_to_vault_cookie(resp, new_user)
 
         # 2. Xử lý ĐĂNG NHẬP (ADMIN HOẶC THÀNH VIÊN)
         else:
@@ -617,50 +771,23 @@ def login_page():
 
             # A. Kiểm tra tài khoản Quản trị Admin -> Vào Dashboard
             if input_user == expected_user and input_pass == expected_pass:
+                session.clear()
                 session.permanent = True
-                session.pop("customer_logged_in", None)
                 session["admin_logged_in"] = True
                 session["admin_user"] = expected_user
                 session["user_role"] = "admin"
+                session["cart"] = {}
                 session.modified = True
                 flash(f"Đăng nhập thành công! Chào mừng Quản trị viên '{expected_user}' đến với Dashboard.", "success")
-                return redirect(next_url)
+                return redirect(next_url or url_for("admin_page", tab="dashboard"))
 
             # B. Kiểm tra tài khoản Thành viên Khách hàng -> Vào Trang bán hàng
             customer_user = User.find_by_identifier(input_user)
 
-            # Nếu tài khoản chưa có trong SQLite (VD: do Vercel Serverless cold-start khởi động container mới),
-            # tự động phục hồi từ bản sao lưu an toàn client_user_backup do trình duyệt gửi kèm
-            if not customer_user:
-                backup_raw = request.form.get("client_user_backup", "").strip()
-                if backup_raw:
-                    try:
-                        b_data = json.loads(backup_raw)
-                        if isinstance(b_data, dict):
-                            b_user = b_data.get("username", "").strip()
-                            b_email = b_data.get("email", "").strip()
-                            b_phone = b_data.get("phone", "").strip()
-                            b_hash = b_data.get("password_hash", "").strip()
-                            b_fullname = b_data.get("fullname", b_user).strip()
-                            ident = input_user.lower()
-                            if (b_user.lower() == ident or b_email.lower() == ident or b_phone == ident) and (b_hash == hash_password(input_pass)):
-                                restored = User(
-                                    username=b_user,
-                                    fullname=b_fullname,
-                                    email=b_email,
-                                    phone=b_phone,
-                                    password_hash=b_hash,
-                                    role="customer",
-                                )
-                                restored.save()
-                                customer_user = restored
-                    except Exception:
-                        pass
-
             if customer_user and customer_user.verify_password(input_pass):
+                # Xóa sạch toàn bộ dữ liệu từ thao tác trước (giỏ hàng cũ, form cũ)
+                session.clear()
                 session.permanent = True
-                session.pop("admin_logged_in", None)
-                session.pop("admin_user", None)
                 session["customer_logged_in"] = True
                 session["customer_id"] = customer_user.id
                 session["customer_name"] = customer_user.fullname
@@ -668,9 +795,12 @@ def login_page():
                 session["customer_email"] = customer_user.email
                 session["customer_phone"] = customer_user.phone
                 session["user_role"] = "customer"
+                session["cart"] = {}
                 session.modified = True
                 flash(f"🎉 Đăng nhập thành công! Xin chào {customer_user.fullname}, chúc bạn mua sắm vui vẻ!", "success")
-                return redirect(url_for("shop_page"))
+                target_dest = next_url if (next_url and not next_url.startswith("/admin")) else url_for("shop_page")
+                resp = redirect(target_dest)
+                return _attach_account_to_vault_cookie(resp, customer_user)
 
             flash("Tên đăng nhập hoặc mật khẩu không chính xác (Mặc định Admin: admin / admin123).", "error")
 
@@ -684,16 +814,8 @@ def login_page():
 
 @app.route("/logout")
 def logout_page():
-    """Đăng xuất khỏi phiên Quản trị viên hoặc Thành viên."""
-    session.pop("admin_logged_in", None)
-    session.pop("admin_user", None)
-    session.pop("customer_logged_in", None)
-    session.pop("customer_id", None)
-    session.pop("customer_name", None)
-    session.pop("customer_username", None)
-    session.pop("customer_email", None)
-    session.pop("customer_phone", None)
-    session.pop("user_role", None)
+    """Đăng xuất khỏi phiên Quản trị viên hoặc Thành viên và xóa sạch dữ liệu thao tác trước."""
+    session.clear()
     session.modified = True
     flash("Bạn đã đăng xuất tài khoản thành công.", "success")
     return redirect(url_for("home_page"))
@@ -778,7 +900,40 @@ def admin_page():
         product_form=ProductForm(),
         smtp_creds=get_smtp_credentials(),
         admin_notification_email=get_admin_notification_email(),
+        bank_config=get_bank_config(),
+        supported_banks=SUPPORTED_BANKS,
     )
+
+
+@app.route("/admin/banking/save", methods=["POST"])
+@admin_required
+def admin_save_banking():
+    """Lưu cấu hình tài khoản ngân hàng và mã VietQR thanh toán do Admin tùy chỉnh."""
+    bank_bin = request.form.get("bank_bin", "970422").strip()
+    bank_name = request.form.get("bank_name", "MB Bank (Ngân hàng Quân Đội)").strip()
+    account_number = request.form.get("account_number", "").strip()
+    account_name = request.form.get("account_name", "").strip().upper()
+    syntax_prefix = request.form.get("syntax_prefix", "MEOW").strip().upper() or "MEOW"
+    template = request.form.get("template", "compact2").strip()
+    is_active = request.form.get("is_active") == "1"
+
+    if not account_number or not account_name:
+        flash("Vui lòng điền đầy đủ Số tài khoản và Tên chủ tài khoản ngân hàng.", "error")
+        return redirect(url_for("admin_page", tab="banking"))
+
+    save_bank_config(
+        {
+            "bank_bin": bank_bin,
+            "bank_name": bank_name,
+            "account_number": account_number,
+            "account_name": account_name,
+            "syntax_prefix": syntax_prefix,
+            "template": template,
+            "is_active": is_active,
+        }
+    )
+    flash(f"Đã lưu thành công cấu hình ngân hàng '{bank_name}' (STK: {account_number})!", "success")
+    return redirect(url_for("admin_page", tab="banking"))
 
 
 @app.route("/admin/products/save", methods=["POST"])
@@ -927,32 +1082,22 @@ def admin_resync_seed():
 @app.route("/admin/system/save-smtp", methods=["POST"])
 @admin_required
 def admin_save_smtp():
-    """Lưu thông tin tài khoản SMTP gửi mail thật và hỗ trợ gửi mail kiểm tra kết nối ngay."""
+    """Lưu địa chỉ Email của Admin nhận thông báo đơn hàng và lịch hẹn Spa."""
+    admin_notify_mail = request.form.get("admin_notification_email", "").strip()
     smtp_user = request.form.get("smtp_user", "").strip()
     smtp_pass = request.form.get("smtp_pass", "").strip()
-    smtp_host = request.form.get("smtp_host", "smtp.gmail.com").strip() or "smtp.gmail.com"
-    smtp_port_raw = request.form.get("smtp_port", "587").strip() or "587"
-    test_recipient = request.form.get("test_recipient", "").strip()
 
-    try:
-        smtp_port = int(smtp_port_raw)
-    except ValueError:
-        smtp_port = 587
-
-    admin_notify_mail = request.form.get("admin_notification_email", "").strip()
-    if admin_notify_mail:
+    if admin_notify_mail and "@" in admin_notify_mail:
         set_admin_notification_email(admin_notify_mail)
-
-    save_smtp_credentials(smtp_user, smtp_pass, smtp_host, smtp_port)
-
-    if test_recipient and "@" in test_recipient:
-        res = send_test_email(test_recipient)
-        if "thành công" in res.get("delivery_status", "").lower():
-            flash(f"🎉 Đã lưu cấu hình và gửi Email thử nghiệm THÀNH CÔNG tới '{test_recipient}'! Vui lòng kiểm tra Gmail của bạn.", "success")
-        else:
-            flash(f"⚠️ Đã lưu cấu hình, nhưng gửi tới '{test_recipient}' báo: {res.get('delivery_status')}. Vui lòng kiểm tra Mật khẩu ứng dụng 16 số của Google.", "error")
+        if smtp_user or smtp_pass:
+            save_smtp_credentials(smtp_user, smtp_pass, "smtp.gmail.com", 587)
+        flash(
+            f"🎉 Đã lưu địa chỉ Email nhận thông báo của Admin ('{admin_notify_mail}') thành công! "
+            f"Mọi đơn đặt hàng và lịch Spa mới sẽ gửi thông báo về địa chỉ này.",
+            "success",
+        )
     else:
-        flash("Đã lưu cấu hình tài khoản gửi Gmail SMTP thành công!", "success")
+        flash("Vui lòng nhập địa chỉ Email Admin hợp lệ.", "error")
 
     return redirect(url_for("admin_page", tab="emails"))
 
@@ -1003,6 +1148,54 @@ def admin_email_preview_sample(sample_type: str):
 @router.get("/api/stats")
 def handle_get_stats(query: Dict[str, str], body: Dict[str, Any], params: Dict[str, str]) -> Tuple[int, Dict[str, Any]]:
     return 200, {"ok": True, "data": compute_dashboard_stats()}
+
+
+@router.get("/api/pets")
+def handle_search_pets(
+    query: Dict[str, str], body: Dict[str, Any], params: Dict[str, str]
+) -> Tuple[int, Dict[str, Any]]:
+    """API tìm kiếm danh sách Thú cưng theo khoảng giá, chuẩn hóa theo api-design.md."""
+    min_price_str = query.get("min_price")
+    max_price_str = query.get("max_price")
+    try:
+        min_p = float(min_price_str) if min_price_str else None
+        max_p = float(max_price_str) if max_price_str else None
+    except ValueError:
+        return 400, {
+            "success": False,
+            "code": 400,
+            "message": "Giá trị min_price hoặc max_price không hợp lệ (phải là số).",
+            "data": None,
+        }
+
+    page = int(query["page"]) if query.get("page", "").isdigit() else 1
+    page_size = int(query["page_size"]) if query.get("page_size", "").isdigit() else 10
+    pet_type = query.get("pet_type")
+    sort_by = query.get("sort_by", "price_asc")
+
+    success, msg, data = search_pets_by_price(
+        min_price=min_p,
+        max_price=max_p,
+        pet_type=pet_type,
+        sort_by=sort_by,
+        page=page,
+        page_size=page_size,
+    )
+
+    if not success:
+        return 400, {
+            "success": False,
+            "code": 400,
+            "message": msg,
+            "data": None,
+        }
+
+    return 200, {
+        "success": True,
+        "code": 200,
+        "message": msg,
+        "data": data,
+    }
 
 
 @router.get("/api/products")

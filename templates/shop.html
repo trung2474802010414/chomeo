@@ -22,16 +22,16 @@
     <a href="{{ url_for('cart_page') }}" class="btn btn-teal">Xem Giỏ hàng &amp; Thanh toán ({{ cart_count }}) &rarr;</a>
 </div>
 
-<!-- Thanh bộ lọc đa tiêu chí (Tự động ràng buộc Loài <-> Giống <-> Danh mục <-> Khoảng giá) -->
-<form method="GET" action="{{ url_for('shop_page') }}" class="filter-panel" id="shopFilterForm" onsubmit="return validateShopFilterForm();">
+<!-- Thanh bộ lọc đa tiêu chí (Tự động lọc tức thì khi khách nhập + Ràng buộc Loài <-> Giống <-> Danh mục) -->
+<form method="GET" action="{{ url_for('shop_page') }}" class="filter-panel" id="shopFilterForm" onsubmit="return validateShopFilterForm(true);">
     <div class="filter-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
         <div>
             <label class="form-label">🔍 Từ khóa tìm kiếm</label>
-            <input type="text" name="keyword" value="{{ filters.keyword }}" maxlength="80" class="form-control" placeholder="Tên giống, hạt, pate, phụ kiện...">
+            <input type="text" name="keyword" id="shopKeywordInput" value="{{ filters.keyword }}" maxlength="80" class="form-control" placeholder="Tên giống, hạt, pate, phụ kiện..." oninput="onShopInputFilter()" autocomplete="off">
         </div>
         <div>
             <label class="form-label">🐾 Loài thú cưng</label>
-            <select name="pet_type" id="shopPetTypeSelect" class="form-control" onchange="syncShopFilters('pet_type')">
+            <select name="pet_type" id="shopPetTypeSelect" class="form-control" onchange="syncShopFilters('pet_type'); triggerAutoFilter(true);">
                 <option value="ALL" {% if filters.pet_type == 'ALL' %}selected{% endif %}>Tất cả loài</option>
                 <option value="Chó" {% if filters.pet_type == 'Chó' %}selected{% endif %}>🐶 Chó</option>
                 <option value="Mèo" {% if filters.pet_type == 'Mèo' %}selected{% endif %}>🐱 Mèo</option>
@@ -40,7 +40,7 @@
         </div>
         <div>
             <label class="form-label">✨ Giống Chó / Mèo</label>
-            <select name="breed" id="shopBreedSelect" class="form-control" onchange="syncShopFilters('breed')">
+            <select name="breed" id="shopBreedSelect" class="form-control" onchange="syncShopFilters('breed'); triggerAutoFilter(true);">
                 <option value="ALL" {% if filters.breed == 'ALL' %}selected{% endif %}>-- Tất cả giống --</option>
                 <optgroup label="Giống Chó Cảnh" id="shopDogBreedsGroup">
                     {% for br in global_dog_breeds %}
@@ -56,7 +56,7 @@
         </div>
         <div>
             <label class="form-label">📦 Danh mục</label>
-            <select name="category" id="shopCategorySelect" class="form-control" onchange="syncShopFilters('category')">
+            <select name="category" id="shopCategorySelect" class="form-control" onchange="syncShopFilters('category'); triggerAutoFilter(true);">
                 <option value="ALL" {% if filters.category == 'ALL' %}selected{% endif %}>Tất cả danh mục</option>
                 {% for cat in categories %}
                 <option value="{{ cat }}" {% if filters.category == cat %}selected{% endif %}>{{ cat }}</option>
@@ -65,15 +65,15 @@
         </div>
         <div>
             <label class="form-label">💵 Giá từ (VNĐ)</label>
-            <input type="number" id="shopMinPrice" name="min_price" value="{{ filters.min_price }}" class="form-control" min="0" max="500000000" step="1000" placeholder="0">
+            <input type="number" id="shopMinPrice" name="min_price" value="{{ filters.min_price }}" class="form-control" min="0" max="500000000" step="1000" placeholder="0" oninput="onShopInputFilter()">
         </div>
         <div>
             <label class="form-label">💵 Đến giá (VNĐ)</label>
-            <input type="number" id="shopMaxPrice" name="max_price" value="{{ filters.max_price }}" class="form-control" min="0" max="500000000" step="1000" placeholder="15.000.000">
+            <input type="number" id="shopMaxPrice" name="max_price" value="{{ filters.max_price }}" class="form-control" min="0" max="500000000" step="1000" placeholder="15.000.000" oninput="onShopInputFilter()">
         </div>
         <div>
             <label class="form-label">⚡ Sắp xếp</label>
-            <select name="sort_by" class="form-control">
+            <select name="sort_by" id="shopSortSelect" class="form-control" onchange="triggerAutoFilter(true);">
                 <option value="id_desc" {% if filters.sort_by == 'id_desc' %}selected{% endif %}>Mới cập nhật</option>
                 <option value="price_asc" {% if filters.sort_by == 'price_asc' %}selected{% endif %}>Giá: Thấp &rarr; Cao</option>
                 <option value="price_desc" {% if filters.sort_by == 'price_desc' %}selected{% endif %}>Giá: Cao &rarr; Thấp</option>
@@ -173,23 +173,55 @@ function syncShopFilters(changedSource) {
     }
 }
 
-function validateShopFilterForm() {
+function validateShopFilterForm(showAlert) {
+    if (typeof showAlert === 'undefined') showAlert = true;
     var minEl = document.getElementById('shopMinPrice');
     var maxEl = document.getElementById('shopMaxPrice');
     if (minEl && maxEl && minEl.value !== '' && maxEl.value !== '') {
         var minVal = parseFloat(minEl.value);
         var maxVal = parseFloat(maxEl.value);
         if (minVal > maxVal) {
-            alert('Ràng buộc giá: "Giá từ" không được lớn hơn "Đến giá"!');
-            minEl.focus();
+            if (showAlert) {
+                alert('Ràng buộc giá: "Giá từ" không được lớn hơn "Đến giá"!');
+                minEl.focus();
+            }
             return false;
         }
     }
     return true;
 }
 
+// Tự động lọc tức thì (Real-time Filter) khi khách gõ tìm kiếm hoặc đổi tiêu chí
+var searchDebounceTimer = null;
+function triggerAutoFilter(immediate) {
+    clearTimeout(searchDebounceTimer);
+    if (immediate) {
+        if (validateShopFilterForm(false)) {
+            document.getElementById('shopFilterForm').submit();
+        }
+    } else {
+        searchDebounceTimer = setTimeout(function() {
+            if (validateShopFilterForm(false)) {
+                document.getElementById('shopFilterForm').submit();
+            }
+        }, 380);
+    }
+}
+
+function onShopInputFilter() {
+    triggerAutoFilter(false);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     syncShopFilters('init');
+    var kwInput = document.getElementById('shopKeywordInput');
+    if (kwInput && kwInput.value) {
+        if (window.location.search.indexOf('keyword=') !== -1) {
+            var val = kwInput.value;
+            kwInput.focus();
+            kwInput.setSelectionRange(val.length, val.length);
+        }
+    }
 });
 </script>
 

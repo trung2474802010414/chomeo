@@ -1054,33 +1054,43 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
    ========================================================================== */
 .table-wrap {
     overflow-x: auto;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .clean-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    background: transparent;
+    color: #ffffff;
 }
 
 .clean-table th,
 .clean-table td {
     padding: 12px 14px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     text-align: left;
     vertical-align: middle;
+    background: transparent;
 }
 
 .clean-table th {
-    background-color: #f8fafc;
-    color: var(--text-body);
-    font-weight: 700;
+    background-color: rgba(139, 92, 246, 0.15) !important;
+    color: #c4b5fd !important;
+    font-weight: 800;
     font-size: 13px;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
+}
+
+.clean-table tbody tr {
+    background: transparent;
 }
 
 .clean-table tbody tr:hover {
-    background-color: #fcfaf7;
+    background-color: rgba(255, 255, 255, 0.04) !important;
 }
 
 .text-right {
@@ -1102,6 +1112,156 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 /* ==========================================================================
    ALERTS & STATS
    ========================================================================== */
+/* ==========================================================================
+   FLOATING TOAST NOTIFICATION (Góc trên bên phải, Dark Glass Neon, Không đẩy trang)
+   ========================================================================== */
+.floating-toast-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px 18px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 27, 75, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(16, 185, 129, 0.25);
+    animation: toastSlideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: all 0.35s ease;
+}
+
+.floating-toast-card.toast-success {
+    border: 1.5px solid #10b981;
+}
+
+.floating-toast-card.toast-error {
+    border: 1.5px solid #f43f5e;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(244, 63, 94, 0.25);
+}
+
+.toast-icon-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.toast-success .toast-icon-circle {
+    background: rgba(16, 185, 129, 0.18);
+    border: 1.5px solid #10b981;
+    color: #10b981;
+}
+
+.toast-error .toast-icon-circle {
+    background: rgba(244, 63, 94, 0.18);
+    border: 1.5px solid #f43f5e;
+    color: #f43f5e;
+}
+
+.toast-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.toast-success .toast-title {
+    color: #34d399;
+}
+
+.toast-error .toast-title {
+    color: #fca5a5;
+}
+
+.toast-msg {
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: #ffffff;
+    word-break: break-word;
+}
+
+.toast-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 99px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff !important;
+    font-size: 12.5px;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.toast-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+}
+
+.toast-close-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+    transition: color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.toast-close-btn:hover {
+    color: #ffffff;
+}
+
+.toast-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+}
+
+.toast-success .toast-progress-bar {
+    background: linear-gradient(90deg, #10b981, #34d399);
+    animation: toastProgress 4.5s linear forwards;
+}
+
+.toast-error .toast-progress-bar {
+    background: linear-gradient(90deg, #f43f5e, #fb7185);
+    animation: toastProgress 4.5s linear forwards;
+}
+
+@keyframes toastProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+@keyframes toastSlideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(60px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.toast-fade-out {
+    opacity: 0 !important;
+    transform: translateX(80px) !important;
+}
+
 .alert {
     padding: 14px 18px;
     border-radius: var(--radius-sm);
@@ -1111,16 +1271,50 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     border: 1px solid transparent;
 }
 
+.alert-box-modern {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 22px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 27, 75, 0.95) 100%);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(12px);
+    animation: alertSlideDown 0.35s ease;
+}
+
+.alert-box-success {
+    border: 1.5px solid #10b981;
+    box-shadow: 0 12px 35px rgba(16, 185, 129, 0.28);
+}
+
+.alert-box-error {
+    border: 1.5px solid #f43f5e;
+    box-shadow: 0 12px 35px rgba(244, 63, 94, 0.28);
+}
+
+@keyframes alertSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .alert-success {
-    background-color: #dcfce7;
-    color: #166534;
-    border-color: #86efac;
+    background-color: rgba(52, 211, 153, 0.18);
+    color: #6ee7b7;
+    border: 1.5px solid #34d399;
 }
 
 .alert-error {
-    background-color: #fee2e2;
-    color: #991b1b;
-    border-color: #fca5a5;
+    background-color: rgba(244, 63, 94, 0.18);
+    color: #fca5a5;
+    border: 1.5px solid #f43f5e;
 }
 
 .stats-row {
@@ -3438,3 +3632,268 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 
+
+/* ==========================================================================
+   POPUP MODAL THÔNG BÁO THÀNH CÔNG (LUXURY POPUP)
+   ========================================================================== */
+.success-popup-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(8, 6, 20, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 9999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
+}
+
+.success-popup-backdrop.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.success-popup-card {
+    background: linear-gradient(145deg, rgba(26, 20, 56, 0.98) 0%, rgba(13, 10, 32, 0.98) 100%);
+    border: 1.5px solid #10b981;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.75), 0 0 40px rgba(16, 185, 129, 0.35);
+    border-radius: 26px;
+    max-width: 540px;
+    width: 100%;
+    padding: 32px 28px;
+    text-align: center;
+    position: relative;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.success-popup-backdrop.show .success-popup-card {
+    transform: scale(1) translateY(0);
+}
+
+.success-popup-close {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e2e8f0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.success-popup-close:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    color: #ffffff;
+    transform: rotate(90deg);
+}
+
+.success-popup-icon-wrap {
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.55);
+    animation: successPulse 2s infinite ease-in-out;
+}
+
+@keyframes successPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 25px rgba(16, 185, 129, 0.45); }
+    50% { transform: scale(1.06); box-shadow: 0 0 40px rgba(16, 185, 129, 0.75); }
+}
+
+.success-popup-title {
+    color: #ffffff;
+    font-size: 23px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+}
+
+.success-popup-sub {
+    color: #cbd5e1;
+    font-size: 14px;
+    line-height: 1.55;
+    margin-bottom: 22px;
+}
+
+.success-popup-msg-box {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px dashed rgba(16, 185, 129, 0.4);
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: #e2e8f0;
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.success-popup-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   CART REDESIGN: ITEM CARDS (CHỐNG CHÌM MÀU & CHỐNG NỀN TRẮNG TRIỆT ĐỂ)
+   ========================================================================== */
+.cart-items-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.cart-item-row {
+    background: rgba(18, 14, 42, 0.85) !important;
+    border: 1px solid rgba(139, 92, 246, 0.25) !important;
+    border-radius: 16px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.cart-item-row:hover {
+    border-color: rgba(139, 92, 246, 0.55) !important;
+    transform: translateY(-1px);
+}
+
+.cart-item-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 240px;
+}
+
+.cart-item-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(236, 72, 153, 0.2) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+}
+
+.cart-item-info {
+    flex: 1;
+}
+
+.cart-item-name {
+    color: #ffffff !important;
+    font-size: 15.5px !important;
+    font-weight: 800 !important;
+    line-height: 1.35;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.cart-item-meta {
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.cart-item-pricing {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.cart-qty-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 3px 6px;
+    border-radius: 10px;
+}
+
+.cart-qty-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.cart-qty-btn:hover {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+    color: #ffffff;
+}
+
+.cart-qty-num {
+    min-width: 24px;
+    text-align: center;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 14.5px;
+}
+
+.cart-item-subtotal {
+    color: #34d399 !important;
+    font-size: 17px !important;
+    font-weight: 900 !important;
+    min-width: 100px;
+    text-align: right;
+}
+
+/* Đảm bảo toàn bộ bảng và form không bao giờ bị nền trắng đè */
+.clean-table,
+.table-wrap,
+table, thead, tbody, th, td {
+    background: transparent !important;
+    color: #ffffff !important;
+}
+
+.clean-table th {
+    background-color: rgba(139, 92, 246, 0.18) !important;
+    color: #c4b5fd !important;
+}
+
+.clean-table td {
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+}
