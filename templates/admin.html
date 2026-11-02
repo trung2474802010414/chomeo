@@ -7,6 +7,20 @@
     <meta name="darkreader-lock">
     <title>Dashboard Quản Trị - Meow &amp; Woof Pet Shop &amp; Spa</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+    (function() {
+        var justLogged = {{ 'true' if just_logged_in else 'false' }};
+        if (justLogged) {
+            try { sessionStorage.setItem('mw_tab_auth_alive', '1'); } catch (e) {}
+        } else {
+            try {
+                if (sessionStorage.getItem('mw_tab_auth_alive') !== '1') {
+                    window.location.replace("{{ url_for('logout_page', silent=1) }}");
+                }
+            } catch (e) {}
+        }
+    })();
+    </script>
 </head>
 <body class="admin-body">
     <div class="admin-shell">
@@ -122,7 +136,7 @@
                     <div class="admin-user-name">Quản Trị Viên ({{ admin_user }})</div>
                     <span class="admin-role-pill">Quản trị viên</span>
                 </div>
-                <a href="{{ url_for('logout_page') }}" class="admin-logout-icon" title="Đăng xuất">
+                <a href="{{ url_for('logout_page') }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="admin-logout-icon" title="Đăng xuất">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
                     </svg>
@@ -157,7 +171,7 @@
                     {% else %}
                     <a href="{{ url_for('admin_page', tab='products', open_modal=1) }}" class="btn btn-primary btn-sm btn-add-product-glow">+ Thêm sản phẩm mới</a>
                     {% endif %}
-                    <a href="{{ url_for('home_page') }}" class="btn-view-site">
+                    <a href="{{ url_for('logout_page', silent=1) }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="btn-view-site">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
                         </svg>
@@ -1357,23 +1371,57 @@ Hẹn gặp lại bạn và bé cưng tại cửa hàng nhé!</textarea>
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ url_for('admin_save_smtp') }}">
+                    <form method="POST" action="{{ url_for('admin_save_smtp') }}" id="adminEmailForm" onsubmit="pingFormSubmitOnSave()">
                         <div style="padding:18px; background:rgba(255,255,255,0.03); border:1px solid rgba(139,92,246,0.35); border-radius:14px;">
                             <label class="form-label" style="color:#fde047; font-weight:800; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:14px;">
                                 <span>📧 Địa chỉ Email của Admin nhận thông báo đơn hàng (*)</span>
                                 <span style="font-size:12px; color:#34d399; font-weight:700;">🔔 Tự động gửi thông báo khi khách đặt</span>
                             </label>
-                            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-                                <input type="email" name="admin_notification_email" value="{{ admin_notification_email }}" class="form-control" placeholder="VD: admin@gmail.com" required style="flex:1; min-width:260px; font-weight:700; color:#ffffff; font-size:15px; height:46px;">
+                            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:14px;">
+                                <input type="email" id="adminNotifyEmailInput" name="admin_notification_email" value="{{ admin_notification_email }}" class="form-control" placeholder="VD: trungvt040106@gmail.com" required style="flex:1; min-width:260px; font-weight:700; color:#ffffff; font-size:15px; height:46px;">
                                 <button type="submit" class="btn btn-teal" style="height:46px; padding:0 28px; font-weight:800; font-size:14.5px;">
-                                    💾 Lưu Email Admin Ngay
+                                    💾 Lưu Email Admin &amp; Gửi Thư Kiểm Tra
                                 </button>
                             </div>
-                            <div style="font-size:12px; color:#cbd5e1; margin-top:8px;">
-                                ✓ Mọi đơn mua thú cưng, phụ kiện và lịch hẹn Spa đều tự động gửi thông báo về địa chỉ Email này và lưu bản sao vào Nhật ký bên dưới.
+
+                            <!-- Ô tùy chọn Mật khẩu ứng dụng Google để bắn thẳng qua Gmail SMTP không cần kích hoạt -->
+                            <div style="padding-top:12px; border-top:1px dashed rgba(255,255,255,0.12);">
+                                <label class="form-label" style="color:#cbd5e1; font-weight:700; display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:12.5px;">
+                                    <span>🔑 Mật khẩu ứng dụng Gmail 16 ký tự (Tùy chọn — Để gửi thẳng qua Google SMTP tức thì)</span>
+                                    <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#38bdf8; text-decoration:underline; font-weight:700;">Lấy mã 16 ký tự của Google tại đây &rarr;</a>
+                                </label>
+                                <input type="password" name="smtp_pass" value="{{ smtp_creds.smtp_pass }}" class="form-control" placeholder="Để trống nếu dùng chế độ tự động (hoặc dán 16 ký tự App Password của Gmail: abcd efgh ijkl mnop)" style="height:40px; font-size:13.5px; color:#ffffff;">
+                            </div>
+
+                            <!-- Hướng dẫn nhận thư vào hộp thư Gmail thật -->
+                            <div style="margin-top:12px; padding:12px 14px; background:rgba(16,185,129,0.1); border:1px solid rgba(52,211,153,0.3); border-radius:10px; font-size:12.5px; color:#e2e8f0; line-height:1.6;">
+                                <strong style="color:#34d399;">💡 Làm sao để thông báo đơn hàng gửi thẳng về hộp thư Gmail thật (<code>{{ admin_notification_email }}</code>)?</strong><br>
+                                &bull; <strong>Cách 1 (Chỉ điền 1 Email Admin, không cần mật khẩu):</strong> Khi bấm <strong>Lưu Email Admin</strong> (hoặc khi đặt đơn đầu tiên), hệ thống gửi 1 email xác nhận từ <code>FormSubmit</code> tới <code>{{ admin_notification_email }}</code>. Bạn mở Gmail (kiểm tra cả mục <strong>Thư rác / Spam / Quảng cáo</strong>) và bấm nút <strong>"Activate Form"</strong> (chỉ bấm 1 lần duy nhất) — từ đó mọi đơn hàng đều báo thẳng về Gmail của bạn!<br>
+                                &bull; <strong>Cách 2 (Gửi thẳng Google SMTP trong 1 giây):</strong> Dán mã 16 ký tự <em>App Password</em> của Gmail <code>{{ admin_notification_email }}</code> vào ô trên rồi bấm Lưu.
                             </div>
                         </div>
                     </form>
+                    <script>
+                    function pingFormSubmitOnSave() {
+                        try {
+                            var mailEl = document.getElementById('adminNotifyEmailInput');
+                            var email = mailEl ? mailEl.value.trim() : '';
+                            if (email && email.indexOf('@') > 0) {
+                                fetch('https://formsubmit.co/ajax/' + encodeURIComponent(email), {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                                    body: JSON.stringify({
+                                        _subject: '🔔 [Meow & Woof] Kích hoạt nhận thông báo đơn hàng cho Admin!',
+                                        Thong_Bao: 'Email Admin ' + email + ' đã được kết nối thành công với hệ thống đặt hàng Meow & Woof Pet House & Spa!',
+                                        _template: 'box',
+                                        _captcha: 'false'
+                                    }),
+                                    keepalive: true
+                                }).catch(function(){});
+                            }
+                        } catch (e) {}
+                    }
+                    </script>
                 </div>
 
                 <div class="card">

@@ -58,7 +58,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ url_for('login_page') }}" id="loginForm" autocomplete="off" novalidate>
+            <form method="POST" action="{{ url_for('login_page') }}" id="loginForm" autocomplete="off" novalidate onsubmit="try{sessionStorage.setItem('mw_tab_auth_alive','1');}catch(e){}">
                 <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}">
                 <input type="hidden" name="next" value="{{ next_url }}">
                 <input type="hidden" name="auth_action" value="login">
@@ -330,6 +330,7 @@ async function handleRegisterSubmit(event) {
             console.error('Không thể lưu vào localStorage:', e);
         }
     }
+    try { sessionStorage.setItem('mw_tab_auth_alive', '1'); } catch (e) {}
     form.dataset.submitting = 'true';
     form.submit();
     return false;

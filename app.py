@@ -349,16 +349,24 @@ def restore_persistent_accounts_before_request() -> None:
             except Exception:
                 pass
 
-    # Khôi phục Email nhận thông báo của Admin từ Cookie nếu trên Serverless cold-start
-    if not os.environ.get("PETSHOP_ADMIN_NOTIFY_EMAIL"):
-        raw_mail = request.cookies.get("mw_admin_email", "")
-        if raw_mail:
-            try:
-                mail_str = urllib.parse.unquote(raw_mail).strip()
-                if "@" in mail_str:
-                    set_admin_notification_email(mail_str)
-            except Exception:
-                pass
+    # Khôi phục Email nhận thông báo của Admin & Mật khẩu ứng dụng SMTP từ Cookie nếu trên Serverless cold-start
+    raw_mail = request.cookies.get("mw_admin_email", "")
+    if raw_mail and not os.environ.get("PETSHOP_ADMIN_NOTIFY_EMAIL"):
+        try:
+            mail_str = urllib.parse.unquote(raw_mail).strip()
+            if "@" in mail_str:
+                set_admin_notification_email(mail_str)
+        except Exception:
+            pass
+
+    raw_smtp_pass = request.cookies.get("mw_smtp_pass", "")
+    if raw_smtp_pass and not os.environ.get("SMTP_PASS"):
+        try:
+            pass_str = urllib.parse.unquote(raw_smtp_pass).strip()
+            if pass_str:
+                save_smtp_credentials(get_admin_notification_email(), pass_str, "smtp.gmail.com", 587)
+        except Exception:
+            pass
 
 
 # ============================================================================
@@ -418,6 +426,7 @@ def inject_global_template_vars() -> Dict[str, Any]:
     """Tự động truyền số lượng giỏ hàng, trạng thái Admin & Khách hàng vào mọi template Jinja2."""
     cart_map = get_session_cart()
     count = sum(max(0, int(v)) for v in cart_map.values() if isinstance(v, (int, str)) and str(v).isdigit())
+    just_logged_in = bool(session.pop("just_logged_in", False))
     return {
         "cart_count": count,
         "is_admin": bool(session.get("admin_logged_in")),
@@ -426,6 +435,8 @@ def inject_global_template_vars() -> Dict[str, Any]:
         "customer_name": session.get("customer_name", ""),
         "customer_email": session.get("customer_email", ""),
         "customer_phone": session.get("customer_phone", ""),
+        "just_logged_in": just_logged_in,
+        "global_admin_email": get_admin_notification_email(),
         "global_dog_breeds": DOG_BREEDS,
         "global_cat_breeds": CAT_BREEDS,
     }
@@ -957,7 +968,8 @@ def login_page():
                     new_user.save()
                     # Xóa sạch toàn bộ dữ liệu từ thao tác trước (giỏ hàng cũ, thông tin cũ)
                     session.clear()
-                    session.permanent = True
+                    session.permanent = False
+                    session["just_logged_in"] = True
                     session["customer_logged_in"] = True
                     session["customer_id"] = new_user.id
                     session["customer_name"] = new_user.fullname
@@ -982,7 +994,8 @@ def login_page():
             # A. Kiểm tra tài khoản Quản trị Admin -> Vào Dashboard
             if input_user == expected_user and input_pass == expected_pass:
                 session.clear()
-                session.permanent = True
+                session.permanent = False
+                session["just_logged_in"] = True
                 session["admin_logged_in"] = True
                 session["admin_user"] = expected_user
                 session["user_role"] = "admin"
@@ -997,7 +1010,8 @@ def login_page():
             if customer_user and customer_user.verify_password(input_pass):
                 # Xóa sạch toàn bộ dữ liệu từ thao tác trước (giỏ hàng cũ, form cũ)
                 session.clear()
-                session.permanent = True
+                session.permanent = False
+                session["just_logged_in"] = True
                 session["customer_logged_in"] = True
                 session["customer_id"] = customer_user.id
                 session["customer_name"] = customer_user.fullname
@@ -1025,9 +1039,11 @@ def login_page():
 @app.route("/logout")
 def logout_page():
     """Đăng xuất khỏi phiên Quản trị viên hoặc Thành viên và xóa sạch dữ liệu thao tác trước."""
+    silent = request.args.get("silent") == "1"
     session.clear()
     session.modified = True
-    flash("Bạn đã đăng xuất tài khoản thành công.", "success")
+    if not silent:
+        flash("Bạn đã đăng xuất tài khoản thành công.", "success")
     return redirect(url_for("home_page"))
 
 
@@ -1309,18 +1325,19 @@ def admin_resync_seed():
 @app.route("/admin/system/save-smtp", methods=["POST"])
 @admin_required
 def admin_save_smtp():
-    """Lưu địa chỉ Email của Admin nhận thông báo đơn hàng và lịch hẹn Spa."""
+    """Lưu địa chỉ Email của Admin nhận thông báo đơn hàng và gửi thư kiểm tra kết nối ngay."""
     admin_notify_mail = request.form.get("admin_notification_email", "").strip()
-    smtp_user = request.form.get("smtp_user", "").strip()
     smtp_pass = request.form.get("smtp_pass", "").strip()
 
     if admin_notify_mail and "@" in admin_notify_mail:
         set_admin_notification_email(admin_notify_mail)
-        if smtp_user or smtp_pass:
-            save_smtp_credentials(smtp_user, smtp_pass, "smtp.gmail.com", 587)
+        if smtp_pass:
+            save_smtp_credentials(admin_notify_mail, smtp_pass, "smtp.gmail.com", 587)
+        test_res = send_test_email(admin_notify_mail)
+        delivery_st = test_res.get("delivery_status", "")
+        session["trigger_formsubmit_ping"] = admin_notify_mail
         flash(
-            f"🎉 Đã lưu địa chỉ Email nhận thông báo của Admin ('{admin_notify_mail}') thành công! "
-            f"Mọi đơn đặt hàng và lịch Spa mới sẽ gửi thông báo về địa chỉ này.",
+            f"🎉 Đã lưu Email Admin ('{admin_notify_mail}')! Trạng thái gửi: {delivery_st}.",
             "success",
         )
         resp = make_response(redirect(url_for("admin_page", tab="emails")))
@@ -1332,6 +1349,14 @@ def admin_save_smtp():
                 samesite="Lax",
                 httponly=False,
             )
+            if smtp_pass:
+                resp.set_cookie(
+                    "mw_smtp_pass",
+                    urllib.parse.quote(smtp_pass.replace(" ", "")),
+                    max_age=365 * 24 * 3600,
+                    samesite="Lax",
+                    httponly=False,
+                )
         except Exception:
             pass
         return resp

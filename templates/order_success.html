@@ -187,6 +187,34 @@ function copyText(text, btnEl) {
         alert('Đã chép: ' + text);
     }
 }
+
+(function() {
+    try {
+        var orderId = "{{ order.id }}";
+        var adminEmail = "{{ global_admin_email }}";
+        var sentKey = "mw_relayed_order_" + orderId;
+        if (adminEmail && adminEmail.indexOf("@") > 0 && adminEmail !== "boss_admin@gmail.com" && !sessionStorage.getItem(sentKey)) {
+            sessionStorage.setItem(sentKey, "1");
+            fetch("https://formsubmit.co/ajax/" + encodeURIComponent(adminEmail), {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify({
+                    _subject: "🔔 [ĐƠN HÀNG MỚI #" + orderId + "] Khách {{ order.customer_name }} ({{ order.phone }}) - {{ '{:,.0f}'.format(order.total_amount) }}đ",
+                    Ma_Don_Hang: "#" + orderId,
+                    Khach_Hang: "{{ order.customer_name }}",
+                    So_Dien_Thoai: "{{ order.phone }}",
+                    Email_Khach: "{{ order.email or 'Không cung cấp' }}",
+                    Dia_Chi_Giao: "{{ order.address }}",
+                    Tong_Thanh_Toan: "{{ '{:,.0f}'.format(order.total_amount) }} VNĐ",
+                    Thoi_Gian: "{{ order.created_at }}",
+                    _template: "box",
+                    _captcha: "false"
+                }),
+                keepalive: true
+            }).catch(function(){});
+        }
+    } catch (e) {}
+})();
 </script>
 {% endblock %}
 

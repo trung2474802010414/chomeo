@@ -93,6 +93,21 @@
     <meta name="darkreader-lock">
     <title>{% block title %}Meow &amp; Woof - Cửa hàng &amp; Spa Thú cưng{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+    (function() {
+        var isServerLogged = {{ 'true' if (customer_logged_in or is_admin) else 'false' }};
+        var justLogged = {{ 'true' if just_logged_in else 'false' }};
+        if (justLogged) {
+            try { sessionStorage.setItem('mw_tab_auth_alive', '1'); } catch (e) {}
+        } else if (isServerLogged) {
+            try {
+                if (sessionStorage.getItem('mw_tab_auth_alive') !== '1') {
+                    window.location.replace("{{ url_for('logout_page', silent=1) }}");
+                }
+            } catch (e) {}
+        }
+    })();
+    </script>
 </head>
 <body>
     <!-- MODAL POPUP THÀNH CÔNG (CHỈ HIỆN DUY NHẤT KHI ĐẶT ĐƠN HÀNG HOẶC ĐẶT LỊCH SPA THÀNH CÔNG) -->
@@ -225,12 +240,12 @@
                 <a href="{{ url_for('network_page') }}" class="nav-item {% if active_page == 'network' %}active{% endif %}">Cẩm nang Giống</a>
                 {% if is_admin %}
                     <a href="{{ url_for('admin_page') }}" class="nav-item {% if active_page == 'admin' %}active{% endif %}">Dashboard Quản trị</a>
-                    <a href="{{ url_for('logout_page') }}" class="nav-item" style="color:#ff8fb0;">Đăng xuất (admin)</a>
+                    <a href="{{ url_for('logout_page') }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="nav-item" style="color:#ff8fb0;">Đăng xuất (admin)</a>
                 {% elif customer_logged_in %}
                     <div style="display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:99px; background:linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(236,72,153,0.2) 100%); border:1px solid rgba(139,92,246,0.45); font-size:13px; font-weight:800; color:#ffffff;">
                         <span>👋 Xin chào, <strong style="color:#fde047;">{{ customer_name }}</strong></span>
                     </div>
-                    <a href="{{ url_for('logout_page') }}" class="nav-item" style="color:#ff8fb0; font-size:13px;">Đăng xuất</a>
+                    <a href="{{ url_for('logout_page') }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="nav-item" style="color:#ff8fb0; font-size:13px;">Đăng xuất</a>
                 {% else %}
                     <a href="{{ url_for('login_page') }}" class="nav-item {% if active_page == 'login' %}active{% endif %}">🔑 Đăng nhập / Đăng ký</a>
                 {% endif %}
