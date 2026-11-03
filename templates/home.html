@@ -80,7 +80,7 @@
             </div>
         </div>
         <div class="feature-box">
-            <div class="feature-icon" style="background:rgba(139,92,246,0.18); color:#a78bfa;">🛁</div>
+            <div class="feature-icon" style="background:#fff7ed; color:#ea580c;">🛁</div>
             <div>
                 <h3>Spa Grooming Thư Giãn</h3>
                 <p>Tắm sấy ion âm êm ái, cắt tỉa form Teddy xinh xắn, massage thảo mộc, email xác nhận lịch hẹn tức thì.</p>
@@ -167,7 +167,7 @@ function switchSpotlightPet(idx) {
 <section class="breed-showcase-section">
     <div class="section-header">
         <div>
-            <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:rgba(139,92,246,0.18); border:1px solid rgba(139,92,246,0.35); font-size:11.5px; font-weight:800; color:#c4b5fd; margin-bottom:8px;">
+            <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:#fff7ed; border:1px solid #fed7aa; font-size:11.5px; font-weight:800; color:#ea580c; margin-bottom:8px;">
                 <span>✨ KHÁM PHÁ THEO GIỐNG THUẦN CHỦNG 🐾</span>
             </div>
             <h2 class="section-title">Chọn Boss Theo Giống Được Yêu Thích Nhất</h2>
@@ -403,11 +403,11 @@ function filterHomeProducts(cat, btnEl) {
     {% if lookup_result %}
     <div class="grid-2" style="margin-top:18px;">
         <div class="card" style="margin-bottom:0; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.08);">
-            <h3 style="font-size:16px; margin-bottom:12px; color:#ffffff;">📦 Đơn mua hàng ({{ lookup_result.orders|length }})</h3>
+            <h3 style="font-size:16px; margin-bottom:12px; color:#2b180d;">📦 Đơn mua hàng ({{ lookup_result.orders|length }})</h3>
             {% if lookup_result.orders %}
                 {% for o in lookup_result.orders %}
-                <div style="background:rgba(18,14,40,0.7); border:1px solid rgba(139,92,246,0.25); border-radius:12px; padding:14px; margin-bottom:10px;">
-                    <div><strong style="color:#ffffff;">Đơn hàng #{{ o.id }}</strong> — <span style="color:#94a3b8; font-size:12.5px;">{{ o.created_at }}</span></div>
+                <div style="background:#fffbf8; border:1px solid #fed7aa; border-radius:12px; padding:14px; margin-bottom:10px;">
+                    <div><strong style="color:#2b180d;">Đơn hàng #{{ o.id }}</strong> — <span style="color:#94a3b8; font-size:12.5px;">{{ o.created_at }}</span></div>
                     <div style="font-size:13.5px; color:#cbd5e1; margin-top:4px;">Khách hàng: <strong>{{ o.customer_name }}</strong> (<code>{{ o.phone }}</code>)</div>
                     <div style="font-size:13px; color:#94a3b8; margin-top:2px;">Địa chỉ: {{ o.address }}</div>
                     <div style="font-size:14px; margin-top:6px;">Tổng thanh toán: <strong style="color:#34d399;">{{ "{:,.0f}".format(o.total_amount) }} đ</strong></div>
@@ -419,12 +419,12 @@ function filterHomeProducts(cat, btnEl) {
         </div>
 
         <div class="card" style="margin-bottom:0; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.08);">
-            <h3 style="font-size:16px; margin-bottom:12px; color:#ffffff;">🛁 Lịch hẹn Spa ({{ lookup_result.bookings|length }})</h3>
+            <h3 style="font-size:16px; margin-bottom:12px; color:#2b180d;">🛁 Lịch hẹn Spa ({{ lookup_result.bookings|length }})</h3>
             {% if lookup_result.bookings %}
                 {% for b in lookup_result.bookings %}
-                <div style="background:rgba(18,14,40,0.7); border:1px solid rgba(139,92,246,0.25); border-radius:12px; padding:14px; margin-bottom:10px;">
+                <div style="background:#fffbf8; border:1px solid #fed7aa; border-radius:12px; padding:14px; margin-bottom:10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong style="color:#ffffff;">Lịch hẹn #{{ b.id }}</strong>
+                        <strong style="color:#2b180d;">Lịch hẹn #{{ b.id }}</strong>
                         <span class="badge badge-stock-ok">{{ b.status }}</span>
                     </div>
                     <div style="font-size:13.5px; color:#cbd5e1; margin-top:4px;">Bé cưng: <strong>{{ b.pet_name }}</strong> ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)</div>

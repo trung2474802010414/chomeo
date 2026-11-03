@@ -1,0 +1,18 @@
+[
+  {
+    "id": 12,
+    "customer_name": "Lê Thanh Trúc",
+    "phone": "0912345678",
+    "email": "thanhtruc@example.com",
+    "pet_name": "Bơ",
+    "pet_type": "Mèo",
+    "pet_weight_kg": 4.5,
+    "service_name": "Tắm sấy & Vệ sinh tai móng",
+    "appointment_date": "2026-10-30",
+    "appointment_time": "10:00",
+    "total_price": 150000.0,
+    "status": "Chờ xác nhận",
+    "note": "Test CLO2 Email",
+    "created_at": "2026-11-03 15:31:59"
+  }
+]

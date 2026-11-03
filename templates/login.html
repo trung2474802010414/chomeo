@@ -4,23 +4,23 @@
 
 {% block content %}
 <div style="max-width: 520px; margin: 32px auto 48px;">
-    <div class="card" style="padding: 32px 36px; border: 1px solid rgba(139, 92, 246, 0.4); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); background: rgba(21, 16, 45, 0.88); backdrop-filter: blur(16px);">
+    <div class="card" style="padding: 32px 36px; border: 1.5px solid #fae4d4; box-shadow: 0 16px 40px rgba(180, 100, 60, 0.08); background: #ffffff; border-radius: 24px;">
         
         <!-- Header biểu tượng Brand -->
         <div class="text-center" style="margin-bottom: 24px;">
-            <div style="width: 60px; height: 60px; border-radius: 18px; background: linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(236,72,153,0.25) 100%); border: 1.5px solid rgba(139,92,246,0.45); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 8px 20px rgba(139,92,246,0.3);">
+            <div style="width: 60px; height: 60px; border-radius: 18px; background: linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%); border: 1.5px solid #fed7aa; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(251,146,60,0.2);">
                 <span style="font-size: 28px;">🐾</span>
             </div>
-            <h1 style="font-size: 24px; font-weight: 800; color: #ffffff; margin-bottom: 6px; letter-spacing: -0.4px;">
+            <h1 style="font-size: 24px; font-weight: 800; color: #2b180d; margin-bottom: 6px; letter-spacing: -0.4px;">
                 Meow &amp; Woof Member &amp; Admin
             </h1>
-            <p style="font-size: 13.5px; color: #cbd5e1; margin: 0; line-height: 1.5;">
+            <p style="font-size: 13.5px; color: #6e5444; margin: 0; line-height: 1.5;">
                 Đăng nhập để vào Dashboard quản trị hoặc tận hưởng đặc quyền mua sắm thú cưng &amp; Spa 5 sao!
             </p>
         </div>
 
         <!-- 2 Tab Chuyển đổi: Đăng nhập vs Đăng ký thành viên -->
-        <div style="display: flex; gap: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 4px; margin-bottom: 24px;">
+        <div style="display: flex; gap: 8px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 14px; padding: 4px; margin-bottom: 24px;">
             <button
                 type="button"
                 id="tabBtnLogin"
@@ -44,9 +44,9 @@
         <!-- ================= PANEL 1: FORM ĐĂNG NHẬP (ADMIN & KHÁCH HÀNG) ================= -->
         <div id="authPanelLogin">
             <!-- Thông báo tài khoản đã ghi nhớ trên trình duyệt (nếu có) -->
-            <div id="rememberedUserBox" style="display: none; margin-bottom: 18px; padding: 12px 16px; background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.35); border-radius: 14px;">
-                <div style="font-size: 13px; color: #a7f3d0; font-weight: 700; margin-bottom: 6px;">
-                    👋 Nhận diện tài khoản trên thiết bị này: <strong id="rememberedName" style="color: #ffffff;"></strong>
+            <div id="rememberedUserBox" style="display: none; margin-bottom: 18px; padding: 12px 16px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 14px;">
+                <div style="font-size: 13px; color: #047857; font-weight: 700; margin-bottom: 6px;">
+                    👋 Nhận diện tài khoản trên thiết bị này: <strong id="rememberedName" style="color: #065f46;"></strong>
                 </div>
                 <button
                     type="button"
@@ -66,7 +66,7 @@
                 <input type="hidden" id="clientUserBackup" name="client_user_backup" value="">
 
                 <div class="form-group" style="margin-bottom: 16px;">
-                    <label class="form-label" style="color: #ffffff; font-weight: 700;">Tên đăng nhập / Email / SĐT (*)</label>
+                    <label class="form-label" style="color: #2b180d; font-weight: 700;">Tên đăng nhập / Email / SĐT (*)</label>
                     <input
                         type="text"
                         id="loginUsername"
@@ -84,7 +84,7 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 16px;">
-                    <label class="form-label" style="color: #ffffff; font-weight: 700;">Mật khẩu (*)</label>
+                    <label class="form-label" style="color: #2b180d; font-weight: 700;">Mật khẩu (*)</label>
                     <input
                         type="password"
                         id="loginPassword"
@@ -99,8 +99,8 @@
                 </div>
 
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #cbd5e1; cursor: pointer;">
-                        <input type="checkbox" id="rememberMeCheck" checked style="accent-color: #8b5cf6; width: 16px; height: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6e5444; cursor: pointer;">
+                        <input type="checkbox" id="rememberMeCheck" checked style="accent-color: #fb923c; width: 16px; height: 16px;">
                         <span>Ghi nhớ đăng nhập trên thiết bị này (30 ngày)</span>
                     </label>
                 </div>
@@ -111,21 +111,21 @@
             </form>
 
             <!-- Hộp gợi ý tài khoản mẫu phục vụ chấm đồ án (Thiết kế Dark Glass sắc nét, không bị chìm) -->
-            <div style="margin-top: 24px; padding: 16px 18px; background: rgba(139, 92, 246, 0.15); border: 1.5px dashed #8b5cf6; border-radius: 16px; box-shadow: 0 4px 16px rgba(139,92,246,0.15);">
-                <div style="font-weight: 800; color: #ffffff; margin-bottom: 8px; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+            <div style="margin-top: 24px; padding: 16px 18px; background: #fff7ed; border: 1.5px dashed #fed7aa; border-radius: 16px;">
+                <div style="font-weight: 800; color: #ea580c; margin-bottom: 8px; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
                     <span>🛡️ Tài khoản mẫu thử nghiệm (Phục vụ chấm đồ án):</span>
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <!-- Admin -->
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                        <div style="font-size: 13px; color: #cbd5e1;">
-                            👑 <strong>Admin</strong>: <code style="color: #38bdf8; font-weight: bold;">admin</code> / <code style="color: #facc15;">admin123</code>
+                        <div style="font-size: 13px; color: #6e5444;">
+                            👑 <strong>Admin</strong>: <code style="color: #0284c7; font-weight: bold;">admin</code> / <code style="color: #d97706;">admin123</code>
                         </div>
                         <button
                             type="button"
                             class="btn btn-outline btn-sm"
-                            style="font-size: 12px; padding: 4px 12px; border-color: rgba(139,92,246,0.6); color: #c4b5fd; font-weight: 700;"
+                            style="font-size: 12px; padding: 4px 12px; border-color: #fed7aa; color: #ea580c; font-weight: 700;"
                             onclick="document.getElementById('loginUsername').value='admin'; document.getElementById('loginPassword').value='admin123';"
                         >
                             Điền Admin
@@ -134,13 +134,13 @@
 
                     <!-- Khách hàng -->
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                        <div style="font-size: 13px; color: #cbd5e1;">
-                            🛍️ <strong>Khách hàng</strong>: <code style="color: #38bdf8; font-weight: bold;">khachhang</code> / <code style="color: #facc15;">123456</code>
+                        <div style="font-size: 13px; color: #6e5444;">
+                            🛍️ <strong>Khách hàng</strong>: <code style="color: #0284c7; font-weight: bold;">khachhang</code> / <code style="color: #d97706;">123456</code>
                         </div>
                         <button
                             type="button"
                             class="btn btn-outline btn-sm"
-                            style="font-size: 12px; padding: 4px 12px; border-color: rgba(52,211,153,0.6); color: #34d399; font-weight: 700;"
+                            style="font-size: 12px; padding: 4px 12px; border-color: #a7f3d0; color: #059669; font-weight: 700;"
                             onclick="document.getElementById('loginUsername').value='khachhang'; document.getElementById('loginPassword').value='123456';"
                         >
                             Điền Khách
@@ -158,7 +158,7 @@
                 <input type="hidden" name="auth_action" value="register">
 
                 <div class="form-group" style="margin-bottom: 14px;">
-                    <label class="form-label" style="color: #ffffff; font-weight: 700;">Họ và tên của bạn (*)</label>
+                    <label class="form-label" style="color: #2b180d; font-weight: 700;">Họ và tên của bạn (*)</label>
                     <input
                         type="text"
                         name="reg_fullname"
@@ -172,7 +172,7 @@
 
                 <div class="grid-2" style="gap: 12px; margin-bottom: 14px;">
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" style="color: #ffffff; font-weight: 700;">Tên đăng nhập (*)</label>
+                        <label class="form-label" style="color: #2b180d; font-weight: 700;">Tên đăng nhập (*)</label>
                         <input
                             type="text"
                             name="reg_username"
@@ -185,7 +185,7 @@
                     </div>
 
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" style="color: #ffffff; font-weight: 700;">Số điện thoại (*)</label>
+                        <label class="form-label" style="color: #2b180d; font-weight: 700;">Số điện thoại (*)</label>
                         <input
                             type="tel"
                             name="reg_phone"
@@ -198,7 +198,7 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 14px;">
-                    <label class="form-label" style="color: #ffffff; font-weight: 700;">Địa chỉ Email (*)</label>
+                    <label class="form-label" style="color: #2b180d; font-weight: 700;">Địa chỉ Email (*)</label>
                     <input
                         type="email"
                         name="reg_email"
@@ -210,7 +210,7 @@
 
                 <div class="grid-2" style="gap: 12px; margin-bottom: 20px;">
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" style="color: #ffffff; font-weight: 700;">Mật khẩu (*)</label>
+                        <label class="form-label" style="color: #2b180d; font-weight: 700;">Mật khẩu (*)</label>
                         <input
                             type="password"
                             name="reg_password"
@@ -222,7 +222,7 @@
                     </div>
 
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" style="color: #ffffff; font-weight: 700;">Nhập lại mật khẩu (*)</label>
+                        <label class="form-label" style="color: #2b180d; font-weight: 700;">Nhập lại mật khẩu (*)</label>
                         <input
                             type="password"
                             name="reg_confirm_password"
@@ -246,12 +246,12 @@
 <style>
 .auth-tab-btn {
     background: transparent;
-    color: #94a3b8;
+    color: #6e5444;
 }
 .auth-tab-btn.active {
-    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%) !important;
+    background: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%) !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 4px 14px rgba(251, 146, 60, 0.35);
 }
 </style>
 

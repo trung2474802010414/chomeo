@@ -8,17 +8,17 @@
         <h1 class="section-title">🛒 Giỏ Hàng &amp; Thanh Toán Đơn Hàng</h1>
         <p class="section-subtitle">Kiểm tra các mặt hàng đã chọn và điền thông tin giao hàng để nhận hóa đơn xác nhận tức thì</p>
     </div>
-    <a href="{{ url_for('shop_page') }}" class="btn btn-outline" style="border-color:rgba(255,255,255,0.25); color:#ffffff;">&larr; Tiếp tục mua sắm</a>
+    <a href="{{ url_for('shop_page') }}" class="btn btn-outline" style="border-color:#fed7aa; color:#ea580c;">&larr; Tiếp tục mua sắm</a>
 </div>
 
 <div class="grid-2" style="align-items:start; gap:24px;">
     <!-- ==============================================================
          CỘT TRÁI: DANH SÁCH MẶT HÀNG TRONG GIỎ (CARD VIEW CAO CẤP, 0% NỀN TRẮNG)
          ============================================================== -->
-    <div class="card" style="background:rgba(18,14,40,0.85); border:1px solid rgba(139,92,246,0.35); box-shadow:0 15px 40px rgba(0,0,0,0.5); border-radius:20px; padding:22px;">
+    <div class="card" style="background:#ffffff; border:1.5px solid #fae4d4; box-shadow:0 10px 30px rgba(180,100,60,0.06); border-radius:20px; padding:22px;">
         <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:14px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <h2 class="card-title" style="font-size:18px; color:#ffffff; margin:0;">📦 Sản Phẩm Trong Giỏ ({{ cart_items|length }} mặt hàng)</h2>
+                <h2 class="card-title" style="font-size:18px; color:#2b180d; margin:0;">📦 Sản Phẩm Trong Giỏ ({{ cart_items|length }} mặt hàng)</h2>
                 <div style="font-size:12px; color:#a5b4fc; margin-top:3px;">Bảo đảm thú cưng thuần chủng &amp; phụ kiện chính hãng 100%</div>
             </div>
             {% if cart_items %}
@@ -34,19 +34,19 @@
         <!-- DANH SÁCH SẢN PHẨM DẠNG CARD CHỐNG CHÌM MÀU TUYỆT ĐỐI -->
         <div class="cart-items-wrapper">
             {% for item in cart_items %}
-            <div class="cart-item-row" style="background:rgba(24,19,54,0.92) !important; border:1px solid rgba(139,92,246,0.3) !important; border-radius:16px; padding:16px 18px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; box-shadow:0 8px 24px rgba(0,0,0,0.35);">
+            <div class="cart-item-row" style="background:#ffffff !important; border:1.5px solid #fae4d4 !important; border-radius:16px; padding:16px 18px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; box-shadow:0 4px 18px rgba(180,100,60,0.05);">
                 <!-- Cột trái: Icon & Tên sản phẩm & SKU -->
                 <div style="display:flex; align-items:center; gap:14px; flex:1; min-width:230px;">
-                    <div style="width:50px; height:50px; border-radius:14px; background:linear-gradient(135deg, rgba(139,92,246,0.35) 0%, rgba(236,72,153,0.25) 100%); border:1px solid rgba(139,92,246,0.5); display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0;">
+                    <div style="width:50px; height:50px; border-radius:14px; background:linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%); border:1px solid #fed7aa; display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0;">
                         {% if 'chó' in item.name.lower() %}🐶{% elif 'mèo' in item.name.lower() %}🐱{% elif 'hạt' in item.name.lower() or 'pate' in item.name.lower() or 'thức ăn' in item.name.lower() %}🥩{% elif 'vệ sinh' in item.name.lower() or 'cát' in item.name.lower() %}✨{% else %}📦{% endif %}
                     </div>
                     <div style="flex:1;">
-                        <strong style="color:#ffffff !important; font-size:15.5px !important; font-weight:800 !important; display:block; margin-bottom:4px; line-height:1.35;">{{ item.name }}</strong>
-                        <div style="font-size:12px; color:#cbd5e1; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <strong style="color:#2b180d !important; font-size:15.5px !important; font-weight:800 !important; display:block; margin-bottom:4px; line-height:1.35;">{{ item.name }}</strong>
+                        <div style="font-size:12px; color:#6e5444; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                             <span style="color:#94a3b8;">Mã SKU:</span>
                             <code style="color:#38bdf8; background:rgba(56,189,248,0.18); padding:2px 6px; border-radius:6px; font-weight:700;">{{ item.sku }}</code>
                             <span style="color:rgba(255,255,255,0.2);">•</span>
-                            <span style="color:#cbd5e1;">Kho còn: <strong style="color:#ffffff;">{{ item.stock }}</strong></span>
+                            <span style="color:#6e5444;">Kho còn: <strong style="color:#2b180d;">{{ item.stock }}</strong></span>
                             <span style="color:rgba(255,255,255,0.2);">•</span>
                             <span style="color:#fde047; font-weight:700;">{{ "{:,.0f}".format(item.price) }} đ</span>
                         </div>
@@ -59,13 +59,13 @@
                         <form method="POST" action="{{ url_for('update_cart_route') }}" style="margin:0;">
                             <input type="hidden" name="product_id" value="{{ item.product_id }}">
                             <input type="hidden" name="delta" value="-1">
-                            <button type="submit" style="width:28px; height:28px; border-radius:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25); color:#ffffff; font-weight:800; cursor:pointer;" title="Giảm số lượng">-</button>
+                            <button type="submit" style="width:28px; height:28px; border-radius:8px; background:#ffffff; border:1px solid #fed7aa; color:#2b180d; font-weight:800; cursor:pointer;" title="Giảm số lượng">-</button>
                         </form>
-                        <strong style="min-width:28px; text-align:center; color:#ffffff !important; font-size:15px; font-weight:800;">{{ item.quantity }}</strong>
+                        <strong style="min-width:28px; text-align:center; color:#2b180d !important; font-size:15px; font-weight:800;">{{ item.quantity }}</strong>
                         <form method="POST" action="{{ url_for('update_cart_route') }}" style="margin:0;">
                             <input type="hidden" name="product_id" value="{{ item.product_id }}">
                             <input type="hidden" name="delta" value="1">
-                            <button type="submit" style="width:28px; height:28px; border-radius:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25); color:#ffffff; font-weight:800; cursor:pointer;" title="Tăng số lượng">+</button>
+                            <button type="submit" style="width:28px; height:28px; border-radius:8px; background:#ffffff; border:1px solid #fed7aa; color:#2b180d; font-weight:800; cursor:pointer;" title="Tăng số lượng">+</button>
                         </form>
                     </div>
                     <div style="text-align:right; min-width:115px;">
@@ -82,7 +82,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:20px;">🎟️</span>
-                    <strong style="color:#ffffff; font-size:15px;">Mã Giảm Giá / Voucher Ưu Đãi</strong>
+                    <strong style="color:#2b180d; font-size:15px;">Mã Giảm Giá / Voucher Ưu Đãi</strong>
                 </div>
                 <span style="font-size:11.5px; color:#f472b6; font-weight:700;">Nhập mã nhận từ Gmail hoặc chọn bên dưới</span>
             </div>
@@ -119,13 +119,13 @@
                     <button
                         type="button"
                         onclick="quickApplyVoucherCode('{{ v.code|e }}')"
-                        style="display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:10px; background:linear-gradient(135deg, rgba(139,92,246,0.22), rgba(236,72,153,0.18)); border:1px dashed rgba(236,72,153,0.55); color:#ffffff; font-size:12px; cursor:pointer; transition:transform 0.15s ease;"
+                        style="display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:10px; background:#fff7ed; border:1px dashed #fed7aa; color:#ea580c; font-size:12px; cursor:pointer; transition:transform 0.15s ease;"
                         title="Hạn dùng: {{ v.start_date }} đến {{ v.expiry_date }}"
                     >
                         <strong style="color:#fde047;">🏷️ {{ v.code }}</strong>
                         <span style="color:#34d399; font-weight:800;">{{ v.discount_display }}</span>
                         {% if v.min_order_value > 0 %}
-                        <span style="font-size:11px; color:#cbd5e1;">(Đơn &ge; {{ "{:,.0f}".format(v.min_order_value) }}đ)</span>
+                        <span style="font-size:11px; color:#6e5444;">(Đơn &ge; {{ "{:,.0f}".format(v.min_order_value) }}đ)</span>
                         {% endif %}
                     </button>
                     {% endfor %}
@@ -135,10 +135,10 @@
         </div>
 
         <!-- TỔNG TIỀN THANH TOÁN NỔI BẬT (CÓ TẠM TÍNH & TRỪ VOUCHER) -->
-        <div style="margin-top:16px; padding:18px 22px; background:linear-gradient(135deg, rgba(139,92,246,0.22) 0%, rgba(236,72,153,0.16) 100%); border:1.5px dashed rgba(139,92,246,0.5); border-radius:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13.5px; color:#cbd5e1; margin-bottom:6px;">
+        <div style="margin-top:16px; padding:18px 22px; background:#fff7ed; border:1.5px dashed #fed7aa; border-radius:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13.5px; color:#6e5444; margin-bottom:6px;">
                 <span>Tạm tính ({{ cart_items|length }} mặt hàng):</span>
-                <strong style="color:#ffffff;">{{ "{:,.0f}".format(cart_total) }} đ</strong>
+                <strong style="color:#2b180d;">{{ "{:,.0f}".format(cart_total) }} đ</strong>
             </div>
             <div id="voucherDiscountRow" style="display:{% if discount_amount and discount_amount > 0 %}flex{% else %}none{% endif %}; justify-content:space-between; align-items:center; font-size:13.5px; color:#f472b6; margin-bottom:8px;">
                 <span>🎟️ Giảm giá Voucher (<strong id="voucherAppliedCodeText">{{ applied_voucher.code if applied_voucher else '' }}</strong>):</span>
@@ -146,7 +146,7 @@
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.12);">
                 <div>
-                    <span style="font-size:14px; font-weight:800; color:#ffffff; text-transform:uppercase; letter-spacing:0.5px;">TỔNG TIỀN THANH TOÁN:</span>
+                    <span style="font-size:14px; font-weight:800; color:#2b180d; text-transform:uppercase; letter-spacing:0.5px;">TỔNG TIỀN THANH TOÁN:</span>
                     <div style="font-size:12px; color:#c4b5fd; margin-top:2px;">(Đã bao gồm thuế VAT &amp; ưu đãi Voucher)</div>
                 </div>
                 <strong id="finalCartTotalText" style="font-size:28px; font-weight:900; color:#34d399; letter-spacing:-0.5px;">{{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</strong>
@@ -156,8 +156,8 @@
         <!-- GIỎ HÀNG TRỐNG -->
         <div class="text-center" style="padding:48px 16px;">
             <div style="font-size:48px; margin-bottom:14px;">🛒</div>
-            <h3 style="color:#ffffff; font-size:19px; margin-bottom:8px;">Giỏ hàng của bạn đang trống</h3>
-            <p style="color:#cbd5e1; margin-bottom:24px; font-size:14.5px;">Hãy khám phá hàng chục giống chó mèo cảnh thuần chủng và đồ dùng phụ kiện tại cửa hàng!</p>
+            <h3 style="color:#2b180d; font-size:19px; margin-bottom:8px;">Giỏ hàng của bạn đang trống</h3>
+            <p style="color:#6e5444; margin-bottom:24px; font-size:14.5px;">Hãy khám phá hàng chục giống chó mèo cảnh thuần chủng và đồ dùng phụ kiện tại cửa hàng!</p>
             <a href="{{ url_for('shop_page') }}" class="btn btn-primary" style="padding:12px 28px; font-weight:800;">🐾 Mua sắm ngay tại Cửa hàng</a>
         </div>
         {% endif %}
@@ -166,28 +166,28 @@
     <!-- ==============================================================
          CỘT PHẢI: FORM GIAO HÀNG & PHƯƠNG THỨC THANH TOÁN QR VIETQR
          ============================================================== -->
-    <div class="card" style="background:rgba(18,14,40,0.85); border:1px solid rgba(139,92,246,0.45); box-shadow:0 20px 50px rgba(0,0,0,0.55); border-radius:20px; padding:22px;">
+    <div class="card" style="background:#ffffff; border:1.5px solid #fae4d4; box-shadow:0 10px 30px rgba(180,100,60,0.06); border-radius:20px; padding:22px;">
         <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:14px; margin-bottom:18px;">
             <div>
-                <h2 class="card-title" style="font-size:18px; color:#ffffff; margin:0;">📋 Thông Tin Nhận Hàng &amp; Thanh Toán</h2>
+                <h2 class="card-title" style="font-size:18px; color:#2b180d; margin:0;">📋 Thông Tin Nhận Hàng &amp; Thanh Toán</h2>
                 {% if customer_logged_in %}
                 <div style="display:inline-flex; align-items:center; gap:6px; margin-top:6px; padding:3px 10px; border-radius:99px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.35); font-size:11.5px; font-weight:800; color:#34d399;">
                     <span>✓ Đang đặt hàng bằng tài khoản thành viên: {{ customer_name }} (@{{ customer_username }})</span>
                 </div>
                 {% else %}
-                <p class="section-subtitle" style="margin:3px 0 0; color:#cbd5e1; font-size:12.5px;">Bắt buộc đăng nhập tài khoản thành viên để đặt mua và lưu lịch sử đơn hàng</p>
+                <p class="section-subtitle" style="margin:3px 0 0; color:#6e5444; font-size:12.5px;">Bắt buộc đăng nhập tài khoản thành viên để đặt mua và lưu lịch sử đơn hàng</p>
                 {% endif %}
             </div>
         </div>
 
         {% if not customer_logged_in and not is_admin %}
         <!-- BẮT BUỘC PHẢI CÓ TÀI KHOẢN MỚI ĐƯỢC ĐẶT HÀNG -->
-        <div style="padding:32px 20px; text-align:center; background:rgba(15,23,42,0.75); border:1.5px dashed rgba(139,92,246,0.55); border-radius:16px;">
-            <div style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(236,72,153,0.25) 100%); border:2px solid #8b5cf6; display:inline-flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:14px;">
+        <div style="padding:32px 20px; text-align:center; background:#fffbf8; border:1.5px dashed #fed7aa; border-radius:16px;">
+            <div style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%); border:2px solid #fb923c; display:inline-flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:14px;">
                 🔒
             </div>
-            <h3 style="color:#ffffff; font-size:18px; font-weight:800; margin-bottom:8px;">Bắt Buộc Đăng Nhập Tài Khoản Để Đặt Hàng</h3>
-            <p style="color:#cbd5e1; font-size:13.5px; line-height:1.6; margin-bottom:22px;">
+            <h3 style="color:#2b180d; font-size:18px; font-weight:800; margin-bottom:8px;">Bắt Buộc Đăng Nhập Tài Khoản Để Đặt Hàng</h3>
+            <p style="color:#6e5444; font-size:13.5px; line-height:1.6; margin-bottom:22px;">
                 Để bảo mật thông tin đơn hàng, lưu lịch sử mua sắm và không bị lẫn dữ liệu với các thao tác trước, quý khách vui lòng <strong>Đăng nhập</strong> hoặc <strong>Tạo tài khoản thành viên</strong> trước khi thanh toán.
             </p>
             <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
@@ -203,7 +203,7 @@
 
             <!-- 1. Họ và tên người nhận -->
             <div class="form-group" style="margin-bottom:14px;">
-                <label class="form-label" style="color:#ffffff; font-weight:700; font-size:13.5px;">Họ và tên người nhận (*)</label>
+                <label class="form-label" style="color:#2b180d; font-weight:700; font-size:13.5px;">Họ và tên người nhận (*)</label>
                 <input
                     type="text"
                     name="customer_name"
@@ -212,11 +212,11 @@
                     minlength="2"
                     maxlength="80"
                     class="form-control"
-                    style="background:rgba(15,23,42,0.85) !important; color:#ffffff !important; border:1.5px solid rgba(139,92,246,0.35) !important; border-radius:12px; font-size:14px; padding:11px 14px;"
+                    style="background:#ffffff !important; color:#2b180d !important; border:1.5px solid #fed7aa !important; border-radius:12px; font-size:14px; padding:11px 14px;"
                     placeholder="VD: Nguyễn Minh Anh"
                     required
                 >
-                <div style="font-size:11.5px; color:#cbd5e1; margin-top:3px;">Chỉ gồm chữ cái tiếng Việt, không chứa chữ số hoặc ký tự lạ.</div>
+                <div style="font-size:11.5px; color:#6e5444; margin-top:3px;">Chỉ gồm chữ cái tiếng Việt, không chứa chữ số hoặc ký tự lạ.</div>
                 {% for err in form.errors.get('customer_name', []) %}
                     <div class="form-error" style="color:#f87171; font-size:12px; margin-top:3px;">{{ err }}</div>
                 {% endfor %}
@@ -224,7 +224,7 @@
 
             <!-- 2. Số điện thoại nhận hàng -->
             <div class="form-group" style="margin-bottom:14px;">
-                <label class="form-label" style="color:#ffffff; font-weight:700; font-size:13.5px;">Số điện thoại nhận hàng (*) (Đúng 10 số)</label>
+                <label class="form-label" style="color:#2b180d; font-weight:700; font-size:13.5px;">Số điện thoại nhận hàng (*) (Đúng 10 số)</label>
                 <input
                     type="tel"
                     id="customerPhoneInput"
@@ -236,12 +236,12 @@
                     maxlength="10"
                     title="Số điện thoại phải gồm đúng 10 chữ số của Việt Nam (bắt đầu bằng 03, 05, 07, 08, 09)"
                     class="form-control"
-                    style="background:rgba(15,23,42,0.85) !important; color:#ffffff !important; border:1.5px solid rgba(139,92,246,0.35) !important; border-radius:12px; font-size:14px; padding:11px 14px;"
+                    style="background:#ffffff !important; color:#2b180d !important; border:1.5px solid #fed7aa !important; border-radius:12px; font-size:14px; padding:11px 14px;"
                     placeholder="VD: 0905123456"
                     required
                     oninput="refreshQRMemo()"
                 >
-                <div style="font-size:11.5px; color:#cbd5e1; margin-top:3px;">Định dạng chuẩn 10 chữ số (Đầu số di động Việt Nam: 03x, 05x, 07x, 08x, 09x).</div>
+                <div style="font-size:11.5px; color:#6e5444; margin-top:3px;">Định dạng chuẩn 10 chữ số (Đầu số di động Việt Nam: 03x, 05x, 07x, 08x, 09x).</div>
                 {% for err in form.errors.get('phone', []) %}
                     <div class="form-error" style="color:#f87171; font-size:12px; margin-top:3px;">{{ err }}</div>
                 {% endfor %}
@@ -249,7 +249,7 @@
 
             <!-- 3. Địa chỉ Email khách hàng -->
             <div class="form-group" style="margin-bottom:14px;">
-                <label class="form-label" style="display:flex; justify-content:space-between; align-items:center; color:#ffffff; font-weight:700; font-size:13.5px;">
+                <label class="form-label" style="display:flex; justify-content:space-between; align-items:center; color:#2b180d; font-weight:700; font-size:13.5px;">
                     <span>Địa chỉ Email của bạn (*)</span>
                     <span style="font-size:11.5px; color:#34d399; font-weight:700;">🔔 Báo đơn về Mail Admin</span>
                 </label>
@@ -260,11 +260,11 @@
                     value="{{ form.raw_data.get('email') or (customer_email if customer_logged_in else '') }}"
                     maxlength="120"
                     class="form-control"
-                    style="background:rgba(15,23,42,0.85) !important; color:#ffffff !important; border:1.5px solid rgba(139,92,246,0.35) !important; border-radius:12px; font-size:14px; padding:11px 14px;"
+                    style="background:#ffffff !important; color:#2b180d !important; border:1.5px solid #fed7aa !important; border-radius:12px; font-size:14px; padding:11px 14px;"
                     placeholder="VD: yourname@gmail.com"
                     required
                 >
-                <div style="font-size:11.5px; color:#cbd5e1; margin-top:3px;">
+                <div style="font-size:11.5px; color:#6e5444; margin-top:3px;">
                     Khi bấm Đặt mua, hệ thống sẽ tự động gửi thông báo đơn hàng chi tiết về hộp thư Email của Admin!
                 </div>
                 {% for err in form.errors.get('email', []) %}
@@ -274,7 +274,7 @@
 
             <!-- 4. Địa chỉ giao hàng chi tiết -->
             <div class="form-group" style="margin-bottom:14px;">
-                <label class="form-label" style="color:#ffffff; font-weight:700; font-size:13.5px;">Địa chỉ giao hàng chi tiết (*)</label>
+                <label class="form-label" style="color:#2b180d; font-weight:700; font-size:13.5px;">Địa chỉ giao hàng chi tiết (*)</label>
                 <input
                     type="text"
                     name="address"
@@ -283,11 +283,11 @@
                     minlength="3"
                     maxlength="250"
                     class="form-control"
-                    style="background:rgba(15,23,42,0.85) !important; color:#ffffff !important; border:1.5px solid rgba(139,92,246,0.35) !important; border-radius:12px; font-size:14px; padding:11px 14px;"
+                    style="background:#ffffff !important; color:#2b180d !important; border:1.5px solid #fed7aa !important; border-radius:12px; font-size:14px; padding:11px 14px;"
                     placeholder="VD: Số 123 đường Nguyễn Văn Linh, P. Nam Dương, Q. Hải Châu, Đà Nẵng"
                     required
                 >
-                <div style="font-size:11.5px; color:#cbd5e1; margin-top:3px;">
+                <div style="font-size:11.5px; color:#6e5444; margin-top:3px;">
                     Vui lòng ghi rõ số nhà, tên đường, phường/xã, quận/huyện để shipper giao tận tay.
                 </div>
                 {% for err in form.errors.get('address', []) %}
@@ -297,14 +297,14 @@
 
             <!-- 5. PHƯƠNG THỨC THANH TOÁN (COD & VIETQR CHUẨN 100%) -->
             <div class="form-group" style="margin-bottom:16px;">
-                <label class="form-label" style="color:#ffffff; font-weight:700; font-size:13.5px;">Phương thức thanh toán (*)</label>
+                <label class="form-label" style="color:#2b180d; font-weight:700; font-size:13.5px;">Phương thức thanh toán (*)</label>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
                     <!-- LỰA CHỌN 1: COD -->
-                    <div id="paymentCardCod" onclick="setPayment('cod')" style="display:flex; align-items:center; gap:10px; padding:13px 14px; border-radius:14px; background:rgba(139,92,246,0.18); border:2px solid #8b5cf6; cursor:pointer; transition:all 0.2s ease;">
+                    <div id="paymentCardCod" onclick="setPayment('cod')" style="display:flex; align-items:center; gap:10px; padding:13px 14px; border-radius:14px; background:#fff7ed; border:2px solid #fb923c; cursor:pointer; transition:all 0.2s ease;">
                         <input type="radio" id="radioCod" name="payment_method" value="cod" checked style="width:18px; height:18px; accent-color:#8b5cf6;" onchange="setPayment('cod')">
                         <label for="radioCod" style="cursor:pointer; margin:0;">
-                            <strong style="font-size:13px; font-weight:800; color:#ffffff; display:block;">💵 Nhận hàng trả tiền (COD)</strong>
-                            <div style="font-size:11px; color:#cbd5e1; margin-top:2px;">Kiểm hàng tận tay trước khi trả</div>
+                            <strong style="font-size:13px; font-weight:800; color:#2b180d; display:block;">💵 Nhận hàng trả tiền (COD)</strong>
+                            <div style="font-size:11px; color:#6e5444; margin-top:2px;">Kiểm hàng tận tay trước khi trả</div>
                         </label>
                     </div>
 
@@ -312,7 +312,7 @@
                     <div id="paymentCardBanking" onclick="setPayment('banking')" style="display:flex; align-items:center; gap:10px; padding:13px 14px; border-radius:14px; background:rgba(255,255,255,0.04); border:2px solid rgba(255,255,255,0.15); cursor:pointer; transition:all 0.2s ease;">
                         <input type="radio" id="radioBanking" name="payment_method" value="banking" style="width:18px; height:18px; accent-color:#34d399;" onchange="setPayment('banking')">
                         <label for="radioBanking" style="cursor:pointer; margin:0;">
-                            <strong style="font-size:13px; font-weight:800; color:#ffffff; display:block;">💳 Quét mã QR (VietQR)</strong>
+                            <strong style="font-size:13px; font-weight:800; color:#2b180d; display:block;">💳 Quét mã QR (VietQR)</strong>
                             <div style="font-size:11px; color:#34d399; margin-top:2px;">Hiện mã VietQR thanh toán tức thì</div>
                         </label>
                     </div>
@@ -329,7 +329,7 @@
                                 💳
                             </div>
                             <div>
-                                <div style="color:#ffffff; font-size:14.5px; font-weight:800; letter-spacing:0.2px;">CỔNG QUÉT MÃ VIETQR NAPAS 247</div>
+                                <div style="color:#2b180d; font-size:14.5px; font-weight:800; letter-spacing:0.2px;">CỔNG QUÉT MÃ VIETQR NAPAS 247</div>
                                 <div style="font-size:11.5px; color:#34d399; font-weight:600;">Tự động điền chính xác số tiền &amp; nội dung chuyển khoản</div>
                             </div>
                         </div>
@@ -350,7 +350,7 @@
                                 <img id="vietqrImage" src="https://api.vietqr.io/image/{{ bank_config.bank_bin|default('970422') }}-{{ bank_config.account_number|default('0905123456') }}-qr_only.png?amount={{ (final_cart_total|default(cart_total))|int }}&addInfo={{ bank_config.syntax_prefix|default('MEOW') }}%20{{ customer_phone or '0905123456' }}&accountName={{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE')|urlencode }}" alt="Mã VietQR Thanh Toán" style="width:154px; height:154px; display:block; object-fit:contain;" onerror="reloadFallbackQR();">
                             </div>
 
-                            <button type="button" onclick="openQrZoomModal()" style="margin-top:10px; width:100%; padding:6px 10px; border-radius:9px; background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.45); color:#e2e8f0; font-size:11.5px; font-weight:700; cursor:pointer;">
+                            <button type="button" onclick="openQrZoomModal()" style="margin-top:10px; width:100%; padding:6px 10px; border-radius:9px; background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.45); color:#503829; font-size:11.5px; font-weight:700; cursor:pointer;">
                                 🔍 Phóng to mã QR
                             </button>
                         </div>
@@ -361,7 +361,7 @@
                             <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.09); border-radius:11px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
                                 <div>
                                     <div style="font-size:10.5px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Ngân hàng thụ hưởng</div>
-                                    <strong style="color:#ffffff; font-size:13.5px; font-weight:800;" id="qrBankName">{{ bank_config.bank_name|default('MB Bank (Ngân hàng Quân Đội)') }}</strong>
+                                    <strong style="color:#2b180d; font-size:13.5px; font-weight:800;" id="qrBankName">{{ bank_config.bank_name|default('MB Bank (Ngân hàng Quân Đội)') }}</strong>
                                 </div>
                                 <span style="font-size:18px;">🏦</span>
                             </div>
@@ -372,14 +372,14 @@
                                     <div style="font-size:10.5px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Số tài khoản nhận</div>
                                     <strong style="color:#fde047; font-size:16px; font-weight:900; letter-spacing:0.6px;" id="qrAccNum">{{ bank_config.account_number|default('0905123456') }}</strong>
                                 </div>
-                                <button type="button" onclick="copyToClipboard('{{ bank_config.account_number|default('0905123456') }}', this)" class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11.5px; height:auto; color:#ffffff; border-color:rgba(250,204,21,0.45); flex-shrink:0;">📋 Sao chép</button>
+                                <button type="button" onclick="copyToClipboard('{{ bank_config.account_number|default('0905123456') }}', this)" class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11.5px; height:auto; color:#2b180d; border-color:rgba(250,204,21,0.45); flex-shrink:0;">📋 Sao chép</button>
                             </div>
 
                             <!-- Hàng 3: Chủ tài khoản -->
                             <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.09); border-radius:11px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
                                 <div>
                                     <div style="font-size:10.5px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Chủ tài khoản</div>
-                                    <strong style="color:#ffffff; font-size:13.5px; font-weight:800; letter-spacing:0.3px;" id="qrAccName">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</strong>
+                                    <strong style="color:#2b180d; font-size:13.5px; font-weight:800; letter-spacing:0.3px;" id="qrAccName">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</strong>
                                 </div>
                                 <span style="font-size:11px; color:#34d399; font-weight:800;">✓ Đã xác thực</span>
                             </div>
@@ -391,21 +391,21 @@
                                         <div style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Số tiền</div>
                                         <strong id="qrAmountDisplay" style="color:#34d399; font-size:14.5px; font-weight:900;">{{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</strong>
                                     </div>
-                                    <button type="button" onclick="copyToClipboard(String(window.CURRENT_FINAL_TOTAL || {{ (final_cart_total|default(cart_total))|int }}), this)" class="btn btn-outline btn-sm" style="padding:3px 7px; font-size:10.5px; height:auto; color:#ffffff;">📋</button>
+                                    <button type="button" onclick="copyToClipboard(String(window.CURRENT_FINAL_TOTAL || {{ (final_cart_total|default(cart_total))|int }}), this)" class="btn btn-outline btn-sm" style="padding:3px 7px; font-size:10.5px; height:auto; color:#2b180d;">📋</button>
                                 </div>
 
-                                <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(139,92,246,0.35); border-radius:11px; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; gap:4px;">
+                                <div style="background:#fffbf8; border:1px solid #fed7aa; border-radius:11px; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; gap:4px;">
                                     <div>
                                         <div style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Nội dung CK</div>
                                         <strong style="color:#c4b5fd; font-size:13px; font-weight:800;" id="qrTransferDesc">{{ bank_config.syntax_prefix|default('MEOW') }} {{ customer_phone or '0905123456' }}</strong>
                                     </div>
-                                    <button type="button" onclick="copyTransferMemo(this)" class="btn btn-outline btn-sm" style="padding:3px 7px; font-size:10.5px; height:auto; color:#ffffff;">📋</button>
+                                    <button type="button" onclick="copyTransferMemo(this)" class="btn btn-outline btn-sm" style="padding:3px 7px; font-size:10.5px; height:auto; color:#2b180d;">📋</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div style="margin-top:12px; font-size:11.5px; color:#cbd5e1; background:rgba(139,92,246,0.14); border:1px solid rgba(139,92,246,0.28); padding:8px 12px; border-radius:10px; text-align:center;">
+                    <div style="margin-top:12px; font-size:11.5px; color:#6e5444; background:#fff7ed; border:1px solid #fed7aa; padding:8px 12px; border-radius:10px; text-align:center;">
                         💡 Mở App Ngân hàng bất kỳ (MB, VCB, Techcombank, ACB, VPBank, MoMo...) &rarr; Chọn <strong>Quét Mã QR</strong> rồi bấm nút <strong>Đặt Mua</strong> bên dưới để hoàn tất!
                     </div>
                 </div>
@@ -413,7 +413,7 @@
 
             <!-- 6. Ghi chú giao hàng (Tùy chọn) -->
             <div class="form-group" style="margin-bottom:18px;">
-                <label class="form-label" style="color:#cbd5e1; font-weight:600; font-size:13px;">Ghi chú giao hàng (Tùy chọn):</label>
+                <label class="form-label" style="color:#6e5444; font-weight:600; font-size:13px;">Ghi chú giao hàng (Tùy chọn):</label>
                 <input
                     type="text"
                     name="note"
@@ -421,7 +421,7 @@
                     value="{{ form.raw_data.get('note', '') }}"
                     maxlength="200"
                     class="form-control"
-                    style="background:rgba(15,23,42,0.85) !important; color:#ffffff !important; border:1.5px solid rgba(139,92,246,0.3) !important; border-radius:12px; font-size:14px; padding:10px 14px;"
+                    style="background:#ffffff !important; color:#2b180d !important; border:1.5px solid #fed7aa !important; border-radius:12px; font-size:14px; padding:10px 14px;"
                     placeholder="VD: Giao giờ hành chính, gọi trước khi giao 15 phút..."
                 >
             </div>
@@ -429,7 +429,7 @@
             <button type="submit" class="btn-add-product-glow" style="width:100%; justify-content:center; padding:15px; font-size:16px; font-weight:800; border-radius:14px;" {% if not cart_items %}disabled{% endif %}>
                 🛍️ Đặt Mua &amp; Gửi Thông Báo Đơn Hàng Ngay
             </button>
-            <div style="text-align:center; margin-top:10px; font-size:12px; color:#cbd5e1;">
+            <div style="text-align:center; margin-top:10px; font-size:12px; color:#6e5444;">
                 🔒 Bảo hành sức khỏe thú cưng 15 ngày • Đổi trả thức ăn phụ kiện trong 7 ngày
             </div>
         </form>
@@ -441,15 +441,15 @@
 <div id="qrZoomModal" onclick="if(event.target===this) closeQrZoomModal();" style="display:none; position:fixed; inset:0; background:rgba(5,4,16,0.85); backdrop-filter:blur(8px); z-index:999999; align-items:center; justify-content:center; padding:20px;">
     <div style="background:linear-gradient(145deg, #161233 0%, #0f172a 100%); border:2px solid #34d399; border-radius:24px; padding:26px; max-width:380px; width:100%; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.8);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-            <strong style="color:#ffffff; font-size:16px;">📱 Quét Mã QR VietQR Napas247</strong>
-            <button type="button" onclick="closeQrZoomModal()" style="background:rgba(255,255,255,0.1); border:none; color:#ffffff; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:18px;">&times;</button>
+            <strong style="color:#2b180d; font-size:16px;">📱 Quét Mã QR VietQR Napas247</strong>
+            <button type="button" onclick="closeQrZoomModal()" style="background:#f1f5f9; border:none; color:#475569; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:18px;">&times;</button>
         </div>
         <div style="background:#ffffff; padding:16px; border-radius:18px; display:inline-block; box-shadow:0 12px 30px rgba(0,0,0,0.5);">
             <img id="vietqrZoomImage" src="" alt="Mã VietQR Phóng To" style="width:260px; height:260px; display:block; object-fit:contain;">
         </div>
-        <div style="margin-top:14px; font-size:13.5px; color:#e2e8f0; line-height:1.6;">
+        <div style="margin-top:14px; font-size:13.5px; color:#503829; line-height:1.6;">
             <div><strong style="color:#fde047; font-size:16px;">{{ bank_config.account_number|default('0905123456') }}</strong> • {{ bank_config.bank_name|default('MB Bank') }}</div>
-            <div style="color:#ffffff; font-weight:700;">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</div>
+            <div style="color:#2b180d; font-weight:700;">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</div>
             <div id="qrZoomAmountText" style="color:#34d399; font-weight:900; font-size:18px; margin-top:4px;">Số tiền: {{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</div>
         </div>
     </div>
@@ -613,8 +613,8 @@ function setPayment(method) {
             qrBox.style.setProperty('display', 'none', 'important');
         }
         if (cardCod) {
-            cardCod.style.borderColor = '#8b5cf6';
-            cardCod.style.background = 'rgba(139,92,246,0.18)';
+            cardCod.style.borderColor = '#fb923c';
+            cardCod.style.background = '#fff7ed';
         }
         if (cardBank) {
             cardBank.style.borderColor = 'rgba(255,255,255,0.15)';
