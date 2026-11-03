@@ -172,7 +172,7 @@
                     {% else %}
                     <a href="{{ url_for('admin_page', tab='products', open_modal=1) }}" class="btn btn-primary btn-sm btn-add-product-glow">+ Thêm sản phẩm mới</a>
                     {% endif %}
-                    <a href="{{ url_for('logout_page', silent=1) }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="btn-view-site">
+                    <a href="{{ url_for('home_page') }}" target="_blank" class="btn-view-site">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
                         </svg>
@@ -1241,9 +1241,10 @@
                                     </button>
                                 </form>
 
-                                <a href="{{ url_for('order_success_page', order_id=o.id) }}" target="_blank" class="btn btn-outline btn-sm" style="height:38px; padding:0 16px; border-radius:99px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;">
-                                    🧾 Xem Hóa đơn &amp; QR
-                                </a>
+                                <script type="application/json" id="orderData_{{ o.id }}">{{ o.to_dict()|tojson }}</script>
+                                <button type="button" onclick="openAdminInvoiceModal({{ o.id }})" class="btn btn-outline btn-sm" style="height:38px; padding:0 16px; border-radius:99px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; cursor:pointer;">
+                                    📰 Xem Hóa đơn &amp; QR
+                                </button>
 
                                 <form method="POST" action="{{ url_for('admin_delete_order', order_id=o.id) }}" onsubmit="return confirm('Xóa đơn hàng #DH{{ o.id }} của {{ o.customer_name }}?');" style="margin:0;">
                                     <button type="submit" class="btn btn-danger btn-sm" style="height:38px; padding:0 14px; border-radius:99px; white-space:nowrap;">
@@ -2634,5 +2635,275 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
         setInterval(poll, 6000);
     })();
     </script>
+
+    <!-- ==============================================================
+         MODAL CHI TIẾT HÓA ĐƠN & VIETQR NGAY TẠI ADMIN DASHBOARD (GEN Z PASTEL)
+         ============================================================== -->
+    <div id="adminInvoiceModal" style="display:none; position:fixed; inset:0; background:rgba(43,24,13,0.65); backdrop-filter:blur(8px); z-index:999999; align-items:center; justify-content:center; padding:18px;">
+        <div style="background:#ffffff; border:2px solid #fed7aa; border-radius:24px; max-width:820px; width:100%; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 60px rgba(180,100,60,0.22); animation:admFadeUp 0.3s ease;">
+            <!-- Modal Header -->
+            <div style="padding:18px 24px; border-bottom:1.5px solid #fae4d4; background:#fff7ed; display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #fb923c, #ea580c); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 12px rgba(234,88,12,0.25);">
+                        🧾
+                    </div>
+                    <div>
+                        <div style="font-size:18px; font-weight:900; color:#2b180d;" id="modalOrderHeading">Hóa Đơn Bán Lẻ & Chi Tiết #DH</div>
+                        <div style="font-size:12px; color:#8c7161;" id="modalOrderDate">Thời gian đặt: --</div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span id="modalOrderStatusBadge" class="badge badge-stock-ok" style="font-size:12px; padding:5px 12px; font-weight:800;">Trạng thái</span>
+                    <button type="button" onclick="closeAdminInvoiceModal()" style="background:#ffffff; border:1px solid #fed7aa; color:#8c7161; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; line-height:1;">&times;</button>
+                </div>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div id="adminInvoicePrintArea" style="flex:1; overflow-y:auto; padding:22px 24px; background:#fffbf8;">
+                <!-- Thông tin khách hàng & Giao hàng -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
+                    <div style="background:#ffffff; border:1.5px solid #fae4d4; border-radius:16px; padding:14px 16px;">
+                        <div style="font-size:11px; color:#8c7161; text-transform:uppercase; font-weight:800; letter-spacing:0.5px; margin-bottom:4px;">👤 THÔNG TIN KHÁCH HÀNG</div>
+                        <div style="font-size:15px; font-weight:800; color:#2b180d;" id="modalCustomerName">--</div>
+                        <div style="font-size:13px; color:#503829; margin-top:4px;">📞 SĐT: <strong id="modalCustomerPhone" style="color:#ea580c;">--</strong></div>
+                        <div style="font-size:12.5px; color:#503829; margin-top:2px;">✉️ Email: <span id="modalCustomerEmail">--</span></div>
+                    </div>
+
+                    <div style="background:#ffffff; border:1.5px solid #fae4d4; border-radius:16px; padding:14px 16px;">
+                        <div style="font-size:11px; color:#8c7161; text-transform:uppercase; font-weight:800; letter-spacing:0.5px; margin-bottom:4px;">📍 ĐỊA CHỈ & THANH TOÁN</div>
+                        <div style="font-size:13.5px; color:#2b180d; font-weight:700; line-height:1.45;" id="modalCustomerAddress">--</div>
+                        <div style="font-size:12.5px; color:#503829; margin-top:6px;">
+                            💳 Phương thức: <strong id="modalPaymentMethod" style="color:#059669;">--</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng danh sách sản phẩm -->
+                <div style="background:#ffffff; border:1.5px solid #fae4d4; border-radius:16px; overflow:hidden; margin-bottom:18px;">
+                    <div style="padding:12px 16px; background:#fff7ed; border-bottom:1.5px solid #fae4d4; font-size:13px; font-weight:800; color:#ea580c; display:flex; justify-content:space-between;">
+                        <span>DANH SÁCH MÓN HÀNG ĐÃ ĐẶT</span>
+                        <span id="modalItemCount">0 sản phẩm</span>
+                    </div>
+                    <table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left;">
+                        <thead>
+                            <tr style="border-bottom:1px solid #fae4d4; background:#fffbf8; color:#8c7161; font-size:11.5px;">
+                                <th style="padding:10px 14px;">Sản phẩm</th>
+                                <th style="padding:10px 14px; text-align:center;">SKU</th>
+                                <th style="padding:10px 14px; text-align:right;">Đơn giá</th>
+                                <th style="padding:10px 14px; text-align:center;">SL</th>
+                                <th style="padding:10px 14px; text-align:right;">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalItemsTableBody">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tổng kết tiền & Voucher -->
+                <div style="background:#ffffff; border:1.5px solid #fed7aa; border-radius:16px; padding:14px 18px; margin-bottom:18px;">
+                    <div style="display:flex; justify-content:space-between; font-size:13px; color:#503829; margin-bottom:6px;">
+                        <span>Tạm tính tiền hàng:</span>
+                        <strong id="modalSubtotal">0 đ</strong>
+                    </div>
+                    <div id="modalVoucherRow" style="display:none; justify-content:space-between; font-size:13px; color:#ea580c; margin-bottom:6px;">
+                        <span>🎟️ Mã Voucher giảm giá (<span id="modalVoucherCode">--</span>):</span>
+                        <strong id="modalDiscountAmount">-0 đ</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:900; color:#2b180d; border-top:1.5px dashed #fed7aa; padding-top:10px; margin-top:6px;">
+                        <span>TỔNG THANH TOÁN:</span>
+                        <span id="modalTotalAmount" style="color:#059669; font-size:18px;">0 đ</span>
+                    </div>
+                </div>
+
+                <!-- Thẻ VietQR Thanh Toán & Đối Soát Chuẩn Pastel -->
+                <div style="background:#ffffff; border:1.5px solid #fed7aa; border-radius:18px; padding:18px; box-shadow:0 8px 24px rgba(251,146,60,0.06);">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1px solid #fae4d4; padding-bottom:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:13px; font-weight:900; color:#ea580c;">VIET<span style="color:#0284c7;">QR</span> NAPAS 24/7</span>
+                            <span style="font-size:11px; background:#ecfdf5; color:#059669; font-weight:800; padding:2px 8px; border-radius:99px; border:1px solid #a7f3d0;">✓ Đối soát tự động</span>
+                        </div>
+                        <span style="font-size:12px; color:#8c7161;">Quét qua mọi App Ngân Hàng</span>
+                    </div>
+
+                    <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+                        <div style="width:145px; height:145px; background:#fffbf8; border:1.5px solid #fed7aa; border-radius:14px; padding:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <img id="modalQrImage" src="" alt="Mã VietQR" style="width:125px; height:125px; object-fit:contain; display:block;">
+                        </div>
+
+                        <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:8px;">
+                            <div style="background:#fffbf8; border:1px solid #fae4d4; border-radius:10px; padding:7px 12px; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:10px; color:#8c7161; text-transform:uppercase; font-weight:700;">Ngân hàng</div>
+                                    <strong id="modalQrBankName" style="color:#2b180d; font-size:13px;">{{ bank_config.bank_name }}</strong>
+                                </div>
+                                <span style="font-size:18px;">🏦</span>
+                            </div>
+
+                            <div style="background:#fffbf8; border:1px solid #fed7aa; border-radius:10px; padding:7px 12px; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:10px; color:#8c7161; text-transform:uppercase; font-weight:700;">Số tài khoản nhận</div>
+                                    <strong id="modalQrAccNum" style="color:#ea580c; font-size:14.5px; font-weight:900; font-family:Consolas, monospace;">{{ bank_config.account_number }}</strong>
+                                </div>
+                                <button type="button" onclick="copyAdminText(document.getElementById('modalQrAccNum').textContent, this)" class="btn btn-outline btn-sm" style="padding:3px 8px; font-size:11px;">Sao chép</button>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:6px 10px;">
+                                    <div style="font-size:9.5px; color:#166534; font-weight:700; text-transform:uppercase;">Số tiền</div>
+                                    <strong id="modalQrAmount" style="color:#15803d; font-size:13.5px; font-weight:900;">0 đ</strong>
+                                </div>
+                                <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                                    <div>
+                                        <div style="font-size:9.5px; color:#9a3412; font-weight:700; text-transform:uppercase;">Cú pháp CK</div>
+                                        <strong id="modalQrMemo" style="color:#c2410c; font-size:12.5px; font-weight:900; font-family:Consolas, monospace;">MEOW</strong>
+                                    </div>
+                                    <button type="button" onclick="copyAdminText(document.getElementById('modalQrMemo').textContent, this)" class="btn btn-outline btn-sm" style="padding:2px 6px; font-size:10px;">📋</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer Buttons -->
+            <div style="padding:14px 24px; border-top:1.5px solid #fae4d4; background:#fff7ed; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button type="button" onclick="printAdminInvoice()" class="btn btn-primary btn-sm" style="padding:8px 18px; border-radius:99px; font-weight:800; display:inline-flex; align-items:center; gap:6px;">
+                        🖨️ In Hóa Đơn
+                    </button>
+                    <a id="modalCustomerViewLink" href="#" target="_blank" class="btn btn-outline btn-sm" style="padding:8px 16px; border-radius:99px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                        🔗 Mở trang hóa đơn khách
+                    </a>
+                </div>
+                <button type="button" onclick="closeAdminInvoiceModal()" class="btn btn-outline btn-sm" style="padding:8px 20px; border-radius:99px; font-weight:800;">
+                    ✕ Đóng lại
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT ĐIỀU KHIỂN IN-ADMIN ORDER INVOICE MODAL -->
+    <script>
+    var MW_BANK_CONFIG = {{ bank_config|tojson }};
+
+    function openAdminInvoiceModal(orderId) {
+        var el = document.getElementById('orderData_' + orderId);
+        if (!el) return;
+        var o = JSON.parse(el.textContent);
+
+        document.getElementById('modalOrderHeading').textContent = 'Hóa Đơn Bán Lẻ #' + (o.id ? ('DH' + o.id) : '');
+        document.getElementById('modalOrderDate').textContent = 'Thời gian đặt: ' + (o.created_at || 'Vừa xong');
+
+        var stBadge = document.getElementById('modalOrderStatusBadge');
+        if (stBadge) {
+            stBadge.textContent = o.status || 'Chờ xác nhận';
+            if (o.status === 'Hoàn thành') {
+                stBadge.className = 'badge badge-stock-ok';
+            } else if (o.status === 'Đã hủy') {
+                stBadge.className = 'badge badge-stock-out';
+            } else {
+                stBadge.className = 'badge badge-both';
+            }
+        }
+
+        document.getElementById('modalCustomerName').textContent = o.customer_name || 'Khách vãng lai';
+        document.getElementById('modalCustomerPhone').textContent = o.phone || '--';
+        document.getElementById('modalCustomerEmail').textContent = o.email || 'Chưa cung cấp';
+        document.getElementById('modalCustomerAddress').textContent = o.address || '--';
+        document.getElementById('modalPaymentMethod').textContent = (o.payment_method === 'banking') ? '💳 Chuyển khoản VietQR' : '💵 Thu tiền khi nhận (COD)';
+
+        // Items table
+        var items = [];
+        try {
+            if (o.items && Array.isArray(o.items)) {
+                items = o.items;
+            } else if (o.items_json) {
+                items = JSON.parse(o.items_json);
+            }
+        } catch(e) { items = []; }
+
+        document.getElementById('modalItemCount').textContent = items.length + ' món';
+        var tbody = document.getElementById('modalItemsTableBody');
+        tbody.innerHTML = '';
+        var subtotal = 0;
+        items.forEach(function(item) {
+            var pr = Number(item.price) || 0;
+            var qty = Number(item.quantity) || 1;
+            var lineTot = Number(item.subtotal) || (pr * qty);
+            subtotal += lineTot;
+            var tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #fae4d4';
+            tr.innerHTML = '<td style="padding:10px 14px; font-weight:700; color:#2b180d;">' + (item.name || 'Sản phẩm') + '</td>' +
+                           '<td style="padding:10px 14px; text-align:center; color:#8c7161; font-family:Consolas, monospace;">' + (item.sku || '--') + '</td>' +
+                           '<td style="padding:10px 14px; text-align:right; color:#503829;">' + Number(pr).toLocaleString('vi-VN') + ' đ</td>' +
+                           '<td style="padding:10px 14px; text-align:center; font-weight:800; color:#ea580c;">x' + qty + '</td>' +
+                           '<td style="padding:10px 14px; text-align:right; font-weight:800; color:#2b180d;">' + Number(lineTot).toLocaleString('vi-VN') + ' đ</td>';
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('modalSubtotal').textContent = Number(subtotal || o.total_amount).toLocaleString('vi-VN') + ' đ';
+
+        var vRow = document.getElementById('modalVoucherRow');
+        if (o.discount_amount && Number(o.discount_amount) > 0) {
+            vRow.style.display = 'flex';
+            document.getElementById('modalVoucherCode').textContent = o.voucher_code || 'VOUCHER';
+            document.getElementById('modalDiscountAmount').textContent = '-' + Number(o.discount_amount).toLocaleString('vi-VN') + ' đ';
+        } else {
+            vRow.style.display = 'none';
+        }
+
+        document.getElementById('modalTotalAmount').textContent = Number(o.total_amount).toLocaleString('vi-VN') + ' đ';
+
+        // VietQR
+        var memo = (MW_BANK_CONFIG.syntax_prefix || 'MEOW') + ' ' + (o.id || '');
+        document.getElementById('modalQrBankName').textContent = MW_BANK_CONFIG.bank_name || 'MB Bank';
+        document.getElementById('modalQrAccNum').textContent = MW_BANK_CONFIG.account_number || '0905123456';
+        document.getElementById('modalQrAmount').textContent = Number(o.total_amount).toLocaleString('vi-VN') + ' đ';
+        document.getElementById('modalQrMemo').textContent = memo;
+
+        var qrImgUrl = 'https://api.vietqr.io/image/' + (MW_BANK_CONFIG.bank_bin || '970422') + '-' +
+                       (MW_BANK_CONFIG.account_number || '0905123456') + '-qr_only.png?amount=' +
+                       Math.round(o.total_amount) + '&addInfo=' + encodeURIComponent(memo) +
+                       '&accountName=' + encodeURIComponent(MW_BANK_CONFIG.account_name || 'MEOW AND WOOF');
+        document.getElementById('modalQrImage').src = qrImgUrl;
+
+        // Customer link
+        document.getElementById('modalCustomerViewLink').href = '/order-success/' + o.id;
+
+        // Show modal
+        var modal = document.getElementById('adminInvoiceModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeAdminInvoiceModal() {
+        var modal = document.getElementById('adminInvoiceModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function copyAdminText(str, btn) {
+        if (!str) return;
+        navigator.clipboard.writeText(str).then(function() {
+            var old = btn.textContent;
+            btn.textContent = '✓ Đã chép';
+            setTimeout(function() { btn.textContent = old; }, 1400);
+        });
+    }
+
+    function printAdminInvoice() {
+        var content = document.getElementById('adminInvoicePrintArea');
+        if (!content) return;
+        var printWin = window.open('', '_blank', 'width=800,height=700');
+        printWin.document.write('<html><head><title>In Hóa Đơn Meow & Woof</title>');
+        printWin.document.write('<style>body{font-family:sans-serif;padding:24px;color:#2b180d;}table{width:100%;border-collapse:collapse;margin:16px 0;}th,td{border:1px solid #fae4d4;padding:8px;}</style></head><body>');
+        printWin.document.write('<div style="text-align:center;margin-bottom:16px;"><h2 style="margin:0;color:#ea580c;">MEOW & WOOF PET HOUSE</h2><p style="margin:4px 0;font-weight:bold;">HÓA ĐƠN BÁN LẺ & GIAO HÀNG</p></div>');
+        printWin.document.write(content.innerHTML);
+        printWin.document.write('</body></html>');
+        printWin.document.close();
+        printWin.focus();
+        setTimeout(function() { printWin.print(); printWin.close(); }, 350);
+    }
+    </script>
+
 </body>
 </html>

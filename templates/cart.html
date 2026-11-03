@@ -318,94 +318,96 @@
                     </div>
                 </div>
 
-                <!-- ==============================================================
-                     KHUNG MÃ VIETQR FINTECH CAO CẤP (RÕ NÉT, KHÔNG VỠ CHỮ, CÓ PHÓNG TO)
+                                <!-- ==============================================================
+                     KHUNG MÃ VIETQR FINTECH PASTEL CAM ĐÀO & TRẮNG ẤM
                      ============================================================== -->
-                <div id="vietqrBox" style="display:none; margin-top:14px; margin-bottom:16px; padding:20px; border-radius:20px; background:linear-gradient(145deg, rgba(13,18,36,0.98) 0%, rgba(26,20,62,0.98) 100%); border:1.5px solid rgba(52,211,153,0.65); box-shadow:0 16px 40px rgba(0,0,0,0.55), 0 0 25px rgba(52,211,153,0.18);">
+                <div id="vietqrBox" style="display:none; margin-top:16px; margin-bottom:18px; padding:22px; border-radius:22px; background:#ffffff; border:1.5px solid #fed7aa; box-shadow:0 12px 36px rgba(251,146,60,0.08);">
                     <!-- Header cổng thanh toán -->
-                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div style="width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 12px rgba(16,185,129,0.4);">
+                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; padding-bottom:14px; border-bottom:1.5px dashed #fed7aa;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #fb923c 0%, #ea580c 100%); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 14px rgba(234,88,12,0.25);">
                                 💳
                             </div>
                             <div>
-                                <div style="color:#2b180d; font-size:14.5px; font-weight:800; letter-spacing:0.2px;">CỔNG QUÉT MÃ VIETQR NAPAS 247</div>
-                                <div style="font-size:11.5px; color:#34d399; font-weight:600;">Tự động điền chính xác số tiền &amp; nội dung chuyển khoản</div>
+                                <div style="color:#2b180d; font-size:15px; font-weight:800; letter-spacing:0.3px;">CỔNG QUÉT MÃ VIETQR NAPAS 24/7</div>
+                                <div style="font-size:12px; color:#ea580c; font-weight:600;">Tự động điền chính xác 100% số tiền & nội dung chuyển khoản</div>
                             </div>
                         </div>
-                        <span style="padding:4px 11px; border-radius:99px; background:rgba(52,211,153,0.16); border:1px solid rgba(52,211,153,0.4); color:#34d399; font-size:11px; font-weight:800;">⚡ Xác nhận 24/7</span>
+                        <span style="padding:5px 12px; border-radius:99px; background:#ecfdf5; border:1px solid #a7f3d0; color:#059669; font-size:11.5px; font-weight:800; display:inline-flex; align-items:center; gap:5px;">
+                            <span style="width:7px; height:7px; border-radius:50%; background:#10b981;"></span> Xác nhận tự động 24/7
+                        </span>
                     </div>
 
                     <!-- Khung chính: Cột trái Mã QR Vuông Sắc Nét + Cột phải Bảng Thông Tin Từng Hàng -->
-                    <div style="display:flex; gap:18px; align-items:stretch; flex-wrap:wrap; justify-content:center;">
+                    <div style="display:flex; gap:20px; align-items:stretch; flex-wrap:wrap; justify-content:center;">
                         <!-- CỘT TRÁI: KHUNG QUÉT QR VUÔNG CHUẨN FINTECH -->
-                        <div style="width:206px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:12px;">
+                        <div style="width:210px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:space-between; background:#fffbf8; border:1.5px solid #fed7aa; border-radius:18px; padding:14px;">
                             <div style="width:100%; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; padding:0 4px;">
-                                <span style="font-size:11px; font-weight:900; color:#f87171; letter-spacing:0.5px;">VIET<span style="color:#60a5fa;">QR</span></span>
-                                <span style="font-size:10.5px; font-weight:800; color:#34d399;">NAPAS 247</span>
+                                <span style="font-size:11.5px; font-weight:900; color:#ea580c; letter-spacing:0.5px;">VIET<span style="color:#0284c7;">QR</span></span>
+                                <span style="font-size:11px; font-weight:800; color:#059669;">NAPAS 247</span>
                             </div>
 
-                            <!-- Khung trắng vuông vắn tuyệt đối (không có chữ dài làm lệch khung) -->
-                            <div onclick="openQrZoomModal()" title="Bấm để phóng to mã QR" style="position:relative; width:178px; height:178px; background:#ffffff; padding:10px; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,0.5); cursor:zoom-in; display:flex; align-items:center; justify-content:center; border:2px solid #34d399;">
-                                <img id="vietqrImage" src="https://api.vietqr.io/image/{{ bank_config.bank_bin|default('970422') }}-{{ bank_config.account_number|default('0905123456') }}-qr_only.png?amount={{ (final_cart_total|default(cart_total))|int }}&addInfo={{ bank_config.syntax_prefix|default('MEOW') }}%20{{ customer_phone or '0905123456' }}&accountName={{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE')|urlencode }}" alt="Mã VietQR Thanh Toán" style="width:154px; height:154px; display:block; object-fit:contain;" onerror="reloadFallbackQR();">
+                            <!-- Khung trắng vuông vắn -->
+                            <div onclick="openQrZoomModal()" title="Bấm để phóng to mã QR" style="position:relative; width:180px; height:180px; background:#ffffff; padding:10px; border-radius:14px; box-shadow:0 6px 20px rgba(180,100,60,0.08); cursor:zoom-in; display:flex; align-items:center; justify-content:center; border:2px solid #fed7aa;">
+                                <img id="vietqrImage" src="https://api.vietqr.io/image/{{ bank_config.bank_bin|default('970422') }}-{{ bank_config.account_number|default('0905123456') }}-qr_only.png?amount={{ (final_cart_total|default(cart_total))|int }}&addInfo={{ bank_config.syntax_prefix|default('MEOW') }}%20{{ customer_phone or '0905123456' }}&accountName={{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE')|urlencode }}" alt="Mã VietQR Thanh Toán" style="width:160px; height:160px; display:block; object-fit:contain;" onerror="reloadFallbackQR();">
                             </div>
 
-                            <button type="button" onclick="openQrZoomModal()" style="margin-top:10px; width:100%; padding:6px 10px; border-radius:9px; background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.45); color:#503829; font-size:11.5px; font-weight:700; cursor:pointer;">
+                            <button type="button" onclick="openQrZoomModal()" style="margin-top:10px; width:100%; padding:7px 12px; border-radius:10px; background:#fff7ed; border:1px solid #fed7aa; color:#ea580c; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
                                 🔍 Phóng to mã QR
                             </button>
                         </div>
 
-                        <!-- CỘT PHẢI: 5 HÀNG THÔNG TIN NGÂN HÀNG TÁCH BIỆT RÕ RÀNG -->
-                        <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:8px; justify-content:space-between;">
+                        <!-- CỘT PHẢI: 4 HÀNG THÔNG TIN NGÂN HÀNG RÕ RÀNG TRÊN NỀN SÁNG -->
+                        <div style="flex:1; min-width:250px; display:flex; flex-direction:column; gap:10px; justify-content:space-between;">
                             <!-- Hàng 1: Ngân hàng -->
-                            <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.09); border-radius:11px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                            <div style="background:#fffbf8; border:1.5px solid #fae4d4; border-radius:14px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
                                 <div>
-                                    <div style="font-size:10.5px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Ngân hàng thụ hưởng</div>
-                                    <strong style="color:#2b180d; font-size:13.5px; font-weight:800;" id="qrBankName">{{ bank_config.bank_name|default('MB Bank (Ngân hàng Quân Đội)') }}</strong>
+                                    <div style="font-size:11px; color:#8c7161; text-transform:uppercase; font-weight:700; letter-spacing:0.3px;">Ngân hàng thụ hưởng</div>
+                                    <strong style="color:#2b180d; font-size:14.5px; font-weight:800;" id="qrBankName">{{ bank_config.bank_name|default('MB Bank (Ngân hàng Quân Đội)') }}</strong>
                                 </div>
-                                <span style="font-size:18px;">🏦</span>
+                                <span style="font-size:22px;">🏦</span>
                             </div>
 
                             <!-- Hàng 2: Số tài khoản -->
-                            <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(250,204,21,0.28); border-radius:11px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                            <div style="background:#fffbf8; border:1.5px solid #fed7aa; border-radius:14px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
                                 <div>
-                                    <div style="font-size:10.5px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Số tài khoản nhận</div>
-                                    <strong style="color:#fde047; font-size:16px; font-weight:900; letter-spacing:0.6px;" id="qrAccNum">{{ bank_config.account_number|default('0905123456') }}</strong>
+                                    <div style="font-size:11px; color:#8c7161; text-transform:uppercase; font-weight:700; letter-spacing:0.3px;">Số tài khoản nhận</div>
+                                    <strong style="color:#ea580c; font-size:17px; font-weight:900; letter-spacing:0.8px; font-family:Consolas, monospace;" id="qrAccNum">{{ bank_config.account_number|default('0905123456') }}</strong>
                                 </div>
-                                <button type="button" onclick="copyToClipboard('{{ bank_config.account_number|default('0905123456') }}', this)" class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11.5px; height:auto; color:#2b180d; border-color:rgba(250,204,21,0.45); flex-shrink:0;">📋 Sao chép</button>
+                                <button type="button" onclick="copyToClipboard('{{ bank_config.account_number|default('0905123456') }}', this)" class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px; font-weight:700; color:#ea580c; border-color:#fed7aa; background:#fff7ed; flex-shrink:0;">📋 Sao chép</button>
                             </div>
 
                             <!-- Hàng 3: Chủ tài khoản -->
-                            <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.09); border-radius:11px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                            <div style="background:#fffbf8; border:1.5px solid #fae4d4; border-radius:14px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
                                 <div>
-                                    <div style="font-size:10.5px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Chủ tài khoản</div>
-                                    <strong style="color:#2b180d; font-size:13.5px; font-weight:800; letter-spacing:0.3px;" id="qrAccName">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</strong>
+                                    <div style="font-size:11px; color:#8c7161; text-transform:uppercase; font-weight:700; letter-spacing:0.3px;">Chủ tài khoản</div>
+                                    <strong style="color:#2b180d; font-size:14px; font-weight:800; letter-spacing:0.4px;" id="qrAccName">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</strong>
                                 </div>
-                                <span style="font-size:11px; color:#34d399; font-weight:800;">✓ Đã xác thực</span>
+                                <span style="font-size:11.5px; color:#059669; font-weight:800; background:#ecfdf5; border:1px solid #a7f3d0; padding:3px 9px; border-radius:99px;">✓ Đã xác thực</span>
                             </div>
 
                             <!-- Hàng 4: Số tiền & Nội dung -->
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                                <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(52,211,153,0.3); border-radius:11px; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; gap:4px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                                <div style="background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:14px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
                                     <div>
-                                        <div style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Số tiền</div>
-                                        <strong id="qrAmountDisplay" style="color:#34d399; font-size:14.5px; font-weight:900;">{{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</strong>
+                                        <div style="font-size:10.5px; color:#166534; text-transform:uppercase; font-weight:700;">Số tiền</div>
+                                        <strong id="qrAmountDisplay" style="color:#15803d; font-size:15px; font-weight:900;">{{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</strong>
                                     </div>
-                                    <button type="button" onclick="copyToClipboard(String(window.CURRENT_FINAL_TOTAL || {{ (final_cart_total|default(cart_total))|int }}), this)" class="btn btn-outline btn-sm" style="padding:3px 7px; font-size:10.5px; height:auto; color:#2b180d;">📋</button>
+                                    <button type="button" onclick="copyToClipboard(String(window.CURRENT_FINAL_TOTAL || {{ (final_cart_total|default(cart_total))|int }}), this)" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px; background:#ffffff; border-color:#86efac; color:#15803d;">📋</button>
                                 </div>
 
-                                <div style="background:#fffbf8; border:1px solid #fed7aa; border-radius:11px; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; gap:4px;">
+                                <div style="background:#fff7ed; border:1.5px solid #fed7aa; border-radius:14px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
                                     <div>
-                                        <div style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Nội dung CK</div>
-                                        <strong style="color:#c4b5fd; font-size:13px; font-weight:800;" id="qrTransferDesc">{{ bank_config.syntax_prefix|default('MEOW') }} {{ customer_phone or '0905123456' }}</strong>
+                                        <div style="font-size:10.5px; color:#9a3412; text-transform:uppercase; font-weight:700;">Nội dung CK</div>
+                                        <strong style="color:#c2410c; font-size:13.5px; font-weight:900; font-family:Consolas, monospace;" id="qrTransferDesc">{{ bank_config.syntax_prefix|default('MEOW') }} {{ customer_phone or '0905123456' }}</strong>
                                     </div>
-                                    <button type="button" onclick="copyTransferMemo(this)" class="btn btn-outline btn-sm" style="padding:3px 7px; font-size:10.5px; height:auto; color:#2b180d;">📋</button>
+                                    <button type="button" onclick="copyTransferMemo(this)" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px; background:#ffffff; border-color:#fed7aa; color:#c2410c;">📋</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div style="margin-top:12px; font-size:11.5px; color:#6e5444; background:#fff7ed; border:1px solid #fed7aa; padding:8px 12px; border-radius:10px; text-align:center;">
+                    <div style="margin-top:14px; font-size:12px; color:#78350f; background:#fff7ed; border:1.5px solid #fed7aa; padding:10px 16px; border-radius:12px; text-align:center; line-height:1.5;">
                         💡 Mở App Ngân hàng bất kỳ (MB, VCB, Techcombank, ACB, VPBank, MoMo...) &rarr; Chọn <strong>Quét Mã QR</strong> rồi bấm nút <strong>Đặt Mua</strong> bên dưới để hoàn tất!
                     </div>
                 </div>
@@ -438,22 +440,23 @@
 </div>
 
 <!-- Modal Phóng To Mã QR Rõ Nét -->
-<div id="qrZoomModal" onclick="if(event.target===this) closeQrZoomModal();" style="display:none; position:fixed; inset:0; background:rgba(5,4,16,0.85); backdrop-filter:blur(8px); z-index:999999; align-items:center; justify-content:center; padding:20px;">
-    <div style="background:linear-gradient(145deg, #161233 0%, #0f172a 100%); border:2px solid #34d399; border-radius:24px; padding:26px; max-width:380px; width:100%; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.8);">
+<div id="qrZoomModal" onclick="if(event.target===this) closeQrZoomModal();" style="display:none; position:fixed; inset:0; background:rgba(43,24,13,0.65); backdrop-filter:blur(8px); z-index:999999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#ffffff; border:2px solid #fed7aa; border-radius:24px; padding:26px; max-width:380px; width:100%; text-align:center; box-shadow:0 25px 60px rgba(180,100,60,0.2);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-            <strong style="color:#2b180d; font-size:16px;">📱 Quét Mã QR VietQR Napas247</strong>
-            <button type="button" onclick="closeQrZoomModal()" style="background:#f1f5f9; border:none; color:#475569; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:18px;">&times;</button>
+            <strong style="color:#2b180d; font-size:16px; font-weight:800;">📱 Quét Mã QR VietQR Napas247</strong>
+            <button type="button" onclick="closeQrZoomModal()" style="background:#fff7ed; border:1px solid #fed7aa; color:#8c7161; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:18px; line-height:1;">&times;</button>
         </div>
-        <div style="background:#ffffff; padding:16px; border-radius:18px; display:inline-block; box-shadow:0 12px 30px rgba(0,0,0,0.5);">
+        <div style="background:#fffbf8; padding:16px; border-radius:18px; display:inline-block; border:1.5px solid #fed7aa; box-shadow:0 8px 24px rgba(180,100,60,0.08);">
             <img id="vietqrZoomImage" src="" alt="Mã VietQR Phóng To" style="width:260px; height:260px; display:block; object-fit:contain;">
         </div>
-        <div style="margin-top:14px; font-size:13.5px; color:#503829; line-height:1.6;">
-            <div><strong style="color:#fde047; font-size:16px;">{{ bank_config.account_number|default('0905123456') }}</strong> • {{ bank_config.bank_name|default('MB Bank') }}</div>
-            <div style="color:#2b180d; font-weight:700;">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</div>
-            <div id="qrZoomAmountText" style="color:#34d399; font-weight:900; font-size:18px; margin-top:4px;">Số tiền: {{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</div>
+        <div style="margin-top:16px; font-size:13.5px; color:#503829; line-height:1.6; background:#fff7ed; border-radius:14px; padding:12px; border:1px solid #fed7aa;">
+            <div><strong style="color:#ea580c; font-size:17px; font-weight:900; font-family:Consolas, monospace;">{{ bank_config.account_number|default('0905123456') }}</strong> &bull; {{ bank_config.bank_name|default('MB Bank') }}</div>
+            <div style="color:#2b180d; font-weight:800; margin-top:2px;">{{ bank_config.account_name|default('MEOW AND WOOF PET HOUSE') }}</div>
+            <div id="qrZoomAmountText" style="color:#15803d; font-weight:900; font-size:17px; margin-top:6px;">Số tiền: {{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</div>
         </div>
     </div>
 </div>
+
 
 <!-- ==============================================================
      JAVASCRIPT ĐIỀU KHIỂN VOUCHER, QUÉT MÃ QR & SAO CHÉP
