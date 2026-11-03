@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark">
+    <meta name="color-scheme" content="light">
     <meta name="darkreader-lock">
     <title>Dashboard Quản Trị - Meow &amp; Woof Pet Shop &amp; Spa</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -222,7 +222,7 @@
                         <input type="date" id="adminStartDate" name="start_date" value="{{ start_date }}" class="form-control" style="width:auto; padding:5px 10px;" required>
                         <span>Đến:</span>
                         <input type="date" id="adminEndDate" name="end_date" value="{{ end_date }}" class="form-control" style="width:auto; padding:5px 10px;" required>
-                        <button type="submit" class="btn btn-sm" style="background:#134e32; color:#fff;">Lọc</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Lọc</button>
                     </form>
                 </div>
                 <script>
@@ -2233,14 +2233,15 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                 </div>
 
                 <!-- Modal xem trước giao diện Email HTML -->
-                <div id="emailPreviewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:99999; backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:20px;">
-                    <div style="background:#0f172a; border:1px solid rgba(139,92,246,0.5); border-radius:20px; width:100%; max-width:680px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.8);">
-                        <div style="padding:14px 20px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; background:#161f38;">
-                            <strong id="emailPreviewModalTitle" style="color:#2b180d; font-size:15px;">✨ Xem Trước Giao Diện Email HTML</strong>
-                            <button type="button" onclick="closeEmailPreviewModal()" style="background:transparent; border:none; color:#6e5444; font-size:20px; cursor:pointer; padding:4px 8px; line-height:1;">&times;</button>
+                <!-- Modal xem trước giao diện Email HTML -->
+                <div id="emailPreviewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(43,24,13,0.6); z-index:99999; backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:20px;">
+                    <div style="background:#ffffff; border:1.5px solid #fae4d4; border-radius:20px; width:100%; max-width:680px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 60px rgba(180,100,60,0.15);">
+                        <div style="padding:16px 22px; border-bottom:1.5px solid #fae4d4; display:flex; justify-content:space-between; align-items:center; background:#fff7ed;">
+                            <strong id="emailPreviewModalTitle" style="color:#2b180d; font-size:15px; font-weight:800;">📧 Xem Trước Giao Diện Email HTML</strong>
+                            <button type="button" onclick="closeEmailPreviewModal()" style="background:transparent; border:none; color:#8c7161; font-size:22px; cursor:pointer; padding:4px 8px; line-height:1;">&times;</button>
                         </div>
-                        <div style="flex:1; overflow-y:auto; padding:12px; background:#0b081d;">
-                            <iframe id="emailPreviewIframe" src="" style="width:100%; height:600px; border:none; border-radius:12px; background:#0b081d;"></iframe>
+                        <div style="flex:1; overflow-y:auto; padding:16px; background:#fffbf8;">
+                            <iframe id="emailPreviewIframe" src="" style="width:100%; height:600px; border:1px solid #fae4d4; border-radius:12px; background:#ffffff;"></iframe>
                         </div>
                     </div>
                 </div>

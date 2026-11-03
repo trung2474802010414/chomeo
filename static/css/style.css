@@ -1207,9 +1207,9 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 /* Thanh Sidebar bên trái */
 .admin-sidebar {
-    width: 260px;
-    background-color: #13281e;
-    color: #d1fae5;
+    width: 268px;
+    background-color: #ffffff;
+    color: #2b180d;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -1217,7 +1217,8 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     top: 0;
     height: 100vh;
     overflow-y: auto;
-    border-right: 1px solid #0c1b14;
+    border-right: 1.5px solid #fae4d4;
+    box-shadow: 4px 0 24px rgba(180, 100, 60, 0.05);
 }
 
 .admin-brand-box {
@@ -1304,8 +1305,8 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .admin-sidebar-footer {
     padding: 14px 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    background-color: #0e1f17;
+    border-top: 1.5px solid #fae4d4;
+    background-color: #fff7ed;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1940,10 +1941,10 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 /* Sidebar */
 .admin-sidebar {
     width: 268px;
-    background: linear-gradient(180deg, #2b2161 0%, #1d1747 55%, #150f36 100%);
-    color: #ddd9ff;
-    border-right: none;
-    box-shadow: 4px 0 28px rgba(43, 33, 97, 0.18);
+    background: #ffffff;
+    color: #2b180d;
+    border-right: 1.5px solid #fae4d4;
+    box-shadow: 4px 0 24px rgba(180, 100, 60, 0.05);
 }
 
 .admin-sidebar::-webkit-scrollbar { width: 6px; }
@@ -2016,7 +2017,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .admin-nav-link.active svg { color: #ffffff; }
 
 .admin-sidebar-footer {
-    background: rgba(0, 0, 0, 0.22);
+    background: #fff7ed;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -2376,8 +2377,12 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 
 /* ==========================================================================
-   ADMIN V3 — PASTEL PEACH & HONEY TRÊN NỀN TRẮNG (CHUYÊN NGHIỆP, THÂN THIỆN, DỄ NHÌN)
+   ADMIN V3 – PASTEL PEACH & HONEY TRÊN NỀN TRẮNG (CAM CAM MẬT ONG ẤM CÚNG GIỐNG TRANG BÁN HÀNG)
    ========================================================================== */
+:root, html {
+    color-scheme: light;
+}
+
 .admin-body {
     --adm-bg: #fffbf8;
     --adm-card: #ffffff;
@@ -2397,244 +2402,355 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     --border: #fae4d4;
     --bg-soft: #fff7ed;
 
-    color-scheme: light;
-    background-color: var(--adm-bg);
-    background-image: none;
-    color: var(--adm-ink);
+    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    color-scheme: light !important;
+    background-color: #fffbf8 !important;
+    background-image:
+        radial-gradient(at 12% 12%, rgba(251, 146, 60, 0.15) 0px, transparent 48%),
+        radial-gradient(at 88% 18%, rgba(244, 114, 182, 0.13) 0px, transparent 48%),
+        radial-gradient(at 50% 85%, rgba(245, 158, 11, 0.11) 0px, transparent 50%) !important;
+    background-attachment: fixed !important;
+    color: var(--adm-ink) !important;
     position: relative;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
 }
 
 .admin-body::before,
 .admin-body::after {
-    display: none;
+    display: none !important;
 }
 
-.admin-shell, .admin-sidebar, .admin-main { position: relative; z-index: 1; }
+.admin-shell {
+    display: flex;
+    min-height: 100vh;
+    background: transparent !important;
+    position: relative;
+    z-index: 1;
+}
 
-/* ---------- Sidebar ---------- */
+.admin-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: transparent !important;
+    position: relative;
+    z-index: 1;
+    color: var(--adm-ink);
+}
+
+.admin-content-area {
+    flex: 1;
+    padding: 24px 28px 48px;
+    background: transparent !important;
+}
+
+/* ---------- Sidebar Đẹp Tông Cam Đào & Trắng Ấm ---------- */
 .admin-sidebar {
-    background: #ffffff;
-    border-right: 1px solid var(--adm-border);
-    box-shadow: 4px 0 20px rgba(180, 100, 60, 0.05);
+    width: 268px !important;
+    background: #ffffff !important;
+    border-right: 1.5px solid #fae4d4 !important;
+    box-shadow: 4px 0 24px rgba(180, 100, 60, 0.05) !important;
+    color: var(--adm-ink) !important;
+    position: sticky !important;
+    top: 0 !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-shrink: 0 !important;
+    z-index: 50 !important;
 }
 
-.admin-brand-box { border-bottom: 1px solid var(--adm-border); }
-.admin-brand-name { color: var(--adm-ink); }
-.admin-brand-sub { color: #ea580c; }
-.admin-nav-group-title { color: #a58978; font-weight: 800; }
+.admin-brand-box {
+    padding: 22px 20px;
+    border-bottom: 1.5px solid #fae4d4 !important;
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+.admin-brand-name {
+    color: var(--adm-ink) !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.5px;
+}
+.admin-brand-sub {
+    color: #ea580c !important;
+    font-weight: 700 !important;
+    font-size: 11px;
+}
+.admin-nav-group-title {
+    color: #a58978 !important;
+    font-weight: 800 !important;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
 
 .admin-nav-link {
-    color: #503829;
+    color: #503829 !important;
     border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    transition: all 0.2s ease;
 }
 
 .admin-nav-link:hover {
-    background: #fff7ed;
-    border-color: #fed7aa;
-    color: #ea580c;
+    background: #fff7ed !important;
+    border-color: #fed7aa !important;
+    color: #ea580c !important;
 }
 
 .admin-nav-link.active {
-    background: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%);
-    border-color: transparent;
-    box-shadow: 0 4px 16px rgba(251, 146, 60, 0.35);
-    color: #ffffff;
+    background: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%) !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 16px rgba(251, 146, 60, 0.35) !important;
+    color: #ffffff !important;
+}
+.admin-nav-link.active svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
 }
 
-.admin-sidebar-footer { background: #fffbf8; border-top: 1px solid var(--adm-border); }
-.admin-user-name { color: var(--adm-ink); }
+.admin-sidebar-footer {
+    background: #fff7ed !important;
+    border-top: 1.5px solid #fae4d4 !important;
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.admin-user-name {
+    color: var(--adm-ink) !important;
+    font-weight: 700;
+}
 
-/* ---------- Topbar ---------- */
+/* ---------- Topbar Tông Cam Đào & Kính Mờ ---------- */
 .admin-topbar {
-    background: rgba(255, 255, 255, 0.94);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--adm-border);
+    background: rgba(255, 251, 248, 0.92) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-bottom: 1.5px solid #fae4d4 !important;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 40;
 }
 
-.admin-page-heading { color: var(--adm-ink); }
+.admin-page-heading {
+    color: var(--adm-ink) !important;
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0;
+}
 
 .btn-view-site {
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
-    color: #ea580c;
+    background: #fff7ed !important;
+    border: 1.5px solid #fed7aa !important;
+    color: #ea580c !important;
+    border-radius: 99px;
+    padding: 8px 16px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
 }
 
-.btn-view-site:hover { background: #ffedd5; border-color: #fb923c; color: #c2410c; }
+.btn-view-site:hover {
+    background: #ffedd5 !important;
+    border-color: #fb923c !important;
+    color: #c2410c !important;
+}
 
-/* ---------- Banner & thanh kỳ báo cáo ---------- */
+/* ---------- Banner & Thanh Kỳ Báo Cáo ---------- */
 .admin-welcome-banner {
-    background: linear-gradient(90deg, #fff7ed 0%, #fef3c7 100%);
-    border: 1px solid #fed7aa;
-    color: #78350f;
+    background: linear-gradient(90deg, #fff7ed 0%, #fef3c7 100%) !important;
+    border: 1.5px solid #fed7aa !important;
+    color: #78350f !important;
+    border-radius: 16px;
+    padding: 14px 20px;
 }
 
-.admin-welcome-close { color: #78350f; }
+.admin-welcome-close { color: #78350f !important; }
 
 .admin-period-bar {
-    background: #ffffff;
-    border: 1px solid var(--adm-border);
-    box-shadow: 0 4px 18px rgba(180, 100, 60, 0.05);
+    background: #ffffff !important;
+    border: 1.5px solid #fae4d4 !important;
+    box-shadow: 0 4px 18px rgba(180, 100, 60, 0.05) !important;
+    border-radius: 16px;
+    padding: 12px 18px;
 }
 
 .admin-period-bar span { color: var(--adm-muted) !important; }
 
-.period-btn-group { background: #fff7ed; }
-.period-btn { color: #503829; }
-.period-btn:hover { color: #ea580c; background: #ffedd5; }
+.period-btn-group {
+    background: #fff7ed !important;
+    border-radius: 12px;
+    padding: 3px;
+}
+.period-btn {
+    color: #503829 !important;
+    border: none;
+    border-radius: 9px;
+    padding: 6px 14px;
+    font-weight: 700;
+}
+.period-btn:hover { color: #ea580c !important; background: #ffedd5 !important; }
 
 .period-btn.active {
-    background: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%);
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(251, 146, 60, 0.35);
+    background: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(251, 146, 60, 0.35) !important;
 }
 
-/* ---------- Thẻ KPI & Báo Cáo ---------- */
+/* ---------- Thẻ Card, KPI, Status Admin ---------- */
 .admin-kpi-card,
 .admin-status-card,
 .admin-body .card {
-    background: #ffffff;
-    border: 1px solid var(--adm-border);
-    box-shadow: 0 4px 20px rgba(180, 100, 60, 0.06);
-    color: var(--adm-ink);
+    background: #ffffff !important;
+    border: 1.5px solid #fae4d4 !important;
+    box-shadow: 0 4px 20px rgba(180, 100, 60, 0.06) !important;
+    border-radius: 20px !important;
+    color: var(--adm-ink) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .admin-kpi-card:hover,
-.admin-status-card:hover {
-    border-color: #fb923c;
-    box-shadow: 0 14px 34px rgba(249, 115, 22, 0.12);
-    background: #ffffff;
+.admin-status-card:hover,
+.admin-body .card:hover {
+    border-color: #fb923c !important;
+    box-shadow: 0 12px 30px rgba(249, 115, 22, 0.12) !important;
 }
 
-.admin-body .card:hover { box-shadow: 0 12px 28px rgba(180, 100, 60, 0.1); }
+.kpi-label, .kpi-sub, .status-card-title { color: var(--adm-muted) !important; }
 
-.kpi-label, .kpi-sub, .status-card-title { color: var(--adm-muted); }
-
-/* Màu số liệu KPI sáng đẹp rõ nét */
 .admin-kpi-grid > .admin-kpi-card:nth-child(1) .kpi-value { color: #059669 !important; }
 .admin-kpi-grid > .admin-kpi-card:nth-child(2) .kpi-value { color: #7c3aed !important; }
 .admin-kpi-grid > .admin-kpi-card:nth-child(3) .kpi-value { color: #0284c7 !important; }
 .admin-kpi-grid > .admin-kpi-card:nth-child(4) .kpi-value { color: #d97706 !important; }
 
-.admin-status-grid > .admin-status-card:nth-child(1) { border-color: #fed7aa; }
-.admin-status-grid > .admin-status-card:nth-child(2) { border-color: #fde68a; }
-.admin-status-grid > .admin-status-card:nth-child(3) { border-color: #fecdd3; }
-.admin-status-grid > .admin-status-card:nth-child(4) { border-color: #a7f3d0; }
+.admin-status-grid > .admin-status-card:nth-child(1) { border-color: #fed7aa !important; }
+.admin-status-grid > .admin-status-card:nth-child(2) { border-color: #fde68a !important; }
+.admin-status-grid > .admin-status-card:nth-child(3) { border-color: #fecdd3 !important; }
+.admin-status-grid > .admin-status-card:nth-child(4) { border-color: #a7f3d0 !important; }
 
-.admin-status-card .status-card-num { color: var(--adm-ink) !important; }
-.admin-status-card .status-card-link { color: #ea580c !important; }
-.admin-status-card div[style*="font-size:12.5px"] { color: var(--adm-muted) !important; }
+.admin-status-card .status-card-num { color: var(--adm-ink) !important; font-weight: 900; }
+.admin-status-card .status-card-link { color: #ea580c !important; font-weight: 700; }
 
-.kpi-icon-green  { background: #ecfdf5; color: #059669; }
-.kpi-icon-blue   { background: #f5f3ff; color: #7c3aed; }
-.kpi-icon-cyan   { background: #f0f9ff; color: #0284c7; }
-.kpi-icon-yellow { background: #fffbeb; color: #d97706; }
+.kpi-icon-green  { background: #ecfdf5 !important; color: #059669 !important; }
+.kpi-icon-blue   { background: #f5f3ff !important; color: #7c3aed !important; }
+.kpi-icon-cyan   { background: #f0f9ff !important; color: #0284c7 !important; }
+.kpi-icon-yellow { background: #fffbeb !important; color: #d97706 !important; }
 
-/* ---------- Biểu đồ SVG ---------- */
-.admin-charts-grid svg text { fill: var(--adm-muted) !important; }
-.admin-charts-grid svg line[stroke="#e2e8f0"] { stroke: #fae4d4; }
-.admin-charts-grid svg line[stroke="#cbd5e1"] { stroke: #fed7aa; }
-.admin-charts-grid svg circle[stroke="#e2e8f0"] { stroke: #fae4d4; }
-.admin-charts-grid svg path[stroke] { filter: none; }
-.admin-charts-grid svg text[font-weight="800"] { fill: var(--adm-ink) !important; }
-.admin-charts-grid svg text[fill="#334155"] { fill: #503829 !important; }
-.admin-charts-grid div { color: var(--adm-muted) !important; }
-
-/* ---------- Bảng Admin ---------- */
+/* ---------- Bảng Clean Table Admin ---------- */
 .admin-body .clean-table th {
-    background: #fff7ed;
-    color: #ea580c;
-    border-bottom: 1px solid var(--adm-border);
+    background: #fff7ed !important;
+    color: #ea580c !important;
+    border-bottom: 1.5px solid #fae4d4 !important;
+    font-weight: 800;
 }
 
 .admin-body .clean-table td {
-    border-bottom: 1px solid var(--adm-border);
-    color: var(--adm-ink);
-}
-
-.admin-body .clean-table tbody tr:hover { background: #fef5ee; }
-.admin-body .clean-table td code { background: #fff7ed; color: #c2410c; }
-.admin-body .clean-table td div[style*="color:var(--text-muted)"],
-.admin-body .clean-table td div[style*="font-size:12px"] { color: var(--adm-muted) !important; }
-.admin-body .clean-table td a { color: #ea580c !important; }
-.admin-body .clean-table tr[style*="fff7ed"] { background: #fff7ed !important; }
-.admin-body .clean-table td strong[style*="color:#15803d"] { color: #059669 !important; }
-
-/* ---------- Nút Admin ---------- */
-.admin-body .btn-outline {
-    background: #fff7ed;
-    color: #ea580c;
-    border-color: #fed7aa;
-}
-
-.admin-body .btn-outline:hover:not(:disabled) {
-    background: #ffedd5;
-    border-color: #fb923c;
-    color: #c2410c;
-}
-
-.admin-body .btn-danger {
-    background: #fff1f2;
-    color: #e11d48;
-    border-color: #fecdd3;
-}
-
-.admin-body .btn-danger:hover:not(:disabled) { background: #ffe4e6; color: #be123c; }
-
-.admin-body .btn-teal { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: #ffffff; }
-
-/* ---------- Ô nhập Admin ---------- */
-.admin-body .form-control {
-    background: #ffffff;
-    border: 1.5px solid #fed7aa;
-    color: var(--adm-ink);
-}
-
-.admin-body .form-control::placeholder { color: #a58978; }
-.admin-body .form-control:hover { border-color: #fb923c; }
-
-.admin-body .form-control:focus {
-    background: #ffffff;
-    border-color: #ea580c;
-    box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.2);
-}
-
-.admin-body select.form-control option,
-.admin-body select.form-control optgroup { background: #ffffff; color: var(--adm-ink); }
-
-.admin-body input[type="date"]::-webkit-calendar-picker-indicator { filter: none; opacity: 0.75; cursor: pointer; }
-
-.admin-body .form-label { color: var(--adm-ink); }
-.admin-body .form-error { color: #dc2626; }
-
-/* Khung tải ảnh & các khối có nền sáng inline */
-.admin-body [style*="background:#f8fafc"],
-.admin-body [style*="background:#fff;"],
-.admin-body [style*="background:#ffffff"] {
-    background: #ffffff !important;
-    border-color: var(--adm-border) !important;
+    border-bottom: 1px solid #fae4d4 !important;
     color: var(--adm-ink) !important;
 }
 
-.admin-body [style*="color:#475569"],
-.admin-body [style*="color:#94a3b8"] { color: var(--adm-muted) !important; }
-.admin-body [style*="color:#0f172a"] { color: var(--adm-ink) !important; }
-.admin-body #form-san-pham { border-color: #fed7aa !important; }
+.admin-body .clean-table tbody tr:hover { background: #fef5ee !important; }
+.admin-body .clean-table td code { background: #fff7ed !important; color: #c2410c !important; border-radius: 6px; padding: 2px 6px; }
+.admin-body .clean-table td a { color: #ea580c !important; }
 
-/* ---------- Huy hiệu & thông báo ---------- */
-.admin-body .badge-cat { background: #fce7f3; color: #be185d; border-color: #fbcfe8; }
-.admin-body .badge-dog { background: #ffedd5; color: #c2410c; border-color: #fed7aa; }
-.admin-body .badge-both { background: #fef3c7; color: #b45309; border-color: #fde68a; }
-.admin-body .badge-stock-ok { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
-.admin-body .badge-stock-low { background: #fffbeb; color: #b45309; border-color: #fde68a; }
-.admin-body .badge-stock-out { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+/* ---------- Nút Bấm Admin Tông Cam Pastel ---------- */
+.admin-body .btn-outline {
+    background: #fff7ed !important;
+    color: #ea580c !important;
+    border: 1.5px solid #fed7aa !important;
+    border-radius: 99px;
+    font-weight: 700;
+}
 
-.admin-body .alert-success { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
-.admin-body .alert-error { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+.admin-body .btn-outline:hover:not(:disabled) {
+    background: #ffedd5 !important;
+    border-color: #fb923c !important;
+    color: #c2410c !important;
+}
 
-.admin-body .code-preview { background: #fffbf8; border: 1px solid var(--adm-border); color: #503829; }
-.admin-body pre { color: #503829; }
-.admin-body ::-webkit-scrollbar-thumb { background: #fed7aa; border-radius: 99px; }
-.admin-body ::-webkit-scrollbar-thumb:hover { background: #fb923c; }
+.admin-body .btn-danger {
+    background: #fff1f2 !important;
+    color: #e11d48 !important;
+    border: 1.5px solid #fecdd3 !important;
+    border-radius: 99px;
+    font-weight: 700;
+}
+
+.admin-body .btn-danger:hover:not(:disabled) { background: #ffe4e6 !important; color: #be123c !important; }
+
+.admin-body .btn-teal {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 99px;
+    font-weight: 700;
+}
+
+/* ---------- Ô Nhập Liệu Form Admin ---------- */
+.admin-body .form-control {
+    background: #ffffff !important;
+    border: 1.5px solid #fed7aa !important;
+    color: var(--adm-ink) !important;
+    border-radius: 12px;
+}
+
+.admin-body .form-control::placeholder { color: #a58978 !important; }
+.admin-body .form-control:hover { border-color: #fb923c !important; }
+
+.admin-body .form-control:focus {
+    background: #ffffff !important;
+    border-color: #ea580c !important;
+    box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.2) !important;
+}
+
+/* Khối Code Preview & Textarea XML/CSV */
+.admin-body .code-preview {
+    background: #fff7ed !important;
+    border: 1.5px solid #fed7aa !important;
+    color: #7c2d12 !important;
+    border-radius: 14px !important;
+    padding: 16px !important;
+    font-family: Consolas, monospace !important;
+    line-height: 1.5;
+}
+.admin-body pre { color: #7c2d12 !important; }
+
+.admin-body textarea.form-control {
+    background: #fffbf8 !important;
+    border: 1.5px solid #fed7aa !important;
+    color: #7c2d12 !important;
+    border-radius: 14px !important;
+    font-family: Consolas, monospace !important;
+    line-height: 1.5;
+}
+
+/* Hỗ trợ hiển thị mượt mà trên trình duyệt có Dark Mode cưỡng bức (như Cốc Cốc) */
+@media (prefers-color-scheme: dark) {
+    .admin-body {
+        background-color: #fffbf8 !important;
+        background-image:
+            radial-gradient(at 12% 12%, rgba(251, 146, 60, 0.16) 0px, transparent 48%),
+            radial-gradient(at 88% 18%, rgba(244, 114, 182, 0.14) 0px, transparent 48%),
+            radial-gradient(at 50% 85%, rgba(245, 158, 11, 0.12) 0px, transparent 50%) !important;
+        color-scheme: light !important;
+    }
+}
+
 
 /* ==========================================================================
    ADMIN: MODAL THÊM / SỬA SẢN PHẨM & BẢNG SẢN PHẨM FULL-WIDTH GEN Z
