@@ -2148,7 +2148,7 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                                     <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#38bdf8; text-decoration:underline; font-weight:700;">Lấy mã 16 ký tự của Google tại đây &rarr;</a>
                                 </label>
                                 <div style="display:flex; gap:8px; align-items:center;">
-                                    <input type="password" id="smtpPassInput" name="smtp_pass" value="{{ smtp_creds.smtp_pass }}" class="form-control" placeholder="Đã lưu rồi thì để nguyên, không cần nhập lại (hoặc dán 16 ký tự App Password của Gmail)" style="height:40px; font-size:13.5px; color:#ffffff; flex:1;">
+                                    <input type="password" id="smtpPassInput" name="smtp_pass" value="{{ smtp_creds.smtp_pass }}" class="form-control" placeholder="Đã lưu rồi thì để nguyên, không cần nhập lại (hoặc dán 16 ký tự App Password của Gmail)" style="height:40px; font-size:13.5px; color:#2b180d; flex:1;">
                                     <button type="button" class="btn btn-outline btn-sm" onclick="var i=document.getElementById('smtpPassInput'); i.type = i.type==='password' ? 'text' : 'password'; this.textContent = i.type==='password' ? '👁 Hiện' : '🙈 Ẩn';">👁 Hiện</button>
                                 </div>
                                 {% if smtp_creds.smtp_pass %}

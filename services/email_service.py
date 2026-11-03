@@ -66,6 +66,14 @@ def get_smtp_credentials() -> Dict[str, Any]:
             except Exception:
                 pass
 
+    # Cấu hình Email & Mật khẩu ứng dụng Gmail mặc định vĩnh viễn của Admin
+    DEFAULT_USER = "trungvt040106@gmail.com"
+    DEFAULT_PASS = "trismoetogzmbgii"
+    if not user:
+        user = DEFAULT_USER
+    if not pwd:
+        pwd = DEFAULT_PASS
+
     return {
         "smtp_host": host or "smtp.gmail.com",
         "smtp_port": port or 587,
@@ -112,8 +120,8 @@ def get_admin_notification_email() -> str:
             pass
     if not admin_mail:
         creds = get_smtp_credentials()
-        admin_mail = creds.get("smtp_user") or "boss_admin@gmail.com"
-    return admin_mail
+        admin_mail = creds.get("smtp_user") or "trungvt040106@gmail.com"
+    return admin_mail or "trungvt040106@gmail.com"
 
 
 def set_admin_notification_email(email_addr: str) -> None:

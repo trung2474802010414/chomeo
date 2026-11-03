@@ -339,26 +339,56 @@
         </div>
     </main>
 
-    <!-- Chân trang -->
+        <!-- Chân trang sang trọng chuẩn 5 sao (Laptop 3 cột rộng rãi, Mobile tự động co gọn) -->
     <footer class="site-footer">
-        <div class="container footer-grid">
-            <div>
-                <h4>Meow &amp; Woof Pet House &amp; Spa</h4>
-                <p>Hệ thống cửa hàng Chó Mèo cảnh thuần chủng, thức ăn dinh dưỡng, phụ kiện cao cấp và dịch vụ chăm sóc Spa chuẩn thú y.</p>
-                <p style="margin-top:8px;">&#128205; Địa chỉ: 245 Nguyễn Thị Minh Khai, Quận 1, TP. Hồ Chí Minh</p>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col footer-col-brand">
+                    <div class="footer-brand">
+                        <span class="footer-brand-icon">🐾</span>
+                        <h4 class="footer-title">Meow &amp; Woof Pet House &amp; Spa</h4>
+                    </div>
+                    <p class="footer-desc">Hệ thống cửa hàng Chó Mèo cảnh thuần chủng, thức ăn dinh dưỡng, phụ kiện cao cấp và dịch vụ chăm sóc Spa chuẩn thú y 5 sao hàng đầu.</p>
+                    <div class="footer-info-item">
+                        <span>📍</span>
+                        <span><strong>Địa chỉ:</strong> 245 Nguyễn Thị Minh Khai, Quận 1, TP. Hồ Chí Minh</span>
+                    </div>
+                    <div class="footer-info-item">
+                        <span>⏰</span>
+                        <span><strong>Mở cửa:</strong> 08:00 – 21:00 (Tất cả các ngày trong tuần)</span>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4 class="footer-title">Danh mục nổi bật</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('shop_page', category='Chó cảnh') }}">🐶 Chó cảnh thuần chủng</a></li>
+                        <li><a href="{{ url_for('shop_page', category='Mèo cảnh') }}">🐱 Mèo cảnh nhập khẩu &amp; nhân giống</a></li>
+                        <li><a href="{{ url_for('shop_page', category='Thức ăn') }}">🥩 Thức ăn hạt &amp; Pate dinh dưỡng</a></li>
+                        <li><a href="{{ url_for('spa_page') }}">🛁 Đặt lịch tắm sấy &amp; Grooming Spa</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4 class="footer-title">Chính sách &amp; Hỗ trợ</h4>
+                    <ul class="footer-links">
+                        <li><span>🛡️</span> Bảo hành sức khỏe 15 ngày (Parvo, Care)</li>
+                        <li><span>🩺</span> Miễn phí tư vấn dinh dưỡng &amp; chăm sóc trọn đời</li>
+                        <li style="margin-top:6px;">
+                            <div class="footer-hotline-box">
+                                <span class="hotline-icon">📞</span>
+                                <div>
+                                    <div class="hotline-label">Hotline tư vấn / Zalo 24/7:</div>
+                                    <div class="hotline-number">0905.123.456</div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div>
-                <h4>Danh mục nổi bật</h4>
-                <p><a href="{{ url_for('shop_page', category='Chó cảnh') }}">Chó cảnh thuần chủng</a></p>
-                <p><a href="{{ url_for('shop_page', category='Mèo cảnh') }}">Mèo cảnh nhập khẩu &amp; nhân giống</a></p>
-                <p><a href="{{ url_for('shop_page', category='Thức ăn') }}">Thức ăn hạt &amp; Pate dinh dưỡng</a></p>
-                <p><a href="{{ url_for('spa_page') }}">Đặt lịch tắm sấy &amp; Grooming Spa</a></p>
-            </div>
-            <div>
-                <h4>Chính sách &amp; Hỗ trợ</h4>
-                <p>&#10003; Bảo hành sức khỏe 15 ngày (Parvo, Care, Giảm bạch cầu)</p>
-                <p>&#10003; Miễn phí tư vấn dinh dưỡng &amp; chăm sóc trọn đời</p>
-                <p>&#128222; Hotline / Zalo: <strong>0905.123.456</strong> (08:00 - 21:00)</p>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Meow &amp; Woof Pet House &amp; Spa. Bản quyền thuộc về Võ Thành Trung. Thiết kế sang trọng chuẩn 5 sao.</p>
             </div>
         </div>
     </footer>

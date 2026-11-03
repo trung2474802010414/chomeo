@@ -48,7 +48,16 @@ def resolve_writable_json_path(filename: str) -> str:
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(base_dir, "data")
     if os.environ.get("VERCEL"):
-        return os.path.join(tempfile.gettempdir(), filename)
+        target = os.path.join(tempfile.gettempdir(), filename)
+        if not os.path.exists(target):
+            src = os.path.join(data_dir, filename)
+            if os.path.exists(src):
+                try:
+                    import shutil
+                    shutil.copy2(src, target)
+                except Exception:
+                    pass
+        return target
     try:
         os.makedirs(data_dir, exist_ok=True)
         test_file = os.path.join(data_dir, ".write_test")

@@ -3595,6 +3595,146 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 /* ==========================================================================
+   FOOTER (PASTEL PEACH & HONEY SANG TRỌNG TRÊN LAPTOP & DESKTOP)
+   ========================================================================== */
+.site-footer {
+    background: #ffffff;
+    border-top: 1.5px solid var(--border);
+    padding: 48px 0 24px;
+    margin-top: auto;
+    color: var(--text-body);
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.8fr 1.2fr 1.4fr;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.footer-brand-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%);
+    border: 1px solid #fed7aa;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #ea580c;
+}
+
+.footer-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 14px 0;
+    letter-spacing: -0.2px;
+}
+
+.footer-desc {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: #6e5444;
+    margin-bottom: 14px;
+}
+
+.footer-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: #503829;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-links li {
+    font-size: 13.5px;
+    color: #6e5444;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-links a {
+    color: #503829;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: #ea580c;
+    transform: translateX(4px);
+    display: inline-block;
+}
+
+.footer-hotline-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff7ed;
+    border: 1.5px solid #fed7aa;
+    border-radius: 14px;
+    padding: 10px 14px;
+    margin-top: 6px;
+}
+
+.hotline-icon {
+    font-size: 22px;
+}
+
+.hotline-label {
+    font-size: 11px;
+    color: #8c7161;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.hotline-number {
+    font-size: 16px;
+    font-weight: 900;
+    color: #ea580c;
+    letter-spacing: 0.5px;
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+    .footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 26px !important;
+    }
+}
+
+/* ==========================================================================
    ADMIN ORDER CARDS V2 & VOUCHER SYSTEM (TẤM 1 & TẤM 2 LUXURY DESIGN)
    ========================================================================== */
 .admin-order-card-v2 {
@@ -3613,7 +3753,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     color: #ffffff !important;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 768px) {
     .admin-order-card-grid {
         grid-template-columns: 1fr !important;
     }
@@ -3622,7 +3762,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 /* ==========================================================================
    MOBILE-FIRST LUXURY RESPONSIVE OVERHAUL (GIAO DIỆN ĐIỆN THOẠI CHUẨN APP 5 SAO)
    ========================================================================== */
-@media (max-width: 960px) {
+@media (max-width: 768px) {
     /* 1. Khung Container & Khoảng cách chung */
     .container {
         padding: 0 14px !important;
