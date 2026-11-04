@@ -4336,3 +4336,35 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
     border: 1.5px solid #a7f3d0 !important;
     color: #047857 !important;
 }
+
+
+/* ==========================================================================
+   SPECS TABLE & HIGH CONTRAST DARK/LIGHT MODE STYLES
+   ========================================================================== */
+.specs-table th {
+    background-color: #fff7ed !important;
+    color: #7c2d12 !important;
+    border: 1.5px solid #fed7aa !important;
+    font-weight: 900 !important;
+}
+
+.specs-table td {
+    background-color: #ffffff !important;
+    color: #1c1917 !important;
+    border: 1.5px solid #fed7aa !important;
+    font-weight: 700 !important;
+}
+
+/* Cốc Cốc Auto Dark Mode Overrides */
+@media (prefers-color-scheme: dark) {
+    .specs-table th {
+        background-color: #27272a !important;
+        color: #fed7aa !important;
+        border-color: #52525b !important;
+    }
+    .specs-table td {
+        background-color: #18181b !important;
+        color: #f8fafc !important;
+        border-color: #52525b !important;
+    }
+}

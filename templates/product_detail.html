@@ -69,34 +69,34 @@
                 {{ p.description }}
             </p>
 
-            <!-- Bảng thông số kỹ thuật / Hồ sơ thú cưng (Màu cam đào & trắng sáng, tương phản 100%) -->
-            <table class="specs-table" style="width:100%; border-collapse:collapse; margin-bottom:22px; font-size:14px; border:1.5px solid #fed7aa; border-radius:14px; overflow:hidden;">
+            <!-- Bảng thông số kỹ thuật / Hồ sơ thú cưng (Màu cam đậm & than đậm, tương phản cực cao trên mọi màn hình) -->
+            <table class="specs-table" style="width:100%; border-collapse:collapse; margin-bottom:22px; font-size:14px; border:1.5px solid #fed7aa; border-radius:14px; overflow:hidden; box-shadow:0 4px 14px rgba(251,146,60,0.06);">
                 <tbody>
                     <tr>
-                        <th style="width:36%; background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Danh mục</th>
-                        <td style="background:#ffffff; color:#2b180d; font-weight:700; padding:11px 14px; border:1px solid #fed7aa;">{{ p.category }}</td>
+                        <th style="width:36%; background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Danh mục</th>
+                        <td style="background:#ffffff; color:#1c1917; font-weight:700; padding:12px 16px; border:1.5px solid #fed7aa;">{{ p.category }}</td>
                     </tr>
                     <tr>
-                        <th style="background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Loài thú cưng</th>
-                        <td style="background:#ffffff; color:#2b180d; font-weight:700; padding:11px 14px; border:1px solid #fed7aa;">{{ p.pet_type }}</td>
+                        <th style="background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Loài thú cưng</th>
+                        <td style="background:#ffffff; color:#1c1917; font-weight:700; padding:12px 16px; border:1.5px solid #fed7aa;">{{ p.pet_type }}</td>
                     </tr>
                     <tr>
-                        <th style="background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Giống / Dòng liên quan</th>
-                        <td style="background:#ffffff; color:#2b180d; font-weight:700; padding:11px 14px; border:1px solid #fed7aa;">{{ p.breed if p.breed else 'Phù hợp cho mọi giống ' + p.pet_type }}</td>
+                        <th style="background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Giống / Dòng liên quan</th>
+                        <td style="background:#ffffff; color:#1c1917; font-weight:700; padding:12px 16px; border:1.5px solid #fed7aa;">{{ p.breed if p.breed else 'Phù hợp cho mọi giống ' + p.pet_type }}</td>
                     </tr>
                     {% if p.category in ('Chó cảnh', 'Mèo cảnh') %}
                     <tr>
-                        <th style="background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Độ tuổi &amp; Tiêm chủng</th>
-                        <td style="background:#ffffff; color:#2b180d; font-weight:600; padding:11px 14px; border:1px solid #fed7aa;">Từ 2 - 2.5 tháng tuổi, đã tiêm phòng vaccine &amp; tẩy giun định kỳ</td>
+                        <th style="background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Độ tuổi &amp; Tiêm chủng</th>
+                        <td style="background:#ffffff; color:#1c1917; font-weight:700; padding:12px 16px; border:1.5px solid #fed7aa;">Từ 2 - 2.5 tháng tuổi, đã tiêm phòng vaccine &amp; tẩy giun định kỳ</td>
                     </tr>
                     <tr>
-                        <th style="background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Chế độ bảo hành</th>
-                        <td style="background:#ffffff; color:#047857; font-weight:700; padding:11px 14px; border:1px solid #fed7aa;">Bảo hành sức khỏe 30 ngày, tặng kèm sổ khám &amp; gói tư vấn dinh dưỡng trọn đời</td>
+                        <th style="background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Chế độ bảo hành</th>
+                        <td style="background:#ffffff; color:#047857; font-weight:800; padding:12px 16px; border:1.5px solid #fed7aa;">Bảo hành sức khỏe 30 ngày, tặng kèm sổ khám &amp; gói tư vấn dinh dưỡng trọn đời</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <th style="background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Xuất xứ &amp; Bảo quản</th>
-                        <td style="background:#ffffff; color:#2b180d; font-weight:600; padding:11px 14px; border:1px solid #fed7aa;">Phân phối chính hãng tại Meow &amp; Woof Pet House, hạn sử dụng dài</td>
+                        <th style="background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Xuất xứ &amp; Bảo quản</th>
+                        <td style="background:#ffffff; color:#1c1917; font-weight:700; padding:12px 16px; border:1.5px solid #fed7aa;">Phân phối chính hãng tại Meow &amp; Woof Pet House, hạn sử dụng dài</td>
                     </tr>
                     {% endif %}
                 </tbody>

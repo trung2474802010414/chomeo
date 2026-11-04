@@ -987,6 +987,8 @@ def order_history_page():
 
     all_orders = list(Order.iter_all(order_by="id DESC"))
     all_bookings = list(SpaBooking.iter_all(order_by="id DESC"))
+    product_image_map = {p.sku: p.image_url for p in Product.iter_all() if p.image_url}
+    product_image_map.update({p.name: p.image_url for p in Product.iter_all() if p.image_url})
 
     if session.get("admin_logged_in") and not session.get("customer_logged_in") and not query_phone:
         orders = [o.to_dict() for o in all_orders]
@@ -1195,6 +1197,7 @@ def order_history_page():
         orders=orders,
         bookings=bookings,
         total_spent=total_spent,
+        product_image_map=product_image_map,
         bank_config=get_bank_config(),
     )
 
@@ -1741,20 +1744,45 @@ def admin_page():
 
     products = [p.to_dict() for p in Product.iter_all(order_by="id DESC")] if admin_tab == "products" else []
     bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")] if admin_tab in ("bookings", "spa") else []
+    product_image_map = {p.sku: p.image_url for p in Product.iter_all() if p.image_url}
+    product_image_map.update({p.name: p.image_url for p in Product.iter_all() if p.image_url})
     orders = []
     if admin_tab in ("orders", "dashboard"):
         for o in Order.iter_all(order_by="id DESC"):
             od = o.to_dict()
-            if not isinstance(od.get("items"), list):
-                od["items"] = []
+            items_list = od.get("items")
+            if not isinstance(items_list, list):
+                items_list = []
+            for it in items_list:
+                if isinstance(it, dict) and not it.get("image_url"):
+                    it["image_url"] = product_image_map.get(it.get("sku")) or product_image_map.get(it.get("name")) or ""
+            od["items"] = items_list
             orders.append(od)
     email_logs = [e.to_dict() for e in EmailLog.iter_all(order_by="id DESC")] if admin_tab == "emails" else []
     xml_preview = export_products_to_xml() if admin_tab == "import_export" else ""
 
     low_stock_products = []
+    urgent_out_of_stock_count = 0
+    near_empty_count = 0
     if admin_tab == "inventory_alerts":
         all_prods = [p.to_dict() for p in Product.iter_all(order_by="stock ASC, id ASC")]
-        low_stock_products = [p for p in all_prods if int(p.get("stock", 0)) <= 10]
+        for p in all_prods:
+            stk = int(p.get("stock", 0))
+            is_pet = p.get("category") in ("Chó cảnh", "Mèo cảnh")
+            if stk == 0:
+                p["alert_level"] = "out_of_stock"
+                p["alert_label"] = "🚨 Hết hàng (0)"
+                urgent_out_of_stock_count += 1
+                low_stock_products.append(p)
+            elif (is_pet and stk <= 1) or (not is_pet and stk <= 3):
+                p["alert_level"] = "low_stock"
+                p["alert_label"] = f"⚠️ Sắp hết (Còn {stk})"
+                near_empty_count += 1
+                low_stock_products.append(p)
+            elif stk <= 5 and not is_pet:
+                p["alert_level"] = "notice"
+                p["alert_label"] = f"Cần lưu ý (Còn {stk})"
+                low_stock_products.append(p)
 
     breed_api_preview = None
     if admin_tab == "system_settings":
@@ -1795,6 +1823,9 @@ def admin_page():
         email_logs=email_logs,
         xml_preview=xml_preview,
         low_stock_products=low_stock_products,
+        urgent_out_of_stock_count=urgent_out_of_stock_count if admin_tab == "inventory_alerts" else 0,
+        near_empty_count=near_empty_count if admin_tab == "inventory_alerts" else 0,
+        product_image_map=product_image_map,
         spa_services=SPA_SERVICES,
         breed_api_preview=breed_api_preview,
         python_version=sys.version.split()[0],
@@ -2539,17 +2570,20 @@ if __name__ == "__main__":
 @app.route("/admin/sync-vault", methods=["POST"])
 @admin_required
 def admin_force_sync_vault():
-    """Nút khẩn cấp cho Quản trị viên: Tự động nạp và phục hồi toàn bộ dữ liệu từ JSON Store và Seeds."""
+    """Nút Reset & Làm Mới Dữ Liệu Quản Trị Hệ Thống từ Server (không cần can thiệp trình duyệt)."""
     try:
-        from petshop.data.seeds import get_seed_orders, get_seed_bookings, get_seed_users
+        try:
+            from data.seeds import get_seed_orders, get_seed_bookings, get_seed_users
+        except Exception:
+            from petshop.data.seeds import get_seed_orders, get_seed_bookings, get_seed_users
         Order.restore_orders_list(get_seed_orders())
         SpaBooking.restore_bookings_list(get_seed_bookings())
         User.restore_accounts_list(get_seed_users())
         Order.sync_from_json_store()
         SpaBooking.sync_from_json_store()
         User.sync_from_json_store()
-        flash("🎉 Đã phục hồi và đồng bộ toàn bộ 6 đơn hàng, 5 lịch hẹn Spa và 4 tài khoản khách hàng!", "success")
+        flash("🎉 Đã reset và làm mới toàn bộ dữ liệu quản trị thành công! Hệ thống đồng bộ tức thì trên Server mà không cần can thiệp trình duyệt.", "success")
     except Exception as exc:
-        flash(f"Lỗi đồng bộ dữ liệu: {exc}", "error")
-    target = request.referrer or url_for("admin_page", tab="orders")
+        flash(f"Lỗi làm mới dữ liệu: {exc}", "error")
+    target = request.referrer or url_for("admin_page", tab="dashboard")
     return redirect(target)

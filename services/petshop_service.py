@@ -414,6 +414,7 @@ def create_order_transactional(payload: Dict[str, Any]) -> Dict[str, Any]:
                     "price": product_dict["price"],
                     "quantity": qty,
                     "subtotal": round(product_dict["price"] * qty, 2),
+                    "image_url": product_dict.get("image_url", ""),
                 }
             )
 
@@ -599,7 +600,7 @@ def compute_dashboard_stats(
     cancelled_bookings_count = sum(1 for b in bookings if b.status == "Đã hủy")
     total_transactions = len(orders) + len(active_bookings)
     avg_order_value = round(net_revenue / total_transactions, 0) if total_transactions > 0 else 0
-    total_items_sold = sum(item.get("quantity", 0) for o in orders for item in o.items)
+    total_items_sold = sum(item.get("quantity", 0) if isinstance(item, dict) else 0 for o in orders for item in (o.items if isinstance(o.items, list) else []))
 
     order_pct = round((len(orders) / total_transactions) * 100) if total_transactions > 0 else 0
     spa_pct = 100 - order_pct if total_transactions > 0 else 0
@@ -615,7 +616,10 @@ def compute_dashboard_stats(
     for o in orders:
         if getattr(o, "status", "") == "Đã hủy":
             continue
-        for item in o.items:
+        items_list = o.items if isinstance(o.items, list) else []
+        for item in items_list:
+            if not isinstance(item, dict):
+                continue
             pid = item.get("product_id")
             sku = str(item.get("sku", "")).strip()
             name = str(item.get("name", "Sản phẩm")).strip()
