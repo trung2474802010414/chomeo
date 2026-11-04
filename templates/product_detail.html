@@ -20,7 +20,7 @@
 </div>
 
 <!-- Khung thông tin chi tiết Thú cưng / Sản phẩm (Tham khảo PetHouse) -->
-<div class="detail-card">
+<div class="detail-card" style="background:#ffffff; border:1.5px solid #fed7aa; box-shadow:0 10px 30px rgba(180,100,60,0.06); border-radius:24px; padding:28px; margin-bottom:36px;">
     <div class="detail-grid">
         <!-- Cột trái: Ảnh lớn -->
         <div class="detail-image-box">
@@ -52,13 +52,13 @@
                 </span>
             </div>
 
-            <h1 class="detail-title">{{ p.name }}</h1>
-            <div style="font-size:13px; color:var(--text-muted);">Mã định danh (SKU): <code>{{ p.sku }}</code> | Phân nhóm: <strong>{{ p.category }}</strong></div>
+            <h1 class="detail-title" style="color:#2b180d !important; font-size:26px; font-weight:900; margin-bottom:10px;">{{ p.name }}</h1>
+            <div style="font-size:13px; color:#6e5444; margin-bottom:14px;">Mã định danh (SKU): <code style="background:#fff7ed; color:#ea580c; border:1px solid #fed7aa; padding:2px 7px; border-radius:6px; font-weight:800;">{{ p.sku }}</code> | Phân nhóm: <strong style="color:#2b180d;">{{ p.category }}</strong></div>
 
-            <div class="detail-price-box">
+            <div class="detail-price-box" style="background:#fff7ed; border:1.5px solid #fed7aa; border-radius:16px; padding:16px 22px; margin:16px 0 20px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <div style="font-size:12.5px; color:var(--text-muted); font-weight:600;">Giá niêm yết tại Pet House:</div>
-                    <div class="detail-price">{{ "{:,.0f}".format(p.price) }} đ</div>
+                    <div class="detail-price" style="font-size:28px; font-weight:900; color:#047857;">{{ "{:,.0f}".format(p.price) }} đ</div>
                 </div>
                 <div style="text-align:right; font-size:13px; color:#15803d; font-weight:600;">
                     &#10004; Kiểm định chất lượng &amp; sức khỏe
@@ -69,34 +69,34 @@
                 {{ p.description }}
             </p>
 
-            <!-- Bảng thông số kỹ thuật / Hồ sơ thú cưng -->
-            <table class="specs-table">
+            <!-- Bảng thông số kỹ thuật / Hồ sơ thú cưng (Màu cam đào & trắng sáng, tương phản 100%) -->
+            <table class="specs-table" style="width:100%; border-collapse:collapse; margin-bottom:22px; font-size:14px; border:1.5px solid #fed7aa; border-radius:14px; overflow:hidden;">
                 <tbody>
                     <tr>
-                        <th>Danh mục</th>
-                        <td>{{ p.category }}</td>
+                        <th style="width:36%; background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Danh mục</th>
+                        <td style="background:#ffffff; color:#2b180d; font-weight:700; padding:11px 14px; border:1px solid #fed7aa;">{{ p.category }}</td>
                     </tr>
                     <tr>
-                        <th>Loài thú cưng</th>
-                        <td>{{ p.pet_type }}</td>
+                        <th style="background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Loài thú cưng</th>
+                        <td style="background:#ffffff; color:#2b180d; font-weight:700; padding:11px 14px; border:1px solid #fed7aa;">{{ p.pet_type }}</td>
                     </tr>
                     <tr>
-                        <th>Giống / Dòng liên quan</th>
-                        <td>{{ p.breed if p.breed else 'Phù hợp cho mọi giống ' + p.pet_type }}</td>
+                        <th style="background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Giống / Dòng liên quan</th>
+                        <td style="background:#ffffff; color:#2b180d; font-weight:700; padding:11px 14px; border:1px solid #fed7aa;">{{ p.breed if p.breed else 'Phù hợp cho mọi giống ' + p.pet_type }}</td>
                     </tr>
                     {% if p.category in ('Chó cảnh', 'Mèo cảnh') %}
                     <tr>
-                        <th>Độ tuổi &amp; Tiêm chủng</th>
-                        <td>Từ 2 - 2.5 tháng tuổi, đã tiêm phòng vaccine &amp; tẩy giun định kỳ</td>
+                        <th style="background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Độ tuổi &amp; Tiêm chủng</th>
+                        <td style="background:#ffffff; color:#2b180d; font-weight:600; padding:11px 14px; border:1px solid #fed7aa;">Từ 2 - 2.5 tháng tuổi, đã tiêm phòng vaccine &amp; tẩy giun định kỳ</td>
                     </tr>
                     <tr>
-                        <th>Chế độ bảo hành</th>
-                        <td>Bảo hành sức khỏe 30 ngày, tặng kèm sổ khám &amp; gói tư vấn dinh dưỡng trọn đời</td>
+                        <th style="background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Chế độ bảo hành</th>
+                        <td style="background:#ffffff; color:#047857; font-weight:700; padding:11px 14px; border:1px solid #fed7aa;">Bảo hành sức khỏe 30 ngày, tặng kèm sổ khám &amp; gói tư vấn dinh dưỡng trọn đời</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <th>Xuất xứ &amp; Bảo quản</th>
-                        <td>Phân phối chính hãng tại Meow &amp; Woof Pet House, hạn sử dụng dài</td>
+                        <th style="background:#fff7ed; color:#8c7161; font-weight:800; padding:11px 14px; border:1px solid #fed7aa;">Xuất xứ &amp; Bảo quản</th>
+                        <td style="background:#ffffff; color:#2b180d; font-weight:600; padding:11px 14px; border:1px solid #fed7aa;">Phân phối chính hãng tại Meow &amp; Woof Pet House, hạn sử dụng dài</td>
                     </tr>
                     {% endif %}
                 </tbody>
@@ -123,9 +123,9 @@
                 <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-lg">Đặt lịch Spa</a>
             </div>
 
-            <ul class="policy-list">
-                <li><strong>Cam kết từ Meow &amp; Woof Pet House:</strong> Hỗ trợ giao thú cưng &amp; phụ kiện tận nơi an toàn.</li>
-                <li>Giảm ngay 15% phí tắm sấy &amp; cắt tỉa lông (Grooming) lần đầu khi mua kèm tại cửa hàng.</li>
+            <ul class="policy-list" style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:14px; padding:14px 18px; margin-top:20px; font-size:13.5px; color:#047857; font-weight:600; list-style-position:inside;">
+                <li style="margin-bottom:6px;"><strong style="color:#065f46;">✓ Cam kết từ Meow &amp; Woof Pet House:</strong> Hỗ trợ giao thú cưng &amp; phụ kiện tận nơi an toàn.</li>
+                <li><strong style="color:#065f46;">✓ Ưu đãi Spa đi kèm:</strong> Giảm ngay 15% phí tắm sấy &amp; cắt tỉa lông (Grooming) lần đầu khi mua kèm tại cửa hàng.</li>
             </ul>
         </div>
     </div>

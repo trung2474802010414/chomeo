@@ -1822,14 +1822,14 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .detail-title {
     font-size: 26px;
     font-weight: 800;
-    color: #ffffff;
+    color: #2b180d;
     line-height: 1.3;
     margin-bottom: 10px;
 }
 
 .detail-price-box {
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    background: #fff7ed;
+    border: 1.5px solid #fed7aa;
     border-radius: var(--radius-sm);
     padding: 16px 22px;
     margin: 16px 0 20px;
@@ -1841,7 +1841,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .detail-price {
     font-size: 28px;
     font-weight: 800;
-    color: #34d399;
+    color: #047857;
 }
 
 .specs-table {
@@ -1849,34 +1849,40 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     border-collapse: collapse;
     margin-bottom: 22px;
     font-size: 14px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #fed7aa;
 }
 
 .specs-table th,
 .specs-table td {
     padding: 10px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid #fed7aa;
     text-align: left;
 }
 
 .specs-table th {
     width: 36%;
-    background-color: rgba(255, 255, 255, 0.04);
-    color: #cbd5e1;
-    font-weight: 600;
+    background-color: #fff7ed;
+    color: #8c7161;
+    font-weight: 700;
 }
 
 .specs-table td {
-    color: #f1f5f9;
+    background-color: #ffffff;
+    color: #2b180d !important;
+    font-weight: 600;
 }
 
 .policy-list {
-    background: rgba(52, 211, 153, 0.08);
-    border: 1px solid rgba(52, 211, 153, 0.25);
+    background: #ecfdf5;
+    border: 1.5px solid #a7f3d0;
     border-radius: var(--radius-sm);
     padding: 14px 18px;
     margin-top: 20px;
     font-size: 13.5px;
-    color: #6ee7b7;
+    color: #047857;
+    font-weight: 600;
 }
 
 .policy-list li {
@@ -4256,4 +4262,77 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
     background: #ffffff !important;
     border: 1.5px solid #fae4d4 !important;
     box-shadow: 0 4px 20px rgba(180, 100, 60, 0.06) !important;
+}
+
+
+/* ==========================================================================
+   ENHANCED LIGHT MODE CONTRAST & READABILITY SAFEGUARDS
+   Biến tất cả chữ neon/trắng/vàng nhạt trên nền sáng thành màu tương phản cao, đậm nét và sắc sảo
+   ========================================================================== */
+.card [style*="color:#fde047"],
+.card [style*="color: #fde047"],
+.admin-main [style*="color:#fde047"],
+.admin-main [style*="color: #fde047"],
+.clean-table [style*="color:#fde047"],
+.clean-table [style*="color:#fbbf24"],
+.admin-main [style*="color:#fbbf24"],
+.card [style*="color:#fbbf24"] {
+    color: #92400e !important;
+}
+
+.card [style*="color:#34d399"],
+.card [style*="color: #34d399"],
+.admin-main [style*="color:#34d399"],
+.admin-main [style*="color: #34d399"],
+.clean-table [style*="color:#34d399"],
+.site-content [style*="color:#34d399"] {
+    color: #047857 !important;
+}
+
+.card [style*="color:#38bdf8"],
+.admin-main [style*="color:#38bdf8"],
+.clean-table [style*="color:#38bdf8"] {
+    color: #0284c7 !important;
+}
+
+.card [style*="color:#c084fc"],
+.card [style*="color:#c4b5fd"],
+.admin-main [style*="color:#c084fc"],
+.admin-main [style*="color:#c4b5fd"] {
+    color: #6d28d9 !important;
+}
+
+.card [style*="color:#94a3b8"],
+.admin-main [style*="color:#94a3b8"],
+.clean-table [style*="color:#94a3b8"] {
+    color: #6e5444 !important;
+}
+
+/* Đảm bảo toàn bộ bảng dữ liệu Admin và thẻ khách hàng luôn đậm nét */
+.clean-table td strong {
+    color: #2b180d;
+}
+.clean-table td {
+    color: #2b180d !important;
+}
+.clean-table th {
+    color: #c2410c !important;
+    font-weight: 800 !important;
+}
+
+/* High-contrast safeguards for Product Detail Specs Table */
+.specs-table th {
+    background-color: #fff7ed !important;
+    color: #8c7161 !important;
+    border: 1px solid #fed7aa !important;
+}
+.specs-table td {
+    background-color: #ffffff !important;
+    color: #2b180d !important;
+    border: 1px solid #fed7aa !important;
+}
+.policy-list {
+    background: #ecfdf5 !important;
+    border: 1.5px solid #a7f3d0 !important;
+    color: #047857 !important;
 }

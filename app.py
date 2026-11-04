@@ -251,11 +251,22 @@ def _attach_order_to_vault_cookie(resp: Response, order_dict: Dict[str, Any]) ->
 
 
 def _sync_orders_vault_cookie(resp: Response, all_orders: List[Dict[str, Any]]) -> Response:
-    """Đồng bộ lại Cookie đơn hàng khi Admin cập nhật trạng thái hoặc xóa đơn hàng."""
+    """Đồng bộ lại Cookie đơn hàng bằng cách gộp với vault hiện có để không làm mất đơn cũ."""
     try:
+        current_vault = _read_cookie_orders_vault()
+        merged_map = {}
+        for x in current_vault:
+            if isinstance(x, dict):
+                k = (str(x.get("phone", "")).strip(), str(x.get("created_at", "")).strip(), round(float(x.get("total_amount", 0)), 0))
+                merged_map[k] = x
+        for o in all_orders:
+            if isinstance(o, dict):
+                k = (str(o.get("phone", "")).strip(), str(o.get("created_at", "")).strip(), round(float(o.get("total_amount", 0)), 0))
+                merged_map[k] = o
+        vault = list(merged_map.values())[-30:]
         resp.set_cookie(
             "mw_orders_vault",
-            _encode_compressed_vault(all_orders[-15:]),
+            _encode_compressed_vault(vault),
             max_age=365 * 24 * 3600,
             samesite="Lax",
             httponly=False,
@@ -888,7 +899,42 @@ def order_success_page(order_id: int):
 @app.route("/my-orders")
 @app.route("/profile")
 def order_history_page():
-    """Trang Hồ Sơ Tài Khoản Khách Hàng & Lịch Sử Mua Hàng / Đặt Lịch Spa (Đồng bộ 100% với Admin)."""
+    """Trang Hồ Sơ Tài Khoản Khách Hàng & Lịch Sử Mua Hàng / Đặt Lịch Spa (Đồng bộ 100% với Admin & Vercel)."""
+    # Đồng bộ kho dữ liệu đơn hàng và lịch Spa từ file JSON lưu trữ
+    Order.sync_from_json_store()
+    SpaBooking.sync_from_json_store()
+
+    # Đồng bộ thêm từ Cookie Vault nếu có
+    try:
+        raw_cookie = request.cookies.get("orders_vault")
+        if raw_cookie:
+            import urllib.parse
+            decoded = urllib.parse.unquote(raw_cookie)
+            cookie_orders = json.loads(decoded)
+            if isinstance(cookie_orders, list):
+                for co in cookie_orders:
+                    if isinstance(co, dict) and co.get("id"):
+                        exists = Order.find_by_id(int(co["id"]))
+                        if not exists:
+                            Order.create_from_dict(co)
+    except Exception:
+        pass
+
+    try:
+        raw_b_cookie = request.cookies.get("bookings_vault")
+        if raw_b_cookie:
+            import urllib.parse
+            decoded_b = urllib.parse.unquote(raw_b_cookie)
+            cookie_bookings = json.loads(decoded_b)
+            if isinstance(cookie_bookings, list):
+                for cb in cookie_bookings:
+                    if isinstance(cb, dict) and cb.get("id"):
+                        exists_b = SpaBooking.find_by_id(int(cb["id"]))
+                        if not exists_b:
+                            SpaBooking.create_from_dict(cb)
+    except Exception:
+        pass
+
     query_phone = request.args.get("phone", "").strip()
     if not session.get("customer_logged_in") and not session.get("admin_logged_in") and not query_phone:
         flash("🔑 Vui lòng đăng nhập tài khoản để xem Hồ sơ khách hàng & Lịch sử mua hàng của bạn!", "error")
@@ -946,20 +992,46 @@ def order_history_page():
         orders = [o.to_dict() for o in all_orders]
         bookings = [b.to_dict() for b in all_bookings]
     else:
-        orders = [
-            o.to_dict()
-            for o in all_orders
-            if (u_phone and u_phone in (o.phone or ""))
-            or (u_email and u_email == (o.email or "").strip().lower())
-            or (u_name and u_name == (o.customer_name or "").strip().lower())
-        ]
-        bookings = [
-            b.to_dict()
-            for b in all_bookings
-            if (u_phone and u_phone in (b.phone or ""))
-            or (u_email and u_email == (b.email or "").strip().lower())
-            or (u_name and u_name == (b.customer_name or "").strip().lower())
-        ]
+        matched_orders = []
+        for o in all_orders:
+            od = o.to_dict()
+            o_phone = str(od.get("phone") or "").strip()
+            o_email = str(od.get("email") or "").strip().lower()
+            o_name = str(od.get("customer_name") or "").strip().lower()
+            o_user = str(od.get("username") or "").strip().lower()
+
+            is_match = False
+            if u_phone and (u_phone in o_phone or o_phone in u_phone):
+                is_match = True
+            elif u_email and u_email == o_email:
+                is_match = True
+            elif u_name and (u_name == o_name or u_name in o_name or o_name in u_name):
+                is_match = True
+            elif username_sess and username_sess.lower() == o_user:
+                is_match = True
+
+            if is_match:
+                matched_orders.append(od)
+        orders = matched_orders
+
+        matched_bookings = []
+        for b in all_bookings:
+            bd = b.to_dict()
+            b_phone = str(bd.get("phone") or "").strip()
+            b_email = str(bd.get("email") or "").strip().lower()
+            b_name = str(bd.get("customer_name") or "").strip().lower()
+
+            is_match = False
+            if u_phone and (u_phone in b_phone or b_phone in u_phone):
+                is_match = True
+            elif u_email and u_email == b_email:
+                is_match = True
+            elif u_name and (u_name == b_name or u_name in b_name or b_name in u_name):
+                is_match = True
+
+            if is_match:
+                matched_bookings.append(bd)
+        bookings = matched_bookings
 
     total_spent = sum(
         o.get("total_amount", 0) for o in orders if o.get("status") != "Đã hủy"
@@ -969,16 +1041,52 @@ def order_history_page():
 
     if total_spent >= 15000000:
         vip_tier = "💎 Hạng Kim Cương"
-        vip_color = "#c4b5fd"
+        vip_badge = "Kim Cương"
+        vip_color = "#6d28d9"
+        vip_bg = "#f5f3ff"
+        vip_border = "#ddd6fe"
+        vip_discount_pct = 15
+        vip_discount_text = "Giảm 15% tất cả đơn hàng & dịch vụ Spa"
+        next_tier_name = "Hạng Cao Nhất"
+        next_tier_target = 15000000
+        next_tier_needed = 0
+        tier_progress = 100
     elif total_spent >= 5000000:
         vip_tier = "🥇 Hạng Vàng"
-        vip_color = "#fde047"
+        vip_badge = "Hạng Vàng"
+        vip_color = "#92400e"
+        vip_bg = "#fef3c7"
+        vip_border = "#fcd34d"
+        vip_discount_pct = 10
+        vip_discount_text = "Giảm 10% dịch vụ Cắt tỉa Spa & Phụ kiện"
+        next_tier_name = "Hạng Kim Cương"
+        next_tier_target = 15000000
+        next_tier_needed = max(0, 15000000 - total_spent)
+        tier_progress = min(100, int((total_spent / 15000000) * 100))
     elif total_spent >= 1000000:
         vip_tier = "🥈 Hạng Bạc"
-        vip_color = "#38bdf8"
+        vip_badge = "Hạng Bạc"
+        vip_color = "#0369a1"
+        vip_bg = "#e0f2fe"
+        vip_border = "#bae6fd"
+        vip_discount_pct = 5
+        vip_discount_text = "Giảm 5% dịch vụ Tắm sấy & Phụ kiện"
+        next_tier_name = "Hạng Vàng"
+        next_tier_target = 5000000
+        next_tier_needed = max(0, 5000000 - total_spent)
+        tier_progress = min(100, int((total_spent / 5000000) * 100))
     else:
-        vip_tier = "🌱 Thành Viên Thân Thiết"
-        vip_color = "#6ee7b7"
+        vip_tier = "🌱 Thành Viên Mới"
+        vip_badge = "Thành Viên Mới"
+        vip_color = "#047857"
+        vip_bg = "#ecfdf5"
+        vip_border = "#a7f3d0"
+        vip_discount_pct = 0
+        vip_discount_text = "Tích lũy chi tiêu từ 1.000.000 đ để thăng Hạng Bạc (giảm 5%)"
+        next_tier_name = "Hạng Bạc"
+        next_tier_target = 1000000
+        next_tier_needed = max(0, 1000000 - total_spent)
+        tier_progress = min(100, int((total_spent / 1000000) * 100))
 
     return render_template(
         "order_history.html",
@@ -986,7 +1094,15 @@ def order_history_page():
         profile=profile_data,
         customer_profile=profile_data,
         vip_tier=vip_tier,
+        vip_badge=vip_badge,
         vip_color=vip_color,
+        vip_bg=vip_bg,
+        vip_border=vip_border,
+        vip_discount_pct=vip_discount_pct,
+        vip_discount_text=vip_discount_text,
+        next_tier_name=next_tier_name,
+        next_tier_needed=next_tier_needed,
+        tier_progress=tier_progress,
         phone=profile_data["phone"],
         orders=orders,
         bookings=bookings,
@@ -1396,6 +1512,10 @@ def admin_page():
         end_date = today_str
 
     stats = compute_dashboard_stats(start_date=start_date, end_date=end_date)
+    if admin_tab == "orders":
+        Order.sync_from_json_store()
+    if admin_tab == "bookings":
+        SpaBooking.sync_from_json_store()
     products = [p.to_dict() for p in Product.iter_all(order_by="id DESC")] if admin_tab == "products" else []
     bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")] if admin_tab == "bookings" else []
     orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")] if admin_tab == "orders" else []

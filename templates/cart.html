@@ -16,10 +16,10 @@
          CỘT TRÁI: DANH SÁCH MẶT HÀNG TRONG GIỎ (CARD VIEW CAO CẤP, 0% NỀN TRẮNG)
          ============================================================== -->
     <div class="card" style="background:#ffffff; border:1.5px solid #fae4d4; box-shadow:0 10px 30px rgba(180,100,60,0.06); border-radius:20px; padding:22px;">
-        <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:14px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+        <div class="card-header" style="border-bottom:1px solid #fed7aa; padding-bottom:14px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
             <div>
                 <h2 class="card-title" style="font-size:18px; color:#2b180d; margin:0;">📦 Sản Phẩm Trong Giỏ ({{ cart_items|length }} mặt hàng)</h2>
-                <div style="font-size:12px; color:#a5b4fc; margin-top:3px;">Bảo đảm thú cưng thuần chủng &amp; phụ kiện chính hãng 100%</div>
+                <div style="font-size:12px; color:#8c7161; margin-top:3px;">Bảo đảm thú cưng thuần chủng &amp; phụ kiện chính hãng 100%</div>
             </div>
             {% if cart_items %}
             <form method="POST" action="{{ url_for('clear_cart_route') }}" style="margin:0;">
@@ -43,19 +43,19 @@
                     <div style="flex:1;">
                         <strong style="color:#2b180d !important; font-size:15.5px !important; font-weight:800 !important; display:block; margin-bottom:4px; line-height:1.35;">{{ item.name }}</strong>
                         <div style="font-size:12px; color:#6e5444; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                            <span style="color:#94a3b8;">Mã SKU:</span>
-                            <code style="color:#38bdf8; background:rgba(56,189,248,0.18); padding:2px 6px; border-radius:6px; font-weight:700;">{{ item.sku }}</code>
-                            <span style="color:rgba(255,255,255,0.2);">•</span>
+                            <span style="color:#8c7161;">Mã SKU:</span>
+                            <code style="color:#0369a1; background:#e0f2fe; padding:2px 6px; border-radius:6px; font-weight:700;">{{ item.sku }}</code>
+                            <span style="color:#fed7aa;">•</span>
                             <span style="color:#6e5444;">Kho còn: <strong style="color:#2b180d;">{{ item.stock }}</strong></span>
-                            <span style="color:rgba(255,255,255,0.2);">•</span>
-                            <span style="color:#fde047; font-weight:700;">{{ "{:,.0f}".format(item.price) }} đ</span>
+                            <span style="color:#fed7aa;">•</span>
+                            <span style="color:#b45309; font-weight:700;">{{ "{:,.0f}".format(item.price) }} đ</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Cột phải: Bộ tăng giảm số lượng & Thành tiền -->
                 <div style="display:flex; align-items:center; gap:18px; flex-wrap:wrap;">
-                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); padding:4px 8px; border-radius:10px;">
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:#fff7ed; border:1px solid #fed7aa; padding:4px 8px; border-radius:10px;">
                         <form method="POST" action="{{ url_for('update_cart_route') }}" style="margin:0;">
                             <input type="hidden" name="product_id" value="{{ item.product_id }}">
                             <input type="hidden" name="delta" value="-1">
@@ -69,22 +69,22 @@
                         </form>
                     </div>
                     <div style="text-align:right; min-width:115px;">
-                        <div style="font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Thành tiền:</div>
-                        <strong style="color:#34d399 !important; font-size:18px !important; font-weight:900 !important; display:block;">{{ "{:,.0f}".format(item.subtotal) }} đ</strong>
+                        <div style="font-size:11px; color:#8c7161; text-transform:uppercase; font-weight:700;">Thành tiền:</div>
+                        <strong style="color:#047857 !important; font-size:18px !important; font-weight:900 !important; display:block;">{{ "{:,.0f}".format(item.subtotal) }} đ</strong>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
 
-        <!-- KHUNG NHẬP & CHỌN NHANH MÃ GIẢM GIÁ VOUCHER -->
-        <div style="margin-top:18px; padding:18px 20px; background:rgba(15,23,42,0.85); border:1.5px solid rgba(236,72,153,0.4); border-radius:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+        <!-- KHUNG NHẬP & CHỌN NHANH MÃ GIẢM GIÁ VOUCHER (TONE CAM ĐÀO & MẬT ONG ẤM PASTEL) -->
+        <div style="margin-top:18px; padding:20px 22px; background:#fff7ed; border:2px dashed #fb923c; border-radius:20px; box-shadow:0 6px 20px rgba(251,146,60,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:20px;">🎟️</span>
-                    <strong style="color:#2b180d; font-size:15px;">Mã Giảm Giá / Voucher Ưu Đãi</strong>
+                    <span style="font-size:22px;">🎁</span>
+                    <strong style="color:#2b180d; font-size:15.5px; font-weight:800;">Mã Giảm Giá / Voucher Khuyến Mãi</strong>
                 </div>
-                <span style="font-size:11.5px; color:#f472b6; font-weight:700;">Nhập mã nhận từ Gmail hoặc chọn bên dưới</span>
+                <span style="font-size:12px; color:#c2410c; font-weight:700;">Nhập mã từ Gmail hoặc bấm chọn nhanh bên dưới:</span>
             </div>
 
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
@@ -94,38 +94,38 @@
                     value="{{ applied_voucher.code if applied_voucher else '' }}"
                     placeholder="Nhập mã chữ Voucher (VD: GENZVIP20, MEOW50K)..."
                     class="form-control"
-                    style="flex:1; min-width:200px; height:44px; background:rgba(9,13,28,0.9) !important; color:#fde047 !important; font-weight:900; text-transform:uppercase; letter-spacing:0.8px; border:1.5px solid rgba(236,72,153,0.45) !important; border-radius:12px;"
+                    style="flex:1; min-width:200px; height:46px; background:#ffffff !important; color:#2b180d !important; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; border:2px solid #fed7aa !important; border-radius:12px; padding:0 14px; font-size:14px;"
                     oninput="this.value=this.value.toUpperCase()"
                 >
-                <button type="button" onclick="applyVoucherAjax()" class="btn btn-primary" style="height:44px; padding:0 22px; font-weight:800; border-radius:12px;">
-                    ✨ Áp Dụng Mã
+                <button type="button" onclick="applyVoucherAjax()" class="btn btn-primary" style="height:46px; padding:0 24px; font-weight:800; border-radius:12px; background:linear-gradient(135deg, #fb923c 0%, #f43f5e 100%); color:#ffffff; box-shadow:0 4px 14px rgba(251,146,60,0.35);">
+                    ⚡ Áp Dụng Mã
                 </button>
-                <button type="button" id="removeVoucherBtn" onclick="removeVoucherAjax()" class="btn btn-outline" style="height:44px; padding:0 14px; border-radius:12px; display:{% if applied_voucher %}inline-flex{% else %}none{% endif %};">
+                <button type="button" id="removeVoucherBtn" onclick="removeVoucherAjax()" class="btn btn-outline" style="height:46px; padding:0 16px; border-radius:12px; border:1.5px solid #fed7aa; color:#ea580c; background:#ffffff; font-weight:700; display:{% if applied_voucher %}inline-flex{% else %}none{% endif %};">
                     ✕ Gỡ mã
                 </button>
             </div>
 
-            <div id="voucherStatusMsg" style="margin-top:8px; font-size:12.5px; font-weight:700; color:{% if applied_voucher %}#34d399{% else %}#cbd5e1{% endif %};">
+            <div id="voucherStatusMsg" style="margin-top:10px; font-size:13px; font-weight:700; color:{% if applied_voucher %}#047857{% else %}#6e5444{% endif %};">
                 {% if applied_voucher %}
-                    ✅ Đang áp dụng mã <strong>{{ applied_voucher.code }}</strong> ({{ applied_voucher.discount_display }}) — Tiết kiệm ngay <strong>{{ "{:,.0f}".format(discount_amount) }} đ</strong>!
+                    🎉 Đang áp dụng mã <strong>{{ applied_voucher.code }}</strong> ({{ applied_voucher.discount_display }}) — Tiết kiệm ngay <strong>{{ "{:,.0f}".format((discount_amount or 0)|float) }} đ</strong>!
                 {% endif %}
             </div>
 
             {% if active_vouchers %}
-            <div style="margin-top:12px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.12);">
-                <div style="font-size:11.5px; color:#a5b4fc; font-weight:700; margin-bottom:8px;">🎁 Mã Voucher đang có hiệu lực (Bấm để áp dụng ngay):</div>
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <div style="margin-top:14px; padding-top:12px; border-top:1.5px dashed #fed7aa;">
+                <div style="font-size:12px; color:#8c7161; font-weight:800; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.3px;">🎟️ Mã Voucher đang có hiệu lực (Bấm để áp dụng ngay):</div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     {% for v in active_vouchers %}
                     <button
                         type="button"
                         onclick="quickApplyVoucherCode('{{ v.code|e }}')"
-                        style="display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:10px; background:#fff7ed; border:1px dashed #fed7aa; color:#ea580c; font-size:12px; cursor:pointer; transition:transform 0.15s ease;"
+                        style="display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:12px; background:#ffffff; border:1.5px solid #fed7aa; color:#2b180d; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 2px 8px rgba(180,100,60,0.06); transition:all 0.2s ease;"
                         title="Hạn dùng: {{ v.start_date }} đến {{ v.expiry_date }}"
                     >
-                        <strong style="color:#fde047;">🏷️ {{ v.code }}</strong>
-                        <span style="color:#34d399; font-weight:800;">{{ v.discount_display }}</span>
+                        <span style="color:#ea580c; font-weight:900; letter-spacing:0.5px;">🎟️ {{ v.code }}</span>
+                        <span style="color:#047857; font-weight:800;">{{ v.discount_display }}</span>
                         {% if v.min_order_value > 0 %}
-                        <span style="font-size:11px; color:#6e5444;">(Đơn &ge; {{ "{:,.0f}".format(v.min_order_value) }}đ)</span>
+                        <span style="font-size:11px; color:#6e5444;">(Đơn &ge; {{ "{:,.0f}".format((v.min_order_value or 0)|float) }}đ)</span>
                         {% endif %}
                     </button>
                     {% endfor %}
@@ -140,16 +140,16 @@
                 <span>Tạm tính ({{ cart_items|length }} mặt hàng):</span>
                 <strong style="color:#2b180d;">{{ "{:,.0f}".format(cart_total) }} đ</strong>
             </div>
-            <div id="voucherDiscountRow" style="display:{% if discount_amount and discount_amount > 0 %}flex{% else %}none{% endif %}; justify-content:space-between; align-items:center; font-size:13.5px; color:#f472b6; margin-bottom:8px;">
+            <div id="voucherDiscountRow" style="display:{% if discount_amount and discount_amount > 0 %}flex{% else %}none{% endif %}; justify-content:space-between; align-items:center; font-size:13.5px; color:#c2410c; margin-bottom:8px;">
                 <span>🎟️ Giảm giá Voucher (<strong id="voucherAppliedCodeText">{{ applied_voucher.code if applied_voucher else '' }}</strong>):</span>
                 <strong id="voucherDiscountValueText">-{{ "{:,.0f}".format(discount_amount|default(0)) }} đ</strong>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.12);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:8px; border-top:1px solid #fed7aa;">
                 <div>
                     <span style="font-size:14px; font-weight:800; color:#2b180d; text-transform:uppercase; letter-spacing:0.5px;">TỔNG TIỀN THANH TOÁN:</span>
-                    <div style="font-size:12px; color:#c4b5fd; margin-top:2px;">(Đã bao gồm thuế VAT &amp; ưu đãi Voucher)</div>
+                    <div style="font-size:12px; color:#8c7161; margin-top:2px;">(Đã bao gồm thuế VAT &amp; ưu đãi Voucher)</div>
                 </div>
-                <strong id="finalCartTotalText" style="font-size:28px; font-weight:900; color:#34d399; letter-spacing:-0.5px;">{{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</strong>
+                <strong id="finalCartTotalText" style="font-size:28px; font-weight:900; color:#047857; letter-spacing:-0.5px;">{{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</strong>
             </div>
         </div>
         {% else %}
@@ -167,11 +167,11 @@
          CỘT PHẢI: FORM GIAO HÀNG & PHƯƠNG THỨC THANH TOÁN QR VIETQR
          ============================================================== -->
     <div class="card" style="background:#ffffff; border:1.5px solid #fae4d4; box-shadow:0 10px 30px rgba(180,100,60,0.06); border-radius:20px; padding:22px;">
-        <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:14px; margin-bottom:18px;">
+        <div class="card-header" style="border-bottom:1px solid #fed7aa; padding-bottom:14px; margin-bottom:18px;">
             <div>
                 <h2 class="card-title" style="font-size:18px; color:#2b180d; margin:0;">📋 Thông Tin Nhận Hàng &amp; Thanh Toán</h2>
                 {% if customer_logged_in %}
-                <div style="display:inline-flex; align-items:center; gap:6px; margin-top:6px; padding:3px 10px; border-radius:99px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.35); font-size:11.5px; font-weight:800; color:#34d399;">
+                <div style="display:inline-flex; align-items:center; gap:6px; margin-top:6px; padding:3px 10px; border-radius:99px; background:#ecfdf5; border:1px solid #a7f3d0; font-size:11.5px; font-weight:800; color:#047857;">
                     <span>✓ Đang đặt hàng bằng tài khoản thành viên: {{ customer_name }} (@{{ customer_username }})</span>
                 </div>
                 {% else %}
@@ -218,7 +218,7 @@
                 >
                 <div style="font-size:11.5px; color:#6e5444; margin-top:3px;">Chỉ gồm chữ cái tiếng Việt, không chứa chữ số hoặc ký tự lạ.</div>
                 {% for err in form.errors.get('customer_name', []) %}
-                    <div class="form-error" style="color:#f87171; font-size:12px; margin-top:3px;">{{ err }}</div>
+                    <div class="form-error" style="color:#dc2626; font-weight:700; font-size:12px; margin-top:3px;">{{ err }}</div>
                 {% endfor %}
             </div>
 
@@ -243,7 +243,7 @@
                 >
                 <div style="font-size:11.5px; color:#6e5444; margin-top:3px;">Định dạng chuẩn 10 chữ số (Đầu số di động Việt Nam: 03x, 05x, 07x, 08x, 09x).</div>
                 {% for err in form.errors.get('phone', []) %}
-                    <div class="form-error" style="color:#f87171; font-size:12px; margin-top:3px;">{{ err }}</div>
+                    <div class="form-error" style="color:#dc2626; font-weight:700; font-size:12px; margin-top:3px;">{{ err }}</div>
                 {% endfor %}
             </div>
 
@@ -251,7 +251,7 @@
             <div class="form-group" style="margin-bottom:14px;">
                 <label class="form-label" style="display:flex; justify-content:space-between; align-items:center; color:#2b180d; font-weight:700; font-size:13.5px;">
                     <span>Địa chỉ Email của bạn (*)</span>
-                    <span style="font-size:11.5px; color:#34d399; font-weight:700;">🔔 Báo đơn về Mail Admin</span>
+                    <span style="font-size:11.5px; color:#047857; font-weight:700;">🔔 Báo đơn về Mail Admin</span>
                 </label>
                 <input
                     type="email"
@@ -268,7 +268,7 @@
                     Khi bấm Đặt mua, hệ thống sẽ tự động gửi thông báo đơn hàng chi tiết về hộp thư Email của Admin!
                 </div>
                 {% for err in form.errors.get('email', []) %}
-                    <div class="form-error" style="color:#f87171; font-size:12px; margin-top:3px;">{{ err }}</div>
+                    <div class="form-error" style="color:#dc2626; font-weight:700; font-size:12px; margin-top:3px;">{{ err }}</div>
                 {% endfor %}
             </div>
 
@@ -291,7 +291,7 @@
                     Vui lòng ghi rõ số nhà, tên đường, phường/xã, quận/huyện để shipper giao tận tay.
                 </div>
                 {% for err in form.errors.get('address', []) %}
-                    <div class="form-error" style="color:#f87171; font-size:12px; margin-top:3px;">{{ err }}</div>
+                    <div class="form-error" style="color:#dc2626; font-weight:700; font-size:12px; margin-top:3px;">{{ err }}</div>
                 {% endfor %}
             </div>
 
@@ -301,7 +301,7 @@
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
                     <!-- LỰA CHỌN 1: COD -->
                     <div id="paymentCardCod" onclick="setPayment('cod')" style="display:flex; align-items:center; gap:10px; padding:13px 14px; border-radius:14px; background:#fff7ed; border:2px solid #fb923c; cursor:pointer; transition:all 0.2s ease;">
-                        <input type="radio" id="radioCod" name="payment_method" value="cod" checked style="width:18px; height:18px; accent-color:#8b5cf6;" onchange="setPayment('cod')">
+                        <input type="radio" id="radioCod" name="payment_method" value="cod" checked style="width:18px; height:18px; accent-color:#ea580c;" onchange="setPayment('cod')">
                         <label for="radioCod" style="cursor:pointer; margin:0;">
                             <strong style="font-size:13px; font-weight:800; color:#2b180d; display:block;">💵 Nhận hàng trả tiền (COD)</strong>
                             <div style="font-size:11px; color:#6e5444; margin-top:2px;">Kiểm hàng tận tay trước khi trả</div>
@@ -309,11 +309,11 @@
                     </div>
 
                     <!-- LỰA CHỌN 2: VIETQR -->
-                    <div id="paymentCardBanking" onclick="setPayment('banking')" style="display:flex; align-items:center; gap:10px; padding:13px 14px; border-radius:14px; background:rgba(255,255,255,0.04); border:2px solid rgba(255,255,255,0.15); cursor:pointer; transition:all 0.2s ease;">
-                        <input type="radio" id="radioBanking" name="payment_method" value="banking" style="width:18px; height:18px; accent-color:#34d399;" onchange="setPayment('banking')">
+                    <div id="paymentCardBanking" onclick="setPayment('banking')" style="display:flex; align-items:center; gap:10px; padding:13px 14px; border-radius:14px; background:#ffffff; border:2px solid #fed7aa; cursor:pointer; transition:all 0.2s ease;">
+                        <input type="radio" id="radioBanking" name="payment_method" value="banking" style="width:18px; height:18px; accent-color:#047857;" onchange="setPayment('banking')">
                         <label for="radioBanking" style="cursor:pointer; margin:0;">
                             <strong style="font-size:13px; font-weight:800; color:#2b180d; display:block;">💳 Quét mã QR (VietQR)</strong>
-                            <div style="font-size:11px; color:#34d399; margin-top:2px;">Hiện mã VietQR thanh toán tức thì</div>
+                            <div style="font-size:11px; color:#047857; margin-top:2px;">Hiện mã VietQR thanh toán tức thì</div>
                         </label>
                     </div>
                 </div>
@@ -479,7 +479,7 @@ function applyVoucherAjax() {
     var msgEl = document.getElementById('voucherStatusMsg');
     if (!code) {
         if (msgEl) {
-            msgEl.style.color = '#f87171';
+            msgEl.style.color = '#dc2626';
             msgEl.innerHTML = '⚠️ Vui lòng nhập mã chữ Voucher trước khi bấm Áp dụng!';
         }
         return;
@@ -504,7 +504,7 @@ function applyVoucherAjax() {
             window.CURRENT_FINAL_TOTAL = Math.round(data.final_total || 0);
             if (hiddenEl) hiddenEl.value = data.code;
             if (msgEl) {
-                msgEl.style.color = '#34d399';
+                msgEl.style.color = '#047857';
                 msgEl.innerHTML = '✅ ' + data.message;
             }
             if (discRow) discRow.style.display = 'flex';
@@ -519,7 +519,7 @@ function applyVoucherAjax() {
             window.CURRENT_FINAL_TOTAL = window.RAW_CART_SUBTOTAL;
             if (hiddenEl) hiddenEl.value = '';
             if (msgEl) {
-                msgEl.style.color = '#f87171';
+                msgEl.style.color = '#dc2626';
                 msgEl.innerHTML = '❌ ' + (data.message || 'Mã Voucher không hợp lệ.');
             }
             if (discRow) discRow.style.display = 'none';
@@ -556,7 +556,7 @@ function removeVoucherAjax() {
         if (qrAmt) qrAmt.textContent = window.RAW_CART_SUBTOTAL.toLocaleString('vi-VN') + ' đ';
         if (qrZoomAmt) qrZoomAmt.textContent = 'Số tiền: ' + window.RAW_CART_SUBTOTAL.toLocaleString('vi-VN') + ' đ';
         if (msgEl) {
-            msgEl.style.color = '#cbd5e1';
+            msgEl.style.color = '#6e5444';
             msgEl.innerHTML = 'Đã gỡ mã giảm giá Voucher.';
         }
         if (rmBtn) rmBtn.style.display = 'none';
@@ -601,12 +601,12 @@ function setPayment(method) {
             qrBox.style.setProperty('display', 'block', 'important');
         }
         if (cardBank) {
-            cardBank.style.borderColor = '#34d399';
-            cardBank.style.background = 'rgba(52,211,153,0.18)';
+            cardBank.style.borderColor = '#fb923c';
+            cardBank.style.background = '#fff7ed';
         }
         if (cardCod) {
-            cardCod.style.borderColor = 'rgba(255,255,255,0.15)';
-            cardCod.style.background = 'rgba(255,255,255,0.04)';
+            cardCod.style.borderColor = '#fed7aa';
+            cardCod.style.background = '#ffffff';
         }
         refreshQRMemo();
     } else {
@@ -620,8 +620,8 @@ function setPayment(method) {
             cardCod.style.background = '#fff7ed';
         }
         if (cardBank) {
-            cardBank.style.borderColor = 'rgba(255,255,255,0.15)';
-            cardBank.style.background = 'rgba(255,255,255,0.04)';
+            cardBank.style.borderColor = '#fed7aa';
+            cardBank.style.background = '#ffffff';
         }
     }
 }
@@ -661,8 +661,8 @@ function copyToClipboard(text, btnEl) {
         navigator.clipboard.writeText(text).then(function() {
             var orig = btnEl.innerHTML;
             btnEl.innerHTML = '✓ Đã chép!';
-            btnEl.style.borderColor = '#34d399';
-            btnEl.style.color = '#34d399';
+            btnEl.style.borderColor = '#047857';
+            btnEl.style.color = '#047857';
             setTimeout(function() {
                 btnEl.innerHTML = orig;
                 btnEl.style.borderColor = '';

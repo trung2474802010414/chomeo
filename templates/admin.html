@@ -248,9 +248,9 @@
                                 </svg>
                             </div>
                         </div>
-                        <div class="kpi-value" style="color:#15803d;">{{ "{:,.0f}".format(stats.net_revenue) }} đ</div>
+                        <div class="kpi-value" style="color:#15803d;">{{ "{:,.0f}".format((stats.net_revenue or 0)|float) }} đ</div>
                         <div class="kpi-sub" style="color:#475569; font-weight:600;">
-                            🛒 Đơn: <strong>{{ "{:,.0f}".format(stats.order_revenue) }}đ</strong> • 🛁 Spa: <strong>{{ "{:,.0f}".format(stats.spa_revenue) }}đ</strong>
+                            🛒 Đơn: <strong>{{ "{:,.0f}".format((stats.order_revenue or 0)|float) }}đ</strong> • 🛁 Spa: <strong>{{ "{:,.0f}".format((stats.spa_revenue or 0)|float) }}đ</strong>
                         </div>
                     </a>
 
@@ -263,7 +263,7 @@
                                 </svg>
                             </div>
                         </div>
-                        <div class="kpi-value" style="color:#1d4ed8;">{{ "{:,.0f}".format(stats.total_inventory_value) }} đ</div>
+                        <div class="kpi-value" style="color:#1d4ed8;">{{ "{:,.0f}".format((stats.total_inventory_value or 0)|float) }} đ</div>
                         <div class="kpi-sub">Tổng <strong>{{ stats.total_products }}</strong> mặt hàng (<strong>{{ stats.total_stock_units }}</strong> đơn vị) &rarr;</div>
                     </a>
 
@@ -289,7 +289,7 @@
                                 </svg>
                             </div>
                         </div>
-                        <div class="kpi-value" style="color:#0f172a;">{{ "{:,.0f}".format(stats.avg_order_value) }} đ</div>
+                        <div class="kpi-value" style="color:#0f172a;">{{ "{:,.0f}".format((stats.avg_order_value or 0)|float) }} đ</div>
                         <div class="kpi-sub">Doanh thu / {{ stats.total_transactions }} giao dịch</div>
                     </div>
                 </div>
@@ -330,7 +330,7 @@
                             <div>
                                 <h2 class="card-title">&#128200; Doanh Thu &amp; Sản Lượng Khách Hàng Đã Mua Theo Danh Mục</h2>
                                 <p style="margin:2px 0 0; font-size:12px; color:#94a3b8;">
-                                    Đồng bộ trực tiếp từ <strong>{{ stats.total_orders }} đơn hàng</strong> ({{ stats.total_items_sold|default(0) }} sản phẩm đã bán: <strong style="color:#34d399;">{{ "{:,.0f}".format(stats.order_revenue) }} đ</strong>)
+                                    Đồng bộ trực tiếp từ <strong>{{ stats.total_orders }} đơn hàng</strong> ({{ stats.total_items_sold|default(0) }} sản phẩm đã bán: <strong style="color:#047857;">{{ "{:,.0f}".format((stats.order_revenue or 0)|float) }} đ</strong>)
                                 </p>
                             </div>
                             <span class="badge badge-stock-ok" style="font-size:11.5px;">⚡ Live Sync Đơn Hàng</span>
@@ -363,8 +363,8 @@
                             {% for sb in stats.sales_bars %}
                             <div style="background:#fffbf8; border:1px solid #fae4d4; border-radius:10px; padding:8px 12px;">
                                 <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
-                                    <strong style="color:#ffffff;">{{ sb.cat }} <span style="color:#38bdf8; font-weight:800;">({{ sb.qty }} đã bán)</span></strong>
-                                    <strong style="color:{% if sb.revenue > 0 %}#34d399{% else %}#64748b{% endif %};">{{ "{:,.0f}".format(sb.revenue) }} đ</strong>
+                                    <strong style="color:#2b180d;">{{ sb.cat }} <span style="color:#0284c7; font-weight:800;">({{ sb.qty }} đã bán)</span></strong>
+                                    <strong style="color:{% if sb.revenue > 0 %}#34d399{% else %}#64748b{% endif %};">{{ "{:,.0f}".format((sb.revenue or 0)|float) }} đ</strong>
                                 </div>
                                 <div style="height:6px; width:100%; background:rgba(255,255,255,0.08); border-radius:99px; overflow:hidden;">
                                     <div style="height:100%; width:{{ sb.pct if sb.revenue > 0 else 4 }}%; background:{% if sb.revenue > 0 %}linear-gradient(90deg, #10b981, #38bdf8){% else %}rgba(148,163,184,0.25){% endif %}; border-radius:99px;"></div>
@@ -389,21 +389,21 @@
                             <div style="font-size:12.5px; color:#6e5444; margin-top:6px; line-height:1.6;">
                                 <div>
                                     <span style="display:inline-block; width:10px; height:10px; background:#10b981; border-radius:2px; margin-right:4px;"></span>
-                                    Đơn mua hàng: <strong>{{ stats.total_orders }} đơn ({{ "{:,.0f}".format(stats.order_revenue) }} đ)</strong>
+                                    Đơn mua hàng: <strong>{{ stats.total_orders }} đơn ({{ "{:,.0f}".format((stats.order_revenue or 0)|float) }} đ)</strong>
                                 </div>
                                 <div>
                                     <span style="display:inline-block; width:10px; height:10px; background:#8b5cf6; border-radius:2px; margin-right:4px;"></span>
-                                    Lịch hẹn Spa: <strong>{{ stats.total_bookings - stats.cancelled_bookings_count }} lịch ({{ "{:,.0f}".format(stats.spa_revenue) }} đ)</strong>
+                                    Lịch hẹn Spa: <strong>{{ stats.total_bookings - stats.cancelled_bookings_count }} lịch ({{ "{:,.0f}".format((stats.spa_revenue or 0)|float) }} đ)</strong>
                                 </div>
                             </div>
 
                             {% if stats.top_selling_products %}
                             <div style="width:100%; text-align:left; margin-top:12px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.1);">
-                                <div style="font-size:11.5px; font-weight:800; color:#fde047; text-transform:uppercase; margin-bottom:6px;">🔥 Sản phẩm khách mua nhiều nhất:</div>
+                                <div style="font-size:11.5px; font-weight:800; color:#b45309; text-transform:uppercase; margin-bottom:6px;">🔥 Sản phẩm khách mua nhiều nhất:</div>
                                 {% for tp in stats.top_selling_products[:3] %}
                                 <div style="display:flex; justify-content:space-between; font-size:12px; color:#503829; padding:3px 0;">
                                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:190px;">&bull; {{ tp.name }} (x{{ tp.qty }})</span>
-                                    <strong style="color:#34d399;">{{ "{:,.0f}".format(tp.revenue) }}đ</strong>
+                                    <strong style="color:#047857;">{{ "{:,.0f}".format((tp.revenue or 0)|float) }}đ</strong>
                                 </div>
                                 {% endfor %}
                             </div>
@@ -434,9 +434,9 @@
                                     <tr>
                                         <td><strong>{{ cat_name }}</strong></td>
                                         <td class="text-center">{{ cat_info.product_count }}</td>
-                                        <td class="text-center"><strong style="color:#38bdf8;">{{ cat_info.sold_qty|default(0) }}</strong></td>
-                                        <td class="text-right"><strong style="color:#34d399;">{{ "{:,.0f}".format(cat_info.sold_revenue|default(0)) }} đ</strong></td>
-                                        <td class="text-right"><strong>{{ "{:,.0f}".format(cat_info.inventory_value) }} đ</strong></td>
+                                        <td class="text-center"><strong style="color:#0284c7;">{{ cat_info.sold_qty|default(0) }}</strong></td>
+                                        <td class="text-right"><strong style="color:#047857;">{{ "{:,.0f}".format((cat_info.sold_revenue|default(0 or 0)|float)) }} đ</strong></td>
+                                        <td class="text-right"><strong>{{ "{:,.0f}".format((cat_info.inventory_value or 0)|float) }} đ</strong></td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -574,7 +574,7 @@
                                         </span>
                                     </td>
                                     <td class="text-right">
-                                        <strong style="color:#34d399; font-size:14.5px; white-space:nowrap;">{{ "{:,.0f}".format(p.price) }} đ</strong>
+                                        <strong style="color:#047857; font-size:14.5px; white-space:nowrap;">{{ "{:,.0f}".format((p.price or 0)|float) }} đ</strong>
                                     </td>
                                     <td class="text-center">
                                         <span class="badge {% if p.stock == 0 %}badge-stock-out{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
@@ -995,7 +995,7 @@
                                     </td>
                                     <td>{{ b.service_name }}</td>
                                     <td>{{ b.appointment_date }} lúc {{ b.appointment_time }}</td>
-                                    <td class="text-right"><strong>{{ "{:,.0f}".format(b.total_price) }} đ</strong></td>
+                                    <td class="text-right"><strong>{{ "{:,.0f}".format((b.total_price or 0)|float) }} đ</strong></td>
                                     <td>
                                         <form method="POST" action="{{ url_for('admin_update_booking_status', booking_id=b.id) }}" style="display:flex; gap:6px;">
                                             <select name="status" class="form-control" style="padding:5px 8px; width:auto;">
@@ -1030,7 +1030,7 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                             </div>
                         </div>
-                        <div class="kpi-value" style="color:#38bdf8;">{{ orders|length }} đơn</div>
+                        <div class="kpi-value" style="color:#0284c7;">{{ orders|length }} đơn</div>
                         <div class="kpi-sub">Đồng bộ thời gian thực với Hồ sơ Khách hàng</div>
                     </div>
                     <div class="admin-kpi-card">
@@ -1040,7 +1040,7 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
                             </div>
                         </div>
-                        <div class="kpi-value" style="color:#34d399;">{{ "{:,.0f}".format(stats.order_revenue) }} đ</div>
+                        <div class="kpi-value" style="color:#047857;">{{ "{:,.0f}".format((stats.order_revenue or 0)|float) }} đ</div>
                         <div class="kpi-sub">Tổng giá trị thanh toán thực thu</div>
                     </div>
                     <div class="admin-kpi-card">
@@ -1050,7 +1050,7 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                             </div>
                         </div>
-                        <div class="kpi-value" style="color:#c084fc;">{{ stats.total_items_sold|default(0) }} món</div>
+                        <div class="kpi-value" style="color:#7c3aed;">{{ stats.total_items_sold|default(0) }} món</div>
                         <div class="kpi-sub">Đã tự động khấu trừ kho &amp; lên biểu đồ</div>
                     </div>
                     <div class="admin-kpi-card">
@@ -1060,8 +1060,8 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                             </div>
                         </div>
-                        <div class="kpi-value" style="color:#fbbf24;">
-                            {{ "{:,.0f}".format((stats.order_revenue / (orders|length)) if orders else 0) }} đ
+                        <div class="kpi-value" style="color:#b45309;">
+                            {{ "{:,.0f}".format(((stats.order_revenue / (orders|length or 0)|float)) if orders else 0) }} đ
                         </div>
                         <div class="kpi-sub">Hiệu suất giỏ hàng trung bình (AOV)</div>
                     </div>
@@ -1103,24 +1103,24 @@
                         <!-- 1. HEADER ĐƠN HÀNG: MÃ ĐƠN + THỜI GIAN + PHƯƠNG THỨC TT + THANH TIẾN ĐỘ 4 BƯỚC -->
                         <div style="padding:16px 22px; background:#fff7ed; border-bottom:1px solid #fed7aa; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                                <span style="padding:6px 14px; border-radius:10px; background:linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color:#ffffff; font-weight:900; font-size:15px; letter-spacing:0.3px; box-shadow:0 4px 14px rgba(139,92,246,0.4);">
+                                <span style="padding:6px 14px; border-radius:10px; background:linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color:#2b180d; font-weight:900; font-size:15px; letter-spacing:0.3px; box-shadow:0 4px 14px rgba(139,92,246,0.4);">
                                     #DH{{ o.id }}
                                 </span>
                                 <span style="padding:5px 12px; border-radius:99px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); font-size:12.5px; color:#6e5444; font-weight:600;">
                                     🕒 {{ o.created_at }}
                                 </span>
                                 {% if o.payment_method|lower in ('cod', 'tiền mặt') %}
-                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:rgba(245,158,11,0.16); color:#fde047; border:1px solid rgba(245,158,11,0.35);">
+                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:rgba(245,158,11,0.16); color:#b45309; border:1px solid rgba(245,158,11,0.35);">
                                     💵 Thanh toán COD khi nhận
                                 </span>
                                 {% else %}
-                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:rgba(56,189,248,0.16); color:#38bdf8; border:1px solid rgba(56,189,248,0.35);">
+                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border:1px solid rgba(56,189,248,0.35);">
                                     💳 Chuyển khoản VietQR 24/7
                                 </span>
                                 {% endif %}
                                 {% if o.voucher_code %}
-                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:rgba(236,72,153,0.18); color:#f472b6; border:1px solid rgba(236,72,153,0.4);">
-                                    🎟️ Voucher: {{ o.voucher_code }} (-{{ "{:,.0f}".format(o.discount_amount|default(0)) }}đ)
+                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:rgba(236,72,153,0.18); color:#be185d; border:1px solid rgba(236,72,153,0.4);">
+                                    🎟️ Voucher: {{ o.voucher_code }} (-{{ "{:,.0f}".format((o.discount_amount|default(0 or 0)|float)) }}đ)
                                 </span>
                                 {% endif %}
                             </div>
@@ -1128,7 +1128,7 @@
                             <!-- Thanh tiến độ trực quan -->
                             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                 {% if cur_st == 'Đã hủy' %}
-                                <span style="padding:6px 14px; border-radius:99px; font-size:12.5px; font-weight:800; background:rgba(239,68,68,0.2); color:#fca5a5; border:1px solid rgba(239,68,68,0.45);">
+                                <span style="padding:6px 14px; border-radius:99px; font-size:12.5px; font-weight:800; background:rgba(239,68,68,0.2); color:#dc2626; border:1px solid rgba(239,68,68,0.45);">
                                     ❌ Đơn hàng đã hủy
                                 </span>
                                 {% else %}
@@ -1150,7 +1150,7 @@
                             <!-- Cột trái: Thông tin khách hàng & Địa chỉ nhận -->
                             <div style="background:#fffbf8; border:1px solid #fae4d4; border-radius:16px; padding:16px 18px; display:flex; flex-direction:column; justify-content:space-between; gap:12px;">
                                 <div style="display:flex; align-items:center; gap:14px;">
-                                    <div style="width:48px; height:48px; border-radius:14px; background:linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color:#ffffff; font-weight:900; font-size:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 6px 16px rgba(236,72,153,0.3);">
+                                    <div style="width:48px; height:48px; border-radius:14px; background:linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color:#2b180d; font-weight:900; font-size:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 6px 16px rgba(236,72,153,0.3);">
                                         {{ (o.customer_name[:1] or 'K')|upper }}
                                     </div>
                                     <div style="min-width:0; flex:1;">
@@ -1162,12 +1162,12 @@
                                 <div style="display:flex; flex-direction:column; gap:7px; font-size:13px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
                                     <div style="display:flex; align-items:center; gap:8px;">
                                         <span style="color:#94a3b8; min-width:70px;">📞 Điện thoại:</span>
-                                        <code style="color:#38bdf8; background:rgba(56,189,248,0.15); padding:2px 8px; border-radius:6px; font-weight:800; font-size:13px;">{{ o.phone }}</code>
+                                        <code style="color:#0284c7; background:rgba(56,189,248,0.15); padding:2px 8px; border-radius:6px; font-weight:800; font-size:13px;">{{ o.phone }}</code>
                                     </div>
                                     {% if o.email %}
                                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                         <span style="color:#94a3b8; min-width:70px;">✉️ Email:</span>
-                                        <span style="color:#fde047; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">{{ o.email }}</span>
+                                        <span style="color:#b45309; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">{{ o.email }}</span>
                                     </div>
                                     {% endif %}
                                     <div style="display:flex; align-items:flex-start; gap:8px;">
@@ -1199,12 +1199,12 @@
                                                 </div>
                                             </div>
                                             <div style="display:flex; align-items:center; gap:12px; white-space:nowrap;">
-                                                <span style="font-size:12.5px; color:#6e5444;">{{ "{:,.0f}".format(item.price) }} đ</span>
+                                                <span style="font-size:12.5px; color:#6e5444;">{{ "{:,.0f}".format((item.price or 0)|float) }} đ</span>
                                                 <span style="padding:3px 10px; border-radius:99px; background:rgba(139,92,246,0.28); color:#e9d5ff; font-weight:800; font-size:12px;">
                                                     &times; {{ item.quantity }}
                                                 </span>
-                                                <strong style="color:#34d399; font-size:14.5px; min-width:95px; text-align:right;">
-                                                    {{ "{:,.0f}".format(item.subtotal|default(item.price * item.quantity)) }} đ
+                                                <strong style="color:#047857; font-size:14.5px; min-width:95px; text-align:right;">
+                                                    {{ "{:,.0f}".format((item.subtotal|default(item.price * item.quantity or 0)|float)) }} đ
                                                 </strong>
                                             </div>
                                         </div>
@@ -1218,12 +1218,12 @@
                         <div style="padding:14px 22px; background:#fffdfb; border-top:1px solid #fae4d4; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
                             <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
                                 <span style="font-size:13px; color:#6e5444; font-weight:700;">TỔNG THANH TOÁN:</span>
-                                <strong style="font-size:22px; font-weight:900; color:#34d399; letter-spacing:-0.3px;">
-                                    {{ "{:,.0f}".format(o.total_amount) }} đ
+                                <strong style="font-size:22px; font-weight:900; color:#047857; letter-spacing:-0.3px;">
+                                    {{ "{:,.0f}".format((o.total_amount or 0)|float) }} đ
                                 </strong>
                                 {% if o.discount_amount and o.discount_amount > 0 %}
-                                <span style="font-size:12px; color:#f472b6; font-weight:700;">
-                                    (Đã giảm {{ "{:,.0f}".format(o.discount_amount) }} đ từ mã {{ o.voucher_code }})
+                                <span style="font-size:12px; color:#be185d; font-weight:700;">
+                                    (Đã giảm {{ "{:,.0f}".format((o.discount_amount or 0)|float) }} đ từ mã {{ o.voucher_code }})
                                 </span>
                                 {% endif %}
                             </div>
@@ -1241,7 +1241,7 @@
                                     </button>
                                 </form>
 
-                                <script type="application/json" id="orderData_{{ o.id }}">{{ o.to_dict()|tojson }}</script>
+                                <script type="application/json" id="orderData_{{ o.id }}">{{ (o.to_dict() if o.to_dict is defined else o)|tojson }}</script>
                                 <button type="button" onclick="openAdminInvoiceModal({{ o.id }})" class="btn btn-outline btn-sm" style="height:38px; padding:0 16px; border-radius:99px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; cursor:pointer;">
                                     📰 Xem Hóa đơn &amp; QR
                                 </button>
@@ -1360,7 +1360,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                             <span class="kpi-label">SẢN PHẨM CẦN CHÚ Ý (≤ 10)</span>
                             <div class="kpi-icon-box kpi-icon-orange">⚠️</div>
                         </div>
-                        <div class="kpi-value" style="color:#fbbf24;">{{ low_stock_products|length }} mặt hàng</div>
+                        <div class="kpi-value" style="color:#b45309;">{{ low_stock_products|length }} mặt hàng</div>
                         <div class="kpi-sub">Các mã có tồn kho từ 10 trở xuống</div>
                     </div>
                     <div class="admin-kpi-card">
@@ -1376,7 +1376,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                             <span class="kpi-label">TỔNG TỒN KHO TOÀN SHOP</span>
                             <div class="kpi-icon-box kpi-icon-green">📦</div>
                         </div>
-                        <div class="kpi-value" style="color:#34d399;">{{ stats.total_stock_units }} đơn vị</div>
+                        <div class="kpi-value" style="color:#047857;">{{ stats.total_stock_units }} đơn vị</div>
                         <div class="kpi-sub">Trên tổng số {{ stats.total_products }} mã SKU</div>
                     </div>
                     <div class="admin-kpi-card">
@@ -1384,7 +1384,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                             <span class="kpi-label">GIÁ TRỊ HÀNG TỒN KHO</span>
                             <div class="kpi-icon-box kpi-icon-blue">💎</div>
                         </div>
-                        <div class="kpi-value" style="color:#60a5fa;">{{ "{:,.0f}".format(stats.total_inventory_value) }} đ</div>
+                        <div class="kpi-value" style="color:#60a5fa;">{{ "{:,.0f}".format((stats.total_inventory_value or 0)|float) }} đ</div>
                         <div class="kpi-sub">Tổng vốn hàng hóa sẵn sàng bán</div>
                     </div>
                 </div>
@@ -1423,7 +1423,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                         <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}">{{ p.pet_type }}</span>
                                         <span style="font-size:12.5px; color:#94a3b8; margin-left:4px;">{{ p.category }}</span>
                                     </td>
-                                    <td class="text-right"><strong style="color:#34d399; white-space:nowrap;">{{ "{:,.0f}".format(p.price) }} đ</strong></td>
+                                    <td class="text-right"><strong style="color:#047857; white-space:nowrap;">{{ "{:,.0f}".format((p.price or 0)|float) }} đ</strong></td>
                                     <td class="text-center">
                                         <span class="badge {% if p.stock == 0 %}badge-cancelled{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
                                             {% if p.stock == 0 %}Hết hàng (0){% else %}Còn {{ p.stock }}{% endif %}
@@ -1455,7 +1455,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                             <span class="kpi-label">TỔNG KHÁCH HÀNG HỆ THỐNG</span>
                             <div class="kpi-icon-box kpi-icon-blue">👥</div>
                         </div>
-                        <div class="kpi-value" style="color:#38bdf8;">{{ stats.customers_list|length }} khách</div>
+                        <div class="kpi-value" style="color:#0284c7;">{{ stats.customers_list|length }} khách</div>
                         <div class="kpi-sub">Bao gồm toàn bộ tài khoản đã đăng ký &amp; đặt hàng</div>
                     </div>
                     <div class="admin-kpi-card">
@@ -1463,7 +1463,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                             <span class="kpi-label">TỔNG ĐƠN KHÁCH ĐÃ MUA</span>
                             <div class="kpi-icon-box kpi-icon-green">🛒</div>
                         </div>
-                        <div class="kpi-value" style="color:#34d399;">{{ stats.total_orders }} đơn hàng</div>
+                        <div class="kpi-value" style="color:#047857;">{{ stats.total_orders }} đơn hàng</div>
                         <div class="kpi-sub">Đồng bộ trực tiếp với Hồ sơ của từng khách</div>
                     </div>
                     <div class="admin-kpi-card">
@@ -1471,7 +1471,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                             <span class="kpi-label">TỔNG LỊCH HẸN SPA</span>
                             <div class="kpi-icon-box kpi-icon-purple">🛁</div>
                         </div>
-                        <div class="kpi-value" style="color:#c084fc;">{{ stats.total_bookings }} lịch hẹn</div>
+                        <div class="kpi-value" style="color:#7c3aed;">{{ stats.total_bookings }} lịch hẹn</div>
                         <div class="kpi-sub">Gắn kết theo SĐT &amp; Tài khoản khách hàng</div>
                     </div>
                     <div class="admin-kpi-card">
@@ -1479,7 +1479,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                             <span class="kpi-label">TỔNG CHI TIÊU KHÁCH HÀNG</span>
                             <div class="kpi-icon-box kpi-icon-orange">💎</div>
                         </div>
-                        <div class="kpi-value" style="color:#fbbf24;">{{ "{:,.0f}".format(stats.total_system_revenue|default(0)) }} đ</div>
+                        <div class="kpi-value" style="color:#b45309;">{{ "{:,.0f}".format((stats.total_system_revenue|default(0 or 0)|float)) }} đ</div>
                         <div class="kpi-sub">Tự động xét hạng VIP theo mức chi tiêu</div>
                     </div>
                 </div>
@@ -1487,7 +1487,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                 <!-- KHUNG THÊM / SỬA TÀI KHOẢN KHÁCH HÀNG DÀNH CHO ADMIN -->
                 <div id="adminCustomerFormCard" class="card" style="display:none; margin-bottom:20px; border:1px solid rgba(56,189,248,0.45); background:#ffffff; border:1.5px solid #fed7aa;">
                     <div class="card-header">
-                        <h2 class="card-title" id="adminCustomerFormTitle" style="color:#fde047;">➕ Thêm / Cập Nhật Tài Khoản Khách Hàng</h2>
+                        <h2 class="card-title" id="adminCustomerFormTitle" style="color:#b45309;">➕ Thêm / Cập Nhật Tài Khoản Khách Hàng</h2>
                         <button type="button" onclick="document.getElementById('adminCustomerFormCard').style.display='none';" class="btn btn-outline btn-sm">✕ Đóng</button>
                     </div>
                     <form method="POST" action="{{ url_for('admin_save_customer') }}">
@@ -1554,11 +1554,11 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                 <tr class="admin-cust-row">
                                     <td>
                                         <div style="display:flex; flex-direction:column; gap:4px;">
-                                            <code style="color:#38bdf8; font-weight:800; font-size:13px;">@{{ c.username or 'khach' }}</code>
+                                            <code style="color:#0284c7; font-weight:800; font-size:13px;">@{{ c.username or 'khach' }}</code>
                                             {% if c.created_at %}
                                             <span style="font-size:11px; color:#94a3b8;">📅 ĐK: {{ c.created_at[:10] }}</span>
                                             {% else %}
-                                            <span style="font-size:11px; color:#fbbf24;">Khách đặt vãng lai</span>
+                                            <span style="font-size:11px; color:#b45309;">Khách đặt vãng lai</span>
                                             {% endif %}
                                         </div>
                                     </td>
@@ -1570,38 +1570,38 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                             <div>
                                                 <strong style="color:#2b180d; font-size:14px;">{{ c.name }}</strong>
                                                 {% if c.user_id %}
-                                                <div style="font-size:11px; color:#6ee7b7;">✓ Tài khoản #ID{{ c.user_id }}</div>
+                                                <div style="font-size:11px; color:#047857;">✓ Tài khoản #ID{{ c.user_id }}</div>
                                                 {% endif %}
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <div style="font-size:13px; color:#ffffff; font-weight:700;">📞 <code>{{ c.phone }}</code></div>
-                                        <div style="font-size:12px; color:#fde047; margin-top:2px;">✉️ {{ c.email or 'Chưa cập nhật' }}</div>
+                                        <div style="font-size:13.5px; color:#2b180d; font-weight:800;">📞 <code style="background:#fff7ed; color:#c2410c; padding:2px 7px; border-radius:6px; font-weight:800; border:1px solid #fed7aa;">{{ c.phone }}</code></div>
+                                        <div style="font-size:12px; color:#0369a1; font-weight:700; margin-top:3px;">✉️ {{ c.email or 'Chưa cập nhật' }}</div>
                                     </td>
                                     <td class="text-center">
                                         {% if c.total_spent >= 15000000 %}
-                                            <span class="badge" style="background:rgba(139,92,246,0.22); color:#c4b5fd; border:1px solid rgba(139,92,246,0.4);">💎 Kim Cương</span>
+                                            <span class="badge" style="background:#f5f3ff; color:#6d28d9; border:1.5px solid #ddd6fe; font-weight:800;">💎 Kim Cương</span>
                                         {% elif c.total_spent >= 5000000 %}
-                                            <span class="badge" style="background:rgba(245,158,11,0.2); color:#fde68a; border:1px solid rgba(245,158,11,0.4);">🥇 Hạng Vàng</span>
+                                            <span class="badge" style="background:#fef3c7; color:#92400e; border:1.5px solid #fcd34d; font-weight:800;">🥇 Hạng Vàng</span>
                                         {% elif c.total_spent >= 1000000 %}
-                                            <span class="badge" style="background:rgba(56,189,248,0.18); color:#bae6fd; border:1px solid rgba(56,189,248,0.35);">🥈 Hạng Bạc</span>
+                                            <span class="badge" style="background:#f1f5f9; color:#334155; border:1.5px solid #cbd5e1; font-weight:800;">🥈 Hạng Bạc</span>
                                         {% else %}
-                                            <span class="badge badge-both">🌱 Thành viên mới</span>
+                                            <span class="badge" style="background:#fff7ed; color:#c2410c; border:1.5px solid #fed7aa; font-weight:800;">🌱 Thành viên mới</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-center">
                                         <div style="display:inline-flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:center;">
-                                            <span style="padding:3px 9px; border-radius:8px; background:rgba(56,189,248,0.16); color:#38bdf8; font-size:12px; font-weight:800;">
+                                            <span style="padding:3px 9px; border-radius:8px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-size:12px; font-weight:800;">
                                                 📦 {{ c.orders_count }} đơn
                                             </span>
-                                            <span style="padding:3px 9px; border-radius:8px; background:rgba(167,139,250,0.16); color:#c4b5fd; font-size:12px; font-weight:800;">
+                                            <span style="padding:3px 9px; border-radius:8px; background:#f5f3ff; color:#6d28d9; border:1px solid #ddd6fe; font-size:12px; font-weight:800;">
                                                 🛁 {{ c.bookings_count }} Spa
                                             </span>
                                         </div>
                                     </td>
                                     <td class="text-right">
-                                        <strong style="color:#34d399; font-size:15px; white-space:nowrap;">{{ "{:,.0f}".format(c.total_spent) }} đ</strong>
+                                        <strong style="color:#047857; font-size:15px; white-space:nowrap;">{{ "{:,.0f}".format((c.total_spent or 0)|float) }} đ</strong>
                                     </td>
                                     <td class="text-center">
                                         <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
@@ -1624,7 +1624,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                     <td colspan="7" style="padding:18px 22px; border-left:3px solid #8b5cf6;">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
                                             <div>
-                                                <strong style="color:#fde047; font-size:14.5px;">📂 Hồ Sơ Lịch Sử Giao Dịch Của Khách Hàng: {{ c.name }} ({{ c.phone }})</strong>
+                                                <strong style="color:#b45309; font-size:14.5px;">📂 Hồ Sơ Lịch Sử Giao Dịch Của Khách Hàng: {{ c.name }} ({{ c.phone }})</strong>
                                                 <span style="font-size:12px; color:#94a3b8; margin-left:8px;">Đồng bộ 100% với trang Hồ sơ cá nhân của khách</span>
                                             </div>
                                             <a href="{{ url_for('order_history_page', phone=c.phone) }}" target="_blank" class="btn btn-outline btn-sm" style="font-size:12px;">
@@ -1635,26 +1635,26 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                         <div class="grid-2" style="gap:16px; align-items:start;">
                                             <!-- Cột Đơn mua hàng của khách -->
                                             <div style="background:#fffbf8; border:1px solid #fed7aa; border-radius:12px; padding:14px;">
-                                                <div style="font-size:13px; font-weight:800; color:#38bdf8; margin-bottom:10px;">
+                                                <div style="font-size:13px; font-weight:800; color:#0284c7; margin-bottom:10px;">
                                                     📦 Đơn Mua Hàng Đã Đặt ({{ c.orders_history|default([])|length }} đơn)
                                                 </div>
                                                 {% if c.orders_history %}
                                                     {% for co in c.orders_history %}
                                                     <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:10px 12px; margin-bottom:8px;">
                                                         <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;">
-                                                            <strong style="color:#ffffff;">#DH{{ co.id }} &bull; <span style="color:#94a3b8; font-weight:400;">{{ co.created_at }}</span></strong>
-                                                            <span style="color:#fde047; font-weight:800;">{{ co.status|default('Chờ xác nhận') }}</span>
+                                                            <strong style="color:#2b180d;">#DH{{ co.id }} &bull; <span style="color:#94a3b8; font-weight:400;">{{ co.created_at }}</span></strong>
+                                                            <span style="color:#b45309; font-weight:800;">{{ co.status|default('Chờ xác nhận') }}</span>
                                                         </div>
                                                         <div style="font-size:12px; color:#6e5444; margin-bottom:6px;">📍 Giao tới: {{ co.address }}</div>
                                                         {% for cit in co['items'] %}
                                                         <div style="font-size:12px; color:#503829; display:flex; justify-content:space-between;">
                                                             <span>&bull; {{ cit.name }} (x{{ cit.quantity }})</span>
-                                                            <span style="color:#34d399;">{{ "{:,.0f}".format(cit.subtotal) }}đ</span>
+                                                            <span style="color:#047857;">{{ "{:,.0f}".format((cit.subtotal or 0)|float) }}đ</span>
                                                         </div>
                                                         {% endfor %}
                                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1); font-size:12.5px;">
                                                             <span style="color:#94a3b8;">Phương thức: <strong>{{ co.payment_method|default('VietQR') }}</strong></span>
-                                                            <strong style="color:#34d399; font-size:14px;">Tổng: {{ "{:,.0f}".format(co.total_amount) }} đ</strong>
+                                                            <strong style="color:#047857; font-size:14px;">Tổng: {{ "{:,.0f}".format((co.total_amount or 0)|float) }} đ</strong>
                                                         </div>
                                                     </div>
                                                     {% endfor %}
@@ -1672,13 +1672,13 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                                     {% for cb in c.bookings_history %}
                                                     <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:12.5px;">
                                                         <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                                                            <strong style="color:#ffffff;">#SPA{{ cb.id }} &bull; Bé {{ cb.pet_name }} ({{ cb.pet_type }})</strong>
-                                                            <span style="color:#6ee7b7; font-weight:800;">{{ cb.status }}</span>
+                                                            <strong style="color:#2b180d;">#SPA{{ cb.id }} &bull; Bé {{ cb.pet_name }} ({{ cb.pet_type }})</strong>
+                                                            <span style="color:#047857; font-weight:800;">{{ cb.status }}</span>
                                                         </div>
                                                         <div style="color:#c4b5fd;">✨ {{ cb.service_name }}</div>
                                                         <div style="display:flex; justify-content:space-between; margin-top:4px; color:#6e5444;">
                                                             <span>📅 Hẹn: {{ cb.appointment_date }} ({{ cb.appointment_time }})</span>
-                                                            <strong style="color:#34d399;">{{ "{:,.0f}".format(cb.total_price) }} đ</strong>
+                                                            <strong style="color:#047857;">{{ "{:,.0f}".format((cb.total_price or 0)|float) }} đ</strong>
                                                         </div>
                                                     </div>
                                                     {% endfor %}
@@ -1751,8 +1751,8 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
 
                             <div style="display:grid; grid-template-columns:1fr 1.3fr; gap:12px; margin-bottom:12px;">
                                 <div class="form-group" style="margin:0;">
-                                    <label class="form-label">Mã chữ Voucher (*) <span style="font-size:11px; color:#fde047;">(Tự đặt chữ)</span></label>
-                                    <input type="text" name="code" id="vFormCode" required placeholder="VD: GENZVIP20, TRUNG50K" class="form-control" style="text-transform:uppercase; font-weight:900; color:#fde047; letter-spacing:0.8px;" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_-]/g,'')">
+                                    <label class="form-label">Mã chữ Voucher (*) <span style="font-size:11px; color:#b45309;">(Tự đặt chữ)</span></label>
+                                    <input type="text" name="code" id="vFormCode" required placeholder="VD: GENZVIP20, TRUNG50K" class="form-control" style="text-transform:uppercase; font-weight:900; color:#b45309; letter-spacing:0.8px;" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_-]/g,'')">
                                 </div>
                                 <div class="form-group" style="margin:0;">
                                     <label class="form-label">Tên chương trình ưu đãi (*)</label>
@@ -1770,7 +1770,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                 </div>
                                 <div class="form-group" style="margin:0;">
                                     <label class="form-label" id="vFormValueLabel">Mức giá giảm (VNĐ) (*)</label>
-                                    <input type="number" name="discount_value" id="vFormValue" value="50000" min="1" step="any" required class="form-control" style="font-weight:800; color:#34d399;">
+                                    <input type="number" name="discount_value" id="vFormValue" value="50000" min="1" step="any" required class="form-control" style="font-weight:800; color:#047857;">
                                 </div>
                                 <div class="form-group" style="margin:0;">
                                     <label class="form-label">Đơn tối thiểu (VNĐ)</label>
@@ -1826,16 +1826,16 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                             <code style="padding:3px 10px; border-radius:8px; background:#fff7ed; border:1px solid #fed7aa; color:#ea580c; font-weight:900; font-size:14px;">
                                                 {{ v.code }}
                                             </code>
-                                            <strong style="color:#34d399; font-size:13.5px;">{{ v.discount_display }}</strong>
+                                            <strong style="color:#047857; font-size:13.5px;">{{ v.discount_display }}</strong>
                                             {% if v.is_valid_now %}
-                                            <span style="font-size:11px; color:#6ee7b7; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:99px; font-weight:700;">● Đang hoạt động</span>
+                                            <span style="font-size:11px; color:#047857; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:99px; font-weight:700;">● Đang hoạt động</span>
                                             {% else %}
-                                            <span style="font-size:11px; color:#fca5a5; background:rgba(239,68,68,0.15); padding:2px 8px; border-radius:99px; font-weight:700;">● {{ v.status_label }}</span>
+                                            <span style="font-size:11px; color:#dc2626; background:rgba(239,68,68,0.15); padding:2px 8px; border-radius:99px; font-weight:700;">● {{ v.status_label }}</span>
                                             {% endif %}
                                         </div>
                                         <div style="font-size:12.5px; color:#503829; margin-top:4px; font-weight:600;">{{ v.title }}</div>
                                         <div style="font-size:11.5px; color:#94a3b8; margin-top:3px;">
-                                            📦 Đơn tối thiểu: <strong>{{ "{:,.0f}".format(v.min_order_value) }}đ</strong>
+                                            📦 Đơn tối thiểu: <strong>{{ "{:,.0f}".format((v.min_order_value or 0)|float) }}đ</strong>
                                             &bull; ⏰ Hạn: <strong>{{ v.start_date }} &rarr; {{ v.expiry_date }}</strong>
                                             &bull; Đã dùng: <strong>{{ v.used_count }}/{{ v.usage_limit }}</strong>
                                         </div>
@@ -1872,7 +1872,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                             <!-- 1. Chọn hoặc nhập Gmail người nhận -->
                             <div class="form-group">
                                 <label class="form-label">📬 Chọn nhanh Khách hàng hoặc nhập địa chỉ Gmail nhận Voucher (*):</label>
-                                <input type="email" name="recipient" id="vip-email-input" required placeholder="Nhập Gmail khách hàng (VD: trungvt040106@gmail.com)" class="form-control" style="font-weight:700; color:#fde047;">
+                                <input type="email" name="recipient" id="vip-email-input" required placeholder="Nhập Gmail khách hàng (VD: trungvt040106@gmail.com)" class="form-control" style="font-weight:700; color:#b45309;">
                                 {% if stats.customers_list %}
                                 <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
                                     {% for c in stats.customers_list[:8] if c.email %}
@@ -1901,7 +1901,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px;">
                                     <div>
                                         <label style="font-size:11.5px; color:#6e5444; display:block; margin-bottom:3px;">Mã chữ Voucher:</label>
-                                        <input type="text" name="voucher_code" id="mailVoucherCode" value="GENZVIP20" class="form-control" style="height:36px; font-weight:900; color:#fde047; text-transform:uppercase;" oninput="this.value=this.value.toUpperCase(); syncEmailTemplateFromVoucher();">
+                                        <input type="text" name="voucher_code" id="mailVoucherCode" value="GENZVIP20" class="form-control" style="height:36px; font-weight:900; color:#b45309; text-transform:uppercase;" oninput="this.value=this.value.toUpperCase(); syncEmailTemplateFromVoucher();">
                                     </div>
                                     <div>
                                         <label style="font-size:11.5px; color:#6e5444; display:block; margin-bottom:3px;">Loại giảm:</label>
@@ -1912,7 +1912,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                     </div>
                                     <div>
                                         <label style="font-size:11.5px; color:#6e5444; display:block; margin-bottom:3px;">Giá trị giảm:</label>
-                                        <input type="number" name="voucher_discount_value" id="mailVoucherValue" value="20" min="1" step="any" class="form-control" style="height:36px; font-weight:800; color:#34d399;" oninput="syncEmailTemplateFromVoucher()">
+                                        <input type="number" name="voucher_discount_value" id="mailVoucherValue" value="20" min="1" step="any" class="form-control" style="height:36px; font-weight:800; color:#047857;" oninput="syncEmailTemplateFromVoucher()">
                                     </div>
                                 </div>
 
@@ -1977,9 +1977,9 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                                     {% for svc_name, base_price in spa_services.items() %}
                                     <tr>
                                         <td><strong>✨ {{ svc_name }}</strong></td>
-                                        <td class="text-right"><span style="color:#503829; white-space:nowrap;">{{ "{:,.0f}".format(base_price) }} đ</span></td>
-                                        <td class="text-right"><span style="color:#ea580c; white-space:nowrap;">{{ "{:,.0f}".format(base_price * 1.25) }} đ</span></td>
-                                        <td class="text-right"><strong style="color:#34d399; white-space:nowrap;">{{ "{:,.0f}".format(base_price * 1.5) }} đ</strong></td>
+                                        <td class="text-right"><span style="color:#503829; white-space:nowrap;">{{ "{:,.0f}".format((base_price or 0)|float) }} đ</span></td>
+                                        <td class="text-right"><span style="color:#ea580c; white-space:nowrap;">{{ "{:,.0f}".format((base_price * 1.25 or 0)|float) }} đ</span></td>
+                                        <td class="text-right"><strong style="color:#047857; white-space:nowrap;">{{ "{:,.0f}".format((base_price * 1.5 or 0)|float) }} đ</strong></td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -2103,7 +2103,7 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                         <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.4); font-size:11.5px; font-weight:800; color:#c4b5fd; margin-bottom:6px;">
                             <span>✨ MEOW &amp; WOOF BRAND LUXURY EMAIL TEMPLATES</span>
                         </div>
-                        <h3 style="margin:0; font-size:17px; font-weight:800; color:#ffffff;">Giao Diện Email HTML Gửi Tới Khách Hàng Chuẩn 5 Sao</h3>
+                        <h3 style="margin:0; font-size:17px; font-weight:800; color:#2b180d;">Giao Diện Email HTML Gửi Tới Khách Hàng Chuẩn 5 Sao</h3>
                         <p style="margin:4px 0 0; font-size:13px; color:#6e5444; max-width:650px; line-height:1.5;">
                             Toàn bộ vé đặt lịch Spa, đơn mua hàng và chiến dịch khuyến mãi đều được tối ưu giao diện HTML Dark Glass rực rỡ, kèm bản text fallback chống lỗi hiển thị.
                         </p>
@@ -2131,9 +2131,9 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
 
                     <form method="POST" action="{{ url_for('admin_save_smtp') }}" id="adminEmailForm">
                         <div style="padding:18px; background:rgba(255,255,255,0.03); border:1px solid rgba(139,92,246,0.35); border-radius:14px;">
-                            <label class="form-label" style="color:#fde047; font-weight:800; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:14px;">
+                            <label class="form-label" style="color:#b45309; font-weight:800; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:14px;">
                                 <span>📧 Địa chỉ Email của Admin nhận thông báo đơn hàng (*)</span>
-                                <span style="font-size:12px; color:#34d399; font-weight:700;">🔔 Tự động gửi thông báo khi khách đặt</span>
+                                <span style="font-size:12px; color:#047857; font-weight:700;">🔔 Tự động gửi thông báo khi khách đặt</span>
                             </label>
                             <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:14px;">
                                 <input type="email" id="adminNotifyEmailInput" name="admin_notification_email" value="{{ admin_notification_email }}" class="form-control" placeholder="VD: trungvt040106@gmail.com" required style="flex:1; min-width:260px; font-weight:700; color:#2b180d; font-size:15px; height:46px;">
@@ -2146,20 +2146,20 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                             <div style="padding-top:12px; border-top:1px dashed #fed7aa;">
                                 <label class="form-label" style="color:#6e5444; font-weight:700; display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:12.5px;">
                                     <span>🔑 Mật khẩu ứng dụng Gmail 16 ký tự (Tùy chọn — Để gửi thẳng qua Google SMTP tức thì)</span>
-                                    <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#38bdf8; text-decoration:underline; font-weight:700;">Lấy mã 16 ký tự của Google tại đây &rarr;</a>
+                                    <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#0284c7; text-decoration:underline; font-weight:700;">Lấy mã 16 ký tự của Google tại đây &rarr;</a>
                                 </label>
                                 <div style="display:flex; gap:8px; align-items:center;">
                                     <input type="password" id="smtpPassInput" name="smtp_pass" value="{{ smtp_creds.smtp_pass }}" class="form-control" placeholder="Đã lưu rồi thì để nguyên, không cần nhập lại (hoặc dán 16 ký tự App Password của Gmail)" style="height:40px; font-size:13.5px; color:#2b180d; flex:1;">
                                     <button type="button" class="btn btn-outline btn-sm" onclick="var i=document.getElementById('smtpPassInput'); i.type = i.type==='password' ? 'text' : 'password'; this.textContent = i.type==='password' ? '👁 Hiện' : '🙈 Ẩn';">👁 Hiện</button>
                                 </div>
                                 {% if smtp_creds.smtp_pass %}
-                                <div style="margin-top:6px; font-size:12px; color:#34d399; font-weight:700;">✅ Mật khẩu ứng dụng đã được lưu — không cần nhập lại. Bấm "Hiện" để xem lại bất cứ lúc nào.</div>
+                                <div style="margin-top:6px; font-size:12px; color:#047857; font-weight:700;">✅ Mật khẩu ứng dụng đã được lưu — không cần nhập lại. Bấm "Hiện" để xem lại bất cứ lúc nào.</div>
                                 {% endif %}
                             </div>
 
                             <!-- Hướng dẫn nhận thư vào hộp thư Gmail thật -->
                             <div style="margin-top:12px; padding:12px 14px; background:rgba(16,185,129,0.1); border:1px solid rgba(52,211,153,0.3); border-radius:10px; font-size:12.5px; color:#503829; line-height:1.6;">
-                                <strong style="color:#34d399;">💡 Để thư Voucher &amp; thông báo đơn gửi thẳng về Gmail (thư HTML đẹp, không bị yêu cầu "Activate")</strong><br>
+                                <strong style="color:#047857;">💡 Để thư Voucher &amp; thông báo đơn gửi thẳng về Gmail (thư HTML đẹp, không bị yêu cầu "Activate")</strong><br>
                                 &bull; Dán <strong>Mật khẩu ứng dụng Gmail 16 ký tự</strong> của <code>{{ admin_notification_email }}</code> vào ô trên rồi bấm Lưu. Hệ thống gửi qua Google SMTP bằng chính Gmail của bạn.<br>
                                 &bull; Khi chưa có mật khẩu ứng dụng, thông báo đơn hàng mới vẫn hiện ngay trong Dashboard Admin (chuông + popup), nhưng thư Voucher gửi cho khách sẽ <strong>chưa gửi được</strong>.
                             </div>
@@ -2199,7 +2199,7 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                     <div style="display:flex; flex-direction:column; gap:8px;">
                         {% for env_name, env_val in persist_env %}
                         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 12px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:10px;">
-                            <code style="color:#fde047; font-weight:800; min-width:210px;">{{ env_name }}</code>
+                            <code style="color:#b45309; font-weight:800; min-width:210px;">{{ env_name }}</code>
                             <input type="{% if env_name == 'SMTP_PASS' %}password{% else %}text{% endif %}" readonly value="{{ env_val }}" id="envval_{{ loop.index }}" class="form-control" style="flex:1; min-width:200px; height:36px; font-size:12.5px; font-family:monospace;">
                             {% if env_name == 'SMTP_PASS' %}
                             <button type="button" class="btn btn-outline btn-sm" onclick="var i=document.getElementById('envval_{{ loop.index }}'); i.type = i.type==='password' ? 'text' : 'password';">👁</button>
@@ -2209,7 +2209,7 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                         {% endfor %}
                     </div>
                     {% if not smtp_creds.smtp_pass %}
-                    <div style="margin-top:10px; font-size:12.5px; color:#fca5a5;">⚠️ Chưa có Mật khẩu ứng dụng Gmail trên máy chủ này. Hãy dán nó ở ô phía trên và bấm Lưu để biến SMTP_USER / SMTP_PASS xuất hiện ở đây.</div>
+                    <div style="margin-top:10px; font-size:12.5px; color:#dc2626;">⚠️ Chưa có Mật khẩu ứng dụng Gmail trên máy chủ này. Hãy dán nó ở ô phía trên và bấm Lưu để biến SMTP_USER / SMTP_PASS xuất hiện ở đây.</div>
                     {% endif %}
                 </div>
 
@@ -2279,7 +2279,7 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                             <span class="kpi-label">TRẠNG THÁI DATABASE</span>
                             <div class="kpi-icon-box kpi-icon-green">🟢</div>
                         </div>
-                        <div class="kpi-value" style="color:#34d399;">SQLite3 Online</div>
+                        <div class="kpi-value" style="color:#047857;">SQLite3 Online</div>
                         <div class="kpi-sub">Giao dịch ACID &amp; WAL an toàn</div>
                     </div>
                     <div class="admin-kpi-card">
@@ -2303,7 +2303,7 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                             <span class="kpi-label">MÔI TRƯỜNG PYTHON</span>
                             <div class="kpi-icon-box kpi-icon-orange">🐍</div>
                         </div>
-                        <div class="kpi-value" style="color:#fbbf24;">Python {{ python_version }}</div>
+                        <div class="kpi-value" style="color:#b45309;">Python {{ python_version }}</div>
                         <div class="kpi-sub">Flask + Custom ORM + Jinja2</div>
                     </div>
                 </div>
@@ -2462,7 +2462,7 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                             <div class="form-group" style="margin-bottom:20px;">
                                 <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                                     <input type="checkbox" name="is_active" value="1" {% if bank_config.is_active %}checked{% endif %} style="width:18px; height:18px; accent-color:#8b5cf6;">
-                                    <span style="font-weight:700; color:#ffffff; font-size:13.5px;">Kích hoạt phương thức quét mã QR VietQR trên trang Giỏ hàng &amp; Thanh toán</span>
+                                    <span style="font-weight:700; color:#2b180d; font-size:13.5px;">Kích hoạt phương thức quét mã QR VietQR trên trang Giỏ hàng &amp; Thanh toán</span>
                                 </label>
                             </div>
 
@@ -2481,12 +2481,12 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                             </div>
 
                             <div style="font-size:12px; color:#6e5444; text-align:left; background:rgba(255,255,255,0.04); padding:12px; border-radius:10px; line-height:1.6;">
-                                <div><span style="color:#94a3b8;">Ngân hàng:</span> <strong id="previewBankNameText" style="color:#ffffff;">{{ bank_config.bank_name }}</strong></div>
-                                <div><span style="color:#94a3b8;">Số TK:</span> <strong id="previewAccNumText" style="color:#fde047;">{{ bank_config.account_number }}</strong></div>
-                                <div><span style="color:#94a3b8;">Chủ TK:</span> <strong id="previewAccNameText" style="color:#ffffff;">{{ bank_config.account_name }}</strong></div>
+                                <div><span style="color:#94a3b8;">Ngân hàng:</span> <strong id="previewBankNameText" style="color:#2b180d;">{{ bank_config.bank_name }}</strong></div>
+                                <div><span style="color:#94a3b8;">Số TK:</span> <strong id="previewAccNumText" style="color:#b45309;">{{ bank_config.account_number }}</strong></div>
+                                <div><span style="color:#94a3b8;">Chủ TK:</span> <strong id="previewAccNameText" style="color:#2b180d;">{{ bank_config.account_name }}</strong></div>
                                 <div><span style="color:#94a3b8;">Ví dụ nội dung CK:</span> <strong id="previewSyntaxText" style="color:#c4b5fd;">{{ bank_config.syntax_prefix }} 0905123456</strong></div>
                             </div>
-                            <div style="margin-top:10px; font-size:11px; color:#34d399;">
+                            <div style="margin-top:10px; font-size:11px; color:#047857;">
                                 ✓ Tương thích 100% ứng dụng SmartBanking Vietcombank, Techcombank, MB, VPBank, ACB, BIDV, MoMo, VNPay...
                             </div>
                         </div>
@@ -2580,7 +2580,7 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
             var box = document.getElementById('adminLiveToasts');
             var el = document.createElement('div');
             el.className = 'admin-live-toast';
-            el.innerHTML = '<div style="font-size:26px;">' + icon + '</div><div style="flex:1;min-width:0;"><div style="font-weight:900;font-size:14.5px;color:#34d399;">' + title + '</div><div style="font-size:13px;color:#503829;margin-top:3px;line-height:1.45;">' + text + '</div></div><button type="button" style="background:none;border:none;color:#6e5444;font-size:18px;cursor:pointer;">&times;</button>';
+            el.innerHTML = '<div style="font-size:26px;">' + icon + '</div><div style="flex:1;min-width:0;"><div style="font-weight:900;font-size:14.5px;color:#047857;">' + title + '</div><div style="font-size:13px;color:#503829;margin-top:3px;line-height:1.45;">' + text + '</div></div><button type="button" style="background:none;border:none;color:#6e5444;font-size:18px;cursor:pointer;">&times;</button>';
             el.onclick = function(ev) { if (ev.target.tagName === 'BUTTON') { el.remove(); } else { location.href = url; } };
             box.appendChild(el);
             setTimeout(function() { if (el.parentNode) el.remove(); }, 12000);

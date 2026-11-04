@@ -542,3 +542,40 @@ def get_seed_users() -> List[Dict[str, Any]]:
         },
     ]
 
+
+
+def get_seed_orders() -> List[Dict[str, Any]]:
+    """Trả về danh sách đơn hàng mẫu ban đầu để Vercel serverless không bao giờ bị rỗng."""
+    return [
+        {
+            "customer_name": "Võ Thành Trung",
+            "phone": "0909916319",
+            "email": "trungvt040106@gmail.com",
+            "address": "Nguyễn Thức Tự",
+            "items_json": json.dumps([
+                {"product_id": 1, "sku": "PET-MED-001", "name": "Sữa Tắm SOS Khử Mùi & Dưỡng Lông (530ml)", "price": 145000.0, "quantity": 1, "subtotal": 145000.0},
+                {"product_id": 2, "sku": "PET-MED-002", "name": "Nhỏ Gáy Trị Ve Rận Frontline Plus", "price": 230000.0, "quantity": 1, "subtotal": 230000.0}
+            ], ensure_ascii=False),
+            "total_amount": 375000.0,
+            "voucher_code": "",
+            "discount_amount": 0.0,
+            "status": "Chờ xác nhận",
+            "payment_method": "banking",
+            "created_at": "2026-11-02 09:18:01",
+        },
+        {
+            "customer_name": "Võ Thành Trung",
+            "phone": "0909916319",
+            "email": "trungvt040106@gmail.com",
+            "address": "Nguyễn Thức Tự",
+            "items_json": json.dumps([
+                {"product_id": 2, "sku": "PET-MED-002", "name": "Nhỏ Gáy Trị Ve Rận Frontline Plus", "price": 230000.0, "quantity": 1, "subtotal": 230000.0}
+            ], ensure_ascii=False),
+            "total_amount": 230000.0,
+            "voucher_code": "",
+            "discount_amount": 0.0,
+            "status": "Đang đóng gói",
+            "payment_method": "banking",
+            "created_at": "2026-11-02 09:19:04",
+        }
+    ]

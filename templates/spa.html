@@ -16,25 +16,25 @@
         </div>
         <div style="text-align:right;">
             <span style="font-size:12px; color:#6e5444;">Tổng chi phí dịch vụ:</span>
-            <div style="font-size:24px; font-weight:900; color:#34d399;">{{ "{:,.0f}".format(booking_success.total_price) }} đ</div>
+            <div style="font-size:24px; font-weight:900; color:#047857;">{{ "{:,.0f}".format(booking_success.total_price) }} đ</div>
         </div>
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; font-size:13.5px; color:#e2e8f0; margin-bottom:20px;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; font-size:13.5px; color:#2b180d; margin-bottom:20px;">
         <div style="background:#fff7ed; padding:12px 14px; border-radius:12px; border:1px solid #fed7aa;">
-            <div style="color:#94a3b8; font-size:11.5px; text-transform:uppercase;">Dịch vụ đã chọn:</div>
+            <div style="color:#6e5444; font-size:11.5px; text-transform:uppercase;">Dịch vụ đã chọn:</div>
             <strong style="color:#2b180d; font-size:15px;">{{ booking_success.service_name }}</strong>
         </div>
         <div style="background:#fff7ed; padding:12px 14px; border-radius:12px; border:1px solid #fed7aa;">
-            <div style="color:#94a3b8; font-size:11.5px; text-transform:uppercase;">Bé cưng:</div>
+            <div style="color:#6e5444; font-size:11.5px; text-transform:uppercase;">Bé cưng:</div>
             <strong style="color:#d97706; font-size:15px;">{{ booking_success.pet_name }}</strong> ({{ booking_success.pet_type }}, {{ booking_success.pet_weight_kg }}kg)
         </div>
         <div style="background:#fff7ed; padding:12px 14px; border-radius:12px; border:1px solid #fed7aa;">
-            <div style="color:#94a3b8; font-size:11.5px; text-transform:uppercase;">Thời gian hẹn:</div>
+            <div style="color:#6e5444; font-size:11.5px; text-transform:uppercase;">Thời gian hẹn:</div>
             <strong style="color:#059669; font-size:15px;">📅 {{ booking_success.appointment_date }} ⏰ {{ booking_success.appointment_time }}</strong>
         </div>
         <div style="background:#fff7ed; padding:12px 14px; border-radius:12px; border:1px solid #fed7aa;">
-            <div style="color:#94a3b8; font-size:11.5px; text-transform:uppercase;">Khách hàng &amp; SĐT:</div>
+            <div style="color:#6e5444; font-size:11.5px; text-transform:uppercase;">Khách hàng &amp; SĐT:</div>
             <strong style="color:#2b180d;">{{ booking_success.customer_name }}</strong> (<code>{{ booking_success.phone }}</code>)
         </div>
     </div>
@@ -67,10 +67,10 @@
         Hệ thống phòng tắm sấy ion âm vô trùng chống hoảng sợ, liệu trình sục bọt massage thảo dược SOS, cắt tỉa tạo form Teddy thịnh hành và bác sĩ thú y trực tiếp kiểm tra da lông miễn phí.
     </p>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <span class="spa-tier-pill" style="color:#6ee7b7; border-color:rgba(110,231,183,0.35); background:rgba(16,185,129,0.14);">🛡️ 100% Khử trùng tia cực tím UV</span>
-        <span class="spa-tier-pill" style="color:#93c5fd; border-color:rgba(147,197,253,0.3); background:rgba(59,130,246,0.12);">🌿 Sữa tắm thảo dược hữu cơ SOS</span>
-        <span class="spa-tier-pill" style="color:#fde68a; border-color:rgba(253,230,138,0.3); background:rgba(245,158,11,0.14);">🩺 Bác sĩ thú y kiểm tra da lông miễn phí</span>
-        <span class="spa-tier-pill" style="color:#f472b6; border-color:rgba(244,114,182,0.3); background:rgba(236,72,153,0.14);">✉️ Nhận vé điện tử qua Email tức thì</span>
+        <span class="spa-tier-pill" style="color:#047857; border-color:rgba(110,231,183,0.35); background:rgba(16,185,129,0.14);">🛡️ 100% Khử trùng tia cực tím UV</span>
+        <span class="spa-tier-pill" style="color:#0369a1; border-color:rgba(147,197,253,0.3); background:rgba(59,130,246,0.12);">🌿 Sữa tắm thảo dược hữu cơ SOS</span>
+        <span class="spa-tier-pill" style="color:#92400e; border-color:rgba(253,230,138,0.3); background:rgba(245,158,11,0.14);">🩺 Bác sĩ thú y kiểm tra da lông miễn phí</span>
+        <span class="spa-tier-pill" style="color:#ea580c; border-color:#fed7aa; background:rgba(236,72,153,0.14);">✉️ Nhận vé điện tử qua Email tức thì</span>
     </div>
 </div>
 
@@ -233,7 +233,7 @@
         <div class="card" style="border: 1.5px solid #fed7aa; box-shadow: 0 16px 40px rgba(180,100,60,0.08); position:sticky; top:20px; background: #ffffff;">
             <div class="card-header" style="margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px;">
                 <div>
-                    <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); font-size:11.5px; font-weight:800; color:#34d399; margin-bottom:6px;">
+                    <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); font-size:11.5px; font-weight:800; color:#047857; margin-bottom:6px;">
                         <span>⚡ ĐẶT LỊCH NHANH TRONG 20 GIÂY</span>
                     </div>
                     <h2 class="card-title" style="font-size:21px; letter-spacing:-0.3px;">Phiếu Đăng Ký Lịch Hẹn Spa</h2>
@@ -332,15 +332,47 @@
                         </div>
 
                         <div class="form-group" style="margin:0;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                <label class="form-label" style="margin:0;">Giờ hẹn (*)</label>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <label class="form-label" style="margin:0; font-weight:800; color:#2b180d;">Giờ hẹn 24h (*)</label>
                                 <div style="display:flex; gap:4px;">
-                                    <button type="button" class="quick-chip-btn" onclick="setTimePreset('09:30')">09:30</button>
-                                    <button type="button" class="quick-chip-btn" onclick="setTimePreset('14:00')">14:00</button>
-                                    <button type="button" class="quick-chip-btn" onclick="setTimePreset('16:30')">16:30</button>
+                                    <button type="button" class="quick-chip-btn" onclick="setTimePreset('09:30')" style="background:#fff7ed; border:1px solid #fed7aa; color:#ea580c; font-weight:700; padding:2px 8px; border-radius:6px; font-size:12px; cursor:pointer;">09:30</button>
+                                    <button type="button" class="quick-chip-btn" onclick="setTimePreset('14:00')" style="background:#fff7ed; border:1px solid #fed7aa; color:#ea580c; font-weight:700; padding:2px 8px; border-radius:6px; font-size:12px; cursor:pointer;">14:00</button>
+                                    <button type="button" class="quick-chip-btn" onclick="setTimePreset('16:30')" style="background:#fff7ed; border:1px solid #fed7aa; color:#ea580c; font-weight:700; padding:2px 8px; border-radius:6px; font-size:12px; cursor:pointer;">16:30</button>
+                                    <button type="button" class="quick-chip-btn" onclick="setTimePreset('18:30')" style="background:#fff7ed; border:1px solid #fed7aa; color:#ea580c; font-weight:700; padding:2px 8px; border-radius:6px; font-size:12px; cursor:pointer;">18:30</button>
                                 </div>
                             </div>
-                            <input type="time" id="spaTimeInput" name="appointment_time" value="{{ form.raw_data.get('appointment_time', '09:30') }}" min="08:00" max="20:30" class="form-control" required onchange="updateLiveTicketPreview()">
+                            {% set cur_time = form.raw_data.get('appointment_time', '09:30') %}
+                            <select id="spaTimeInput" name="appointment_time" class="form-control" required onchange="updateLiveTicketPreview()" style="height:44px; font-weight:700; font-size:14px; background:#ffffff; border:1.5px solid #fed7aa; color:#2b180d;">
+                                <optgroup label="☀️ Buổi Sáng (08:00 - 11:30)">
+                                    <option value="08:00" {% if cur_time == '08:00' %}selected{% endif %}>08:00 (Sáng sớm)</option>
+                                    <option value="08:30" {% if cur_time == '08:30' %}selected{% endif %}>08:30</option>
+                                    <option value="09:00" {% if cur_time == '09:00' %}selected{% endif %}>09:00</option>
+                                    <option value="09:30" {% if cur_time == '09:30' or not cur_time %}selected{% endif %}>09:30 (Phổ biến)</option>
+                                    <option value="10:00" {% if cur_time == '10:00' %}selected{% endif %}>10:00</option>
+                                    <option value="10:30" {% if cur_time == '10:30' %}selected{% endif %}>10:30</option>
+                                    <option value="11:00" {% if cur_time == '11:00' %}selected{% endif %}>11:00</option>
+                                    <option value="11:30" {% if cur_time == '11:30' %}selected{% endif %}>11:30</option>
+                                </optgroup>
+                                <optgroup label="🌤️ Buổi Chiều (13:30 - 17:30)">
+                                    <option value="13:30" {% if cur_time == '13:30' %}selected{% endif %}>13:30</option>
+                                    <option value="14:00" {% if cur_time == '14:00' %}selected{% endif %}>14:00 (Đầu giờ chiều)</option>
+                                    <option value="14:30" {% if cur_time == '14:30' %}selected{% endif %}>14:30</option>
+                                    <option value="15:00" {% if cur_time == '15:00' %}selected{% endif %}>15:00</option>
+                                    <option value="15:30" {% if cur_time == '15:30' %}selected{% endif %}>15:30</option>
+                                    <option value="16:00" {% if cur_time == '16:00' %}selected{% endif %}>16:00</option>
+                                    <option value="16:30" {% if cur_time == '16:30' %}selected{% endif %}>16:30 (Tan tầm)</option>
+                                    <option value="17:00" {% if cur_time == '17:00' %}selected{% endif %}>17:00</option>
+                                    <option value="17:30" {% if cur_time == '17:30' %}selected{% endif %}>17:30</option>
+                                </optgroup>
+                                <optgroup label="🌙 Buổi Tối (18:00 - 20:30)">
+                                    <option value="18:00" {% if cur_time == '18:00' %}selected{% endif %}>18:00</option>
+                                    <option value="18:30" {% if cur_time == '18:30' %}selected{% endif %}>18:30 (Tối mát)</option>
+                                    <option value="19:00" {% if cur_time == '19:00' %}selected{% endif %}>19:00</option>
+                                    <option value="19:30" {% if cur_time == '19:30' %}selected{% endif %}>19:30</option>
+                                    <option value="20:00" {% if cur_time == '20:00' %}selected{% endif %}>20:00</option>
+                                    <option value="20:30" {% if cur_time == '20:30' %}selected{% endif %}>20:30 (Suất cuối)</option>
+                                </optgroup>
+                            </select>
                             {% for err in form.errors.get('appointment_time', []) %}
                                 <div class="form-error">{{ err }}</div>
                             {% endfor %}
@@ -370,7 +402,7 @@
                     <div class="form-group" style="margin-bottom:10px;">
                         <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
                             <span>Địa chỉ Email nhận vé xác nhận</span>
-                            <span style="font-size:11px; color:#34d399; font-weight:600;">✉️ Giao diện vé chuẩn Brand VIP</span>
+                            <span style="font-size:11px; color:#047857; font-weight:600;">✉️ Giao diện vé chuẩn Brand VIP</span>
                         </label>
                         <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" maxlength="120" class="form-control" placeholder="VD: minhanh@gmail.com (Không bắt buộc)">
                         {% for err in form.errors.get('email', []) %}
@@ -399,19 +431,19 @@
                         <div style="font-size:12px; font-weight:800; color:#ea580c; text-transform:uppercase; letter-spacing:0.5px;">
                             🎟️ VÉ HẸN SPA DỰ KIẾN
                         </div>
-                        <div style="font-size:11px; font-weight:700; color:#34d399; background:rgba(52,211,153,0.15); padding:2px 8px; border-radius:99px;">
+                        <div style="font-size:11px; font-weight:700; color:#047857; background:rgba(52,211,153,0.15); padding:2px 8px; border-radius:99px;">
                             ✓ Tự động tính giá
                         </div>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; font-size:13px; color:#6e5444; line-height:1.5;">
                         <div>
                             <div><strong id="ticketServiceName" style="color:#2b180d;">Tắm sấy &amp; Vệ sinh tai móng</strong></div>
-                            <div style="font-size:12px; color:#94a3b8;" id="ticketPetSummary">Bé: <span id="summaryPetName">Bé cưng</span> (<span id="summaryPetType">🐱 Mèo</span>, <span id="summaryPetWeight">4.0</span>kg)</div>
-                            <div style="font-size:12px; color:#facc15;" id="ticketTimeSummary">📅 <span id="summaryDate">Hôm nay</span> lúc ⏰ <span id="summaryTime">09:30</span></div>
+                            <div style="font-size:12px; color:#6e5444;" id="ticketPetSummary">Bé: <span id="summaryPetName">Bé cưng</span> (<span id="summaryPetType">🐱 Mèo</span>, <span id="summaryPetWeight">4.0</span>kg)</div>
+                            <div style="font-size:12px; color:#d97706; font-weight:700;" id="ticketTimeSummary">📅 <span id="summaryDate">Hôm nay</span> lúc ⏰ <span id="summaryTime">09:30</span></div>
                         </div>
                         <div style="text-align:right;">
-                            <div style="font-size:11px; color:#94a3b8; text-transform:uppercase;">TỔNG TẠM TÍNH:</div>
-                            <div id="spaPricePreview" style="font-size:22px; font-weight:900; color:#34d399; letter-spacing:-0.5px;">150.000 đ</div>
+                            <div style="font-size:11px; color:#6e5444; text-transform:uppercase;">TỔNG TẠM TÍNH:</div>
+                            <div id="spaPricePreview" style="font-size:22px; font-weight:900; color:#047857; letter-spacing:-0.5px;">150.000 đ</div>
                         </div>
                     </div>
                 </div>

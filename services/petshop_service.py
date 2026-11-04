@@ -23,7 +23,7 @@ from core.paginator import (
     parse_csv_stream,
     stream_csv_export,
 )
-from data.seeds import SEED_CATALOG, get_seed_bookings, get_seed_users
+from data.seeds import SEED_CATALOG, get_seed_bookings, get_seed_users, get_seed_orders
 from models.entities import (
     BOOKING_STATUSES,
     CATEGORIES,
@@ -197,6 +197,11 @@ def init_db_and_seed() -> None:
             SpaBooking(**b).save()
 
     Order.sync_from_json_store()
+    first_order = next(Order.iter_all(), None)
+    if first_order is None:
+        for od in get_seed_orders():
+            Order(**od).save()
+        Order.sync_all_to_json_file()
 
     User.sync_from_json_store()
     first_user = next(User.iter_all(), None)

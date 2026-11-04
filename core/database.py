@@ -83,7 +83,13 @@ class DatabaseSession:
         self.cursor: Optional[sqlite3.Cursor] = None
 
     def __enter__(self) -> "DatabaseSession":
-        self.conn = sqlite3.connect(self.db_path)
+        # Kết nối với timeout 30s để tránh triệt để lỗi database is locked khi nhiều người truy cập cùng lúc
+        self.conn = sqlite3.connect(self.db_path, timeout=30.0)
+        try:
+            self.conn.execute("PRAGMA journal_mode=WAL")
+            self.conn.execute("PRAGMA busy_timeout=30000")
+        except Exception:
+            pass
         # Trả về từng dòng dưới dạng sqlite3.Row (có thể truy cập như dict)
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()

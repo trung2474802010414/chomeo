@@ -195,8 +195,25 @@ class SpaBooking(BaseModel):
 
     @classmethod
     def sync_all_to_json_file(cls) -> List[Dict[str, Any]]:
-        """Đồng bộ toàn bộ danh sách lịch hẹn hiện tại trong SQLite xuống file JSON."""
-        all_items = [b.to_dict() for b in cls.iter_all(order_by="id ASC")]
+        """Đồng bộ toàn bộ danh sách lịch hẹn hiện tại trong SQLite xuống file JSON (gộp không xóa)."""
+        existing_records = []
+        if os.path.exists(BOOKINGS_STORE_PATH):
+            try:
+                with open(BOOKINGS_STORE_PATH, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                    if isinstance(loaded, list):
+                        existing_records = loaded
+            except Exception:
+                pass
+        merged_map = {}
+        for r in existing_records:
+            if isinstance(r, dict):
+                k = (str(r.get("phone","")).strip(), str(r.get("pet_name","")).strip(), str(r.get("appointment_date","")).strip(), str(r.get("appointment_time","")).strip())
+                merged_map[k] = r
+        for b in [x.to_dict() for x in cls.iter_all(order_by="id ASC")]:
+            k = (str(b.get("phone","")).strip(), str(b.get("pet_name","")).strip(), str(b.get("appointment_date","")).strip(), str(b.get("appointment_time","")).strip())
+            merged_map[k] = b
+        all_items = list(merged_map.values())
         try:
             os.makedirs(os.path.dirname(BOOKINGS_STORE_PATH), exist_ok=True)
             with open(BOOKINGS_STORE_PATH, "w", encoding="utf-8") as f:
