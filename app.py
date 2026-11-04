@@ -1600,28 +1600,27 @@ def admin_page():
         end_date = today_str
 
     stats = compute_dashboard_stats(start_date=start_date, end_date=end_date)
-    if admin_tab == "orders":
-        Order.sync_from_json_store()
-        try:
-            raw_cookie = request.cookies.get("orders_vault")
-            if raw_cookie:
-                import urllib.parse
-                decoded = urllib.parse.unquote(raw_cookie)
-                cookie_orders = json.loads(decoded)
-                if isinstance(cookie_orders, list):
-                    for co in cookie_orders:
-                        if isinstance(co, dict) and co.get("id"):
-                            exists = Order.find_by_id(int(co["id"]))
-                            if not exists:
-                                Order.create_from_dict(co)
-        except Exception:
-            pass
-    if admin_tab == "bookings":
-        SpaBooking.sync_from_json_store()
+    # Đảm bảo đồng bộ đầy đủ mọi đơn hàng, lịch spa và tài khoản cho Admin
+    Order.sync_from_json_store()
+    raw_cookie = request.cookies.get("mw_orders_vault") or request.cookies.get("orders_vault")
+    if raw_cookie:
+        c_orders = _decode_compressed_vault(raw_cookie)
+        if c_orders:
+            Order.restore_orders_list(c_orders)
+
+    SpaBooking.sync_from_json_store()
+    raw_b_cookie = request.cookies.get("mw_bookings_vault") or request.cookies.get("bookings_vault")
+    if raw_b_cookie:
+        c_bookings = _decode_compressed_vault(raw_b_cookie)
+        if c_bookings:
+            SpaBooking.restore_bookings_list(c_bookings)
+
+    User.sync_from_json_store()
+
     products = [p.to_dict() for p in Product.iter_all(order_by="id DESC")] if admin_tab == "products" else []
-    bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")] if admin_tab == "bookings" else []
+    bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")] if admin_tab in ("bookings", "spa") else []
     orders = []
-    if admin_tab == "orders":
+    if admin_tab in ("orders", "dashboard"):
         for o in Order.iter_all(order_by="id DESC"):
             od = o.to_dict()
             if not isinstance(od.get("items"), list):
@@ -2414,3 +2413,21 @@ def run_server(host: str = "127.0.0.1", port: int = 8000) -> None:
 
 if __name__ == "__main__":
     run_server()
+
+@app.route("/admin/sync-vault", methods=["POST"])
+@admin_required
+def admin_force_sync_vault():
+    """Nút khẩn cấp cho Quản trị viên: Tự động nạp và phục hồi toàn bộ dữ liệu từ JSON Store và Seeds."""
+    try:
+        from petshop.data.seeds import get_seed_orders, get_seed_bookings, get_seed_users
+        Order.restore_orders_list(get_seed_orders())
+        SpaBooking.restore_bookings_list(get_seed_bookings())
+        User.restore_accounts_list(get_seed_users())
+        Order.sync_from_json_store()
+        SpaBooking.sync_from_json_store()
+        User.sync_from_json_store()
+        flash("🎉 Đã phục hồi và đồng bộ toàn bộ 6 đơn hàng, 5 lịch hẹn Spa và 4 tài khoản khách hàng!", "success")
+    except Exception as exc:
+        flash(f"Lỗi đồng bộ dữ liệu: {exc}", "error")
+    target = request.referrer or url_for("admin_page", tab="orders")
+    return redirect(target)

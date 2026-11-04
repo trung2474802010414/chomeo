@@ -1,3 +1,4 @@
+import json
 """
 data/seeds.py
 Dữ liệu khởi tạo mẫu (Seed Data) cho hệ thống PetShop:
@@ -55,7 +56,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Phốc Sóc (Pomeranian)",
         "price": 7200000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=700&q=80",
+        "image_url": "https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=700&q=80",
         "description": "Bé Phốc Sóc mặt gấu bộ lông trắng bông xù dày dặn, lanh lợi, kèm sổ theo dõi sức khỏe thú y.",
     },
     {
@@ -132,7 +133,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Akita",
         "price": 12500000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=700&q=80",
+        "image_url": "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=700&q=80",
         "description": "Quốc khuyển Nhật Bản nổi tiếng trung thành, dáng đứng uy vệ, khỏe mạnh và điềm đạm.",
     },
     {
@@ -356,7 +357,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Sphynx Không Lông",
         "price": 13500000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1548802673-380ab8ebc7b7?auto=format&fit=crop&w=700&q=80",
+        "image_url": "https://images.unsplash.com/photo-1521724429677-0a4c31abf278?auto=format&fit=crop&w=700&q=80",
         "description": "Mèo Sphynx hoàn toàn không rụng lông, da ấm áp, cực kỳ thông minh và thân thiện với người dị ứng lông.",
     },
     {
@@ -393,7 +394,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Tai Cụp Scottish Fold",
         "price": 35000,
         "stock": 45,
-        "image_url": "https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=700&q=80",
+        "image_url": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=700&q=80",
         "description": "Súp thưởng vị cá ngừ và gà giúp kích thích vị giác và bổ sung nước cho mèo mọi lứa tuổi.",
     },
     {
@@ -415,7 +416,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Anh Lông Ngắn (ALN)",
         "price": 125000,
         "stock": 30,
-        "image_url": "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&w=700&q=80",
+        "image_url": "https://images.unsplash.com/photo-1727510153658-643787acb16a?auto=format&fit=crop&w=700&q=80",
         "description": "Cát vệ sinh vón cục nhanh, ít bụi, mùi trà xanh tự nhiên, có thể xả bồn cầu tiện lợi.",
     },
     {
@@ -426,7 +427,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "",
         "price": 240000,
         "stock": 9,
-        "image_url": "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=700&q=80",
+        "image_url": "https://images.unsplash.com/photo-1787988426106-d7cc87eb79b7?auto=format&fit=crop&w=700&q=80",
         "description": "Balo vận chuyển chó nhỏ (Poodle, Phốc Sóc, Schnauzer) và mèo dưới 7kg đi dạo hoặc đi khám thú y.",
     },
     {
@@ -437,7 +438,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Schnauzer",
         "price": 145000,
         "stock": 14,
-        "image_url": "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=700&q=80",
+        "image_url": "https://images.unsplash.com/photo-1597603413826-cd1c06b05222?auto=format&fit=crop&w=700&q=80",
         "description": "Sữa tắm chuyên dụng làm mềm lông, lưu hương lâu và hạn chế nấm da cho chó mèo.",
     },
     {
@@ -481,16 +482,81 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "",
         "price": 230000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=700&q=80",
+        "image_url": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=700&q=80",
         "description": "Phòng và diệt bọ chét, ve rận hiệu quả kéo dài trong 30 ngày.",
     },
 ]
 
 
 def get_seed_bookings() -> List[Dict[str, Any]]:
-    """Trả về danh sách các lượt đặt hẹn Spa mẫu ban đầu."""
+    """Trả về danh sách 5 lượt đặt hẹn Spa đồng bộ hoàn hảo với tài khoản khách & tester."""
     return [
         {
+            "id": 1,
+            "customer_name": "Trần Lê Cẩm An",
+            "phone": "0345293819",
+            "email": "tranlecamann0704@gmail.com",
+            "pet_name": "Bé Bông",
+            "pet_type": "Chó",
+            "pet_weight_kg": 3.5,
+            "service_name": "Tắm sấy & Vệ sinh tai móng",
+            "appointment_date": "2026-11-05",
+            "appointment_time": "09:30",
+            "total_price": 150000.0,
+            "status": "Đã xác nhận",
+            "note": "Bé ngoan, sấy ấm và thơm nhẹ.",
+            "created_at": "2026-11-03 14:15:20",
+        },
+        {
+            "id": 2,
+            "customer_name": "Trần Lê Cẩm An",
+            "phone": "0345293819",
+            "email": "tranlecamann0704@gmail.com",
+            "pet_name": "Bé Bông",
+            "pet_type": "Chó",
+            "pet_weight_kg": 3.5,
+            "service_name": "Cắt tỉa & Tạo kiểu lông (Grooming)",
+            "appointment_date": "2026-11-12",
+            "appointment_time": "14:00",
+            "total_price": 100000.0,
+            "status": "Chờ xác nhận",
+            "note": "Tỉa kiểu gấu Teddy tròn xinh.",
+            "created_at": "2026-11-03 14:30:10",
+        },
+        {
+            "id": 3,
+            "customer_name": "Trần Lê Cẩm An",
+            "phone": "0345293819",
+            "email": "tranlecamann0704@gmail.com",
+            "pet_name": "Bé Bông",
+            "pet_type": "Chó",
+            "pet_weight_kg": 3.5,
+            "service_name": "Khám sức khỏe & Tư vấn dinh dưỡng",
+            "appointment_date": "2026-11-20",
+            "appointment_time": "16:30",
+            "total_price": 0.0,
+            "status": "Chờ xác nhận",
+            "note": "Kiểm tra định kỳ sau tiêm phòng.",
+            "created_at": "2026-11-03 14:45:00",
+        },
+        {
+            "id": 4,
+            "customer_name": "Võ Thành Trung",
+            "phone": "0909916319",
+            "email": "trungvt040106@gmail.com",
+            "pet_name": "Bé Ken",
+            "pet_type": "Chó",
+            "pet_weight_kg": 5.5,
+            "service_name": "Tắm sấy & Vệ sinh tai móng",
+            "appointment_date": "2026-11-08",
+            "appointment_time": "15:30",
+            "total_price": 187500.0,
+            "status": "Đã xác nhận",
+            "note": "Dùng sữa tắm SOS khử mùi thảo mộc.",
+            "created_at": "2026-11-02 19:30:00",
+        },
+        {
+            "id": 5,
             "customer_name": "Nguyễn Minh Anh",
             "phone": "0905123456",
             "email": "minhanh@gmail.com",
@@ -498,32 +564,35 @@ def get_seed_bookings() -> List[Dict[str, Any]]:
             "pet_type": "Mèo",
             "pet_weight_kg": 4.2,
             "service_name": "Tắm sấy & Vệ sinh tai móng",
-            "appointment_date": "2026-10-26",
+            "appointment_date": "2026-11-06",
             "appointment_time": "09:30",
-            "total_price": SpaBooking.calculate_service_price("Tắm sấy & Vệ sinh tai móng", 4.2),
+            "total_price": 150000.0,
             "status": "Đã xác nhận",
-            "note": "Bé hơi nhát người lạ, nhờ kỹ thuật viên sấy nhiệt độ ấm vừa.",
-        },
-        {
-            "customer_name": "Trần Hoàng Nam",
-            "phone": "0988765432",
-            "email": "hoangnam@gmail.com",
-            "pet_name": "Lu",
-            "pet_type": "Chó",
-            "pet_weight_kg": 6.8,
-            "service_name": "Cắt tỉa & Tạo kiểu lông (Grooming)",
-            "appointment_date": "2026-10-26",
-            "appointment_time": "14:00",
-            "total_price": SpaBooking.calculate_service_price("Cắt tỉa & Tạo kiểu lông (Grooming)", 6.8),
-            "status": "Chờ xác nhận",
-            "note": "Tỉa gọn lông mặt và bàn chân kiểu Poodle Teddy.",
+            "note": "Bé hơi nhát nước, nhờ kỹ thuật viên nhẹ tay.",
+            "created_at": "2026-10-26 09:30:00",
         },
     ]
-
-
 def get_seed_users() -> List[Dict[str, Any]]:
-    """Trả về danh sách tài khoản khách hàng mẫu để kiểm tra tính năng."""
+    """Trả về danh sách tài khoản khách hàng mẫu và tester để Vercel luôn bảo toàn dữ liệu."""
     return [
+        {
+            "username": "trung",
+            "fullname": "Võ Thành Trung",
+            "email": "trungvt040106@gmail.com",
+            "phone": "0909916319",
+            "password_hash": hash_password("123456"),
+            "role": "customer",
+            "created_at": "2026-11-02 10:00:00",
+        },
+        {
+            "username": "Annc",
+            "fullname": "Trần Lê Cẩm An",
+            "email": "tranlecamann0704@gmail.com",
+            "phone": "0345293819",
+            "password_hash": hash_password("123456"),
+            "role": "customer",
+            "created_at": "2026-11-03 14:00:00",
+        },
         {
             "username": "khachhang",
             "fullname": "Nguyễn Minh Anh",
@@ -531,6 +600,7 @@ def get_seed_users() -> List[Dict[str, Any]]:
             "phone": "0905123456",
             "password_hash": hash_password("123456"),
             "role": "customer",
+            "created_at": "2026-10-25 09:00:00",
         },
         {
             "username": "petlover",
@@ -539,43 +609,138 @@ def get_seed_users() -> List[Dict[str, Any]]:
             "phone": "0908888999",
             "password_hash": hash_password("123456"),
             "role": "customer",
+            "created_at": "2026-10-26 11:30:00",
         },
     ]
-
-
-
 def get_seed_orders() -> List[Dict[str, Any]]:
-    """Trả về danh sách đơn hàng mẫu ban đầu để Vercel serverless không bao giờ bị rỗng."""
+    """Trả về danh sách 6 đơn hàng thực tế của khách & tester để Vercel không bao giờ bị mất dữ liệu."""
     return [
         {
+            "id": 1,
             "customer_name": "Võ Thành Trung",
             "phone": "0909916319",
             "email": "trungvt040106@gmail.com",
-            "address": "Nguyễn Thức Tự",
+            "address": "123 Nguyễn Thức Tự, Đà Nẵng",
             "items_json": json.dumps([
-                {"product_id": 1, "sku": "PET-MED-001", "name": "Sữa Tắm SOS Khử Mùi & Dưỡng Lông (530ml)", "price": 145000.0, "quantity": 1, "subtotal": 145000.0},
-                {"product_id": 2, "sku": "PET-MED-002", "name": "Nhỏ Gáy Trị Ve Rận Frontline Plus", "price": 230000.0, "quantity": 1, "subtotal": 230000.0}
+                {"product_id": 1, "sku": "DOG-PET-001", "name": "Chó Schnauzer Tiêu Muối Thuần Chủng (2.5 tháng)", "price": 6500000.0, "quantity": 1, "subtotal": 6500000.0}
             ], ensure_ascii=False),
-            "total_amount": 375000.0,
-            "voucher_code": "",
-            "discount_amount": 0.0,
-            "status": "Chờ xác nhận",
+            "total_amount": 6400000.0,
+            "voucher_code": "TRUNGVIP100K",
+            "discount_amount": 100000.0,
+            "status": "Hoàn thành",
             "payment_method": "banking",
-            "created_at": "2026-11-02 09:18:01",
+            "created_at": "2026-11-02 18:47:41",
+            "items": [
+                {"product_id": 1, "sku": "DOG-PET-001", "name": "Chó Schnauzer Tiêu Muối Thuần Chủng (2.5 tháng)", "price": 6500000.0, "quantity": 1, "subtotal": 6500000.0}
+            ]
         },
         {
+            "id": 2,
             "customer_name": "Võ Thành Trung",
             "phone": "0909916319",
             "email": "trungvt040106@gmail.com",
-            "address": "Nguyễn Thức Tự",
+            "address": "123 Nguyễn Thức Tự, Đà Nẵng",
             "items_json": json.dumps([
-                {"product_id": 2, "sku": "PET-MED-002", "name": "Nhỏ Gáy Trị Ve Rận Frontline Plus", "price": 230000.0, "quantity": 1, "subtotal": 230000.0}
+                {"product_id": 33, "sku": "CAT-FD-001", "name": "Hạt Royal Canin Indoor 27 Cho Mèo (2kg)", "price": 380000.0, "quantity": 2, "subtotal": 760000.0}
             ], ensure_ascii=False),
-            "total_amount": 230000.0,
+            "total_amount": 760000.0,
+            "voucher_code": "",
+            "discount_amount": 0.0,
+            "status": "Đang giao hàng",
+            "payment_method": "cod",
+            "created_at": "2026-11-02 19:15:20",
+            "items": [
+                {"product_id": 33, "sku": "CAT-FD-001", "name": "Hạt Royal Canin Indoor 27 Cho Mèo (2kg)", "price": 380000.0, "quantity": 2, "subtotal": 760000.0}
+            ]
+        },
+        {
+            "id": 3,
+            "customer_name": "Võ Thành Trung",
+            "phone": "0909916319",
+            "email": "trungvt040106@gmail.com",
+            "address": "123 Nguyễn Thức Tự, Đà Nẵng",
+            "items_json": json.dumps([
+                {"product_id": 37, "sku": "PET-ACC-001", "name": "Balo Phi Hành Gia Trong Suốt Có Lỗ Thoáng", "price": 380000.0, "quantity": 1, "subtotal": 380000.0},
+                {"product_id": 38, "sku": "PET-CARE-001", "name": "Sữa Tắm SOS Khử Mùi & Dưỡng Lông (530ml)", "price": 145000.0, "quantity": 1, "subtotal": 145000.0}
+            ], ensure_ascii=False),
+            "total_amount": 525000.0,
             "voucher_code": "",
             "discount_amount": 0.0,
             "status": "Đang đóng gói",
             "payment_method": "banking",
-            "created_at": "2026-11-02 09:19:04",
+            "created_at": "2026-11-03 08:30:10",
+            "items": [
+                {"product_id": 37, "sku": "PET-ACC-001", "name": "Balo Phi Hành Gia Trong Suốt Có Lỗ Thoáng", "price": 380000.0, "quantity": 1, "subtotal": 380000.0},
+                {"product_id": 38, "sku": "PET-CARE-001", "name": "Sữa Tắm SOS Khử Mùi & Dưỡng Lông (530ml)", "price": 145000.0, "quantity": 1, "subtotal": 145000.0}
+            ]
+        },
+        {
+            "id": 4,
+            "customer_name": "Võ Thành Trung",
+            "phone": "0909916319",
+            "email": "trungvt040106@gmail.com",
+            "address": "123 Nguyễn Thức Tự, Đà Nẵng",
+            "items_json": json.dumps([
+                {"product_id": 36, "sku": "CAT-SAN-001", "name": "Cát Đậu Nành Hữu Cơ Tofu Cat Litter (6L)", "price": 150000.0, "quantity": 3, "subtotal": 450000.0},
+                {"product_id": 39, "sku": "CAT-TOY-001", "name": "Trụ Cào Móng Bọc Thừng Sisal Kèm Bóng Lông", "price": 250000.0, "quantity": 1, "subtotal": 250000.0}
+            ], ensure_ascii=False),
+            "total_amount": 700000.0,
+            "voucher_code": "",
+            "discount_amount": 0.0,
+            "status": "Chờ xác nhận",
+            "payment_method": "cod",
+            "created_at": "2026-11-03 14:10:05",
+            "items": [
+                {"product_id": 36, "sku": "CAT-SAN-001", "name": "Cát Đậu Nành Hữu Cơ Tofu Cat Litter (6L)", "price": 150000.0, "quantity": 3, "subtotal": 450000.0},
+                {"product_id": 39, "sku": "CAT-TOY-001", "name": "Trụ Cào Móng Bọc Thừng Sisal Kèm Bóng Lông", "price": 250000.0, "quantity": 1, "subtotal": 250000.0}
+            ]
+        },
+        {
+            "id": 5,
+            "customer_name": "Võ Thành Trung",
+            "phone": "0909916319",
+            "email": "trungvt040106@gmail.com",
+            "address": "123 Nguyễn Thức Tự, Đà Nẵng",
+            "items_json": json.dumps([
+                {"product_id": 35, "sku": "DOG-FD-001", "name": "Hạt SmartHeart Adult Vị Bò Nướng Cho Chó (3kg)", "price": 320000.0, "quantity": 1, "subtotal": 320000.0},
+                {"product_id": 34, "sku": "CAT-FD-002", "name": "Pate Mèo Ciao Churu Súp Thưởng (Gói 4 thanh)", "price": 45000.0, "quantity": 10, "subtotal": 450000.0},
+                {"product_id": 41, "sku": "PET-MED-001", "name": "Gel Dinh Dưỡng Nutri-Plus Gel Virbac (120g)", "price": 280000.0, "quantity": 1, "subtotal": 280000.0},
+                {"product_id": 42, "sku": "PET-MED-002", "name": "Nhỏ Gáy Trị Ve Rận Frontline Plus", "price": 230000.0, "quantity": 1, "subtotal": 230000.0},
+                {"product_id": 40, "sku": "DOG-TOY-001", "name": "Xương Cao Su Sạch Răng Gặm Nhai Bền Bỉ", "price": 120000.0, "quantity": 1, "subtotal": 120000.0},
+                {"product_id": 14, "sku": "DOG-PET-014", "name": "Chó Pug Mặt Xệ Màu Vàng Kim (2 tháng tuổi)", "price": 898000.0, "quantity": 1, "subtotal": 898000.0}
+            ], ensure_ascii=False),
+            "total_amount": 2298000.0,
+            "voucher_code": "",
+            "discount_amount": 0.0,
+            "status": "Chờ xác nhận",
+            "payment_method": "banking",
+            "created_at": "2026-11-03 16:45:22",
+            "items": [
+                {"product_id": 35, "sku": "DOG-FD-001", "name": "Hạt SmartHeart Adult Vị Bò Nướng Cho Chó (3kg)", "price": 320000.0, "quantity": 1, "subtotal": 320000.0},
+                {"product_id": 34, "sku": "CAT-FD-002", "name": "Pate Mèo Ciao Churu Súp Thưởng (Gói 4 thanh)", "price": 45000.0, "quantity": 10, "subtotal": 450000.0},
+                {"product_id": 41, "sku": "PET-MED-001", "name": "Gel Dinh Dưỡng Nutri-Plus Gel Virbac (120g)", "price": 280000.0, "quantity": 1, "subtotal": 280000.0},
+                {"product_id": 42, "sku": "PET-MED-002", "name": "Nhỏ Gáy Trị Ve Rận Frontline Plus", "price": 230000.0, "quantity": 1, "subtotal": 230000.0},
+                {"product_id": 40, "sku": "DOG-TOY-001", "name": "Xương Cao Su Sạch Răng Gặm Nhai Bền Bỉ", "price": 120000.0, "quantity": 1, "subtotal": 120000.0},
+                {"product_id": 14, "sku": "DOG-PET-014", "name": "Chó Pug Mặt Xệ Màu Vàng Kim (2 tháng tuổi)", "price": 898000.0, "quantity": 1, "subtotal": 898000.0}
+            ]
+        },
+        {
+            "id": 6,
+            "customer_name": "Trần Lê Cẩm An",
+            "phone": "0345293819",
+            "email": "tranlecamann0704@gmail.com",
+            "address": "45/12 Lê Duẩn, Hải Châu, Đà Nẵng",
+            "items_json": json.dumps([
+                {"product_id": 2, "sku": "DOG-PET-002", "name": "Chó Poodle Tiny Màu Nâu Đỏ (2 tháng tuổi)", "price": 4800000.0, "quantity": 1, "subtotal": 4800000.0}
+            ], ensure_ascii=False),
+            "total_amount": 4800000.0,
+            "voucher_code": "",
+            "discount_amount": 0.0,
+            "status": "Đang đóng gói",
+            "payment_method": "banking",
+            "created_at": "2026-11-03 15:20:18",
+            "items": [
+                {"product_id": 2, "sku": "DOG-PET-002", "name": "Chó Poodle Tiny Màu Nâu Đỏ (2 tháng tuổi)", "price": 4800000.0, "quantity": 1, "subtotal": 4800000.0}
+            ]
         }
     ]

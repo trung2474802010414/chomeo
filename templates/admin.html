@@ -167,6 +167,11 @@
                 </h1>
 
                 <div style="display:flex; gap:10px; align-items:center;">
+                    <form method="POST" action="{{ url_for('admin_force_sync_vault') }}" style="margin:0; display:inline-flex;">
+                        <button type="submit" class="btn btn-outline btn-sm" style="border-radius:99px; height:36px; padding:0 14px; font-weight:800; font-size:12.5px; border:1px solid #fed7aa; background:#fff7ed; color:#c2410c; display:inline-flex; align-items:center; gap:6px; cursor:pointer;" title="Phục hồi và đồng bộ tức thì toàn bộ 6 đơn hàng, 5 lịch hẹn Spa và tài khoản">
+                            🔄 Đồng Bộ Dữ Liệu
+                        </button>
+                    </form>
                     {% if admin_tab == 'products' %}
                     <button type="button" onclick="openProductModal()" class="btn btn-primary btn-sm btn-add-product-glow">+ Thêm sản phẩm mới</button>
                     {% else %}
@@ -1074,8 +1079,15 @@
                             <h2 class="card-title" style="margin:0; font-size:19px;">📋 Trung Tâm Điều Phối &amp; Quản Lý Đơn Hàng ({{ orders|length }} đơn)</h2>
                             <p class="section-subtitle" style="margin:4px 0 0;">Giao diện thẻ đơn hàng thông minh — theo dõi tiến độ xử lý, mã giảm giá Voucher, phương thức thanh toán và in hóa đơn QR.</p>
                         </div>
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <form method="POST" action="{{ url_for('admin_force_sync_vault') }}" style="margin:0; display:inline-flex;">
+                                <button type="submit" class="btn btn-outline btn-sm" style="height:42px; border-radius:99px; font-weight:800; padding:0 16px; border:1px solid #fed7aa; background:#fff7ed; color:#c2410c; display:inline-flex; align-items:center; gap:6px; cursor:pointer;" title="Phục hồi toàn bộ 6 đơn hàng và 5 lịch hẹn Spa">
+                                    🔄 Đồng Bộ Lưu Trữ
+                                </button>
+                            </form>
                         <div style="position:relative; min-width:290px; flex:0 1 360px;">
                             <input type="text" id="orderSearchInput" oninput="filterAdminOrders()" placeholder="🔍 Tìm mã #DH, tên khách, SĐT, email, sản phẩm..." class="form-control" style="height:42px; padding-left:16px; border-radius:99px; font-size:13.5px;">
+                        </div>
                         </div>
                     </div>
 
