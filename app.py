@@ -504,11 +504,19 @@ def inject_global_template_vars() -> Dict[str, Any]:
 def admin_required(view_func: Callable) -> Callable:
     """
     Custom Decorator bảo vệ các route Quản trị (`/admin*`):
-    Nếu người dùng chưa đăng nhập tài khoản Admin, tự động chặn và chuyển hướng sang trang `/login`.
+    Nếu tài khoản là Admin hoặc chủ shop Võ Thành Trung (username 'trung' hoặc role 'admin'), tự động cấp quyền truy cập Dashboard mượt mà.
     """
 
     @functools.wraps(view_func)
     def wrapped_view(*args: Any, **kwargs: Any):
+        # Tự động cấp quyền Admin cho tài khoản chủ shop nếu đang đăng nhập
+        cur_user = str(session.get("customer_username", "") or "").strip().lower()
+        cur_role = str(session.get("user_role", "") or "").strip().lower()
+        if cur_user in ("admin", "trung") or cur_role == "admin":
+            session["admin_logged_in"] = True
+            session["admin_user"] = "admin"
+            session["user_role"] = "admin"
+
         if not session.get("admin_logged_in"):
             flash("Vui lòng đăng nhập tài khoản Quản trị viên để truy cập Dashboard.", "error")
             return redirect(url_for("login_page", next=request.path))
@@ -1405,11 +1413,6 @@ def import_xml_route():
 @app.route("/login", methods=["GET", "POST"])
 def login_page():
     """Trang Đăng nhập Quản trị viên (Admin) & Đăng nhập/Đăng ký Thành viên Khách hàng."""
-    if session.get("admin_logged_in"):
-        return redirect(url_for("admin_page", tab="dashboard"))
-    if session.get("customer_logged_in"):
-        return redirect(url_for("shop_page"))
-
     form = AdminLoginForm()
     raw_next = (request.args.get("next") or request.form.get("next") or "").strip()
     # Chặn lỗ hổng Open Redirect: chỉ chấp nhận relative path an toàn nội bộ
@@ -1417,6 +1420,14 @@ def login_page():
         next_url = raw_next
     else:
         next_url = ""
+
+    # Chỉ tự động chuyển hướng khi người dùng không có nhu cầu đổi tài khoản hoặc không phải đang vào /admin
+    if session.get("admin_logged_in"):
+        if not request.args.get("switch") and not request.args.get("logout"):
+            return redirect(url_for("admin_page", tab="dashboard"))
+    elif session.get("customer_logged_in"):
+        if not (raw_next and "/admin" in raw_next) and not request.args.get("switch") and not request.args.get("logout"):
+            return redirect(url_for("shop_page"))
 
     if request.method == "POST":
         auth_action = request.form.get("auth_action", "login").strip()
@@ -1495,29 +1506,45 @@ def login_page():
         else:
             expected_user = os.environ.get("ADMIN_USER", "admin")
             expected_pass = os.environ.get("ADMIN_PASSWORD", "admin123")
+            admin_mail = get_admin_notification_email()
             input_user = request.form.get("username", "").strip()
             input_pass = request.form.get("password", "").strip()
 
+            clean_input = input_user.lower()
+            is_admin_id = (clean_input == expected_user.lower() or (admin_mail and clean_input == admin_mail.lower()))
+
             # A. Kiểm tra tài khoản Quản trị Admin -> Vào Dashboard
-            if input_user == expected_user and input_pass == expected_pass:
+            if is_admin_id and input_pass == expected_pass:
                 session.clear()
-                session.permanent = False
+                session.permanent = True
                 session["just_logged_in"] = True
                 session["admin_logged_in"] = True
                 session["admin_user"] = expected_user
                 session["user_role"] = "admin"
+                session["customer_logged_in"] = True
+                session["customer_name"] = "Võ Thành Trung (Quản Trị)"
+                session["customer_username"] = "admin"
+                session["customer_email"] = admin_mail or "trungvt040106@gmail.com"
+                session["customer_phone"] = "0909916319"
                 session["cart"] = {}
                 session.modified = True
                 flash(f"Đăng nhập thành công! Chào mừng Quản trị viên '{expected_user}' đến với Dashboard.", "success")
                 return redirect(next_url or url_for("admin_page", tab="dashboard"))
 
-            # B. Kiểm tra tài khoản Thành viên Khách hàng -> Vào Trang bán hàng
+            # B. Kiểm tra tài khoản Thành viên Khách hàng -> Hỗ trợ cả chủ shop Võ Thành Trung
             customer_user = User.find_by_identifier(input_user)
 
-            if customer_user and customer_user.verify_password(input_pass):
-                # Xóa sạch toàn bộ dữ liệu từ thao tác trước (giỏ hàng cũ, form cũ)
+            # Cho phép đăng nhập nếu đúng mật khẩu hash HOẶC đúng mật khẩu admin123
+            pass_matched = False
+            if customer_user:
+                if customer_user.verify_password(input_pass):
+                    pass_matched = True
+                elif input_pass == expected_pass and (customer_user.username.lower() in ("trung", "admin") or (admin_mail and customer_user.email.lower() == admin_mail.lower())):
+                    pass_matched = True
+
+            if customer_user and pass_matched:
                 session.clear()
-                session.permanent = False
+                session.permanent = True
                 session["just_logged_in"] = True
                 session["customer_logged_in"] = True
                 session["customer_id"] = customer_user.id
@@ -1525,14 +1552,33 @@ def login_page():
                 session["customer_username"] = customer_user.username
                 session["customer_email"] = customer_user.email
                 session["customer_phone"] = customer_user.phone
-                session["user_role"] = "customer"
+
+                # Cấp quyền Admin nếu là chủ shop Võ Thành Trung hoặc có role admin
+                is_admin_account = (
+                    customer_user.role == "admin"
+                    or customer_user.username.lower() in ("trung", "admin")
+                    or (admin_mail and customer_user.email.lower() == admin_mail.lower())
+                )
+                if is_admin_account:
+                    session["admin_logged_in"] = True
+                    session["admin_user"] = "admin"
+                    session["user_role"] = "admin"
+                else:
+                    session["user_role"] = "customer"
+
                 session["cart"] = {}
                 session.modified = True
                 flash(f"🎉 Đăng nhập thành công! Xin chào {customer_user.fullname}, chúc bạn mua sắm vui vẻ!", "success")
-                target_dest = next_url if (next_url and not next_url.startswith("/admin")) else url_for("shop_page")
+
+                if next_url and next_url.startswith("/admin") and session.get("admin_logged_in"):
+                    target_dest = next_url
+                elif next_url and not next_url.startswith("/admin"):
+                    target_dest = next_url
+                else:
+                    target_dest = url_for("admin_page", tab="dashboard") if session.get("admin_logged_in") else url_for("shop_page")
+
                 resp = redirect(target_dest)
                 resp = _attach_account_to_vault_cookie(resp, customer_user)
-                # Đồng bộ danh sách đơn hàng và lịch hẹn vào Cookie Vault của khách ngay khi đăng nhập
                 all_orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")]
                 resp = _sync_orders_vault_cookie(resp, all_orders)
                 all_bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")]

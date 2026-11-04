@@ -7,20 +7,7 @@
     <meta name="darkreader-lock">
     <title>Dashboard Quản Trị - Meow &amp; Woof Pet Shop &amp; Spa</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script>
-    (function() {
-        var justLogged = {{ 'true' if just_logged_in else 'false' }};
-        if (justLogged) {
-            try { sessionStorage.setItem('mw_tab_auth_alive', '1'); } catch (e) {}
-        } else {
-            try {
-                if (sessionStorage.getItem('mw_tab_auth_alive') !== '1') {
-                    window.location.replace("{{ url_for('logout_page', silent=1) }}");
-                }
-            } catch (e) {}
-        }
-    })();
-    </script>
+
 </head>
 <body class="admin-body">
     <div class="admin-shell">

@@ -95,24 +95,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script>
     (function() {
-        var isServerLogged = {{ 'true' if (customer_logged_in or is_admin) else 'false' }};
         var justLogged = {{ 'true' if just_logged_in else 'false' }};
         if (justLogged) {
             try {
                 sessionStorage.setItem('mw_tab_auth_alive', '1');
-                // Đăng nhập thành công -> lưu hẳn tên + mật khẩu để lần sau bấm "Điền nhanh" là xong
                 var pend = sessionStorage.getItem('mw_pending_login');
                 if (pend) {
                     var obj = JSON.parse(decodeURIComponent(escape(atob(pend))));
                     obj.n = obj.n || {{ (customer_name or '')|tojson }};
                     localStorage.setItem('mw_saved_login', btoa(unescape(encodeURIComponent(JSON.stringify(obj)))));
                     sessionStorage.removeItem('mw_pending_login');
-                }
-            } catch (e) {}
-        } else if (isServerLogged) {
-            try {
-                if (sessionStorage.getItem('mw_tab_auth_alive') !== '1') {
-                    window.location.replace("{{ url_for('logout_page', silent=1) }}");
                 }
             } catch (e) {}
         }

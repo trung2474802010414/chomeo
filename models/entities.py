@@ -758,14 +758,19 @@ class User(BaseModel):
 
     @classmethod
     def find_by_identifier(cls, identifier: str) -> Optional["User"]:
-        """Tìm user theo username, email hoặc số điện thoại (tự động đồng bộ từ JSON trước)."""
+        """Tìm user theo username, email hoặc số điện thoại (an toàn với None và tự động đồng bộ)."""
         cls.sync_from_json_store()
-        ident = identifier.strip().lower()
+        ident = str(identifier or "").strip().lower()
+        if not ident:
+            return None
         for u in cls.iter_all():
+            u_name = str(getattr(u, "username", "") or "").strip().lower()
+            u_email = str(getattr(u, "email", "") or "").strip().lower()
+            u_phone = str(getattr(u, "phone", "") or "").strip()
             if (
-                u.username.lower() == ident
-                or u.email.lower() == ident
-                or u.phone == ident
+                u_name == ident
+                or u_email == ident
+                or u_phone == ident
             ):
                 return u
         return None
