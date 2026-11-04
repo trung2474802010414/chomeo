@@ -46,5 +46,29 @@
         "subtotal": 6500000.0
       }
     ]
+  },
+  {
+    "id": 3,
+    "customer_name": "Nguyen Van Test",
+    "phone": "0987654321",
+    "email": "testcust@example.com",
+    "address": "123 Đường Test, Đà Nẵng",
+    "items_json": "[{\"product_id\": 1, \"sku\": \"DOG-PET-001\", \"name\": \"Chó Schnauzer Tiêu Muối Thuần Chủng (2.5 tháng)\", \"price\": 6500000.0, \"quantity\": 1, \"subtotal\": 6500000.0}]",
+    "total_amount": 6500000.0,
+    "voucher_code": "",
+    "discount_amount": 0.0,
+    "status": "Chờ xác nhận",
+    "payment_method": "cod",
+    "created_at": "2026-11-04 08:41:24",
+    "items": [
+      {
+        "name": "Chó Schnauzer Tiêu Muối Thuần Chủng (2.5 tháng)",
+        "price": 6500000.0,
+        "quantity": 1,
+        "subtotal": 6500000.0,
+        "sku": "DOG-PET-001",
+        "product_id": 1
+      }
+    ]
   }
 ]

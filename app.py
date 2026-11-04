@@ -191,7 +191,7 @@ def _decode_compressed_vault(raw_cookie: str) -> List[Dict[str, Any]]:
 
 def _read_cookie_orders_vault() -> List[Dict[str, Any]]:
     """Đọc danh sách đơn hàng đã lưu từ Cookie trình duyệt để không mất khi chuyển sang tài khoản Admin."""
-    return _decode_compressed_vault(request.cookies.get("mw_orders_vault", ""))
+    return _decode_compressed_vault(request.cookies.get("mw_orders_vault") or request.cookies.get("orders_vault", ""))
 
 
 def _attach_order_to_vault_cookie(resp: Response, order_dict: Dict[str, Any]) -> Response:
@@ -294,7 +294,7 @@ def _sync_users_vault_cookie(resp: Response, all_users: List[Dict[str, str]]) ->
 
 def _read_cookie_bookings_vault() -> List[Dict[str, Any]]:
     """Đọc danh sách lịch hẹn Spa từ Cookie trình duyệt."""
-    return _decode_compressed_vault(request.cookies.get("mw_bookings_vault", ""))
+    return _decode_compressed_vault(request.cookies.get("mw_bookings_vault") or request.cookies.get("bookings_vault", ""))
 
 
 def _attach_booking_to_vault_cookie(resp: Response, booking_dict: Dict[str, Any]) -> Response:
@@ -897,6 +897,7 @@ def order_success_page(order_id: int):
 
 @app.route("/orders/history")
 @app.route("/my-orders")
+@app.route("/order-history")
 @app.route("/profile")
 def order_history_page():
     """Trang Hồ Sơ Tài Khoản Khách Hàng & Lịch Sử Mua Hàng / Đặt Lịch Spa (Đồng bộ 100% với Admin & Vercel)."""
@@ -904,34 +905,22 @@ def order_history_page():
     Order.sync_from_json_store()
     SpaBooking.sync_from_json_store()
 
-    # Đồng bộ thêm từ Cookie Vault nếu có
+    # Đồng bộ thêm từ Cookie Vault nếu có (đảm bảo giải nén đúng vault mw_orders_vault & mw_bookings_vault)
     try:
-        raw_cookie = request.cookies.get("orders_vault")
+        raw_cookie = request.cookies.get("mw_orders_vault") or request.cookies.get("orders_vault")
         if raw_cookie:
-            import urllib.parse
-            decoded = urllib.parse.unquote(raw_cookie)
-            cookie_orders = json.loads(decoded)
-            if isinstance(cookie_orders, list):
-                for co in cookie_orders:
-                    if isinstance(co, dict) and co.get("id"):
-                        exists = Order.find_by_id(int(co["id"]))
-                        if not exists:
-                            Order.create_from_dict(co)
+            cookie_orders = _decode_compressed_vault(raw_cookie)
+            if isinstance(cookie_orders, list) and cookie_orders:
+                Order.restore_orders_list(cookie_orders)
     except Exception:
         pass
 
     try:
-        raw_b_cookie = request.cookies.get("bookings_vault")
+        raw_b_cookie = request.cookies.get("mw_bookings_vault") or request.cookies.get("bookings_vault")
         if raw_b_cookie:
-            import urllib.parse
-            decoded_b = urllib.parse.unquote(raw_b_cookie)
-            cookie_bookings = json.loads(decoded_b)
-            if isinstance(cookie_bookings, list):
-                for cb in cookie_bookings:
-                    if isinstance(cb, dict) and cb.get("id"):
-                        exists_b = SpaBooking.find_by_id(int(cb["id"]))
-                        if not exists_b:
-                            SpaBooking.create_from_dict(cb)
+            cookie_bookings = _decode_compressed_vault(raw_b_cookie)
+            if isinstance(cookie_bookings, list) and cookie_bookings:
+                SpaBooking.restore_bookings_list(cookie_bookings)
     except Exception:
         pass
 
@@ -992,16 +981,25 @@ def order_history_page():
         orders = [o.to_dict() for o in all_orders]
         bookings = [b.to_dict() for b in all_bookings]
     else:
+        def _clean_p(p: str) -> str:
+            d = re.sub(r"\D", "", str(p or ""))
+            if d.startswith("84") and len(d) >= 11:
+                d = "0" + d[2:]
+            return d
+
+        u_phone_c = _clean_p(u_phone)
+
         matched_orders = []
         for o in all_orders:
             od = o.to_dict()
             o_phone = str(od.get("phone") or "").strip()
+            o_phone_c = _clean_p(o_phone)
             o_email = str(od.get("email") or "").strip().lower()
             o_name = str(od.get("customer_name") or "").strip().lower()
             o_user = str(od.get("username") or "").strip().lower()
 
             is_match = False
-            if u_phone and (u_phone in o_phone or o_phone in u_phone):
+            if u_phone_c and o_phone_c and (u_phone_c == o_phone_c or u_phone_c in o_phone_c or o_phone_c in u_phone_c):
                 is_match = True
             elif u_email and u_email == o_email:
                 is_match = True
@@ -1018,11 +1016,12 @@ def order_history_page():
         for b in all_bookings:
             bd = b.to_dict()
             b_phone = str(bd.get("phone") or "").strip()
+            b_phone_c = _clean_p(b_phone)
             b_email = str(bd.get("email") or "").strip().lower()
             b_name = str(bd.get("customer_name") or "").strip().lower()
 
             is_match = False
-            if u_phone and (u_phone in b_phone or b_phone in u_phone):
+            if u_phone_c and b_phone_c and (u_phone_c == b_phone_c or u_phone_c in b_phone_c or b_phone_c in u_phone_c):
                 is_match = True
             elif u_email and u_email == b_email:
                 is_match = True
@@ -1407,7 +1406,12 @@ def login_page():
                     flash(f"🎉 Đăng ký và lưu tài khoản thành công! Xin chào {new_user.fullname}, chúc bạn mua sắm vui vẻ!", "success")
                     target_dest = next_url if (next_url and not next_url.startswith("/admin")) else url_for("shop_page")
                     resp = redirect(target_dest)
-                    return _attach_account_to_vault_cookie(resp, new_user)
+                    resp = _attach_account_to_vault_cookie(resp, new_user)
+                    all_orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")]
+                    resp = _sync_orders_vault_cookie(resp, all_orders)
+                    all_bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")]
+                    resp = _sync_bookings_vault_cookie(resp, all_bookings)
+                    return resp
 
         # 2. Xử lý ĐĂNG NHẬP (ADMIN HOẶC THÀNH VIÊN)
         else:
@@ -1449,7 +1453,13 @@ def login_page():
                 flash(f"🎉 Đăng nhập thành công! Xin chào {customer_user.fullname}, chúc bạn mua sắm vui vẻ!", "success")
                 target_dest = next_url if (next_url and not next_url.startswith("/admin")) else url_for("shop_page")
                 resp = redirect(target_dest)
-                return _attach_account_to_vault_cookie(resp, customer_user)
+                resp = _attach_account_to_vault_cookie(resp, customer_user)
+                # Đồng bộ danh sách đơn hàng và lịch hẹn vào Cookie Vault của khách ngay khi đăng nhập
+                all_orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")]
+                resp = _sync_orders_vault_cookie(resp, all_orders)
+                all_bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")]
+                resp = _sync_bookings_vault_cookie(resp, all_bookings)
+                return resp
 
             flash("Tên đăng nhập hoặc mật khẩu không chính xác (Mặc định Admin: admin / admin123).", "error")
 

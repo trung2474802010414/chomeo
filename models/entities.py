@@ -255,44 +255,54 @@ class SpaBooking(BaseModel):
     def restore_bookings_list(cls, bookings: List[Dict[str, Any]]) -> None:
         """Khôi phục danh sách lịch hẹn Spa từ Cookie/JSON vào SQLite mà không tạo trùng."""
         try:
-            existing_map = {
-                (
-                    b.phone.strip(),
-                    b.pet_name.strip(),
-                    b.appointment_date.strip(),
-                    b.appointment_time.strip(),
-                ): b
-                for b in cls.iter_all()
-            }
+            existing_map = {}
+            for b in cls.iter_all():
+                try:
+                    p = str(getattr(b, "phone", "") or "").strip()
+                    n = str(getattr(b, "pet_name", "") or "").strip()
+                    d = str(getattr(b, "appointment_date", "") or "").strip()
+                    t = str(getattr(b, "appointment_time", "") or "").strip()
+                    if p and n and d:
+                        existing_map[(p, n, d, t)] = b
+                    if getattr(b, "id", None):
+                        existing_map[f"id_{b.id}"] = b
+                except Exception:
+                    pass
+
             for bd in bookings:
                 if not isinstance(bd, dict):
                     continue
-                phone = str(bd.get("phone", "")).strip()
-                pet_name = str(bd.get("pet_name", "")).strip()
-                app_date = str(bd.get("appointment_date", "")).strip()
-                app_time = str(bd.get("appointment_time", "")).strip()
+                phone = str(bd.get("phone", "") or "").strip()
+                pet_name = str(bd.get("pet_name", "") or "").strip()
+                app_date = str(bd.get("appointment_date", "") or "").strip()
+                app_time = str(bd.get("appointment_time", "") or "09:00").strip()
                 if not phone or not pet_name or not app_date:
                     continue
                 key = (phone, pet_name, app_date, app_time)
-                status_val = str(bd.get("status", "Chờ xác nhận")).strip()
+                id_key = f"id_{bd.get('id')}" if bd.get("id") else None
+
+                status_val = str(bd.get("status", "Chờ xác nhận") or "Chờ xác nhận").strip()
                 if status_val not in BOOKING_STATUSES:
                     status_val = "Chờ xác nhận"
-                if key in existing_map:
-                    ex = existing_map[key]
-                    if ex.status != status_val:
+
+                if key in existing_map or (id_key and id_key in existing_map):
+                    ex = existing_map.get(key) or existing_map.get(id_key)
+                    if getattr(ex, "status", "Chờ xác nhận") != status_val:
                         ex.status = status_val
-                        super(SpaBooking, ex).save()
+                        ex.save()
                     continue
-                svc = str(bd.get("service_name", "Tắm sấy & Vệ sinh tai móng")).strip()
+
+                svc = str(bd.get("service_name", "Tắm sấy & Vệ sinh tai móng") or "Tắm sấy & Vệ sinh tai móng").strip()
                 if svc not in SPA_SERVICES:
                     svc = "Tắm sấy & Vệ sinh tai móng"
-                p_type = str(bd.get("pet_type", "Mèo")).strip()
+                p_type = str(bd.get("pet_type", "Mèo") or "Mèo").strip()
                 if p_type not in ("Chó", "Mèo"):
                     p_type = "Mèo"
+
                 new_b = cls(
-                    customer_name=str(bd.get("customer_name", "Khách hàng")).strip(),
+                    customer_name=str(bd.get("customer_name", "Khách hàng") or "Khách hàng").strip(),
                     phone=phone,
-                    email=str(bd.get("email", "")).strip(),
+                    email=str(bd.get("email", "") or "").strip(),
                     pet_name=pet_name,
                     pet_type=p_type,
                     pet_weight_kg=max(0.2, float(bd.get("pet_weight_kg", 3.5) or 3.5)),
@@ -301,16 +311,19 @@ class SpaBooking(BaseModel):
                     appointment_time=app_time or "09:00",
                     total_price=float(bd.get("total_price", 150000.0) or 150000.0),
                     status=status_val,
-                    note=str(bd.get("note", "")).strip(),
+                    note=str(bd.get("note", "") or "").strip(),
                     created_at=str(
-                        bd.get("created_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                        bd.get("created_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S")) or ""
                     ),
                 )
-                super(SpaBooking, new_b).save()
+                if bd.get("id"):
+                    new_b.id = int(bd["id"])
+                new_b.save()
                 existing_map[key] = new_b
+                if bd.get("id"):
+                    existing_map[f"id_{bd['id']}"] = new_b
         except Exception:
             pass
-
 
 class Order(BaseModel):
     __tablename__ = "orders"
@@ -418,15 +431,60 @@ class Order(BaseModel):
 
     @classmethod
     def sync_all_to_json_file(cls) -> List[Dict[str, Any]]:
-        """Đồng bộ toàn bộ danh sách đơn hàng hiện tại trong SQLite xuống file JSON."""
-        all_orders = [o.to_dict() for o in cls.iter_all(order_by="id ASC")]
+        """Đồng bộ toàn bộ danh sách đơn hàng hiện tại trong SQLite xuống file JSON (gộp thông minh, không ghi đè mất đơn cũ)."""
+        existing_records = []
+        if os.path.exists(ORDERS_STORE_PATH):
+            try:
+                with open(ORDERS_STORE_PATH, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                    if isinstance(loaded, list):
+                        existing_records = loaded
+            except Exception:
+                pass
+
+        merged_map = {}
+        for r in existing_records:
+            if isinstance(r, dict):
+                k = (
+                    str(r.get("phone", "")).strip(),
+                    str(r.get("created_at", "")).strip(),
+                    round(float(r.get("total_amount", 0) or 0), 0),
+                )
+                if k[0] and k[1]:
+                    merged_map[k] = r
+                if r.get("id"):
+                    merged_map[f"id_{r['id']}"] = r
+
+        for o in [x.to_dict() for x in cls.iter_all(order_by="id ASC")]:
+            k = (
+                str(o.get("phone", "")).strip(),
+                str(o.get("created_at", "")).strip(),
+                round(float(o.get("total_amount", 0) or 0), 0),
+            )
+            if k[0] and k[1]:
+                merged_map[k] = o
+            if o.get("id"):
+                merged_map[f"id_{o['id']}"] = o
+
+        all_items = []
+        seen_keys = set()
+        for v in merged_map.values():
+            vk = (
+                str(v.get("phone", "")).strip(),
+                str(v.get("created_at", "")).strip(),
+                round(float(v.get("total_amount", 0) or 0), 0),
+            )
+            if vk not in seen_keys:
+                seen_keys.add(vk)
+                all_items.append(v)
+
         try:
             os.makedirs(os.path.dirname(ORDERS_STORE_PATH), exist_ok=True)
             with open(ORDERS_STORE_PATH, "w", encoding="utf-8") as f:
-                json.dump(all_orders[-50:], f, ensure_ascii=False, indent=2)
+                json.dump(all_items[-100:], f, ensure_ascii=False, indent=2)
         except Exception:
             pass
-        return all_orders
+        return all_items
 
     @classmethod
     def sync_from_json_store(cls) -> None:
@@ -443,37 +501,53 @@ class Order(BaseModel):
 
     @classmethod
     def restore_orders_list(cls, orders: List[Dict[str, Any]]) -> None:
-        """Khôi phục danh sách đơn hàng từ Cookie/JSON vào SQLite để Admin luôn nhìn thấy đầy đủ đơn hàng."""
+        """Khôi phục danh sách đơn hàng từ Cookie/JSON vào SQLite để Admin và Khách luôn nhìn thấy đầy đủ đơn hàng."""
         try:
-            existing_map = {
-                (
-                    o.phone.strip(),
-                    o.created_at.strip(),
-                    round(float(o.total_amount), 0),
-                ): o
-                for o in cls.iter_all()
-            }
-            existing_emails_created = {e.created_at.strip() for e in EmailLog.iter_all()}
+            existing_map = {}
+            for o in cls.iter_all():
+                try:
+                    p = str(getattr(o, "phone", "") or "").strip()
+                    c = str(getattr(o, "created_at", "") or "").strip()
+                    t = round(float(getattr(o, "total_amount", 0) or 0), 0)
+                    if p and c:
+                        existing_map[(p, c, t)] = o
+                    if getattr(o, "id", None):
+                        existing_map[f"id_{o.id}"] = o
+                except Exception:
+                    pass
+
+            existing_emails_created = set()
+            try:
+                for e in EmailLog.iter_all():
+                    c = str(getattr(e, "created_at", "") or "").strip()
+                    if c:
+                        existing_emails_created.add(c)
+            except Exception:
+                pass
+
             for od in orders:
                 if not isinstance(od, dict):
                     continue
-                phone = str(od.get("phone", "")).strip()
+                phone = str(od.get("phone", "") or "").strip()
                 created_at = str(
-                    od.get("created_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                    od.get("created_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S")) or ""
                 ).strip()
                 total_amt = float(od.get("total_amount", 0) or 0)
                 if not phone or total_amt <= 0:
                     continue
                 key = (phone, created_at, round(total_amt, 0))
+                id_key = f"id_{od.get('id')}" if od.get("id") else None
+
                 status_val = str(od.get("status", "Chờ xác nhận") or "Chờ xác nhận").strip()
                 if status_val not in ORDER_STATUSES:
                     status_val = "Chờ xác nhận"
                 pay_val = str(od.get("payment_method", "cod") or "cod").strip()
-                if key in existing_map:
-                    ex = existing_map[key]
+
+                if key in existing_map or (id_key and id_key in existing_map):
+                    ex = existing_map.get(key) or existing_map.get(id_key)
                     if getattr(ex, "status", "Chờ xác nhận") != status_val:
                         ex.status = status_val
-                        super(Order, ex).save()
+                        ex.save()
                     continue
 
                 raw_items = od.get("items_json", "")
@@ -483,10 +557,10 @@ class Order(BaseModel):
                     raw_items = "[]"
 
                 new_o = cls(
-                    customer_name=str(od.get("customer_name", "Khách hàng")).strip(),
+                    customer_name=str(od.get("customer_name", "Khách hàng") or "Khách hàng").strip(),
                     phone=phone,
-                    email=str(od.get("email", "")).strip(),
-                    address=str(od.get("address", "Đà Nẵng")).strip(),
+                    email=str(od.get("email", "") or "").strip(),
+                    address=str(od.get("address", "Đà Nẵng") or "Đà Nẵng").strip(),
                     items_json=str(raw_items),
                     total_amount=total_amt,
                     voucher_code=str(od.get("voucher_code", "") or "").strip(),
@@ -495,10 +569,13 @@ class Order(BaseModel):
                     payment_method=pay_val,
                     created_at=created_at,
                 )
-                super(Order, new_o).save()
+                if od.get("id"):
+                    new_o.id = int(od["id"])
+                new_o.save()
                 existing_map[key] = new_o
+                if od.get("id"):
+                    existing_map[f"id_{od['id']}"] = new_o
 
-                # Đồng bộ luôn bản ghi thông báo Email đơn hàng vào Hộp thư Admin nếu chưa có
                 if created_at not in existing_emails_created:
                     admin_mail = os.environ.get(
                         "PETSHOP_ADMIN_NOTIFY_EMAIL", "admin@meowwoof.vn"
@@ -518,7 +595,6 @@ class Order(BaseModel):
                     existing_emails_created.add(created_at)
         except Exception:
             pass
-
 
 class EmailLog(BaseModel):
     __tablename__ = "email_logs"

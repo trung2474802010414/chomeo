@@ -171,26 +171,35 @@ class BaseModel(metaclass=ModelMeta):
             db.execute(sql)
 
     def save(self) -> "BaseModel":
-        """Lưu đối tượng vào SQLite (INSERT nếu chưa có id, UPDATE nếu đã có id)."""
+        """Lưu đối tượng vào SQLite (INSERT nếu chưa có id hoặc id chưa tồn tại trong DB, UPDATE nếu id đã có trong DB)."""
         pk_value = getattr(self, "id", None)
-        if pk_value is None:
-            non_pk_fields = [name for name, f in self._fields.items() if not f.primary_key]
-            placeholders = ", ".join("?" for _ in non_pk_fields)
-            columns = ", ".join(non_pk_fields)
-            values = tuple(getattr(self, name) for name in non_pk_fields)
+        with DatabaseSession() as db:
+            if pk_value is None:
+                non_pk_fields = [name for name, f in self._fields.items() if not f.primary_key]
+                placeholders = ", ".join("?" for _ in non_pk_fields)
+                columns = ", ".join(non_pk_fields)
+                values = tuple(getattr(self, name) for name in non_pk_fields)
 
-            sql = f"INSERT INTO {self._table_name} ({columns}) VALUES ({placeholders})"
-            with DatabaseSession() as db:
+                sql = f"INSERT INTO {self._table_name} ({columns}) VALUES ({placeholders})"
                 cursor = db.execute(sql, values)
                 setattr(self, "id", cursor.lastrowid)
-        else:
-            non_pk_fields = [name for name, f in self._fields.items() if not f.primary_key]
-            set_clause = ", ".join(f"{name} = ?" for name in non_pk_fields)
-            values = tuple(getattr(self, name) for name in non_pk_fields) + (pk_value,)
+            else:
+                row = db.execute(f"SELECT id FROM {self._table_name} WHERE id = ?", (pk_value,)).fetchone()
+                if row:
+                    non_pk_fields = [name for name, f in self._fields.items() if not f.primary_key]
+                    set_clause = ", ".join(f"{name} = ?" for name in non_pk_fields)
+                    values = tuple(getattr(self, name) for name in non_pk_fields) + (pk_value,)
 
-            sql = f"UPDATE {self._table_name} SET {set_clause} WHERE id = ?"
-            with DatabaseSession() as db:
-                db.execute(sql, values)
+                    sql = f"UPDATE {self._table_name} SET {set_clause} WHERE id = ?"
+                    db.execute(sql, values)
+                else:
+                    fields = [name for name in self._fields.keys() if getattr(self, name, None) is not None]
+                    placeholders = ", ".join("?" for _ in fields)
+                    columns = ", ".join(fields)
+                    values = tuple(getattr(self, name) for name in fields)
+
+                    sql = f"INSERT INTO {self._table_name} ({columns}) VALUES ({placeholders})"
+                    db.execute(sql, values)
         return self
 
     @classmethod

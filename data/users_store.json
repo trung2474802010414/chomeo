@@ -1,0 +1,56 @@
+[
+  {
+    "username": "testcust",
+    "fullname": "Nguyen Van Test",
+    "email": "testcust@example.com",
+    "phone": "0987654321",
+    "password_hash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+    "role": "customer",
+    "created_at": "2026-11-04 08:41:24"
+  },
+  {
+    "username": "testcust1",
+    "fullname": "Nguyen Van Test",
+    "email": "testcust1@example.com",
+    "phone": "0987654321",
+    "password_hash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+    "role": "customer",
+    "created_at": "2026-11-04 08:43:21"
+  },
+  {
+    "username": "testcust2",
+    "fullname": "Nguyen Van Test",
+    "email": "testcust2@example.com",
+    "phone": "0987654322",
+    "password_hash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+    "role": "customer",
+    "created_at": "2026-11-04 08:43:32"
+  },
+  {
+    "username": "testcust3",
+    "fullname": "Nguyen Van Test",
+    "email": "testcust3@example.com",
+    "phone": "0987654323",
+    "password_hash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+    "role": "customer",
+    "created_at": "2026-11-04 08:43:42"
+  },
+  {
+    "username": "cust_1793756647",
+    "fullname": "Nguyen Van Test",
+    "email": "cust_1793756647@example.com",
+    "phone": "0993756647",
+    "password_hash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+    "role": "customer",
+    "created_at": "2026-11-04 08:44:07"
+  },
+  {
+    "username": "cust_1793756666",
+    "fullname": "Nguyen Van Test",
+    "email": "cust_1793756666@example.com",
+    "phone": "0993756666",
+    "password_hash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+    "role": "customer",
+    "created_at": "2026-11-04 08:44:26"
+  }
+]
