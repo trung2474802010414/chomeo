@@ -1087,6 +1087,82 @@ def order_history_page():
         next_tier_needed = max(0, 1000000 - total_spent)
         tier_progress = min(100, int((total_spent / 1000000) * 100))
 
+    if total_spent >= 15000000:
+        overall_milestone_pct = 100
+    elif total_spent >= 5000000:
+        overall_milestone_pct = round(66 + ((total_spent - 5000000) / 10000000) * 34, 1)
+    elif total_spent >= 1000000:
+        overall_milestone_pct = round(33 + ((total_spent - 1000000) / 4000000) * 33, 1)
+    else:
+        overall_milestone_pct = round(max(0.0, (total_spent / 1000000) * 33), 1)
+
+    vip_milestones = [
+        {
+            "tier_name": "🌱 Thành Viên Mới",
+            "tier_short": "Mới",
+            "tier_icon": "🌱",
+            "threshold": 0,
+            "threshold_text": "0 đ",
+            "threshold_short": "0 đ",
+            "discount_pct": 0,
+            "discount_text": "Gia nhập hệ thống & Tư vấn dinh dưỡng miễn phí",
+            "color": "#047857",
+            "bg": "#ecfdf5",
+            "border": "#a7f3d0",
+            "is_current": (total_spent < 1000000),
+            "is_unlocked": True,
+            "needed_amount": 0,
+        },
+        {
+            "tier_name": "🥈 Hạng Bạc (Silver)",
+            "tier_short": "Bạc",
+            "tier_icon": "🥈",
+            "threshold": 1000000,
+            "threshold_text": "1.000.000 đ",
+            "threshold_short": "1 Tr",
+            "discount_pct": 5,
+            "discount_text": "Giảm 5% dịch vụ Tắm sấy Spa & Phụ kiện",
+            "color": "#0369a1",
+            "bg": "#e0f2fe",
+            "border": "#bae6fd",
+            "is_current": (1000000 <= total_spent < 5000000),
+            "is_unlocked": (total_spent >= 1000000),
+            "needed_amount": max(0, 1000000 - total_spent),
+        },
+        {
+            "tier_name": "🥇 Hạng Vàng (Gold)",
+            "tier_short": "Vàng",
+            "tier_icon": "🥇",
+            "threshold": 5000000,
+            "threshold_text": "5.000.000 đ",
+            "threshold_short": "5 Tr",
+            "discount_pct": 10,
+            "discount_text": "Giảm 10% dịch vụ Cắt tỉa Spa & Phụ kiện",
+            "color": "#b45309",
+            "bg": "#fef3c7",
+            "border": "#fcd34d",
+            "is_current": (5000000 <= total_spent < 15000000),
+            "is_unlocked": (total_spent >= 5000000),
+            "needed_amount": max(0, 5000000 - total_spent),
+        },
+        {
+            "tier_name": "💎 Hạng Kim Cương (Diamond)",
+            "tier_short": "Kim Cương",
+            "tier_icon": "💎",
+            "threshold": 15000000,
+            "threshold_text": "15.000.000 đ",
+            "threshold_short": "15 Tr",
+            "discount_pct": 15,
+            "discount_text": "Giảm 15% tất cả đơn hàng & dịch vụ Spa + Đưa đón tận nhà",
+            "color": "#6d28d9",
+            "bg": "#f5f3ff",
+            "border": "#ddd6fe",
+            "is_current": (total_spent >= 15000000),
+            "is_unlocked": (total_spent >= 15000000),
+            "needed_amount": max(0, 15000000 - total_spent),
+        },
+    ]
+
     return render_template(
         "order_history.html",
         active_page="orders",
@@ -1102,6 +1178,8 @@ def order_history_page():
         next_tier_name=next_tier_name,
         next_tier_needed=next_tier_needed,
         tier_progress=tier_progress,
+        overall_milestone_pct=overall_milestone_pct,
+        vip_milestones=vip_milestones,
         phone=profile_data["phone"],
         orders=orders,
         bookings=bookings,

@@ -136,19 +136,162 @@
             </div>
         </div>
         
-        <!-- Thanh tiến trình thăng hạng -->
+        <!-- Thanh tiến trình thăng hạng có vạch mốc tiền phân đoạn -->
         <div style="margin-top:12px; padding-top:10px; border-top:1px dashed #fed7aa;">
             <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#6e5444; font-weight:700; margin-bottom:5px;">
-                <span>Tiến trình thăng hạng:</span>
+                <span>Tiến trình tích lũy:</span>
                 {% if next_tier_needed and next_tier_needed > 0 %}
-                <span style="color:#c2410c;">Cần thêm {{ "{:,.0f}".format(next_tier_needed) }} đ lên {{ next_tier_name }}</span>
+                <span style="color:#c2410c; font-weight:800;">Cần thêm {{ "{:,.0f}".format(next_tier_needed) }} đ lên {{ next_tier_name }}</span>
                 {% else %}
-                <span style="color:#047857; font-weight:800;">Đã đạt hạng cao nhất!</span>
+                <span style="color:#047857; font-weight:800;">✓ Đã đạt mốc cao nhất!</span>
                 {% endif %}
             </div>
-            <div style="width:100%; height:8px; background:#f1f5f9; border-radius:99px; overflow:hidden;">
-                <div style="width:{{ tier_progress|default(0) }}%; height:100%; background:linear-gradient(90deg, #fb923c, #ea580c); border-radius:99px;"></div>
+            <div style="width:100%; height:8px; background:#f1f5f9; border-radius:99px; overflow:hidden; position:relative;">
+                <div style="width:{{ overall_milestone_pct|default(tier_progress)|default(0) }}%; height:100%; background:linear-gradient(90deg, #fb923c, #ea580c); border-radius:99px; transition:width 0.4s ease;"></div>
             </div>
+
+            <!-- Các mốc tiền phân đoạn hiển thị trực tiếp dưới thanh tiến trình -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-top:6px; font-size:10.5px; font-weight:700;">
+                <div style="text-align:left; color:{% if total_spent >= 0 %}#047857{% else %}#94a3b8{% endif %};">
+                    <div>🌱 0đ</div>
+                    <div style="font-size:9.5px; color:#64748b; font-weight:600;">Mới</div>
+                </div>
+                <div style="text-align:center; color:{% if total_spent >= 1000000 %}#0369a1{% else %}#94a3b8{% endif %};">
+                    <div>🥈 1 Tr</div>
+                    <div style="font-size:9.5px; color:{% if total_spent >= 1000000 %}#0369a1{% else %}#94a3b8{% endif %}; font-weight:600;">-5%</div>
+                </div>
+                <div style="text-align:center; color:{% if total_spent >= 5000000 %}#b45309{% else %}#94a3b8{% endif %};">
+                    <div>🥇 5 Tr</div>
+                    <div style="font-size:9.5px; color:{% if total_spent >= 5000000 %}#b45309{% else %}#94a3b8{% endif %}; font-weight:600;">-10%</div>
+                </div>
+                <div style="text-align:right; color:{% if total_spent >= 15000000 %}#6d28d9{% else %}#94a3b8{% endif %};">
+                    <div>💎 15 Tr</div>
+                    <div style="font-size:9.5px; color:{% if total_spent >= 15000000 %}#6d28d9{% else %}#94a3b8{% endif %}; font-weight:600;">-15%</div>
+                </div>
+            </div>
+
+            <!-- Khung 4 mốc tiền nâng hạng nổi bật -->
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-top:10px;">
+                <div style="padding:6px 8px; border-radius:10px; background:{% if total_spent < 1000000 %}#ecfdf5; border:1.5px solid #10b981{% else %}#f8fafc; border:1px solid #e2e8f0{% endif %}; font-size:11px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:800; color:#047857;">🌱 Mới: 0 đ</span>
+                        {% if total_spent < 1000000 %}<span style="font-size:9.5px; background:#10b981; color:#fff; padding:1px 5px; border-radius:4px; font-weight:800;">Hiện tại</span>{% endif %}
+                    </div>
+                    <div style="font-size:10px; color:#64748b; margin-top:2px;">Tích lũy ban đầu</div>
+                </div>
+
+                <div style="padding:6px 8px; border-radius:10px; background:{% if total_spent >= 1000000 and total_spent < 5000000 %}#e0f2fe; border:1.5px solid #0284c7{% else %}#f8fafc; border:1px solid #e2e8f0{% endif %}; font-size:11px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:800; color:#0369a1;">🥈 Bạc: 1.000.000 đ</span>
+                        {% if total_spent >= 1000000 and total_spent < 5000000 %}<span style="font-size:9.5px; background:#0284c7; color:#fff; padding:1px 5px; border-radius:4px; font-weight:800;">Hiện tại</span>{% endif %}
+                    </div>
+                    <div style="font-size:10px; color:#0369a1; font-weight:700; margin-top:2px;">Giảm 5% Tắm &amp; Phụ kiện</div>
+                </div>
+
+                <div style="padding:6px 8px; border-radius:10px; background:{% if total_spent >= 5000000 and total_spent < 15000000 %}#fef3c7; border:1.5px solid #d97706{% else %}#f8fafc; border:1px solid #e2e8f0{% endif %}; font-size:11px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:800; color:#b45309;">🥇 Vàng: 5.000.000 đ</span>
+                        {% if total_spent >= 5000000 and total_spent < 15000000 %}<span style="font-size:9.5px; background:#d97706; color:#fff; padding:1px 5px; border-radius:4px; font-weight:800;">Hiện tại</span>{% endif %}
+                    </div>
+                    <div style="font-size:10px; color:#b45309; font-weight:700; margin-top:2px;">Giảm 10% Cắt tỉa &amp; Đồ dùng</div>
+                </div>
+
+                <div style="padding:6px 8px; border-radius:10px; background:{% if total_spent >= 15000000 %}#f5f3ff; border:1.5px solid #7c3aed{% else %}#f8fafc; border:1px solid #e2e8f0{% endif %}; font-size:11px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:800; color:#6d28d9;">💎 Kim Cương: 15.000.000 đ</span>
+                        {% if total_spent >= 15000000 %}<span style="font-size:9.5px; background:#7c3aed; color:#fff; padding:1px 5px; border-radius:4px; font-weight:800;">Hiện tại</span>{% endif %}
+                    </div>
+                    <div style="font-size:10px; color:#6d28d9; font-weight:700; margin-top:2px;">Giảm 15% Tất cả đơn &amp; Spa</div>
+                </div>
+            </div>
+
+            <div style="margin-top:10px; text-align:center;">
+                <a href="#vipPolicySection" style="font-size:11.5px; color:#ea580c; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                    <span>📜 Xem bảng quyền lợi &amp; mốc tiền chi tiết</span> &darr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     PHẦN 2B: BẢNG QUY ĐỊNH CHI TIẾT CÁC MỐC TIỀN & ĐẶC QUYỀN HẠNG THÀNH VIÊN VIP
+     ========================================================================= -->
+<div id="vipPolicySection" class="card" style="margin-bottom:26px; padding:22px 24px; background:#ffffff; border:1.5px solid #fed7aa; box-shadow:0 8px 24px rgba(251,146,60,0.06); border-radius:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; border-bottom:1px solid #fed7aa; padding-bottom:14px;">
+        <div>
+            <div style="display:inline-flex; align-items:center; gap:8px;">
+                <span style="font-size:22px;">👑</span>
+                <h3 style="margin:0; font-size:18px; font-weight:900; color:#2b180d;">Bảng Quy Định Các Mốc Tiền &amp; Đặc Quyền Thăng Hạng Thành Viên</h3>
+            </div>
+            <p style="margin:4px 0 0; color:#6e5444; font-size:13px;">
+                Hệ thống tự động cộng dồn toàn bộ chi tiêu từ Đơn Mua Hàng &amp; Dịch Vụ Spa để xét thăng hạng tức thì.
+            </p>
+        </div>
+        <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:99px; background:#fff7ed; border:1px solid #fed7aa; font-size:13px; font-weight:800; color:#c2410c;">
+            <span>💰 Tổng tích lũy của bạn:</span>
+            <span style="color:#047857; font-size:15px;">{{ "{:,.0f}".format((total_spent or 0)|float) }} đ</span>
+        </div>
+    </div>
+
+    <!-- Grid 4 Mốc tiền lớn chi tiết -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:14px;">
+        {% for m in vip_milestones %}
+        <div style="background:{% if m.is_current %}{{ m.bg }}{% else %}#ffffff{% endif %}; border:{% if m.is_current %}2px solid {{ m.color }}{% elif m.is_unlocked %}1.5px solid #a7f3d0{% else %}1.5px solid #fed7aa{% endif %}; border-radius:16px; padding:18px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:{% if m.is_current %}0 6px 20px rgba(0,0,0,0.06){% else %}none{% endif %};">
+            <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span style="font-size:24px;">{{ m.tier_icon }}</span>
+                    {% if m.is_current %}
+                    <span style="background:{{ m.color }}; color:#ffffff; font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px;">
+                        ⭐ Hạng Hiện Tại
+                    </span>
+                    {% elif m.is_unlocked %}
+                    <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px;">
+                        ✓ Đã Mở Khóa
+                    </span>
+                    {% else %}
+                    <span style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px;">
+                        🔒 Cần Thêm {{ "{:,.0f}".format(m.needed_amount) }} đ
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div style="font-size:17px; font-weight:900; color:{{ m.color }}; margin-bottom:4px;">
+                    {{ m.tier_name }}
+                </div>
+                
+                <div style="font-size:12px; color:#6e5444; margin-bottom:12px;">
+                    Mốc chi tiêu: <strong style="color:#2b180d; font-size:14px;">{{ m.threshold_text }}</strong>
+                </div>
+
+                <div style="background:#ffffff; border:1px solid {% if m.is_current %}{{ m.border }}{% else %}#fed7aa{% endif %}; border-radius:12px; padding:12px; margin-bottom:12px;">
+                    <div style="font-size:11.5px; font-weight:800; color:#2b180d; margin-bottom:4px;">🎁 Quyền lợi áp dụng:</div>
+                    <div style="font-size:12.5px; color:{% if m.discount_pct > 0 %}#ea580c{% else %}#64748b{% endif %}; font-weight:700;">
+                        {{ m.discount_text }}
+                    </div>
+                </div>
+            </div>
+
+            <div style="font-size:11px; color:#64748b; padding-top:8px; border-top:1px dashed #fed7aa; display:flex; justify-content:space-between; align-items:center;">
+                <span>Chiết khấu tự động</span>
+                <strong style="color:{{ m.color }}; font-size:13px;">{% if m.discount_pct > 0 %}-{{ m.discount_pct }}%{% else %}0%{% endif %}</strong>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Lời nhắc mua sắm để thăng hạng -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:18px; padding-top:14px; border-top:1px dashed #fed7aa;">
+        <div style="font-size:12.5px; color:#6e5444;">
+            💡 <strong>Mẹo tích lũy:</strong> Mọi đơn mua thú cưng, phụ kiện thức ăn tại Cửa hàng hoặc đặt lịch Grooming Spa đều được cộng dồn 100% vào tài khoản của bạn.
+        </div>
+        <div style="display:flex; gap:10px;">
+            <a href="{{ url_for('shop_page') }}" class="btn btn-primary btn-sm" style="font-weight:800; padding:8px 16px;">
+                🐾 Mua Sắm Ngay
+            </a>
+            <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-sm" style="font-weight:800; padding:8px 16px;">
+                🛁 Đặt Lịch Spa
+            </a>
         </div>
     </div>
 </div>
