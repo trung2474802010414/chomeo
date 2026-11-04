@@ -1061,7 +1061,7 @@
                             </div>
                         </div>
                         <div class="kpi-value" style="color:#b45309;">
-                            {{ "{:,.0f}".format(((stats.order_revenue / (orders|length or 0)|float)) if orders else 0) }} đ
+                            {{ "{:,.0f}".format(((stats.order_revenue or 0) / (orders|length if orders else 1))|float) }} đ
                         </div>
                         <div class="kpi-sub">Hiệu suất giỏ hàng trung bình (AOV)</div>
                     </div>
@@ -1151,7 +1151,7 @@
                             <div style="background:#fffbf8; border:1px solid #fae4d4; border-radius:16px; padding:16px 18px; display:flex; flex-direction:column; justify-content:space-between; gap:12px;">
                                 <div style="display:flex; align-items:center; gap:14px;">
                                     <div style="width:48px; height:48px; border-radius:14px; background:linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color:#2b180d; font-weight:900; font-size:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 6px 16px rgba(236,72,153,0.3);">
-                                        {{ (o.customer_name[:1] or 'K')|upper }}
+                                        {{ (((o.customer_name or 'K')[:1])|upper) }}
                                     </div>
                                     <div style="min-width:0; flex:1;">
                                         <div style="font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight:800; letter-spacing:0.4px;">Người nhận hàng</div>
@@ -1182,12 +1182,12 @@
                                 <div>
                                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                         <span style="font-size:11.5px; color:#ea580c; text-transform:uppercase; font-weight:800; letter-spacing:0.4px;">
-                                            🛍️ Danh sách sản phẩm đã đặt ({{ o['items']|length }} mặt hàng)
+                                            🛍️ Danh sách sản phẩm đã đặt ({{ (o['items'] if (o['items'] is defined and o['items'] is not none and o['items'] is not callable) else [])|length }} mặt hàng)
                                         </span>
                                         <span style="font-size:12px; color:#94a3b8;">Đơn giá &times; Số lượng</span>
                                     </div>
                                     <div style="display:flex; flex-direction:column; gap:8px;">
-                                        {% for item in o['items'] %}
+                                        {% for item in ((o['items'] if (o['items'] is defined and o['items'] is not none and o['items'] is not callable) else []) or []) %}
                                         <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 14px; border-radius:12px; background:#ffffff; border:1px solid #fed7aa; flex-wrap:wrap;">
                                             <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:200px;">
                                                 <span style="width:32px; height:32px; border-radius:8px; background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.4); display:inline-flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;">🐾</span>
@@ -1204,7 +1204,7 @@
                                                     &times; {{ item.quantity }}
                                                 </span>
                                                 <strong style="color:#047857; font-size:14.5px; min-width:95px; text-align:right;">
-                                                    {{ "{:,.0f}".format((item.subtotal|default(item.price * item.quantity or 0)|float)) }} đ
+                                                    {{ "{:,.0f}".format((item.subtotal or ((item.price or 0) * (item.quantity or 1)) or 0)|float) }} đ
                                                 </strong>
                                             </div>
                                         </div>
@@ -1556,7 +1556,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                         <div style="display:flex; flex-direction:column; gap:4px;">
                                             <code style="color:#0284c7; font-weight:800; font-size:13px;">@{{ c.username or 'khach' }}</code>
                                             {% if c.created_at %}
-                                            <span style="font-size:11px; color:#94a3b8;">📅 ĐK: {{ c.created_at[:10] }}</span>
+                                            <span style="font-size:11px; color:#94a3b8;">📅 ĐK: {{ (c.created_at or "")[:10] }}</span>
                                             {% else %}
                                             <span style="font-size:11px; color:#b45309;">Khách đặt vãng lai</span>
                                             {% endif %}
@@ -1565,7 +1565,7 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                     <td>
                                         <div style="display:flex; align-items:center; gap:10px;">
                                             <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #6366f1, #ec4899); color:#fff; font-weight:900; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                                {{ (c.name[:1] or 'K')|upper }}
+                                                {{ (((c.name or 'K')[:1])|upper) }}
                                             </div>
                                             <div>
                                                 <strong style="color:#2b180d; font-size:14px;">{{ c.name }}</strong>

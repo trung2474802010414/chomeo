@@ -1514,11 +1514,31 @@ def admin_page():
     stats = compute_dashboard_stats(start_date=start_date, end_date=end_date)
     if admin_tab == "orders":
         Order.sync_from_json_store()
+        try:
+            raw_cookie = request.cookies.get("orders_vault")
+            if raw_cookie:
+                import urllib.parse
+                decoded = urllib.parse.unquote(raw_cookie)
+                cookie_orders = json.loads(decoded)
+                if isinstance(cookie_orders, list):
+                    for co in cookie_orders:
+                        if isinstance(co, dict) and co.get("id"):
+                            exists = Order.find_by_id(int(co["id"]))
+                            if not exists:
+                                Order.create_from_dict(co)
+        except Exception:
+            pass
     if admin_tab == "bookings":
         SpaBooking.sync_from_json_store()
     products = [p.to_dict() for p in Product.iter_all(order_by="id DESC")] if admin_tab == "products" else []
     bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")] if admin_tab == "bookings" else []
-    orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")] if admin_tab == "orders" else []
+    orders = []
+    if admin_tab == "orders":
+        for o in Order.iter_all(order_by="id DESC"):
+            od = o.to_dict()
+            if not isinstance(od.get("items"), list):
+                od["items"] = []
+            orders.append(od)
     email_logs = [e.to_dict() for e in EmailLog.iter_all(order_by="id DESC")] if admin_tab == "emails" else []
     xml_preview = export_products_to_xml() if admin_tab == "import_export" else ""
 

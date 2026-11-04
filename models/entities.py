@@ -149,6 +149,22 @@ class SpaBooking(BaseModel):
             multiplier = 1.0
         return round(base_price * multiplier, 0)
 
+    def to_dict(self) -> Dict[str, Any]:
+        data = super().to_dict()
+        data["customer_name"] = str(data.get("customer_name") or "Khách hàng")
+        data["phone"] = str(data.get("phone") or "0905123456")
+        data["email"] = str(data.get("email") or "")
+        data["pet_name"] = str(data.get("pet_name") or "Bé cưng")
+        data["pet_type"] = str(data.get("pet_type") or "Mèo")
+        data["pet_weight_kg"] = float(data.get("pet_weight_kg") or 3.5)
+        data["service_name"] = str(data.get("service_name") or "Tắm sấy & Vệ sinh tai móng")
+        data["appointment_date"] = str(data.get("appointment_date") or datetime.now().strftime("%Y-%m-%d"))
+        data["appointment_time"] = str(data.get("appointment_time") or "09:30")
+        data["total_price"] = float(data.get("total_price") or 150000.0)
+        data["status"] = str(data.get("status") or "Chờ xác nhận")
+        data["created_at"] = str(data.get("created_at") or datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        return data
+
     def save(self) -> "SpaBooking":
         """Lưu vào SQLite và đồng bộ xuống file JSON bền vững."""
         super().save()
@@ -318,13 +334,44 @@ class Order(BaseModel):
     @property
     def items(self) -> List[Dict[str, Any]]:
         try:
-            return json.loads(self.items_json)
+            val = json.loads(self.items_json)
+            if isinstance(val, list):
+                res = []
+                for item in val:
+                    if isinstance(item, dict):
+                        p_val = float(item.get("price") or 0.0)
+                        q_val = int(item.get("quantity") or 1)
+                        sub_val = float(item.get("subtotal") or (p_val * q_val))
+                        res.append({
+                            "name": str(item.get("name") or "Sản phẩm"),
+                            "price": p_val,
+                            "quantity": q_val,
+                            "subtotal": sub_val,
+                            "sku": str(item.get("sku") or ""),
+                            "product_id": item.get("product_id")
+                        })
+                return res
+            return []
         except Exception:
             return []
 
     def to_dict(self) -> Dict[str, Any]:
         data = super().to_dict()
-        data["items"] = self.items
+        try:
+            it = self.items
+            data["items"] = it if isinstance(it, list) else []
+        except Exception:
+            data["items"] = []
+        data["customer_name"] = str(data.get("customer_name") or "Khách hàng")
+        data["phone"] = str(data.get("phone") or "0905123456")
+        data["email"] = str(data.get("email") or "")
+        data["address"] = str(data.get("address") or "")
+        data["total_amount"] = float(data.get("total_amount") or 0.0)
+        data["discount_amount"] = float(data.get("discount_amount") or 0.0)
+        data["status"] = str(data.get("status") or "Chờ xác nhận")
+        data["payment_method"] = str(data.get("payment_method") or "COD")
+        data["voucher_code"] = str(data.get("voucher_code") or "")
+        data["created_at"] = str(data.get("created_at") or datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         return data
 
     def save(self) -> "Order":

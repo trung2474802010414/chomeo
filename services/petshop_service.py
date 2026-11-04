@@ -590,8 +590,8 @@ def compute_dashboard_stats(
         | {u.phone for u in all_users if u.phone}
     )
 
-    order_revenue = sum(o.total_amount for o in orders)
-    spa_revenue = sum(b.total_price for b in bookings if b.status != "Đã hủy")
+    order_revenue = sum(float(getattr(o, "total_amount", 0) or 0) for o in orders if getattr(o, "status", "") != "Đã hủy")
+    spa_revenue = sum(float(getattr(b, "total_price", 0) or 0) for b in bookings if getattr(b, "status", "") != "Đã hủy")
     net_revenue = order_revenue + spa_revenue
 
     active_bookings = [b for b in bookings if b.status != "Đã hủy"]
@@ -620,7 +620,7 @@ def compute_dashboard_stats(
             sku = str(item.get("sku", "")).strip()
             name = str(item.get("name", "Sản phẩm")).strip()
             qty = int(item.get("quantity", 1) or 1)
-            sub = float(item.get("subtotal", 0) or (float(item.get("price", 0)) * qty))
+            sub = float(item.get("subtotal", 0) or (float(item.get("price") or 0.0) * qty))
 
             p_obj = prod_by_id.get(pid) or prod_by_sku.get(sku)
             cat_name = p_obj.category if p_obj else "Phụ kiện"
@@ -752,11 +752,7 @@ def compute_dashboard_stats(
         for b_d in u_bookings:
             matched_booking_ids.add(b_d["id"])
 
-        u_spent = sum(
-            o_d["total_amount"] for o_d in u_orders if o_d.get("status") != "Đã hủy"
-        ) + sum(
-            b_d["total_price"] for b_d in u_bookings if b_d.get("status") != "Đã hủy"
-        )
+        u_spent = sum(float(o_d.get("total_amount") or 0) for o_d in u_orders if o_d.get("status") != "Đã hủy") + sum(float(b_d.get("total_price") or 0) for b_d in u_bookings if b_d.get("status") != "Đã hủy")
 
         if u_spent >= 15000000:
             tier = "Kim Cương"
@@ -810,7 +806,7 @@ def compute_dashboard_stats(
         )
         g["orders_count"] += 1
         if getattr(o, "status", "") != "Đã hủy":
-            g["total_spent"] += o.total_amount
+            g["total_spent"] += float(getattr(o, "total_amount", 0) or 0)
         g["orders_history"].append(o.to_dict())
 
     for g_info in guest_map.values():

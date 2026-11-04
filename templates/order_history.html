@@ -40,7 +40,7 @@
         <!-- Avatar + Thông tin định danh -->
         <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
             <div style="width:78px; height:78px; border-radius:22px; background:linear-gradient(135deg, #fb923c 0%, #f43f5e 100%); display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:900; color:#ffffff; box-shadow:0 6px 18px rgba(251,146,60,0.25); border:2px solid #fed7aa;">
-                {{ (prof_name[:1] or 'U')|upper }}
+                {{ (((prof_name or 'U')[:1])|upper) }}
             </div>
             <div>
                 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -240,8 +240,8 @@
 
                         <!-- Danh sách mặt hàng trong đơn -->
                         <div style="background:#fffbf8; border:1px solid #fae4d4; border-radius:12px; padding:12px 14px; margin-bottom:14px;">
-                            <div style="font-size:11.5px; color:#6e5444; text-transform:uppercase; margin-bottom:8px; font-weight:800; letter-spacing:0.4px;">Chi tiết sản phẩm đã mua ({{ o['items']|length }} món):</div>
-                            {% for it in o['items'] %}
+                            <div style="font-size:11.5px; color:#6e5444; text-transform:uppercase; margin-bottom:8px; font-weight:800; letter-spacing:0.4px;">Chi tiết sản phẩm đã mua ({{ (o['items'] if (o['items'] is defined and o['items'] is not none and o['items'] is not callable) else [])|length }} món):</div>
+                            {% for it in ((o['items'] if (o['items'] is defined and o['items'] is not none and o['items'] is not callable) else []) or []) %}
                             <div style="display:flex; justify-content:space-between; align-items:center; font-size:13.5px; color:#2a170b; padding:5px 0; {% if not loop.last %}border-bottom:1px solid rgba(255,255,255,0.05);{% endif %}">
                                 <div>
                                     <span style="color:#f472b6; font-weight:800;">&bull;</span>
@@ -291,7 +291,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #fed7aa; padding-bottom:10px; margin-bottom:12px;">
                             <div>
                                 <strong style="color:#2a170b; font-size:16px;">Lịch Spa #SPA{{ b.id }}</strong>
-                                <div style="font-size:12px; color:#6e5444; margin-top:2px;">Ngày đặt: {{ b.created_at[:10] }}</div>
+                                <div style="font-size:12px; color:#6e5444; margin-top:2px;">Ngày đặt: {{ (b.created_at or "")[:10] }}</div>
                             </div>
                             <span class="badge {% if b.status == 'Đã hoàn tất' %}badge-stock-ok{% elif b.status == 'Đã hủy' %}badge-stock-low{% else %}badge-both{% endif %}" style="font-size:12px;">
                                 {{ b.status }}
