@@ -706,31 +706,36 @@ class User(BaseModel):
     def restore_accounts_list(cls, accounts: List[Dict[str, str]]) -> None:
         """Khôi phục danh sách tài khoản từ Cookie/LocalStorage/JSON vào SQLite và cập nhật thông tin mới nhất."""
         try:
-            existing_map = {u.username.strip().lower(): u for u in cls.iter_all()}
+            existing_map = {str(getattr(u, "username", "") or "").strip().lower().replace("@", ""): u for u in cls.iter_all()}
             for acc in accounts:
                 if not isinstance(acc, dict):
                     continue
                 uname = str(acc.get("username", "")).strip()
+                if uname.startswith("@"):
+                    uname = uname[1:].strip()
                 p_hash = str(acc.get("password_hash", "")).strip()
+                p_raw = str(acc.get("password_raw", "") or acc.get("password", "")).strip()
+                if not p_hash and p_raw:
+                    p_hash = hash_password(p_raw)
                 if not uname or not p_hash:
                     continue
                 u_key = uname.lower()
                 if u_key in existing_map:
                     ex_u = existing_map[u_key]
                     changed = False
-                    new_fn = str(acc.get("fullname", ex_u.fullname)).strip()
-                    new_em = str(acc.get("email", ex_u.email)).strip()
-                    new_ph = str(acc.get("phone", ex_u.phone)).strip()
-                    if new_fn and ex_u.fullname != new_fn:
+                    new_fn = str(acc.get("fullname", getattr(ex_u, "fullname", uname))).strip()
+                    new_em = str(acc.get("email", getattr(ex_u, "email", ""))).strip()
+                    new_ph = str(acc.get("phone", getattr(ex_u, "phone", ""))).strip()
+                    if new_fn and getattr(ex_u, "fullname", "") != new_fn:
                         ex_u.fullname = new_fn
                         changed = True
-                    if new_em and ex_u.email != new_em:
+                    if new_em and getattr(ex_u, "email", "") != new_em:
                         ex_u.email = new_em
                         changed = True
-                    if new_ph and ex_u.phone != new_ph:
+                    if new_ph and getattr(ex_u, "phone", "") != new_ph:
                         ex_u.phone = new_ph
                         changed = True
-                    if p_hash and ex_u.password_hash != p_hash:
+                    if p_hash and getattr(ex_u, "password_hash", "") != p_hash:
                         ex_u.password_hash = p_hash
                         changed = True
                     if changed:
@@ -739,7 +744,7 @@ class User(BaseModel):
                 new_u = cls(
                     username=uname,
                     fullname=str(acc.get("fullname", uname)).strip(),
-                    email=str(acc.get("email", f"{uname}@gmail.com")).strip(),
+                    email=str(acc.get("email", uname + "@gmail.com")).strip(),
                     phone=str(acc.get("phone", "0905123456")).strip(),
                     password_hash=p_hash,
                     role=str(acc.get("role", "customer")).strip() or "customer",
@@ -758,13 +763,29 @@ class User(BaseModel):
 
     @classmethod
     def find_by_identifier(cls, identifier: str) -> Optional["User"]:
-        """Tìm user theo username, email hoặc số điện thoại (an toàn với None và tự động đồng bộ)."""
+        """Tìm user theo username, email hoặc số điện thoại (tự động đồng bộ từ JSON và Cookie Vault)."""
         cls.sync_from_json_store()
+        try:
+            from flask import request, has_request_context
+            if has_request_context():
+                raw_cookie = request.cookies.get("mw_users_vault") or request.cookies.get("users_vault")
+                if raw_cookie:
+                    import urllib.parse
+                    decoded = urllib.parse.unquote(raw_cookie)
+                    c_users = json.loads(decoded)
+                    if isinstance(c_users, list):
+                        cls.restore_accounts_list(c_users)
+        except Exception:
+            pass
         ident = str(identifier or "").strip().lower()
+        if ident.startswith("@"):
+            ident = ident[1:].strip()
         if not ident:
             return None
         for u in cls.iter_all():
             u_name = str(getattr(u, "username", "") or "").strip().lower()
+            if u_name.startswith("@"):
+                u_name = u_name[1:].strip()
             u_email = str(getattr(u, "email", "") or "").strip().lower()
             u_phone = str(getattr(u, "phone", "") or "").strip()
             if (

@@ -132,8 +132,10 @@ def _attach_account_to_vault_cookie(resp: Response, user_obj: User) -> Response:
 
         vault = _read_cookie_accounts_vault()
         u_lower = user_obj.username.strip().lower()
+        if u_lower.startswith("@"):
+            u_lower = u_lower[1:].strip()
         entry = {
-            "username": user_obj.username,
+            "username": user_obj.username.replace("@", "").strip(),
             "fullname": user_obj.fullname,
             "email": user_obj.email,
             "phone": user_obj.phone,
@@ -141,15 +143,16 @@ def _attach_account_to_vault_cookie(resp: Response, user_obj: User) -> Response:
             "role": user_obj.role,
             "created_at": user_obj.created_at,
         }
-        vault = [x for x in vault if str(x.get("username", "")).strip().lower() != u_lower]
+        vault = [x for x in vault if str(x.get("username", "")).strip().lower().replace("@", "") != u_lower]
         vault.append(entry)
-        vault = vault[-10:]
+        vault = vault[-20:]
         encoded = urllib.parse.quote(json.dumps(vault, ensure_ascii=False))
         resp.set_cookie(
             "mw_users_vault",
             encoded,
             max_age=365 * 24 * 3600,
             samesite="Lax",
+            path="/",
             httponly=False,
         )
     except Exception:
@@ -1432,75 +1435,135 @@ def login_page():
     if request.method == "POST":
         auth_action = request.form.get("auth_action", "login").strip()
 
-        # Phục hồi danh sách tài khoản từ client_user_backup (nếu trình duyệt gửi kèm)
+        # Phục hồi danh sách tài khoản từ Cookie Vault & Client Form Backup TRƯỚC MỌI THAO TÁC
+        vault = _read_cookie_accounts_vault()
         backup_raw = request.form.get("client_user_backup", "").strip()
         if backup_raw:
             try:
                 b_data = json.loads(backup_raw)
                 if isinstance(b_data, list):
-                    User.restore_accounts_list(b_data)
+                    vault.extend(b_data)
                 elif isinstance(b_data, dict):
-                    User.restore_accounts_list([b_data])
+                    vault.append(b_data)
             except Exception:
                 pass
+        cur_backup = session.get("current_user_backup")
+        if isinstance(cur_backup, dict):
+            vault.append(cur_backup)
+        if vault:
+            User.restore_accounts_list(vault)
 
         # 1. Xử lý ĐĂNG KÝ THÀNH VIÊN MỚI
         if auth_action == "register":
             fullname = request.form.get("reg_fullname", "").strip()
             username = request.form.get("reg_username", "").strip()
-            email = request.form.get("reg_email", "").strip()
-            phone = request.form.get("reg_phone", "").strip()
+            if username.startswith("@"):
+                username = username[1:].strip()
+            email = request.form.get("reg_email", "").strip().lower()
+            phone_raw = request.form.get("reg_phone", "").strip()
+            phone = re.sub(r"[^\d]", "", phone_raw)
+            if phone.startswith("84") and len(phone) >= 11:
+                phone = "0" + phone[2:]
+            if not phone:
+                phone = "0905123456"
             password = request.form.get("reg_password", "").strip()
             confirm_pass = request.form.get("reg_confirm_password", "").strip()
 
+            reg_err = None
             if len(fullname) < 2 or len(fullname) > 80:
-                flash("Họ và tên phải từ 2 đến 80 ký tự.", "error")
+                reg_err = "Họ và tên phải từ 2 đến 80 ký tự."
             elif len(username) < 3 or len(username) > 40:
-                flash("Tên đăng nhập phải từ 3 đến 40 ký tự.", "error")
+                reg_err = "Tên đăng nhập phải từ 3 đến 40 ký tự."
             elif not re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", email):
-                flash("Địa chỉ Email không đúng định dạng.", "error")
-            elif not re.match(r"^0\d{8,10}$", phone):
-                flash("Số điện thoại phải bắt đầu bằng số 0 và gồm 9–11 chữ số.", "error")
+                reg_err = "Địa chỉ Email không đúng định dạng (VD: ten@gmail.com)."
+            elif len(phone) < 9 or len(phone) > 11:
+                reg_err = "Số điện thoại phải gồm 9–11 chữ số (VD: 0905123456)."
             elif len(password) < 6:
-                flash("Mật khẩu phải có tối thiểu 6 ký tự.", "error")
+                reg_err = "Mật khẩu phải có tối thiểu 6 ký tự."
             elif password != confirm_pass:
-                flash("Mật khẩu xác nhận không khớp.", "error")
-            else:
-                existing = User.find_by_identifier(username) or User.find_by_identifier(email)
-                if existing:
-                    flash(f"Tên đăng nhập '{username}' hoặc Email '{email}' đã được đăng ký. Vui lòng đăng nhập hoặc dùng tên khác.", "error")
-                else:
-                    new_user = User(
-                        username=username,
-                        fullname=fullname,
-                        email=email,
-                        phone=phone,
-                        password_hash=hash_password(password),
-                        role="customer",
-                    )
-                    new_user.save()
-                    # Xóa sạch toàn bộ dữ liệu từ thao tác trước (giỏ hàng cũ, thông tin cũ)
+                reg_err = "Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại."
+
+            if reg_err:
+                flash(reg_err, "error")
+                return render_template(
+                    "login.html",
+                    active_page="login",
+                    form=form,
+                    next_url=next_url,
+                    active_auth_tab="register",
+                    reg_fullname=fullname,
+                    reg_username=username,
+                    reg_email=email,
+                    reg_phone=phone,
+                )
+
+            existing = User.find_by_identifier(username) or User.find_by_identifier(email)
+            if existing:
+                if existing.verify_password(password):
+                    # Tài khoản đã có sẵn và đúng mật khẩu -> Đăng nhập ngay
                     session.clear()
-                    session.permanent = False
+                    session.permanent = True
                     session["just_logged_in"] = True
                     session["customer_logged_in"] = True
-                    session["customer_id"] = new_user.id
-                    session["customer_name"] = new_user.fullname
-                    session["customer_username"] = new_user.username
-                    session["customer_email"] = new_user.email
-                    session["customer_phone"] = new_user.phone
-                    session["user_role"] = "customer"
+                    session["customer_id"] = existing.id
+                    session["customer_name"] = existing.fullname
+                    session["customer_username"] = existing.username
+                    session["customer_email"] = existing.email
+                    session["customer_phone"] = existing.phone
+                    session["user_role"] = existing.role
                     session["cart"] = {}
                     session.modified = True
-                    flash(f"🎉 Đăng ký và lưu tài khoản thành công! Xin chào {new_user.fullname}, chúc bạn mua sắm vui vẻ!", "success")
+                    flash(f"🎉 Bạn đã có tài khoản trên hệ thống! Đăng nhập thành công với {existing.fullname}.", "success")
                     target_dest = next_url if (next_url and not next_url.startswith("/admin")) else url_for("shop_page")
                     resp = redirect(target_dest)
-                    resp = _attach_account_to_vault_cookie(resp, new_user)
-                    all_orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")]
-                    resp = _sync_orders_vault_cookie(resp, all_orders)
-                    all_bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")]
-                    resp = _sync_bookings_vault_cookie(resp, all_bookings)
+                    resp = _attach_account_to_vault_cookie(resp, existing)
                     return resp
+                else:
+                    flash(f"Tên đăng nhập '{username}' hoặc Email '{email}' đã được đăng ký. Vui lòng chọn tên khác hoặc chuyển sang tab Đăng Nhập.", "error")
+                    return render_template(
+                        "login.html",
+                        active_page="login",
+                        form=form,
+                        next_url=next_url,
+                        active_auth_tab="register",
+                        reg_fullname=fullname,
+                        reg_username=username,
+                        reg_email=email,
+                        reg_phone=phone,
+                    )
+
+            new_user = User(
+                username=username,
+                fullname=fullname,
+                email=email,
+                phone=phone,
+                password_hash=hash_password(password),
+                role="customer",
+            )
+            new_user.save()
+
+            session.clear()
+            session.permanent = True
+            session["just_logged_in"] = True
+            session["customer_logged_in"] = True
+            session["customer_id"] = new_user.id
+            session["customer_name"] = new_user.fullname
+            session["customer_username"] = new_user.username
+            session["customer_email"] = new_user.email
+            session["customer_phone"] = new_user.phone
+            session["user_role"] = "customer"
+            session["cart"] = {}
+            session.modified = True
+            flash(f"🎉 Đăng ký thành viên thành công! Xin chào {new_user.fullname}, chúc bạn mua sắm vui vẻ!", "success")
+
+            target_dest = next_url if (next_url and not next_url.startswith("/admin")) else url_for("shop_page")
+            resp = redirect(target_dest)
+            resp = _attach_account_to_vault_cookie(resp, new_user)
+            all_orders = [o.to_dict() for o in Order.iter_all(order_by="id DESC")]
+            resp = _sync_orders_vault_cookie(resp, all_orders)
+            all_bookings = [b.to_dict() for b in SpaBooking.iter_all(order_by="id DESC")]
+            resp = _sync_bookings_vault_cookie(resp, all_bookings)
+            return resp
 
         # 2. Xử lý ĐĂNG NHẬP (ADMIN HOẶC THÀNH VIÊN)
         else:
@@ -1508,6 +1571,8 @@ def login_page():
             expected_pass = os.environ.get("ADMIN_PASSWORD", "admin123")
             admin_mail = get_admin_notification_email()
             input_user = request.form.get("username", "").strip()
+            if input_user.startswith("@"):
+                input_user = input_user[1:].strip()
             input_pass = request.form.get("password", "").strip()
 
             clean_input = input_user.lower()
@@ -1533,8 +1598,19 @@ def login_page():
 
             # B. Kiểm tra tài khoản Thành viên Khách hàng -> Hỗ trợ cả chủ shop Võ Thành Trung
             customer_user = User.find_by_identifier(input_user)
+            if not customer_user and vault:
+                for acc in vault:
+                    if isinstance(acc, dict):
+                        u_v = str(acc.get("username", "")).strip().lower()
+                        if u_v.startswith("@"):
+                            u_v = u_v[1:].strip()
+                        e_v = str(acc.get("email", "")).strip().lower()
+                        p_v = str(acc.get("phone", "")).strip()
+                        if clean_input in (u_v, e_v, p_v):
+                            User.restore_accounts_list([acc])
+                            customer_user = User.find_by_identifier(input_user)
+                            break
 
-            # Cho phép đăng nhập nếu đúng mật khẩu hash HOẶC đúng mật khẩu admin123
             pass_matched = False
             if customer_user:
                 if customer_user.verify_password(input_pass):

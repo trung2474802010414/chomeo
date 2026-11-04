@@ -108,6 +108,27 @@
                 }
             } catch (e) {}
         }
+        {% if customer_logged_in and customer_username %}
+        try {
+            var curU = {
+                username: {{ customer_username|tojson }},
+                fullname: {{ (customer_name or '')|tojson }},
+                email: {{ (customer_email or '')|tojson }},
+                phone: {{ (customer_phone or '')|tojson }},
+                role: {{ (user_role or 'customer')|tojson }}
+            };
+            var v = [];
+            try {
+                var rawV = localStorage.getItem('petshop_users_vault');
+                if (rawV) v = JSON.parse(rawV);
+                if (!Array.isArray(v)) v = [];
+            } catch(e) { v = []; }
+            v = v.filter(function(x) { return x && x.username !== curU.username; });
+            v.push(curU);
+            localStorage.setItem('petshop_users_vault', JSON.stringify(v));
+            localStorage.setItem('petshop_user_backup', JSON.stringify(curU));
+        } catch(e) {}
+        {% endif %}
     })();
     </script>
 </head>
