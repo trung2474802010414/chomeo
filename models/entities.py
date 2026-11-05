@@ -79,6 +79,53 @@ ORDER_STATUSES = ["Chờ xác nhận", "Đang đóng gói", "Đang giao hàng", 
 
 USERS_STORE_PATH = resolve_writable_json_path("users_store.json")
 ORDERS_STORE_PATH = resolve_writable_json_path("orders_store.json")
+DELETED_ORDERS_PATH = resolve_writable_json_path("deleted_orders.json")
+DELETED_BOOKINGS_PATH = resolve_writable_json_path("deleted_bookings.json")
+
+def _get_deleted_orders_set():
+    ids = set()
+    keys = set()
+    if os.path.exists(DELETED_ORDERS_PATH):
+        try:
+            with open(DELETED_ORDERS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                for d in data:
+                    if isinstance(d, dict):
+                        if d.get("id"):
+                            ids.add(int(d["id"]))
+                        p = str(d.get("phone", "")).strip()
+                        c = str(d.get("created_at", "")).strip()
+                        t = round(float(d.get("total_amount", 0) or 0), 0)
+                        if p and c:
+                            keys.add((p, c, t))
+        except Exception:
+            pass
+    return ids, keys
+
+def _get_deleted_bookings_set():
+    ids = set()
+    keys = set()
+    if os.path.exists(DELETED_BOOKINGS_PATH):
+        try:
+            with open(DELETED_BOOKINGS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                for d in data:
+                    if isinstance(d, dict):
+                        if d.get("id"):
+                            ids.add(int(d["id"]))
+                        p = str(d.get("phone", "")).strip()
+                        n = str(d.get("pet_name", "")).strip()
+                        dt = str(d.get("appointment_date", "")).strip()
+                        tm = str(d.get("appointment_time", "")).strip()
+                        if p and n and dt:
+                            keys.add((p, n, dt, tm))
+        except Exception:
+            pass
+    return ids, keys
+
+
 BOOKINGS_STORE_PATH = resolve_writable_json_path("bookings_store.json")
 VOUCHERS_STORE_PATH = resolve_writable_json_path("vouchers_store.json")
 
@@ -210,6 +257,64 @@ class SpaBooking(BaseModel):
             pass
 
     @classmethod
+    def delete_booking_permanently(cls, booking_id: int) -> Optional[Dict[str, Any]]:
+        """Xóa vĩnh viễn lịch hẹn Spa khỏi SQLite và đồng bộ xóa khỏi file bookings_store.json."""
+        target = cls.get_by_id(booking_id)
+        target_info = target.to_dict() if target else None
+        target_phone = str(getattr(target, "phone", "") or "").strip() if target else ""
+        target_pet = str(getattr(target, "pet_name", "") or "").strip() if target else ""
+        target_date = str(getattr(target, "appointment_date", "") or "").strip() if target else ""
+        target_time = str(getattr(target, "appointment_time", "") or "").strip() if target else ""
+
+        try:
+            del_list = []
+            if os.path.exists(DELETED_BOOKINGS_PATH):
+                with open(DELETED_BOOKINGS_PATH, "r", encoding="utf-8") as df:
+                    del_list = json.load(df)
+            if not isinstance(del_list, list):
+                del_list = []
+            del_list.append({
+                "id": booking_id,
+                "phone": target_phone,
+                "pet_name": target_pet,
+                "appointment_date": target_date,
+                "appointment_time": target_time
+            })
+            os.makedirs(os.path.dirname(DELETED_BOOKINGS_PATH), exist_ok=True)
+            with open(DELETED_BOOKINGS_PATH, "w", encoding="utf-8") as df:
+                json.dump(del_list[-150:], df, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+        cls.delete_by_id(booking_id)
+
+        if os.path.exists(BOOKINGS_STORE_PATH):
+            try:
+                with open(BOOKINGS_STORE_PATH, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                if isinstance(loaded, list):
+                    filtered = []
+                    for r in loaded:
+                        if not isinstance(r, dict):
+                            continue
+                        r_id = r.get("id")
+                        r_p = str(r.get("phone", "")).strip()
+                        r_n = str(r.get("pet_name", "")).strip()
+                        r_d = str(r.get("appointment_date", "")).strip()
+                        r_t = str(r.get("appointment_time", "")).strip()
+                        if r_id and int(r_id) == booking_id:
+                            continue
+                        if target_phone and r_p == target_phone and r_n == target_pet and r_d == target_date and r_t == target_time:
+                            continue
+                        filtered.append(r)
+                    with open(BOOKINGS_STORE_PATH, "w", encoding="utf-8") as f:
+                        json.dump(filtered, f, ensure_ascii=False, indent=2)
+            except Exception:
+                pass
+
+        return target_info
+
+    @classmethod
     def sync_all_to_json_file(cls) -> List[Dict[str, Any]]:
         """Đồng bộ toàn bộ danh sách lịch hẹn hiện tại trong SQLite xuống file JSON (gộp không xóa)."""
         existing_records = []
@@ -269,8 +374,12 @@ class SpaBooking(BaseModel):
                 except Exception:
                     pass
 
+            b_deleted_ids, b_deleted_keys = _get_deleted_bookings_set()
             for bd in bookings:
                 if not isinstance(bd, dict):
+                    continue
+                bd_id = int(bd["id"]) if (bd.get("id") and str(bd["id"]).isdigit()) else None
+                if bd_id and bd_id in b_deleted_ids:
                     continue
                 phone = str(bd.get("phone", "") or "").strip()
                 pet_name = str(bd.get("pet_name", "") or "").strip()
@@ -430,6 +539,65 @@ class Order(BaseModel):
             pass
 
     @classmethod
+    def delete_order_permanently(cls, order_id: int) -> Optional[Dict[str, Any]]:
+        """Xóa vĩnh viễn đơn hàng khỏi SQLite và đồng bộ xóa khỏi file orders_store.json lẫn deleted_orders.json."""
+        target = cls.get_by_id(order_id)
+        target_info = target.to_dict() if target else None
+        target_phone = str(getattr(target, "phone", "") or "").strip() if target else ""
+        target_created = str(getattr(target, "created_at", "") or "").strip() if target else ""
+        target_total = round(float(getattr(target, "total_amount", 0) or 0), 0) if target else 0
+
+        # 1. Ghi nhận vào deleted_orders.json
+        try:
+            del_list = []
+            if os.path.exists(DELETED_ORDERS_PATH):
+                with open(DELETED_ORDERS_PATH, "r", encoding="utf-8") as df:
+                    del_list = json.load(df)
+            if not isinstance(del_list, list):
+                del_list = []
+            del_entry = {
+                "id": order_id,
+                "phone": target_phone,
+                "created_at": target_created,
+                "total_amount": target_total
+            }
+            del_list.append(del_entry)
+            os.makedirs(os.path.dirname(DELETED_ORDERS_PATH), exist_ok=True)
+            with open(DELETED_ORDERS_PATH, "w", encoding="utf-8") as df:
+                json.dump(del_list[-150:], df, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+        # 2. Xóa khỏi SQLite
+        cls.delete_by_id(order_id)
+
+        # 3. Lọc bỏ khỏi orders_store.json
+        if os.path.exists(ORDERS_STORE_PATH):
+            try:
+                with open(ORDERS_STORE_PATH, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                if isinstance(loaded, list):
+                    filtered = []
+                    for r in loaded:
+                        if not isinstance(r, dict):
+                            continue
+                        r_id = r.get("id")
+                        r_p = str(r.get("phone", "")).strip()
+                        r_c = str(r.get("created_at", "")).strip()
+                        r_t = round(float(r.get("total_amount", 0) or 0), 0)
+                        if r_id and int(r_id) == order_id:
+                            continue
+                        if target_phone and r_p == target_phone and r_c == target_created and r_t == target_total:
+                            continue
+                        filtered.append(r)
+                    with open(ORDERS_STORE_PATH, "w", encoding="utf-8") as f:
+                        json.dump(filtered, f, ensure_ascii=False, indent=2)
+            except Exception:
+                pass
+
+        return target_info
+
+    @classmethod
     def sync_all_to_json_file(cls) -> List[Dict[str, Any]]:
         """Đồng bộ toàn bộ danh sách đơn hàng hiện tại trong SQLite xuống file JSON (gộp thông minh, không ghi đè mất đơn cũ)."""
         existing_records = []
@@ -525,8 +693,12 @@ class Order(BaseModel):
             except Exception:
                 pass
 
+            deleted_ids, deleted_keys = _get_deleted_orders_set()
             for od in orders:
                 if not isinstance(od, dict):
+                    continue
+                od_id = int(od["id"]) if (od.get("id") and str(od["id"]).isdigit()) else None
+                if od_id and od_id in deleted_ids:
                     continue
                 phone = str(od.get("phone", "") or "").strip()
                 created_at = str(

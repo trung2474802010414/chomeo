@@ -1968,13 +1968,42 @@ def admin_update_booking_status(booking_id: int):
 @app.route("/admin/bookings/<int:booking_id>/delete", methods=["POST"])
 @admin_required
 def admin_delete_booking(booking_id: int):
-    if SpaBooking.delete_by_id(booking_id):
-        flash(f"Đã xóa lịch hẹn Spa #{booking_id}.", "success")
-    else:
-        flash(f"Không tìm thấy lịch hẹn #{booking_id}.", "error")
-    all_bookings = SpaBooking.sync_all_to_json_file()
+    target_info = SpaBooking.delete_booking_permanently(booking_id)
+    flash(f"✅ Đã xóa vĩnh viễn lịch hẹn Spa #{booking_id} thành công.", "success")
     resp = make_response(redirect(url_for("admin_page", tab="bookings")))
-    return _sync_bookings_vault_cookie(resp, all_bookings)
+    try:
+        t_phone = str(target_info.get("phone", "")).strip() if target_info else ""
+        t_pet = str(target_info.get("pet_name", "")).strip() if target_info else ""
+        t_date = str(target_info.get("appointment_date", "")).strip() if target_info else ""
+        t_time = str(target_info.get("appointment_time", "")).strip() if target_info else ""
+
+        raw_c = request.cookies.get("mw_bookings_vault") or request.cookies.get("bookings_vault") or ""
+        clean_b_vault = []
+        for x in _decode_compressed_vault(raw_c):
+            if not isinstance(x, dict):
+                continue
+            x_id = x.get("id")
+            x_p = str(x.get("phone", "")).strip()
+            x_n = str(x.get("pet_name", "")).strip()
+            x_d = str(x.get("appointment_date", "")).strip()
+            x_t = str(x.get("appointment_time", "")).strip()
+            if x_id and int(x_id) == booking_id:
+                continue
+            if t_phone and x_p == t_phone and x_n == t_pet and x_d == t_date and x_t == t_time:
+                continue
+            clean_b_vault.append(x)
+
+        resp.set_cookie(
+            "mw_bookings_vault",
+            _encode_compressed_vault(clean_b_vault),
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+        resp.delete_cookie("bookings_vault")
+    except Exception:
+        pass
+    return resp
 
 
 @app.route("/admin/orders/<int:order_id>/status", methods=["POST"])
@@ -1995,13 +2024,39 @@ def admin_update_order_status(order_id: int):
 @app.route("/admin/orders/<int:order_id>/delete", methods=["POST"])
 @admin_required
 def admin_delete_order(order_id: int):
-    if Order.delete_by_id(order_id):
-        flash(f"Đã xóa đơn hàng #{order_id}.", "success")
-    else:
-        flash(f"Không tìm thấy đơn hàng #{order_id}.", "error")
-    all_orders = Order.sync_all_to_json_file()
+    target_info = Order.delete_order_permanently(order_id)
+    flash(f"✅ Đã xóa vĩnh viễn đơn hàng #DH{order_id} thành công khỏi hệ thống.", "success")
     resp = make_response(redirect(url_for("admin_page", tab="orders")))
-    return _sync_orders_vault_cookie(resp, all_orders)
+    try:
+        t_phone = str(target_info.get("phone", "")).strip() if target_info else ""
+        t_created = str(target_info.get("created_at", "")).strip() if target_info else ""
+        t_total = round(float(target_info.get("total_amount", 0) or 0), 0) if target_info else 0
+
+        clean_vault = []
+        for x in _read_cookie_orders_vault():
+            if not isinstance(x, dict):
+                continue
+            x_id = x.get("id")
+            x_p = str(x.get("phone", "")).strip()
+            x_c = str(x.get("created_at", "")).strip()
+            x_t = round(float(x.get("total_amount", 0) or 0), 0)
+            if x_id and int(x_id) == order_id:
+                continue
+            if t_phone and x_p == t_phone and x_c == t_created and x_t == t_total:
+                continue
+            clean_vault.append(x)
+
+        resp.set_cookie(
+            "mw_orders_vault",
+            _encode_compressed_vault(clean_vault),
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+        resp.delete_cookie("orders_vault")
+    except Exception:
+        pass
+    return resp
 
 
 @app.route("/admin/customers/save", methods=["POST"])
