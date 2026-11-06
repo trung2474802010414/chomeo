@@ -463,8 +463,406 @@
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeSuccessModal();
+            var modal = document.getElementById('mwAiChatModal');
+            if (modal && !modal.classList.contains('mw-ai-hidden')) {
+                modal.classList.add('mw-ai-hidden');
+            }
         }
     });
+
+    // ==========================================
+    // CLIENT LOGIC CHO TRỢ LÝ AI (LLaMA)
+    // ==========================================
+    function toggleMwAiChat() {
+        var modal = document.getElementById('mwAiChatModal');
+        if (!modal) return;
+        modal.classList.toggle('mw-ai-hidden');
+        if (!modal.classList.contains('mw-ai-hidden')) {
+            var inp = document.getElementById('mwAiInput');
+            if (inp) inp.focus();
+            scrollMwAiToBottom();
+        }
+    }
+
+    function clearMwAiChat() {
+        var list = document.getElementById('mwAiMessagesList');
+        if (!list) return;
+        list.innerHTML = `
+            <div class="mw-ai-msg mw-ai-assistant">
+                <div class="mw-ai-msg-avatar">🤖</div>
+                <div class="mw-ai-msg-content">
+                    <div class="mw-ai-bubble">Đã làm sạch lịch sử hội thoại! Bạn cần em tư vấn thêm thông tin gì về thú cưng hoặc dịch vụ của shop không ạ?</div>
+                    <div class="mw-ai-engine-tag">⚡ Powered by LLaMA 3 & RAG Engine</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function sendMwAiQuick(promptText) {
+        var inp = document.getElementById('mwAiInput');
+        if (inp) {
+            inp.value = promptText;
+            sendMwAiMessage();
+        }
+    }
+
+    function scrollMwAiToBottom() {
+        var list = document.getElementById('mwAiMessagesList');
+        if (list) list.scrollTop = list.scrollHeight;
+    }
+
+    function formatMwAiText(raw) {
+        if (!raw) return '';
+        var s = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        s = s.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        s = s.replace(/`(.*?)`/g, '<code style="background:rgba(245,158,11,0.18);color:#f59e0b;padding:1px 5px;border-radius:4px;font-size:12px;">$1</code>');
+        return s;
+    }
+
+    async function sendMwAiMessage() {
+        var inp = document.getElementById('mwAiInput');
+        if (!inp) return;
+        var text = inp.value.trim();
+        if (!text) return;
+
+        var list = document.getElementById('mwAiMessagesList');
+        if (!list) return;
+
+        // 1. Thêm tin nhắn người dùng
+        list.innerHTML += `
+            <div class="mw-ai-msg mw-ai-user">
+                <div class="mw-ai-msg-avatar">👤</div>
+                <div class="mw-ai-msg-content">
+                    <div class="mw-ai-bubble">${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                </div>
+            </div>
+        `;
+        inp.value = '';
+        scrollMwAiToBottom();
+
+        // 2. Thêm loading bubble
+        var tempId = 'mw-ai-loading-' + Date.now();
+        list.innerHTML += `
+            <div class="mw-ai-msg mw-ai-assistant" id="${tempId}">
+                <div class="mw-ai-msg-avatar">🤖</div>
+                <div class="mw-ai-msg-content">
+                    <div class="mw-ai-bubble" style="color:#f59e0b;font-style:italic;">⏳ Đang suy nghĩ và tra cứu dữ liệu...</div>
+                </div>
+            </div>
+        `;
+        scrollMwAiToBottom();
+
+        try {
+            var response = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+            var data = await response.json();
+            var target = document.getElementById(tempId);
+            if (target) {
+                if (data.ok) {
+                    target.innerHTML = `
+                        <div class="mw-ai-msg-avatar">🤖</div>
+                        <div class="mw-ai-msg-content">
+                            <div class="mw-ai-bubble">${formatMwAiText(data.reply)}</div>
+                            <div class="mw-ai-engine-tag">⚡ ${data.engine || 'LLaMA / RAG'}</div>
+                        </div>
+                    `;
+                } else {
+                    target.innerHTML = `
+                        <div class="mw-ai-msg-avatar">🤖</div>
+                        <div class="mw-ai-msg-content">
+                            <div class="mw-ai-bubble" style="color:#ef4444;">Dạ hiện tại hệ thống bận một chút: ${data.error || 'Vui lòng thử lại!'}</div>
+                        </div>
+                    `;
+                }
+            }
+        } catch (err) {
+            var target = document.getElementById(tempId);
+            if (target) {
+                target.innerHTML = `
+                    <div class="mw-ai-msg-avatar">🤖</div>
+                    <div class="mw-ai-msg-content">
+                        <div class="mw-ai-bubble" style="color:#ef4444;">Không thể kết nối đến máy chủ AI: ${err.message}</div>
+                    </div>
+                `;
+            }
+        }
+        scrollMwAiToBottom();
+    }
     </script>
+
+    <!-- ========================================== -->
+    <!-- MEOW & WOOF FLOATING AI CHATBOT (LLaMA)    -->
+    <!-- ========================================== -->
+    <style>
+    #mwAiWidgetContainer {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 99999;
+        font-family: inherit;
+    }
+    #mwAiTriggerBtn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: #1a0f00;
+        border: none;
+        border-radius: 50px;
+        padding: 11px 18px;
+        font-weight: 700;
+        font-size: 13.5px;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(217, 119, 6, 0.45);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s ease;
+    }
+    #mwAiTriggerBtn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 12px 28px rgba(217, 119, 6, 0.6);
+    }
+    .mw-ai-pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        animation: mwAiPulse 1.8s infinite;
+    }
+    @keyframes mwAiPulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    #mwAiChatModal {
+        position: fixed;
+        bottom: 82px;
+        right: 24px;
+        width: 390px;
+        max-width: calc(100vw - 32px);
+        height: 530px;
+        max-height: calc(100vh - 105px);
+        background: #181512;
+        border: 1px solid #3d342a;
+        border-radius: 20px;
+        box-shadow: 0 20px 45px rgba(0,0,0,0.7);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        transform-origin: bottom right;
+    }
+    #mwAiChatModal.mw-ai-hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.85) translateY(20px);
+    }
+    .mw-ai-header {
+        background: #231e19;
+        padding: 12px 16px;
+        border-bottom: 1px solid #332a21;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .mw-ai-header-info { display: flex; align-items: center; gap: 10px; }
+    .mw-ai-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(245, 158, 11, 0.18);
+        border: 1px solid #f59e0b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+    .mw-ai-title { font-size: 14px; font-weight: 700; color: #f59e0b; }
+    .mw-ai-subtitle { font-size: 11px; color: #a19385; }
+    .mw-ai-header-actions { display: flex; gap: 6px; }
+    .mw-ai-action-btn {
+        background: #2a241e;
+        border: 1px solid #44382d;
+        color: #c7b9ab;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .mw-ai-action-btn:hover { background: #f59e0b; color: #000; }
+    .mw-ai-body {
+        flex: 1;
+        padding: 14px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #14110e;
+    }
+    .mw-ai-msg { display: flex; gap: 8px; max-width: 90%; }
+    .mw-ai-user { align-self: flex-end; flex-direction: row-reverse; }
+    .mw-ai-assistant { align-self: flex-start; }
+    .mw-ai-msg-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #2a231b;
+        border: 1px solid #f59e0b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+    .mw-ai-user .mw-ai-msg-avatar { background: #d97706; border-color: #f59e0b; }
+    .mw-ai-bubble {
+        padding: 10px 14px;
+        border-radius: 14px;
+        font-size: 13px;
+        line-height: 1.5;
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+    .mw-ai-assistant .mw-ai-bubble {
+        background: #231d17;
+        border: 1px solid #382e23;
+        color: #e6dfd8;
+    }
+    .mw-ai-user .mw-ai-bubble {
+        background: linear-gradient(135deg, #d97706, #b45309);
+        color: #ffffff;
+    }
+    .mw-ai-engine-tag {
+        font-size: 10px;
+        color: #f59e0b;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+    .mw-ai-chips-bar {
+        padding: 8px 12px;
+        background: #1b1713;
+        border-top: 1px solid #2d241b;
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .mw-ai-chips-bar::-webkit-scrollbar { display: none; }
+    .mw-ai-chip {
+        background: #28211a;
+        border: 1px solid #3e3327;
+        color: #d1c5b8;
+        padding: 5px 10px;
+        border-radius: 16px;
+        font-size: 11px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .mw-ai-chip:hover {
+        background: #f59e0b;
+        color: #000;
+        border-color: #f59e0b;
+    }
+    .mw-ai-footer {
+        padding: 10px 12px;
+        background: #201a14;
+        border-top: 1px solid #2d241b;
+        display: flex;
+        gap: 8px;
+    }
+    .mw-ai-input-field {
+        flex: 1;
+        background: #120f0c;
+        border: 1px solid #3d3225;
+        color: #fff;
+        padding: 9px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        outline: none;
+    }
+    .mw-ai-input-field:focus { border-color: #f59e0b; }
+    .mw-ai-send-btn {
+        background: #f59e0b;
+        color: #1a0f00;
+        font-weight: 700;
+        font-size: 12px;
+        border: none;
+        padding: 0 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .mw-ai-send-btn:hover { background: #fbbf24; }
+    </style>
+
+    <div id="mwAiWidgetContainer">
+        <!-- Floating Trigger Button -->
+        <button id="mwAiTriggerBtn" type="button" onclick="toggleMwAiChat()" title="Trò chuyện với Trợ lý AI Meow & Woof">
+            <span class="mw-ai-pulse-dot"></span>
+            <span style="font-size:16px;">🐾</span>
+            <span>Trợ Lý AI <small style="font-size:10px;opacity:0.85;background:rgba(0,0,0,0.25);padding:1px 5px;border-radius:10px;margin-left:2px;">LLaMA</small></span>
+        </button>
+
+        <!-- Floating Chat Modal Window -->
+        <div id="mwAiChatModal" class="mw-ai-hidden">
+            <div class="mw-ai-header">
+                <div class="mw-ai-header-info">
+                    <div class="mw-ai-avatar">🤖</div>
+                    <div>
+                        <div class="mw-ai-title">Trợ Lý AI Meow & Woof</div>
+                        <div class="mw-ai-subtitle">Mô hình LLaMA 3 & Tri Thức Cửa Hàng</div>
+                    </div>
+                </div>
+                <div class="mw-ai-header-actions">
+                    <button type="button" class="mw-ai-action-btn" onclick="clearMwAiChat()" title="Xóa lịch sử chat">🧹</button>
+                    <button type="button" class="mw-ai-action-btn" onclick="toggleMwAiChat()" title="Đóng cửa sổ">✕</button>
+                </div>
+            </div>
+
+            <div class="mw-ai-body" id="mwAiMessagesList">
+                <div class="mw-ai-msg mw-ai-assistant">
+                    <div class="mw-ai-msg-avatar">🤖</div>
+                    <div class="mw-ai-msg-content">
+                        <div class="mw-ai-bubble">Dạ Meow & Woof xin chào bạn! 🐶🐱
+Em là <b>Trợ lý AI (LLaMA)</b> được huấn luyện trực tiếp trên kho dữ liệu của shop. Em có thể tư vấn cho bạn về:
+• 🐕 <b>42 Giống Thú Cưng</b> có sẵn (giá cả, đặc điểm, giống nuôi chung cư)
+• 🛁 <b>5 Gói Dịch Vụ Spa</b> & Bảng giá cắt tỉa, tắm sấy
+• 🎁 <b>Mã Giảm Giá Voucher</b> (MEOW10, WOOF15) & Hạng VIP
+• 🛡️ <b>Chính Sách Bảo Hành 15 Ngày</b> Parvo & Care
+
+Bạn đang muốn tìm hiểu về bé cún/mèo nào ạ?</div>
+                        <div class="mw-ai-engine-tag">⚡ Powered by LLaMA 3 & RAG Engine</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Suggestions Chips -->
+            <div class="mw-ai-chips-bar">
+                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Tìm chó dưới 5 triệu nuôi ở chung cư')">🏠 Chó dưới 5tr nuôi chung cư</button>
+                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Bảng giá dịch vụ Spa và tắm sấy')">🛁 Bảng giá Spa & Tắm sấy</button>
+                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Shop có những mã giảm giá nào?')">🎁 Mã giảm giá hôm nay</button>
+                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Chính sách bảo hành và tiêm phòng thế nào?')">🛡️ Bảo hành 15 ngày</button>
+                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Tư vấn mèo Anh lông ngắn classic')">🐈 Mèo Anh lông ngắn</button>
+            </div>
+
+            <!-- Chat Input Footer -->
+            <div class="mw-ai-footer">
+                <input type="text" id="mwAiInput" class="mw-ai-input-field" placeholder="Nhập câu hỏi (VD: Nuôi chung cư nên chọn giống nào?)..." onkeydown="if(event.key==='Enter') sendMwAiMessage()">
+                <button type="button" class="mw-ai-send-btn" onclick="sendMwAiMessage()" title="Gửi tin nhắn">
+                    <span>Gửi</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
