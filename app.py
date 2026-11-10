@@ -790,24 +790,22 @@ def api_check_voucher():
 
 @app.route("/api/ai/chat", methods=["POST"])
 def api_ai_chat():
-    """API tư vấn khách hàng tự động bằng Mô hình Ngôn ngữ Lớn LLaMA kết hợp RAG Knowledge Base."""
+    """API tư vấn khách hàng tự động bằng Google Gemini 3.8 Flash kết hợp RAG Knowledge Base."""
     payload = request.get_json(silent=True) or {}
     message = str(payload.get("message", "")).strip()
+    history = payload.get("history") if isinstance(payload.get("history"), list) else []
     if not message:
         return jsonify({"ok": False, "error": "Vui lòng nhập nội dung câu hỏi."}), 400
 
     try:
         from ai_advisor import PetShopAIAdvisor
         advisor = PetShopAIAdvisor()
-        token = payload.get("token") or os.environ.get("HUGGINGFACE_API_TOKEN") or os.environ.get("HF_TOKEN") or ""
-        if token:
-            advisor.set_hf_token(token)
-        res = advisor.ask(message)
+        res = advisor.ask(message, history=history)
         return jsonify({
             "ok": True,
             "reply": res["reply"],
             "engine": res["engine"],
-            "model": res.get("model", "meta-llama/Llama-3.2-3B-Instruct")
+            "model": res.get("model", "gemini-3.8-flash")
         })
     except Exception as e:
         return jsonify({"ok": False, "error": f"Lỗi xử lý AI: {str(e)}"}), 500

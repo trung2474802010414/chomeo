@@ -471,8 +471,10 @@
     });
 
     // ==========================================
-    // CLIENT LOGIC CHO TRỢ LÝ AI (LLaMA)
+    // CLIENT LOGIC CHO TRỢ LÝ AI (GEMINI 3.8 FLASH)
     // ==========================================
+    var mwAiChatHistory = [];
+
     function toggleMwAiChat() {
         var modal = document.getElementById('mwAiChatModal');
         if (!modal) return;
@@ -485,14 +487,14 @@
     }
 
     function clearMwAiChat() {
+        mwAiChatHistory = [];
         var list = document.getElementById('mwAiMessagesList');
         if (!list) return;
         list.innerHTML = `
             <div class="mw-ai-msg mw-ai-assistant">
                 <div class="mw-ai-msg-avatar">🤖</div>
                 <div class="mw-ai-msg-content">
-                    <div class="mw-ai-bubble">Đã làm sạch lịch sử hội thoại! Bạn cần em tư vấn thêm thông tin gì về thú cưng hoặc dịch vụ của shop không ạ?</div>
-                    <div class="mw-ai-engine-tag">⚡ Powered by LLaMA 3 & RAG Engine</div>
+                    <div class="mw-ai-bubble">Xin chào bạn! 🐾 Tôi có thể giúp gì cho bạn về thú cưng, bảng giá Spa hay ưu đãi hôm nay ạ?</div>
                 </div>
             </div>
         `;
@@ -528,7 +530,6 @@
         var list = document.getElementById('mwAiMessagesList');
         if (!list) return;
 
-        // 1. Thêm tin nhắn người dùng
         list.innerHTML += `
             <div class="mw-ai-msg mw-ai-user">
                 <div class="mw-ai-msg-avatar">👤</div>
@@ -540,13 +541,12 @@
         inp.value = '';
         scrollMwAiToBottom();
 
-        // 2. Thêm loading bubble
         var tempId = 'mw-ai-loading-' + Date.now();
         list.innerHTML += `
             <div class="mw-ai-msg mw-ai-assistant" id="${tempId}">
                 <div class="mw-ai-msg-avatar">🤖</div>
                 <div class="mw-ai-msg-content">
-                    <div class="mw-ai-bubble" style="color:#f59e0b;font-style:italic;">⏳ Đang suy nghĩ và tra cứu dữ liệu...</div>
+                    <div class="mw-ai-bubble" style="color:#f59e0b;font-style:italic;">Đang trả lời...</div>
                 </div>
             </div>
         `;
@@ -556,24 +556,25 @@
             var response = await fetch('/api/ai/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text })
+                body: JSON.stringify({ message: text, history: mwAiChatHistory })
             });
             var data = await response.json();
             var target = document.getElementById(tempId);
             if (target) {
                 if (data.ok) {
+                    mwAiChatHistory.push({ role: 'user', content: text });
+                    mwAiChatHistory.push({ role: 'assistant', content: data.reply });
                     target.innerHTML = `
                         <div class="mw-ai-msg-avatar">🤖</div>
                         <div class="mw-ai-msg-content">
                             <div class="mw-ai-bubble">${formatMwAiText(data.reply)}</div>
-                            <div class="mw-ai-engine-tag">⚡ ${data.engine || 'LLaMA / RAG'}</div>
                         </div>
                     `;
                 } else {
                     target.innerHTML = `
                         <div class="mw-ai-msg-avatar">🤖</div>
                         <div class="mw-ai-msg-content">
-                            <div class="mw-ai-bubble" style="color:#ef4444;">Dạ hiện tại hệ thống bận một chút: ${data.error || 'Vui lòng thử lại!'}</div>
+                            <div class="mw-ai-bubble" style="color:#ef4444;">${data.error || 'Vui lòng thử lại!'}</div>
                         </div>
                     `;
                 }
@@ -584,7 +585,7 @@
                 target.innerHTML = `
                     <div class="mw-ai-msg-avatar">🤖</div>
                     <div class="mw-ai-msg-content">
-                        <div class="mw-ai-bubble" style="color:#ef4444;">Không thể kết nối đến máy chủ AI: ${err.message}</div>
+                        <div class="mw-ai-bubble" style="color:#ef4444;">Lỗi kết nối: ${err.message}</div>
                     </div>
                 `;
             }
@@ -594,7 +595,7 @@
     </script>
 
     <!-- ========================================== -->
-    <!-- MEOW & WOOF FLOATING AI CHATBOT (LLaMA)    -->
+    <!-- MEOW & WOOF FLOATING AI CHATBOT            -->
     <!-- ========================================== -->
     <style>
     #mwAiWidgetContainer {
@@ -640,9 +641,9 @@
         position: fixed;
         bottom: 82px;
         right: 24px;
-        width: 390px;
+        width: 380px;
         max-width: calc(100vw - 32px);
-        height: 530px;
+        height: 500px;
         max-height: calc(100vh - 105px);
         background: #181512;
         border: 1px solid #3d342a;
@@ -669,18 +670,17 @@
     }
     .mw-ai-header-info { display: flex; align-items: center; gap: 10px; }
     .mw-ai-avatar {
-        width: 36px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         background: rgba(245, 158, 11, 0.18);
         border: 1px solid #f59e0b;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 16px;
     }
     .mw-ai-title { font-size: 14px; font-weight: 700; color: #f59e0b; }
-    .mw-ai-subtitle { font-size: 11px; color: #a19385; }
     .mw-ai-header-actions { display: flex; gap: 6px; }
     .mw-ai-action-btn {
         background: #2a241e;
@@ -737,12 +737,6 @@
     .mw-ai-user .mw-ai-bubble {
         background: linear-gradient(135deg, #d97706, #b45309);
         color: #ffffff;
-    }
-    .mw-ai-engine-tag {
-        font-size: 10px;
-        color: #f59e0b;
-        margin-top: 4px;
-        font-weight: 600;
     }
     .mw-ai-chips-bar {
         padding: 8px 12px;
@@ -806,10 +800,10 @@
 
     <div id="mwAiWidgetContainer">
         <!-- Floating Trigger Button -->
-        <button id="mwAiTriggerBtn" type="button" onclick="toggleMwAiChat()" title="Trò chuyện với Trợ lý AI Meow & Woof">
+        <button id="mwAiTriggerBtn" type="button" onclick="toggleMwAiChat()" title="Trò chuyện với Trợ lý AI">
             <span class="mw-ai-pulse-dot"></span>
             <span style="font-size:16px;">🐾</span>
-            <span>Trợ Lý AI <small style="font-size:10px;opacity:0.85;background:rgba(0,0,0,0.25);padding:1px 5px;border-radius:10px;margin-left:2px;">LLaMA</small></span>
+            <span>Trợ Lý AI</span>
         </button>
 
         <!-- Floating Chat Modal Window -->
@@ -817,14 +811,11 @@
             <div class="mw-ai-header">
                 <div class="mw-ai-header-info">
                     <div class="mw-ai-avatar">🤖</div>
-                    <div>
-                        <div class="mw-ai-title">Trợ Lý AI Meow & Woof</div>
-                        <div class="mw-ai-subtitle">Mô hình LLaMA 3 & Tri Thức Cửa Hàng</div>
-                    </div>
+                    <div class="mw-ai-title">Trợ Lý AI Meow & Woof</div>
                 </div>
                 <div class="mw-ai-header-actions">
-                    <button type="button" class="mw-ai-action-btn" onclick="clearMwAiChat()" title="Xóa lịch sử chat">🧹</button>
-                    <button type="button" class="mw-ai-action-btn" onclick="toggleMwAiChat()" title="Đóng cửa sổ">✕</button>
+                    <button type="button" class="mw-ai-action-btn" onclick="clearMwAiChat()" title="Làm mới">🧹</button>
+                    <button type="button" class="mw-ai-action-btn" onclick="toggleMwAiChat()" title="Đóng">✕</button>
                 </div>
             </div>
 
@@ -832,32 +823,23 @@
                 <div class="mw-ai-msg mw-ai-assistant">
                     <div class="mw-ai-msg-avatar">🤖</div>
                     <div class="mw-ai-msg-content">
-                        <div class="mw-ai-bubble">Dạ Meow & Woof xin chào bạn! 🐶🐱
-Em là <b>Trợ lý AI (LLaMA)</b> được huấn luyện trực tiếp trên kho dữ liệu của shop. Em có thể tư vấn cho bạn về:
-• 🐕 <b>42 Giống Thú Cưng</b> có sẵn (giá cả, đặc điểm, giống nuôi chung cư)
-• 🛁 <b>5 Gói Dịch Vụ Spa</b> & Bảng giá cắt tỉa, tắm sấy
-• 🎁 <b>Mã Giảm Giá Voucher</b> (MEOW10, WOOF15) & Hạng VIP
-• 🛡️ <b>Chính Sách Bảo Hành 15 Ngày</b> Parvo & Care
-
-Bạn đang muốn tìm hiểu về bé cún/mèo nào ạ?</div>
-                        <div class="mw-ai-engine-tag">⚡ Powered by LLaMA 3 & RAG Engine</div>
+                        <div class="mw-ai-bubble">Xin chào bạn! 🐾 Tôi có thể giúp gì cho bạn về thú cưng, bảng giá Spa hay ưu đãi hôm nay ạ?</div>
                     </div>
                 </div>
             </div>
 
             <!-- Quick Suggestions Chips -->
             <div class="mw-ai-chips-bar">
-                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Tìm chó dưới 5 triệu nuôi ở chung cư')">🏠 Chó dưới 5tr nuôi chung cư</button>
-                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Bảng giá dịch vụ Spa và tắm sấy')">🛁 Bảng giá Spa & Tắm sấy</button>
-                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Shop có những mã giảm giá nào?')">🎁 Mã giảm giá hôm nay</button>
-                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Chính sách bảo hành và tiêm phòng thế nào?')">🛡️ Bảo hành 15 ngày</button>
-                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Tư vấn mèo Anh lông ngắn classic')">🐈 Mèo Anh lông ngắn</button>
+                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Tìm chó dưới 5 triệu')">Chó dưới 5tr</button>
+                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Bảng giá dịch vụ Spa')">Bảng giá Spa</button>
+                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Có mã giảm giá nào không?')">Mã giảm giá</button>
+                <button type="button" class="mw-ai-chip" onclick="sendMwAiQuick('Địa chỉ và giờ mở cửa')">Địa chỉ shop</button>
             </div>
 
             <!-- Chat Input Footer -->
             <div class="mw-ai-footer">
-                <input type="text" id="mwAiInput" class="mw-ai-input-field" placeholder="Nhập câu hỏi (VD: Nuôi chung cư nên chọn giống nào?)..." onkeydown="if(event.key==='Enter') sendMwAiMessage()">
-                <button type="button" class="mw-ai-send-btn" onclick="sendMwAiMessage()" title="Gửi tin nhắn">
+                <input type="text" id="mwAiInput" class="mw-ai-input-field" placeholder="Nhập câu hỏi của bạn..." onkeydown="if(event.key==='Enter') sendMwAiMessage()">
+                <button type="button" class="mw-ai-send-btn" onclick="sendMwAiMessage()">
                     <span>Gửi</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </button>
