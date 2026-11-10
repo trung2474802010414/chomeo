@@ -500,6 +500,15 @@
         `;
     }
 
+    function promptMwAiKey() {
+        var cur = localStorage.getItem('mw_gemini_api_key') || '';
+        var val = prompt('Nhập Gemini API Key của bạn (để kích hoạt trực tiếp Gemini 3.8 Flash):', cur);
+        if (val !== null) {
+            localStorage.setItem('mw_gemini_api_key', val.trim());
+            alert(val.trim() ? 'Đã lưu Gemini API Key thành công!' : 'Đã xóa API Key.');
+        }
+    }
+
     function sendMwAiQuick(promptText) {
         var inp = document.getElementById('mwAiInput');
         if (inp) {
@@ -556,7 +565,11 @@
             var response = await fetch('/api/ai/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text, history: mwAiChatHistory })
+                body: JSON.stringify({
+                    message: text,
+                    history: mwAiChatHistory,
+                    api_key: localStorage.getItem('mw_gemini_api_key') || ''
+                })
             });
             var data = await response.json();
             var target = document.getElementById(tempId);
@@ -814,6 +827,7 @@
                     <div class="mw-ai-title">Trợ Lý AI Meow & Woof</div>
                 </div>
                 <div class="mw-ai-header-actions">
+                    <button type="button" class="mw-ai-action-btn" onclick="promptMwAiKey()" title="Cài đặt Gemini API Key">🔑</button>
                     <button type="button" class="mw-ai-action-btn" onclick="clearMwAiChat()" title="Làm mới">🧹</button>
                     <button type="button" class="mw-ai-action-btn" onclick="toggleMwAiChat()" title="Đóng">✕</button>
                 </div>

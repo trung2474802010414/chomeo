@@ -799,7 +799,8 @@ def api_ai_chat():
 
     try:
         from ai_advisor import PetShopAIAdvisor
-        advisor = PetShopAIAdvisor()
+        api_key = str(payload.get("api_key", "")).strip() or None
+        advisor = PetShopAIAdvisor(api_key=api_key)
         res = advisor.ask(message, history=history)
         return jsonify({
             "ok": True,

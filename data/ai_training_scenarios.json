@@ -1,0 +1,545 @@
+{
+  "metadata": {
+    "name": "Meow & Woof Customer Service Training Corpus",
+    "version": "2.0",
+    "language": "vi",
+    "description": "Bộ dữ liệu huấn luyện NLP xử lý tình huống tư vấn thú cưng, chăm sóc y tế, mặc cả, khiếu nại, Spa, thanh toán và hội thoại tự nhiên."
+  },
+  "synonyms": {
+    "ko": "khong",
+    "k": "khong",
+    "kh": "khong",
+    "hok": "khong",
+    "hem": "khong",
+    "bn": "bao nhieu",
+    "bnh": "bao nhieu",
+    "bnhiu": "bao nhieu",
+    "tr": "trieu",
+    "cu": "trieu",
+    "dc": "duoc",
+    "dk": "duoc",
+    "đc": "duoc",
+    "đk": "duoc",
+    "ntn": "nhu the nao",
+    "ad": "admin",
+    "sd": "su dung",
+    "sdt": "so dien thoai",
+    "dt": "dien thoai",
+    "km": "khuyen mai",
+    "gg": "giam gia",
+    "ck": "chuyen khoan",
+    "qr": "vietqr",
+    "vs": "ve sinh",
+    "bs": "bac si",
+    "aln": "anh long ngan",
+    "ald": "anh long dai",
+    "pom": "phoc soc",
+    "pomeranian": "phoc soc",
+    "frenchie": "bull phap",
+    "dachshund": "lap xuong",
+    "scottish": "tai cup",
+    "persian": "ba tu",
+    "siamese": "xiem"
+  },
+  "intents": [
+    {
+      "tag": "user_introduce_name",
+      "priority": 100,
+      "patterns": [
+        "tôi tên trung",
+        "toi ten trung",
+        "mình tên lan",
+        "minh ten nam",
+        "em tên hương",
+        "anh tên dũng",
+        "chị tên hoa",
+        "tôi tên là minh anh",
+        "tên tôi là tuấn",
+        "ten minh la hung",
+        "gọi mình là bin nhé",
+        "xưng tên là linh",
+        "chào shop mình tên khanh",
+        "hi ad tôi tên bảo",
+        "mình là thảo đây"
+      ]
+    },
+    {
+      "tag": "ask_bot_identity",
+      "priority": 85,
+      "patterns": [
+        "bạn tên gì",
+        "ban ten gi",
+        "tên bạn là gì",
+        "bạn tên là gì thế",
+        "bạn là ai",
+        "ban la ai",
+        "ai đang trả lời vậy",
+        "ai đang tư vấn cho mình",
+        "đây là người thật hay bot",
+        "nhân viên thật hay chatbot vậy",
+        "bot hay nhân viên vậy",
+        "trợ lý tên gì",
+        "trợ lý ai của shop tên gì",
+        "cho hỏi bạn là ai",
+        "bạn là người máy à",
+        "mày là bot hay ai",
+        "bạn là chatgpt à"
+      ]
+    },
+    {
+      "tag": "capabilities_faq",
+      "priority": 90,
+      "patterns": [
+        "bạn có thể trả lời những câu nào",
+        "ban co the tra loi nhung cau nao",
+        "tôi có thể hỏi bạn những gì",
+        "có thể hỏi những gì vậy",
+        "bạn làm được những gì",
+        "bạn có chức năng gì",
+        "trợ lý biết làm những gì",
+        "bạn giúp được gì cho tôi",
+        "hỏi được những gì vậy shop",
+        "menu câu hỏi mẫu",
+        "hướng dẫn hỏi trợ lý ai",
+        "bạn biết những thông tin gì",
+        "những chủ đề nào bạn tư vấn được",
+        "trợ lý tư vấn được những chủ đề gì",
+        "liệt kê các câu hỏi mẫu",
+        "giới thiệu chức năng của trợ lý",
+        "co the hoi gi",
+        "ban tu van duoc gi"
+      ]
+    },
+    {
+      "tag": "complaint_issue",
+      "priority": 98,
+      "patterns": [
+        "giao hàng chậm quá",
+        "giao hang cham qua",
+        "đơn giao lâu quá sao chưa tới",
+        "sao lâu nhận được hàng vậy",
+        "dịch vụ tệ quá",
+        "dich vu te qua",
+        "chất lượng quá tệ",
+        "tôi không hài lòng",
+        "rất không hài lòng với dịch vụ",
+        "thất vọng với shop quá",
+        "quá thất vọng luôn",
+        "bực mình thật sự",
+        "rất bực mình với đơn này",
+        "gọi hotline không ai nghe máy",
+        "nhắn tin không ai nghe máy",
+        "sản phẩm bị lỗi rồi",
+        "hàng bị lỗi hư hỏng",
+        "giao sai hàng cho tôi",
+        "giao sai sản phẩm rồi",
+        "giao nhầm đồ rồi shop ơi",
+        "nhận nhầm hàng rồi",
+        "bé mới mua về thấy ủ rũ buồn bã",
+        "muốn khiếu nại đơn hàng",
+        "khieu nai shop",
+        "lỗi thanh toán chưa xác nhận đơn",
+        "lỗi chuyển khoản rồi mà chưa duyệt",
+        "làm ăn thiếu chuyên nghiệp",
+        "dịch vụ thiếu chuyên nghiệp quá",
+        "phản ánh thái độ nhân viên",
+        "thái độ nhân viên kém quá",
+        "hàng hư hỏng khi vận chuyển"
+      ]
+    },
+    {
+      "tag": "pet_emergency_health",
+      "priority": 99,
+      "patterns": [
+        "chó bị tiêu chảy phải làm sao",
+        "cho bi tieu chay phai lam sao",
+        "chó đi ngoài lỏng tiêu chảy",
+        "mèo bị tiêu chảy đi ngoài",
+        "mèo bị nôn mửa liên tục",
+        "chó bị nôn ói mệt mỏi",
+        "cún bỏ ăn mệt mỏi lờ đờ",
+        "chó con bỏ ăn đi ngoài ra máu",
+        "mèo bị chảy nước mũi hắt hơi",
+        "chó bị chảy nước mũi ho",
+        "cún bị ho khạc suốt đêm",
+        "chó bị ve rận bọ chét nhiều quá",
+        "mèo bị ve rận bọ chét",
+        "mèo bị nấm da rụng lông từng mảng",
+        "chó bị nấm da ngứa gãi nhiều",
+        "chó sốt cao mệt bỏ ăn",
+        "mèo bị sốt cao không ăn uống",
+        "cứu với mèo nhà mình bị ốm",
+        "chó mới mua bị ốm phải làm sao",
+        "bé bị đau bụng tiêu chảy",
+        "chó bị sốc nhiệt thở gấp",
+        "tư vấn sơ cứu chó mèo bị bệnh",
+        "dấu hiệu bệnh parvo và care là gì",
+        "cho bi oi bo an"
+      ]
+    },
+    {
+      "tag": "bargain_discount",
+      "priority": 92,
+      "patterns": [
+        "giá mắc quá giảm thêm đi shop",
+        "mac qua giam them di",
+        "có bớt giá được không",
+        "fix nhẹ chút đi ạ",
+        "giá hơi cao có thương lượng không",
+        "sinh viên có được giảm giá thêm không",
+        "mua 2 bé có bớt không",
+        "mua combo chó và phụ kiện có giảm thêm không",
+        "chát quá shop ơi bớt cho mình đi",
+        "có ưu đãi riêng cho mình không",
+        "gia cao qua bot chut di",
+        "xin giảm giá chút được không",
+        "tại sao giá ở đây cao hơn chỗ khác",
+        "có chỗ bán rẻ hơn sao bên này đắt thế",
+        "giá cuối cùng là bao nhiêu không bớt à"
+      ]
+    },
+    {
+      "tag": "pet_nutrition_care",
+      "priority": 88,
+      "patterns": [
+        "chó con ăn gì cho mau lớn",
+        "cho con an gi",
+        "mèo con ăn gì tốt nhất",
+        "meo bieng an phai lam sao",
+        "mới đón bé về cần chăm sóc thế nào",
+        "lịch ăn uống cho chó 2 tháng tuổi",
+        "bé này ăn hạt gì hợp",
+        "con đó ăn gì vậy shop",
+        "cách chăm sóc chó mới mua về nhà",
+        "nên tắm cho cún mấy lần 1 tuần",
+        "mèo mấy tháng mới tắm được",
+        "chó mèo uống sữa tươi không đường được không",
+        "có nên cho chó ăn xương gà không",
+        "thực đơn dinh dưỡng cho mèo anh lông ngắn",
+        "chó kén ăn không chịu ăn hạt"
+      ]
+    },
+    {
+      "tag": "breed_comparison",
+      "priority": 90,
+      "patterns": [
+        "nên nuôi chó hay nuôi mèo",
+        "nen nuoi cho hay meo",
+        "so sánh chó poodle và corgi",
+        "poodle với phốc sóc con nào dễ nuôi hơn",
+        "alaska và husky khác nhau điểm nào",
+        "mèo anh lông ngắn hay lông dài đẹp hơn",
+        "phân vân giữa mèo ragdoll và mèo ba tư",
+        "so sánh giúp mình golden và labrador",
+        "corgi với pug con nào ít rụng lông hơn",
+        "chọn giữa shiba và corgi đi shop",
+        "khác nhau thế nào giữa hai giống này",
+        "so sanh giong cho meo",
+        "chó hay mèo hợp với người bận rộn"
+      ]
+    },
+    {
+      "tag": "cheapest_pet",
+      "priority": 89,
+      "patterns": [
+        "bé nào rẻ nhất ở shop",
+        "be nao re nhat",
+        "chó nào giá rẻ nhất",
+        "mèo nào rẻ nhất",
+        "giá thấp nhất là bao nhiêu",
+        "ít tiền có mua được thú cưng không",
+        "sinh viên tài chính ít nên nuôi con gì",
+        "giống chó nào giá mềm nhất",
+        "giống mèo nào giá bình dân nhất",
+        "con nào ít tiền nhất shop ơi",
+        "re nhat bao nhieu tien"
+      ]
+    },
+    {
+      "tag": "most_expensive_pet",
+      "priority": 89,
+      "patterns": [
+        "con nào đắt nhất shop",
+        "be nao dat nhat",
+        "giống chó nào cao cấp đắt tiền nhất",
+        "giống mèo nào đắt nhất",
+        "bé nào xịn nhất cửa hàng",
+        "giá cao nhất ở shop là bao nhiêu",
+        "thú cưng vip đắt nhất"
+      ]
+    },
+    {
+      "tag": "apartment_beginner_advice",
+      "priority": 88,
+      "patterns": [
+        "ở chung cư nên nuôi giống nào",
+        "o chung cu nen nuoi con gi",
+        "phòng trọ nhỏ nuôi chó gì ít sủa",
+        "người mới nuôi lần đầu nên chọn bé nào",
+        "moi nuoi lan dau chon con gi",
+        "giống chó nào không rụng lông ít hôi",
+        "nhà có trẻ nhỏ em bé nên nuôi chó gì hiền lành",
+        "mình bị dị ứng lông nhẹ nuôi mèo nào được",
+        "đi làm cả ngày nuôi con nào dễ chăm",
+        "tư vấn chó cảnh hiền lành thân thiện",
+        "chó nhỏ nhắn dễ thương ít ồn ào"
+      ]
+    },
+    {
+      "tag": "pet_list_menu",
+      "priority": 82,
+      "patterns": [
+        "shop có những giống chó nào",
+        "shop co nhung giong cho nao",
+        "shop bán những loại mèo nào",
+        "liệt kê tất cả thú cưng đang có",
+        "xem danh sách chó mèo của shop",
+        "cửa hàng có tất cả bao nhiêu giống",
+        "có những con gì đang bán",
+        "tổng hợp menu thú cưng",
+        "những giống chó hot nhất",
+        "những giống mèo được ưa chuộng"
+      ]
+    },
+    {
+      "tag": "spa_booking_howto",
+      "priority": 89,
+      "patterns": [
+        "đặt lịch spa như thế nào",
+        "dat lich spa nhu the nao",
+        "cách đặt hẹn tắm cho chó trên web",
+        "muốn book lịch cắt tỉa lông cho mèo",
+        "cần đặt lịch trước bao lâu",
+        "chó nặng 12kg tắm sấy hết bao nhiêu tiền",
+        "mèo 6kg đi cắt tỉa lông tính giá sao",
+        "đặt lịch khám sức khỏe cho bé",
+        "quy trình đưa thú cưng đi spa",
+        "shop có nhận trông giữ thú cưng dịp lễ tết không",
+        "gửi chó mèo khách sạn qua đêm giá sao",
+        "phụ phí cân nặng spa tính thế nào"
+      ]
+    },
+    {
+      "tag": "spa_pricing",
+      "priority": 87,
+      "patterns": [
+        "bảng giá dịch vụ spa",
+        "bang gia spa",
+        "tắm sấy cho chó mèo bao nhiêu tiền",
+        "tam say bao nhieu",
+        "cắt tỉa tạo kiểu lông grooming giá sao",
+        "cạo lông máu cho chó mèo giá mấy",
+        "khám sức khỏe và tư vấn dinh dưỡng bao nhiêu",
+        "trông giữ thú cưng một ngày bao nhiêu tiền",
+        "vệ sinh tai cắt móng giá sao",
+        "dịch vụ làm đẹp thú cưng có những gói nào"
+      ]
+    },
+    {
+      "tag": "voucher_promo",
+      "priority": 88,
+      "patterns": [
+        "shop có mã giảm giá nào không",
+        "co ma giam gia nao khong",
+        "cho xin voucher khuyến mãi hôm nay",
+        "mã freeship là gì",
+        "chương trình ưu đãi tháng này",
+        "làm sao để nhập mã giảm giá ở giỏ hàng",
+        "mã genzvip20 giảm bao nhiêu",
+        "mã meow50k áp dụng cho đơn mấy trăm",
+        "có code giảm giá spa không",
+        "khuyen mai voucher"
+      ]
+    },
+    {
+      "tag": "vip_membership",
+      "priority": 88,
+      "patterns": [
+        "hạng thành viên vip là gì",
+        "tích điểm hội viên như thế nào",
+        "chi tiêu bao nhiêu được lên hạng bạc vàng kim cương",
+        "hạng kim cương được ưu đãi gì",
+        "quyen loi khach hang than thiet",
+        "làm sao kiểm tra hạng thành viên của mình",
+        "có thẻ vip được giảm thêm phần trăm không"
+      ]
+    },
+    {
+      "tag": "warranty_health_policy",
+      "priority": 91,
+      "patterns": [
+        "chế độ bảo hành thú cưng thế nào",
+        "bao hanh nhu the nao",
+        "bảo hành mấy ngày cho bệnh parvo care",
+        "thú cưng bán ra đã tiêm phòng vắc xin chưa",
+        "có tẩy giun và sổ theo dõi sức khỏe không",
+        "cam kết thuần chủng không lai tạp chứ",
+        "lỗi di truyền có được đổi trả 1 1 không",
+        "chính sách đổi trả hoàn tiền",
+        "shop có uy tín đảm bảo sức khỏe không"
+      ]
+    },
+    {
+      "tag": "shipping_delivery",
+      "priority": 88,
+      "patterns": [
+        "chính sách giao hàng thế nào",
+        "giao hang the nao",
+        "shop có ship tỉnh xa ngoài sài gòn không",
+        "ship về hà nội đà nẵng cần thơ mất bao lâu",
+        "giao hỏa tốc nội thành tphcm mấy tiếng",
+        "vận chuyển chó mèo đi xa có an toàn không",
+        "phí ship bao nhiêu tiền",
+        "đơn bao nhiêu được miễn phí vận chuyển",
+        "có giao bằng xe điều hòa không"
+      ]
+    },
+    {
+      "tag": "payment_vietqr_cod",
+      "priority": 88,
+      "patterns": [
+        "hình thức thanh toán của shop",
+        "thanh toan nhu the nao",
+        "có cho thanh toán tiền mặt khi nhận hàng cod không",
+        "quét mã qr chuyển khoản vietqr như thế nào",
+        "số tài khoản ngân hàng của shop là gì",
+        "mua chó có hỗ trợ trả góp không",
+        "cần đặt cọc trước bao nhiêu phần trăm",
+        "chuyển khoản 24 7 ngân hàng nào"
+      ]
+    },
+    {
+      "tag": "order_tracking_cancel",
+      "priority": 91,
+      "patterns": [
+        "kiểm tra đơn hàng của tôi ở đâu",
+        "kiem tra don hang",
+        "đơn mua của mình đang ở trạng thái nào rồi",
+        "tôi muốn hủy đơn hàng vừa đặt",
+        "huy don hang",
+        "muốn đổi địa chỉ và số điện thoại nhận hàng",
+        "xem lại lịch hẹn spa đã đặt ở đâu",
+        "vào trang hồ sơ đơn mua bằng cách nào",
+        "làm sao hủy lịch hẹn spa"
+      ]
+    },
+    {
+      "tag": "accessories_supplies",
+      "priority": 87,
+      "patterns": [
+        "shop có bán thức ăn hạt và pate không",
+        "cửa hàng bán đồ ăn phụ kiện gì không",
+        "shop có bán đồ ăn cho chó mèo không",
+        "thức ăn cho chó mèo gồm những loại nào",
+        "có bán cát vệ sinh đậu nành không",
+        "balo phi hành gia vận chuyển mèo giá bao nhiêu",
+        "sữa tắm sos khử mùi dưỡng lông",
+        "đồ chơi trụ cào móng và xương gặm cho chó",
+        "có thuốc nhỏ gáy trị ve rận frontline plus không",
+        "gel dinh dưỡng nutri plus gel virbac giá sao",
+        "phụ kiện đồ dùng y tế cho thú cưng",
+        "hat royal canin indoor bao nhieu",
+        "mua đồ chơi phụ kiện thú cưng ở đâu",
+        "có bán sữa tắm và cát mèo không",
+        "xem danh mục thức ăn phụ kiện"
+      ]
+    },
+    {
+      "tag": "how_to_buy_order",
+      "priority": 88,
+      "patterns": [
+        "làm sao để đặt mua thú cưng trên web",
+        "cách mua hàng ở shop thế nào",
+        "tôi muốn đặt mua bé này",
+        "hướng dẫn đặt mua online",
+        "thêm vào giỏ hàng rồi làm gì tiếp",
+        "mua con này thì làm sao",
+        "cách đặt hàng trên meow and woof",
+        "chốt đơn bé này giúp mình",
+        "muon dat mua thi lam the nao"
+      ]
+    },
+    {
+      "tag": "shop_contact_hours",
+      "priority": 87,
+      "patterns": [
+        "địa chỉ cửa hàng ở đâu vậy",
+        "dia chi shop o dau",
+        "mấy giờ shop mở cửa và đóng cửa",
+        "giờ làm việc thế nào",
+        "thứ 7 chủ nhật ngày lễ có mở cửa không",
+        "số điện thoại hotline zalo của shop",
+        "email liên hệ hỗ trợ là gì",
+        "tới xem trực tiếp chó mèo ở đâu",
+        "chỉ đường tới meow and woof"
+      ]
+    },
+    {
+      "tag": "greeting_intro",
+      "priority": 75,
+      "patterns": [
+        "xin chào",
+        "xin chao",
+        "hello shop",
+        "hi ad",
+        "alo có ai ở đó không",
+        "chào buổi sáng",
+        "chào buổi tối",
+        "shop ơi tư vấn giúp mình",
+        "admin ơi",
+        "hey bot"
+      ]
+    },
+    {
+      "tag": "thanks_goodbye",
+      "priority": 80,
+      "patterns": [
+        "cảm ơn shop nhiều nhé",
+        "cam on ban nha",
+        "thanks ad",
+        "thank you so much",
+        "ok tuyệt vời quá",
+        "rất hữu ích cảm ơn nhiều",
+        "tạm biệt nhé",
+        "bye bye hẹn gặp lại",
+        "chúc shop buôn may bán đắt"
+      ]
+    },
+    {
+      "tag": "catalog_lookup",
+      "priority": 80,
+      "patterns": [
+        "giá chó corgi bao nhiêu",
+        "shop có chó poodle không",
+        "mèo anh lông ngắn giá mấy",
+        "tìm chó dưới 5 triệu",
+        "tìm mèo tầm 6 triệu",
+        "muốn mua một bé chó cảnh",
+        "cho xem thông tin giống mèo ragdoll",
+        "shiba inu còn hàng không",
+        "còn bé phốc sóc nào không",
+        "con đó giá bao nhiêu vậy"
+      ]
+    },
+    {
+      "tag": "smalltalk_chitchat",
+      "priority": 70,
+      "patterns": [
+        "bạn ăn cơm chưa",
+        "ban an com chua",
+        "bạn có người yêu chưa",
+        "kể một câu chuyện cười đi",
+        "hát cho mình nghe một bài",
+        "hôm nay thời tiết thế nào",
+        "trời mưa buồn quá",
+        "tôi đang chán quá nói chuyện phiếm đi",
+        "2 cộng 2 bằng mấy",
+        "giải giúp mình bài tập toán",
+        "viết giúp đoạn code python",
+        "tối nay đá bóng đội nào thắng",
+        "bạn ngủ chưa đấy",
+        "làm thơ đi bạn"
+      ]
+    }
+  ]
+}
