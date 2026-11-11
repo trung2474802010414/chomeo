@@ -514,11 +514,196 @@
         "mèo anh lông ngắn giá mấy",
         "tìm chó dưới 5 triệu",
         "tìm mèo tầm 6 triệu",
-        "muốn mua một bé chó cảnh",
         "cho xem thông tin giống mèo ragdoll",
         "shiba inu còn hàng không",
         "còn bé phốc sóc nào không",
         "con đó giá bao nhiêu vậy"
+      ]
+    },
+    {
+      "tag": "buy_dog_general",
+      "priority": 89,
+      "patterns": [
+        "tôi muốn mua chó",
+        "toi muon mua cho",
+        "muốn mua một bé chó cảnh",
+        "muốn tìm mua chó con",
+        "shop có bán chó không",
+        "cho xem các bé chó bên shop",
+        "tư vấn giúp mình mua chó",
+        "đang muốn nuôi một chú cún",
+        "cần tìm một con chó dễ thương",
+        "giá chó bên mình khoảng bao nhiêu",
+        "mua chó giá tầm nào vậy shop",
+        "mua chó",
+        "tìm chó",
+        "xem chó cảnh",
+        "muon nuoi cho",
+        "tu van mua cun"
+      ]
+    },
+    {
+      "tag": "buy_cat_general",
+      "priority": 89,
+      "patterns": [
+        "tôi muốn mua mèo",
+        "toi muon mua meo",
+        "muốn mua một bé mèo cảnh",
+        "muốn tìm mua mèo con",
+        "shop có bán mèo không",
+        "cho mình xem các bé mèo đẹp",
+        "tư vấn giúp mình chọn mèo",
+        "đang muốn nuôi một em mèo",
+        "giá mèo bên shop khoảng bao nhiêu",
+        "mua mèo",
+        "tìm mèo",
+        "xem mèo cảnh",
+        "muon nuoi meo",
+        "tu van mua meo"
+      ]
+    },
+    {
+      "tag": "buy_pet_general",
+      "priority": 84,
+      "patterns": [
+        "tôi muốn mua thú cưng",
+        "muốn tìm mua pet",
+        "shop có bán thú cưng gì vậy",
+        "tư vấn chọn thú cưng giúp mình",
+        "muốn đón một bé về nuôi",
+        "giá cả chó mèo bên shop thế nào",
+        "tu van giup minh nhe"
+      ]
+    },
+    {
+      "tag": "pet_age_gender_origin",
+      "priority": 86,
+      "patterns": [
+        "chó bên shop mấy tháng tuổi rồi",
+        "mèo con mấy tháng mới bán",
+        "có bé đực và bé cái để chọn không",
+        "chọn giới tính đực cái được không",
+        "chó trưởng thành nặng khoảng mấy kg",
+        "có nhiều màu lông để chọn không",
+        "gửi video xem mặt bé trực tiếp được không",
+        "nguồn gốc xuất xứ chó mèo ở đâu",
+        "be may thang tuoi",
+        "chon duc cai duoc ko"
+      ]
+    },
+    {
+      "tag": "monthly_cost_estimate",
+      "priority": 87,
+      "patterns": [
+        "nuôi chó tốn bao nhiêu tiền 1 tháng",
+        "chi phí nuôi mèo mỗi tháng khoảng mấy trăm",
+        "nuôi poodle một tháng hết nhiều không",
+        "sinh viên nuôi mèo có tốn kém không",
+        "nuôi chó cảnh tốn kém lắm không shop",
+        "tiền ăn tiền cát cho mèo hàng tháng",
+        "chi phi nuoi cho meo 1 thang"
+      ]
+    },
+    {
+      "tag": "pet_training_behavior",
+      "priority": 88,
+      "patterns": [
+        "cách dạy chó đi vệ sinh đúng chỗ",
+        "huấn luyện chó con không ị bậy",
+        "mèo cào ghế sofa phải làm sao",
+        "chó hay sủa nhiều vào ban đêm",
+        "cún con hay cắn dép cắn đồ",
+        "dạy chó bắt tay ngồi xuống như thế nào",
+        "cách tập cho mèo đi vệ sinh vào thau cát",
+        "cho hay sua nhieu phai lam sao",
+        "day cho di ve sinh",
+        "meo cao ghe sofa"
+      ]
+    },
+    {
+      "tag": "shedding_grooming_tips",
+      "priority": 87,
+      "patterns": [
+        "chó rụng lông nhiều quá phải làm sao",
+        "mèo bị rụng lông nhiều cách khắc phục",
+        "nên tắm cho chó mấy ngày một lần",
+        "mèo bao lâu tắm một lần được",
+        "cách vệ sinh tai và cắt móng cho thú cưng",
+        "chó bị hôi miệng và mùi cơ thể",
+        "meo bi rung long nhieu",
+        "cach chong rung long cho cho"
+      ]
+    },
+    {
+      "tag": "vaccination_schedule",
+      "priority": 88,
+      "patterns": [
+        "lịch tiêm phòng cho chó con gồm mấy mũi",
+        "mèo con tiêm vắc xin vào tháng thứ mấy",
+        "bao lâu tẩy giun cho chó mèo một lần",
+        "chó cần tiêm phòng dại khi nào",
+        "tiêm mũi 5 bệnh 7 bệnh là gì",
+        "lich tiem phong cho meo",
+        "bao lau tay giun 1 lan"
+      ]
+    },
+    {
+      "tag": "spay_neuter_breeding",
+      "priority": 86,
+      "patterns": [
+        "mèo mấy tháng thì triệt sản được",
+        "có nên triệt sản cho chó mèo không",
+        "mèo gào đực kêu suốt đêm phải làm sao",
+        "chó mấy tháng tuổi có thể phối giống",
+        "chó mèo mang thai khoảng bao nhiêu ngày đẻ",
+        "triet san cho meo may thang"
+      ]
+    },
+    {
+      "tag": "pet_naming_ideas",
+      "priority": 84,
+      "patterns": [
+        "gợi ý đặt tên hay cho chó",
+        "đặt tên gì cho bé mèo dễ thương",
+        "những cái tên cute cho cún con",
+        "tên tiếng anh hay cho chó poodle corgi",
+        "dat ten gi cho meo"
+      ]
+    },
+    {
+      "tag": "cohabitation_multi_pet",
+      "priority": 86,
+      "patterns": [
+        "nuôi chung chó với mèo trong nhà được không",
+        "nhà đang nuôi mèo đón thêm chó có đánh nhau không",
+        "cách làm quen cho mèo cũ và mèo mới",
+        "nuoi chung cho va meo co duoc khong"
+      ]
+    },
+    {
+      "tag": "short_affirmative",
+      "priority": 72,
+      "patterns": [
+        "ok shop",
+        "ok bạn",
+        "dạ có",
+        "có ạ",
+        "ừ đúng rồi",
+        "vâng ạ",
+        "được đấy tư vấn tiếp đi",
+        "kể thêm đi bạn",
+        "chi tiết hơn đi"
+      ]
+    },
+    {
+      "tag": "short_negative",
+      "priority": 72,
+      "patterns": [
+        "dạ không",
+        "không cần nữa",
+        "thôi cảm ơn",
+        "chưa cần đâu",
+        "để sau nhé"
       ]
     },
     {
@@ -540,6 +725,26 @@
         "bạn ngủ chưa đấy",
         "làm thơ đi bạn"
       ]
+    }
+  ],
+  "custom_qas": [
+    {
+      "question": "shop có giấy vka tica hay gắn microchip cho chó mèo không",
+      "patterns": [
+        "có giấy vka hay phả hệ không",
+        "có gắn microchip định danh không",
+        "làm giấy tờ thuần chủng tica"
+      ],
+      "answer": "📜 Toàn bộ bé tại **Meow & Woof** đều đảm bảo thuần chủng kèm **sổ theo dõi tiêm phòng thú y** và **hợp đồng bảo hành 15 ngày**. Với các bé dòng cao cấp cần **giấy VKA / TICA hoặc gắn Microchip**, bạn liên hệ Hotline **`0905.123.456`** để shop hỗ trợ làm thủ tục trọn gói theo yêu cầu nhé!"
+    },
+    {
+      "question": "có nhận trông giữ ký gửi chó mèo dịp lễ tết không",
+      "patterns": [
+        "dịp lễ tết có nhận trông giữ pet không",
+        "gửi chó mèo qua tết giá bao nhiêu",
+        "khách sạn thú cưng mở xuyên tết không"
+      ],
+      "answer": "🏨 **Meow & Woof mở cửa xuyên suốt cả Thứ 7, Chủ Nhật và ngày Lễ** (08:00 – 21:00)!\n• Gói **Trông giữ thú cưng / Khách sạn** giá chuẩn **200,000 đ/ngày** (<5kg), phòng điều hòa sạch sẽ, cập nhật video bé mỗi ngày.\n👉 Bạn đặt trước tại trang **Dịch vụ Spa (`/spa`)** để giữ phòng nhé!"
     }
   ]
 }

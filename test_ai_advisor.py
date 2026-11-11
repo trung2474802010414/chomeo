@@ -99,6 +99,41 @@ class TestPetShopAIAdvisor(unittest.TestCase):
         self.assertIn("GENZVIP20", ctx)
         self.assertIn("150,000 đ", ctx)
 
+    def test_8_general_buy_and_rag_traits_and_petcare_faq(self):
+        """Kiểm tra mua chó/mèo tổng quát, tìm theo đặc điểm RAG, hỏi đáp nuôi dưỡng & từ ngắn."""
+        res_buy_dog = self.fallback.consult("tôi muốn mua chó")
+        self.assertIn("20 giống Chó", res_buy_dog)
+        self.assertIn("4,200,000", res_buy_dog)
+
+        res_buy_cat = self.fallback.consult("cho mình xem các bé mèo bên shop")
+        self.assertIn("12 giống Mèo", res_buy_cat)
+        self.assertNotIn("20 giống Chó", res_buy_cat)
+
+        res_white_dog = self.fallback.consult("có chó nào màu trắng tuyết không?")
+        self.assertIn("Phốc Sóc", res_white_dog)
+        self.assertIn("Samoyed", res_white_dog)
+
+        res_mouser = self.fallback.consult("mèo nào bắt chuột giỏi nhất shop")
+        self.assertIn("Mèo Mỹ Lông Ngắn", res_mouser)
+        self.assertIn("4,900,000", res_mouser)
+
+        res_cost = self.fallback.consult("nuôi mèo một tháng tốn khoảng bao nhiêu tiền")
+        self.assertIn("Royal Canin", res_cost)
+
+        res_train = self.fallback.consult("cách dạy chó con đi vệ sinh đúng chỗ")
+        self.assertIn("7 ngày", res_train)
+
+        res_vaccine = self.fallback.consult("lịch tiêm phòng cho chó con gồm mấy mũi")
+        self.assertIn("6–8 tuần", res_vaccine)
+
+        history = [
+            {"role": "user", "content": "Shop có chó Corgi không?"},
+            {"role": "assistant", "content": "Chó Corgi Pembroke (`DOG-PET-003`) giá 7,900,000 đ"},
+        ]
+        res_ok = self.fallback.consult("ok", history=history)
+        self.assertIn("Corgi", res_ok)
+        self.assertIn("7,400,000", res_ok)
+
 
 if __name__ == "__main__":
     unittest.main()

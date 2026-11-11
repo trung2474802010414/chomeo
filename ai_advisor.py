@@ -118,17 +118,23 @@ class TrainedIntentClassifier:
         self.is_trained: bool = False
         self.train()
 
+    FILLER_TOKENS = {
+        "shop", "ad", "admin", "oi", "nha", "nhe", "a", "vay", "the",
+        "toi", "minh", "ban", "em", "anh", "chi", "giup", "minh",
+    }
+
     def _featurize(self, text: str) -> Counter:
         """Trích xuất đặc trưng kết hợp Word Unigram, Word Bigram và Intra-word Char 3-gram."""
         tokens = preprocess_vi_tokens(text, self.synonyms)
         feats: Counter = Counter()
         for t in tokens:
-            feats[f"w:{t}"] += 2.0
-            if len(t) >= 3:
+            w_weight = 0.7 if t in self.FILLER_TOKENS else 2.2
+            feats[f"w:{t}"] += w_weight
+            if len(t) >= 3 and t not in self.FILLER_TOKENS:
                 for i in range(len(t) - 2):
-                    feats[f"c3:{t[i:i + 3]}"] += 0.25
+                    feats[f"c3:{t[i:i + 3]}"] += 0.12
         for i in range(len(tokens) - 1):
-            feats[f"bg:{tokens[i]}_{tokens[i + 1]}"] += 2.8
+            feats[f"bg:{tokens[i]}_{tokens[i + 1]}"] += 3.0
         return feats
 
     def train(self, override_docs: Optional[List[Tuple[str, str]]] = None) -> Dict[str, Any]:
@@ -184,7 +190,7 @@ class TrainedIntentClassifier:
             vec: Dict[str, float] = {}
             sq_sum = 0.0
             for k, tf_val in raw_tf.items():
-                w = (1.0 + math.log(tf_val)) * self.idf.get(k, 1.0)
+                w = tf_val * self.idf.get(k, 1.0)
                 vec[k] = w
                 sq_sum += w * w
             norm = math.sqrt(sq_sum) or 1.0
@@ -218,7 +224,7 @@ class TrainedIntentClassifier:
         q_sq = 0.0
         for k, tf_val in raw_tf.items():
             if k in self.idf:
-                w = (1.0 + math.log(tf_val)) * self.idf[k]
+                w = tf_val * self.idf[k]
                 q_vec[k] = w
                 q_sq += w * w
 
@@ -246,7 +252,7 @@ class TrainedIntentClassifier:
                     cdot += q_w * c_w
             csim = cdot / (q_norm * c_norm)
             psim = max_pattern_sim.get(tag, 0.0)
-            combined = 0.55 * psim + 0.45 * csim
+            combined = 0.72 * psim + 0.28 * csim
             if combined > 0:
                 intent_scores[tag] = round(combined, 4)
 
@@ -260,6 +266,189 @@ class TrainedIntentClassifier:
         )
         best_tag, best_score = ranked[0]
         return best_tag, best_score, intent_scores
+
+
+class TrainedCatalogRAGRetriever:
+    """
+    Bộ tìm kiếm ngữ nghĩa TF-IDF + Coverage trực tiếp trên toàn bộ 42 sản phẩm/thú cưng & Q&A tự dạy.
+    Cho phép khách hỏi theo ngoại hình, màu sắc, tính cách, công dụng (`màu trắng`, `bắt chuột`, `mắt xanh`...).
+    """
+
+    STOPWORDS = {
+        "cho", "meo", "cun", "pet", "thu", "cung", "toi", "minh", "em", "anh", "chi",
+        "ban", "shop", "ad", "admin", "muon", "mua", "tim", "xem", "co", "khong",
+        "nao", "gi", "gia", "bao", "nhieu", "ben", "cua", "hang", "be", "con",
+        "duoc", "nha", "nhe", "a", "oi", "va", "la", "thi", "voi", "ve", "mot",
+        "hay", "hoac", "rat", "sieu", "cuc", "ky", "nhat", "the", "vay", "sao",
+        "mau", "loai", "giong", "tinh", "cach", "canh", "thuan", "chung", "dep",
+        "xinh", "de", "thuong", "dang", "yeu", "ngo", "tot", "cac", "nhung", "chu",
+        "tu", "van", "chon", "nuoi", "giup", "hoi", "biet", "coi", "nay", "kia", "do",
+    }
+
+    def __init__(self, pets: List[Dict[str, Any]], dataset_path: Optional[str] = None):
+        self.pets = pets
+        self.dataset_path = dataset_path or TrainedIntentClassifier.DEFAULT_SCENARIOS_PATH
+        self.custom_qas: List[Dict[str, Any]] = []
+        self.idf: Dict[str, float] = {}
+        self.pet_docs: List[Tuple[Dict[str, Any], set, set, Dict[str, float], float]] = []
+        self.qa_docs: List[Tuple[Dict[str, Any], set, set, Dict[str, float], float]] = []
+        self._build_index()
+
+    def _tokenize_content(self, text: str) -> Tuple[List[str], List[str]]:
+        tokens = [t for t in preprocess_vi_tokens(text) if t not in self.STOPWORDS and len(t) >= 2]
+        bigrams = [f"{tokens[i]}_{tokens[i + 1]}" for i in range(len(tokens) - 1)]
+        return tokens, bigrams
+
+    def _content_feats(self, text: str) -> Tuple[Counter, set, set]:
+        tokens, bigrams = self._tokenize_content(text)
+        feats: Counter = Counter()
+        for t in tokens:
+            feats[f"w:{t}"] += 1.0
+        for bg in bigrams:
+            feats[f"bg:{bg}"] += 1.5
+        return feats, set(tokens), set(bigrams)
+
+    def _load_custom_qas(self):
+        self.custom_qas = []
+        if self.dataset_path and os.path.exists(self.dataset_path):
+            try:
+                with open(self.dataset_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                qas = data.get("custom_qas", [])
+                if isinstance(qas, list):
+                    self.custom_qas = [q for q in qas if isinstance(q, dict) and q.get("answer")]
+            except Exception:
+                pass
+
+    def _build_index(self):
+        self._load_custom_qas()
+        raw_pet_docs: List[Tuple[Dict[str, Any], Counter, set, set]] = []
+        raw_qa_docs: List[Tuple[Dict[str, Any], Counter, set, set]] = []
+        df: Counter = Counter()
+
+        for p in self.pets:
+            doc_text = f"{p.get('name', '')} {p.get('breed', '')} {p.get('category', '')} {p.get('description', '')}"
+            feats, tok_set, bg_set = self._content_feats(doc_text)
+            if feats:
+                raw_pet_docs.append((p, feats, tok_set, bg_set))
+                for k in feats:
+                    df[k] += 1
+
+        for qa in self.custom_qas:
+            q_text = " ".join(qa.get("patterns", [])) + " " + str(qa.get("question", ""))
+            feats, tok_set, bg_set = self._content_feats(q_text)
+            if feats:
+                raw_qa_docs.append((qa, feats, tok_set, bg_set))
+                for k in feats:
+                    df[k] += 1
+
+        total = max(len(raw_pet_docs) + len(raw_qa_docs), 1)
+        self.default_idf = math.log(1.0 + total) + 1.0
+        for k, freq in df.items():
+            self.idf[k] = math.log((1.0 + total) / (1.0 + freq)) + 1.0
+
+        def _vec(feats: Counter) -> Tuple[Dict[str, float], float]:
+            v: Dict[str, float] = {}
+            sq = 0.0
+            for k, tf_val in feats.items():
+                w = (1.0 + math.log(tf_val)) * self.idf.get(k, 1.0)
+                v[k] = w
+                sq += w * w
+            return v, (math.sqrt(sq) or 1.0)
+
+        self.pet_docs = [(p, tok_set, bg_set, *_vec(feats)) for p, feats, tok_set, bg_set in raw_pet_docs]
+        self.qa_docs = [(qa, tok_set, bg_set, *_vec(feats)) for qa, feats, tok_set, bg_set in raw_qa_docs]
+
+    def _score_query_against_doc(
+        self,
+        q_tok_set: set,
+        q_bg_set: set,
+        q_vec: Dict[str, float],
+        q_norm: float,
+        doc_tok_set: set,
+        doc_bg_set: set,
+        d_vec: Dict[str, float],
+        d_norm: float,
+    ) -> float:
+        if not q_tok_set:
+            return 0.0
+        total_q_idf = sum(self.idf.get(f"w:{t}", self.default_idf) for t in q_tok_set) or 1.0
+        matched_q_idf = sum(self.idf.get(f"w:{t}", self.default_idf) for t in (q_tok_set & doc_tok_set))
+        if matched_q_idf <= 0.0:
+            return 0.0
+        coverage = matched_q_idf / total_q_idf
+        cos_sim = 0.0
+        if q_vec:
+            dot = sum(q_w * d_vec.get(k, 0.0) for k, q_w in q_vec.items())
+            cos_sim = dot / (q_norm * d_norm)
+        bg_hits = len(q_bg_set & doc_bg_set)
+        bg_bonus = min(0.18, 0.09 * bg_hits)
+        return round(0.65 * coverage + 0.35 * cos_sim + bg_bonus, 4)
+
+    def _build_query_vec(self, feats: Counter) -> Tuple[Dict[str, float], float]:
+        q_vec: Dict[str, float] = {}
+        q_sq = 0.0
+        for k, tf_val in feats.items():
+            if k in self.idf:
+                w = (1.0 + math.log(tf_val)) * self.idf[k]
+                q_vec[k] = w
+                q_sq += w * w
+        return q_vec, (math.sqrt(q_sq) or 1.0)
+
+    def search_custom_qa(self, query: str) -> Tuple[Optional[Dict[str, Any]], float]:
+        if not self.qa_docs:
+            return None, 0.0
+        # Đối với Q&A tự dạy giữ lại cả 'cho', 'meo' để khớp chính xác câu hỏi đã dạy
+        raw_toks = [t for t in preprocess_vi_tokens(query) if len(t) >= 2 and t not in {"toi", "minh", "em", "anh", "chi", "ban", "shop", "ad", "oi", "nha", "nhe", "a"}]
+        raw_bgs = [f"{raw_toks[i]}_{raw_toks[i + 1]}" for i in range(len(raw_toks) - 1)]
+        feats: Counter = Counter()
+        for t in raw_toks:
+            feats[f"w:{t}"] += 1.0
+        for bg in raw_bgs:
+            feats[f"bg:{bg}"] += 1.5
+        if not raw_toks:
+            return None, 0.0
+        q_vec, q_norm = self._build_query_vec(feats)
+        q_tok_set, q_bg_set = set(raw_toks), set(raw_bgs)
+
+        best_qa, best_sim = None, 0.0
+        for qa, d_tok_set, d_bg_set, d_vec, d_norm in self.qa_docs:
+            qa_text = " ".join(qa.get("patterns", [])) + " " + str(qa.get("question", ""))
+            qa_raw_toks = {t for t in preprocess_vi_tokens(qa_text) if len(t) >= 2}
+            combined_tok_set = d_tok_set | qa_raw_toks
+            sim = self._score_query_against_doc(
+                q_tok_set, q_bg_set, q_vec, q_norm,
+                combined_tok_set, d_bg_set, d_vec, d_norm,
+            )
+            if sim > best_sim:
+                best_sim = sim
+                best_qa = qa
+        return best_qa, best_sim
+
+    def retrieve_pets(
+        self,
+        query: str,
+        pet_type_filter: Optional[str] = None,
+        top_k: int = 4,
+    ) -> List[Tuple[Dict[str, Any], float]]:
+        feats, q_tok_set, q_bg_set = self._content_feats(query)
+        if not q_tok_set:
+            return []
+        q_vec, q_norm = self._build_query_vec(feats)
+
+        scored: List[Tuple[Dict[str, Any], float]] = []
+        for p, d_tok_set, d_bg_set, d_vec, d_norm in self.pet_docs:
+            if pet_type_filter in ("Chó", "Mèo"):
+                if p.get("pet_type") != pet_type_filter and "Chó & Mèo" not in str(p.get("pet_type", "")):
+                    continue
+            sim = self._score_query_against_doc(
+                q_tok_set, q_bg_set, q_vec, q_norm,
+                d_tok_set, d_bg_set, d_vec, d_norm,
+            )
+            if sim > 0:
+                scored.append((p, sim))
+        scored.sort(key=lambda x: x[1], reverse=True)
+        return scored[:top_k]
 
 
 # =============================================================================
@@ -473,6 +662,19 @@ class PetShopKnowledgeBase:
                 f"| Giá: {int(p.get('price', 0)):,} đ | Tồn kho: {p.get('stock', 1)} "
                 f"| Mô tả: {p.get('description', '')}"
             )
+
+        sc_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "ai_training_scenarios.json")
+        if os.path.exists(sc_path):
+            try:
+                with open(sc_path, "r", encoding="utf-8") as f:
+                    qas = json.load(f).get("custom_qas", [])
+                if qas:
+                    lines.append("\n--- KIẾN THỨC BỔ SUNG TỪ HUẤN LUYỆN CỬA HÀNG ---")
+                    for qa in qas:
+                        if isinstance(qa, dict) and qa.get("question") and qa.get("answer"):
+                            lines.append(f"• Hỏi: {qa['question']} => Đáp: {qa['answer']}")
+            except Exception:
+                pass
         return "\n".join(lines)
 
 
@@ -664,6 +866,10 @@ class SmartSemanticFallbackAdvisor:
         self.sku_map: Dict[str, Dict[str, Any]] = {
             str(p.get("sku", "")): p for p in self.kb.pets if p.get("sku")
         }
+        self.rag = TrainedCatalogRAGRetriever(
+            self.kb.pets,
+            dataset_path=self.classifier.dataset_path,
+        )
 
     # ------------------------------------------------------------------
     # Trích xuất thực thể & Bộ nhớ hội thoại
@@ -779,17 +985,46 @@ class SmartSemanticFallbackAdvisor:
         norm = normalize_vi(text)
         return any(re.search(pat, norm) for pat in self.COREF_PATTERNS)
 
-    def _compatible_context_pet(self, norm_q: str, last_pet: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    def _detect_pet_type_intent(self, raw_q: str, norm_q: str) -> Optional[str]:
+        """Phân biệt chính xác khách hỏi Chó hay Mèo (tránh nhầm từ 'cho' trong 'cho mình xem mèo')."""
+        low = str(raw_q or "").lower()
+        has_dog = bool(re.search(r"\b(?:chó|cún|cậu vàng)\b", low))
+        has_cat = bool(re.search(r"\b(?:mèo|hoàng thượng|boss mèo)\b", low))
+
+        if not has_cat and re.search(r"\bmeo\b", norm_q):
+            has_cat = True
+
+        if not has_dog:
+            if re.search(r"\bcun\b", norm_q):
+                has_dog = True
+            else:
+                prep_guard = r"(?!\s*(?:minh|toi|em|anh|chi|ban|khach|nha|nguoi|ai|biet|xem|hoi|thay|meo|be|con|cun|no|chung|an|uong|tam|ngu|lam|duoc))"
+                has_vi_accents = bool(re.search(r"[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]", low))
+                if re.search(rf"\b(?:giong|mua|tim|ban|nuoi|con|be|em|thich|gia|tam)\s+cho\b{prep_guard}", norm_q):
+                    has_dog = True
+                elif not has_vi_accents and re.search(r"\bcho\s+(?:duoi|tren|tam|khoang|gia|mau|long|chan|tai|mat|nao|de|khon|re|dat|dep|xinh|nho|to|con|canh|hay|khong|meo)\b", norm_q):
+                    if not re.search(r"\b(?:hat|thuc an|pate|cat|sua tam|do choi|phu kien|thuoc|tam|cat tia|tiem|tay giun|triet san|dat ten|danh|gui|kham)\s+cho\s+meo\b", norm_q):
+                        has_dog = True
+                elif re.search(r"\bcho\s+(?:va|hay)\s+meo\b", norm_q):
+                    has_dog = True
+
+        if has_dog and has_cat:
+            return "BOTH"
+        if has_dog:
+            return "Chó"
+        if has_cat:
+            return "Mèo"
+        return None
+
+    def _compatible_context_pet(self, raw_q: str, norm_q: str, last_pet: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         """Kiểm tra thú cưng trong trí nhớ có mâu thuẫn loại (chó vs mèo) với câu hiện tại không."""
         if not last_pet:
             return None
-        tokens = set(preprocess_vi_tokens(norm_q))
         ptype = normalize_vi(str(last_pet.get("pet_type", "")))
-        mentions_dog = ("cho" in tokens or "cun" in tokens) and ("cho " in norm_q or "cun" in tokens or "cho" in tokens)
-        mentions_cat = "meo" in tokens
-        if mentions_cat and not mentions_dog and ptype == "cho":
+        detected = self._detect_pet_type_intent(raw_q, norm_q)
+        if detected == "Mèo" and ptype == "cho":
             return None
-        if mentions_dog and not mentions_cat and ptype == "meo":
+        if detected == "Chó" and ptype == "meo":
             return None
         return last_pet
 
@@ -843,7 +1078,7 @@ class SmartSemanticFallbackAdvisor:
         cur_name = self._extract_person_name(query) or mem["user_name"]
         tag, score, _ = self.classifier.predict(query)
         breeds = self._find_items_by_alias(query, self.BREED_ALIASES)
-        context_pet = breeds[0] if breeds else self._compatible_context_pet(normalize_vi(query), mem.get("last_pet"))
+        context_pet = breeds[0] if breeds else self._compatible_context_pet(query, normalize_vi(query), mem.get("last_pet"))
 
         parts = [f"Intent={tag} ({score:.2f})"]
         if cur_name:
@@ -887,7 +1122,8 @@ class SmartSemanticFallbackAdvisor:
         supplies_in_q = self._find_items_by_alias(raw_q, self.SUPPLY_ALIASES)
         is_coref = self._has_coref_pronoun(raw_q)
         explicit_item = breeds_in_q[0] if breeds_in_q else (supplies_in_q[0] if supplies_in_q else None)
-        compat_mem_pet = self._compatible_context_pet(norm_q, mem.get("last_pet"))
+        pet_type_intent = self._detect_pet_type_intent(raw_q, norm_q)
+        compat_mem_pet = self._compatible_context_pet(raw_q, norm_q, mem.get("last_pet"))
         active_pet = explicit_item if explicit_item else (compat_mem_pet if is_coref else None)
         topic_pet = explicit_item or compat_mem_pet
 
@@ -903,11 +1139,17 @@ class SmartSemanticFallbackAdvisor:
                 f"Hôm nay {cur_name} muốn tìm hiểu bé cún/mèo nào, đặt lịch Spa hay xem mã giảm giá ạ?"
             )
 
+        # ----- Tình huống 1b: Phản hồi theo tri thức Q&A tự dạy trong custom_qas -----
+        qa_match, qa_score = self.rag.search_custom_qa(raw_q)
+        if qa_match and qa_score >= 0.62:
+            return f"{prefix}{qa_match['answer']}"
+
         # ----- Tình huống 2: Tình huống khẩn cấp y tế / thú cưng có dấu hiệu bệnh -----
         medical_cues = any(w in norm_q for w in [
-            "tieu chay", "non mua", "non oi", "di ngoai", "bo an", "sot",
+            "tieu chay", "non mua", "non oi", "di ngoai", "bo an", "bi sot",
             "ho khac", "chay nuoc mui", "hat hoi", "ve ran", "bo chet",
-            "nam da", "parvo", "care", "bi benh", "bi om", "cap cuu", "soc nhiet"
+            "nam da", "bi parvo", "bi care", "benh parvo", "benh care",
+            "bi benh", "bi om", "cap cuu", "soc nhiet"
         ])
         if medical_cues or (intent == "pet_emergency_health" and confidence >= 0.30):
             return self._handle_emergency_health(norm_q, topic_pet, user_name)
@@ -936,11 +1178,22 @@ class SmartSemanticFallbackAdvisor:
             return self._handle_comparison(norm_q, breeds_in_q, mem.get("last_pet"), user_name)
 
         # ----- Tình huống 6: Con rẻ nhất / đắt nhất -----
-        if any(w in norm_q for w in ["re nhat", "thap nhat", "mem nhat"]) or (intent == "cheapest_pet" and confidence >= 0.33):
-            return self._handle_cheapest_or_expensive(norm_q, mode="cheapest", user_name=user_name)
+        q_tok_set = set(preprocess_vi_tokens(norm_q))
+        cheap_cues = any(w in norm_q for w in ["re nhat", "thap nhat", "mem nhat"]) or (
+            intent == "cheapest_pet"
+            and confidence >= 0.35
+            and bool(q_tok_set & {"re", "thap", "mem", "gia", "tien"})
+        )
+        if cheap_cues:
+            return self._handle_cheapest_or_expensive(raw_q, norm_q, mode="cheapest", user_name=user_name)
 
-        if any(w in norm_q for w in ["dat nhat", "cao nhat", "xin nhat", "cao cap nhat"]) or (intent == "most_expensive_pet" and confidence >= 0.33):
-            return self._handle_cheapest_or_expensive(norm_q, mode="expensive", user_name=user_name)
+        exp_cues = any(w in norm_q for w in ["dat nhat", "cao nhat", "xin nhat", "cao cap nhat"]) or (
+            intent == "most_expensive_pet"
+            and confidence >= 0.35
+            and bool(q_tok_set & {"dat", "cao", "mac", "xin", "vip", "gia", "sang"})
+        )
+        if exp_cues:
+            return self._handle_cheapest_or_expensive(raw_q, norm_q, mode="expensive", user_name=user_name)
 
         # ----- Tình huống 7: Hỏi ăn gì / chăm sóc dinh dưỡng (bao gồm "con đó ăn gì?") -----
         nutrition_cues = any(w in norm_q for w in ["an gi", "an hat", "bieng an", "ken an", "cham soc", "uong sua", "xuong ga", "thuc don"])
@@ -956,14 +1209,15 @@ class SmartSemanticFallbackAdvisor:
                 "• Nếu cần **đổi địa chỉ giao gấp** hoặc **hủy đơn/lịch Spa vừa đặt**, bạn gọi ngay Hotline/Zalo **`0905.123.456`** để nhân viên xử lý ngay lập tức nhé!"
             )
 
-        buy_cues = any(w in norm_q for w in ["dat mua", "cach mua", "mua hang", "chot don", "mua con nay", "mua be nay", "gio hang lam gi"])
-        if buy_cues or (intent == "how_to_buy_order" and confidence >= 0.33):
+        buy_cues = any(w in norm_q for w in ["dat mua", "cach mua", "mua hang", "chot don", "mua con nay", "mua be nay", "mua em nay", "gio hang lam gi", "mua online", "dat hang"])
+        has_howto_word = any(w in norm_q for w in ["dat", "cach", "online", "gio hang", "con nay", "be nay"])
+        if buy_cues or (intent == "how_to_buy_order" and confidence >= 0.36 and (has_howto_word or explicit_item is not None)):
             return self._handle_how_to_buy(topic_pet, user_name)
 
         # ----- Tình huống 9: Tra cứu khoảng giá ("tìm chó dưới 5 triệu") -----
         if price_filter:
             min_p, max_p, range_label = price_filter
-            cat_f = "Chó" if "cho" in preprocess_vi_tokens(raw_q) else ("Mèo" if "meo" in preprocess_vi_tokens(raw_q) else None)
+            cat_f = pet_type_intent if pet_type_intent in ("Chó", "Mèo") else None
             matched = sorted(
                 self.kb.search_pets(min_price=min_p, max_price=max_p, category=cat_f, pets_only=True),
                 key=lambda x: float(x.get("price", 0)),
@@ -985,10 +1239,14 @@ class SmartSemanticFallbackAdvisor:
 
         # ----- Tình huống 10: Hỏi Spa (có tính cân nặng kg nếu khách cung cấp!) -----
         spa_cues = any(w in norm_q for w in ["spa", "tam say", "tam cho", "tam meo", "cat tia", "tia long", "grooming", "cao long", "trong giu", "khach san", "kham suc khoe"])
-        if spa_cues or (intent in {"spa_booking_howto", "spa_pricing"} and confidence >= 0.31):
+        if spa_cues or weight_kg is not None or (intent in {"spa_booking_howto", "spa_pricing"} and confidence >= 0.31):
             return self._handle_spa(norm_q, weight_kg, topic_pet, intent, user_name)
 
-        # ----- Tình huống 11: Bảo hành / tiêm phòng / giao hàng / thanh toán / VIP / voucher / địa chỉ -----
+        # ----- Tình huống 10b: Các câu hỏi thực tế chuyên sâu về nuôi dưỡng & chăm sóc -----
+        vac_sched_cues = any(w in norm_q for w in ["lich tiem", "may mui", "thang thu may", "tay giun", "phong dai", "5 benh", "7 benh", "4 benh"])
+        if vac_sched_cues or (intent == "vaccination_schedule" and confidence >= 0.34):
+            return self._handle_vaccination_schedule(pet_type_intent, topic_pet, user_name)
+
         if any(w in norm_q for w in ["bao hanh", "tiem phong", "vac xin", "parvo", "care", "thuan chung", "doi tra", "so suc khoe"]) or (
             intent == "warranty_health_policy" and confidence >= 0.34
         ):
@@ -1003,6 +1261,37 @@ class SmartSemanticFallbackAdvisor:
                 f"💉 **Tiêm phòng**: {self.kb.policies['vaccination']}"
             )
 
+        cost_cues = any(w in norm_q for w in ["ton bao nhieu", "chi phi nuoi", "1 thang", "moi thang", "tien an", "ton kem", "sinh vien nuoi"])
+        if cost_cues or (intent == "monthly_cost_estimate" and confidence >= 0.34):
+            return self._handle_monthly_cost(pet_type_intent, topic_pet, user_name)
+
+        train_cues = any(w in norm_q for w in ["di ve sinh", "i bay", "dai bay", "thau cat", "cao ghe", "sofa", "hay sua", "sua nhieu", "can dep", "can do", "huan luyen", "day cho", "day meo", "bat tay"])
+        if train_cues or (intent == "pet_training_behavior" and confidence >= 0.34):
+            return self._handle_training_behavior(norm_q, pet_type_intent, user_name)
+
+        shedding_cues = ("it rung long" not in norm_q) and any(
+            w in norm_q for w in ["rung long", "bao lau tam", "may ngay tam", "may tuan tam", "ve sinh tai", "cat mong", "hoi mieng", "mui co the", "mui hoi"]
+        )
+        if shedding_cues or (intent == "shedding_grooming_tips" and confidence >= 0.34):
+            return self._handle_shedding_grooming(norm_q, pet_type_intent, user_name)
+
+        spay_cues = any(w in norm_q for w in ["triet san", "gao duc", "dong duc", "phoi giong", "mang thai", "may ngay de"])
+        if spay_cues or (intent == "spay_neuter_breeding" and confidence >= 0.34):
+            return self._handle_spay_neuter(pet_type_intent, user_name)
+
+        naming_cues = any(w in norm_q for w in ["dat ten", "ten hay cho", "ten cute"])
+        if naming_cues or (intent == "pet_naming_ideas" and confidence >= 0.34):
+            return self._handle_pet_naming(pet_type_intent, user_name)
+
+        cohab_cues = any(w in norm_q for w in ["nuoi chung", "danh nhau", "lam quen", "meo cu", "meo moi"])
+        if cohab_cues or (intent == "cohabitation_multi_pet" and confidence >= 0.34):
+            return self._handle_cohabitation(user_name)
+
+        age_cues = any(w in norm_q for w in ["may thang", "bao nhieu thang", "duc cai", "duc hay cai", "gioi tinh", "truong thanh", "nguon goc", "xuat xu", "xem video", "xem mat"])
+        if age_cues or (intent == "pet_age_gender_origin" and confidence >= 0.34):
+            return self._handle_pet_age_gender_origin(pet_type_intent, topic_pet, user_name)
+
+        # ----- Tình huống 11: Giao hàng / thanh toán / VIP / voucher / địa chỉ -----
         if any(w in norm_q for w in ["ship", "giao hang", "van chuyen", "hoa toc", "ha noi", "tinh xa"]) or (
             intent == "shipping_delivery" and confidence >= 0.34
         ):
@@ -1068,7 +1357,7 @@ class SmartSemanticFallbackAdvisor:
         if any(w in norm_q for w in ["nhung giong", "cac loai", "danh sach", "liet ke", "menu thu cung", "ban nhung con gi"]) or (
             intent == "pet_list_menu" and confidence >= 0.32
         ):
-            return self._handle_pet_list_menu(norm_q, user_name)
+            return self._handle_pet_list_menu(raw_q, norm_q, user_name)
 
         # ----- Tình huống 13: Tra cứu cụ thể giống chó/mèo, phụ kiện hoặc câu nối tiếp -----
         if active_pet and (
@@ -1079,30 +1368,64 @@ class SmartSemanticFallbackAdvisor:
         ):
             return self._format_pet_card(active_pet, prefix=prefix)
 
-        supplies_cues = any(w in norm_q for w in [
-            "do an", "phu kien", "thuc an", "do choi", "do dung", "y te",
-            "cat ve sinh", "sua tam", "balo", "tru cao", "xuong gam", "hat ", "pate"
-        ])
-        if supplies_cues or (intent == "accessories_supplies" and confidence >= 0.28):
+        supplies_cues = bool(re.search(
+            r"\b(?:do an|phu kien|thuc an|do choi|do dung|y te|cat ve sinh|sua tam|balo|tru cao|xuong gam|hat|pate)\b",
+            norm_q,
+        ))
+        if supplies_cues:
             return self._handle_supplies_list(user_name)
 
+        # ----- Tình huống 13b: Hội thoại gật đầu / từ chối ngắn gọn ("ok", "có", "kể thêm đi", "không") -----
+        word_count = len(norm_q.split())
+        if word_count <= 5 and pet_type_intent is None and explicit_item is None and not price_filter and not weight_kg:
+            aff_set = {"ok", "oke", "okay", "co", "co a", "da co", "da vang", "vang", "vang a", "u", "uh", "duoc", "duoc a", "tiep di", "ke them", "ok shop", "ok ban"}
+            neg_set = {"khong", "ko", "k", "da khong", "thoi", "khong can", "chua can", "de sau", "thoi cam on"}
+            if norm_q in aff_set or (intent == "short_affirmative" and confidence >= 0.36):
+                return self._handle_short_affirmative(mem, user_name)
+            if norm_q in neg_set or (intent == "short_negative" and confidence >= 0.36):
+                return f"Dạ vâng {f'**{user_name}**' if user_name else 'bạn'}! Khi nào cần tư vấn chọn bé, đặt Spa hoặc lấy mã giảm giá cứ nhắn mình ngay nhé! 🐾"
+
+        # ----- Tình huống 13c: RAG Tìm kiếm ngữ nghĩa theo đặc điểm ngoại hình / màu sắc / tính cách -----
+        rag_hits = self.rag.retrieve_pets(raw_q, pet_type_filter=pet_type_intent, top_k=4)
+        if rag_hits and rag_hits[0][1] >= 0.52 and intent not in {"greeting_intro", "thanks_goodbye", "smalltalk_chitchat"}:
+            top_score = rag_hits[0][1]
+            selected = [p for p, sc in rag_hits if sc >= max(0.52, top_score * 0.78)][:4]
+            return self._handle_rag_matches(raw_q, selected, pet_type_intent, user_name)
+
+        if intent == "accessories_supplies" and confidence >= 0.40:
+            return self._handle_supplies_list(user_name)
+
+        # ----- Tình huống 13d: Hỏi mua / tìm hiểu chung về Chó, Mèo hoặc Thú cưng ("tôi muốn mua chó") -----
+        if intent == "buy_dog_general" and (pet_type_intent == "Chó" or confidence >= 0.34):
+            return self._handle_buy_category("Chó", user_name)
+        if intent == "buy_cat_general" and (pet_type_intent == "Mèo" or confidence >= 0.34):
+            return self._handle_buy_category("Mèo", user_name)
+        if intent == "buy_pet_general" and confidence >= 0.34:
+            return self._handle_buy_category(pet_type_intent or "BOTH", user_name)
+
         # ----- Tình huống 14: Chào hỏi, Cảm ơn / Tạm biệt, Tán gẫu ngoài lề -----
-        if intent == "greeting_intro" and confidence >= 0.32:
+        if intent == "greeting_intro" and confidence >= 0.32 and pet_type_intent is None:
             return (
                 f"Xin chào {f'**{user_name}**' if user_name else 'bạn'}! 🐶🐱 Mình là Trợ lý AI của Meow & Woof.\n"
                 "Bạn đang muốn tìm giống chó mèo nào, xem bảng giá Spa hay nhận mã giảm giá hôm nay ạ?"
             )
 
-        if intent == "thanks_goodbye" and confidence >= 0.32:
+        if intent == "thanks_goodbye" and confidence >= 0.32 and pet_type_intent is None:
             return (
                 f"Dạ không có gì đâu {f'**{user_name}**' if user_name else 'bạn'} ơi! ❤️ Rất vui được hỗ trợ bạn.\n"
                 f"Khi nào cần đón bé cưng hoặc đặt lịch Spa, cứ nhắn mình hoặc gọi Hotline **{self.kb.shop_info['hotline']}** nhé!"
             )
 
-        if intent == "smalltalk_chitchat" and confidence >= 0.31:
+        if intent == "smalltalk_chitchat" and confidence >= 0.31 and pet_type_intent is None:
             return self._handle_smalltalk(raw_q, user_name)
 
-        # ----- Tình huống 15: Tin nhắn mơ hồ / Ngoài phạm vi kiến thức -----
+        # ----- Lưới an toàn miền thú cưng trước Out-of-scope -----
+        if pet_type_intent in ("Chó", "Mèo", "BOTH"):
+            return self._handle_buy_category(pet_type_intent, user_name)
+        if any(w in norm_q for w in ["thu cung", "ban pet", "mua pet", "tu van giup", "shop co gi", "co nhung gi"]):
+            return self._handle_buy_category("BOTH", user_name)
+
+        # ----- Tình huống 15: Tin nhắn thực sự ngoài phạm vi / vô nghĩa -----
         return self._handle_out_of_scope(raw_q, user_name, mem.get("last_assistant_reply", ""))
 
     # ------------------------------------------------------------------
@@ -1221,18 +1544,18 @@ class SmartSemanticFallbackAdvisor:
             "• VD: *\"So sánh Poodle và Corgi\"* hoặc *\"Mèo Anh Lông Ngắn hay Ragdoll dễ nuôi hơn?\"*"
         )
 
-    def _handle_cheapest_or_expensive(self, norm_q: str, mode: str, user_name: Optional[str]) -> str:
+    def _handle_cheapest_or_expensive(self, raw_q: str, norm_q: str, mode: str, user_name: Optional[str]) -> str:
         prefix = self._greeting_prefix(user_name)
-        tokens = set(preprocess_vi_tokens(norm_q))
+        ptype = self._detect_pet_type_intent(raw_q, norm_q)
         dogs = sorted(self.kb.search_pets(category="Chó", pets_only=True), key=lambda x: float(x["price"]), reverse=(mode == "expensive"))
         cats = sorted(self.kb.search_pets(category="Mèo", pets_only=True), key=lambda x: float(x["price"]), reverse=(mode == "expensive"))
         all_pets = sorted(dogs + cats, key=lambda x: float(x["price"]), reverse=(mode == "expensive"))
 
         label = "giá mềm nhất" if mode == "cheapest" else "cao cấp & giá cao nhất"
-        if "cho" in tokens and "meo" not in tokens and dogs:
+        if ptype == "Chó" and dogs:
             target_list = dogs[:3]
             heading = f"🐶 **Top Chó cảnh {label} tại Meow & Woof**:"
-        elif "meo" in tokens and "cho" not in tokens and cats:
+        elif ptype == "Mèo" and cats:
             target_list = cats[:3]
             heading = f"🐱 **Top Mèo cảnh {label} tại Meow & Woof**:"
         else:
@@ -1334,21 +1657,216 @@ class SmartSemanticFallbackAdvisor:
         prefix = self._greeting_prefix(user_name)
         return (
             f"{prefix}🤖 **Tôi được huấn luyện để hỗ trợ bạn mượt mà các chủ đề sau**:\n"
-            "1. **Giá & chi tiết 32 giống chó mèo**: VD *\"Shop có chó Corgi không?\"*, *\"Bé nào rẻ nhất?\"*, *\"So sánh Poodle và Corgi\"*\n"
-            "2. **Tư vấn chọn bé theo nhu cầu & ngân sách**: VD *\"Tìm chó dưới 5 triệu nuôi chung cư\"*\n"
+            "1. **Tư vấn mua & tra cứu 32 giống chó mèo**: VD *\"Tôi muốn mua chó\"*, *\"Chó màu trắng\"*, *\"Mèo bắt chuột giỏi\"*, *\"Giá Corgi\"*, *\"So sánh Poodle và Corgi\"*\n"
+            "2. **Lọc theo ngân sách & không gian sống**: VD *\"Tìm chó dưới 5 triệu\"*, *\"Mới nuôi ở chung cư nên chọn bé nào?\"*\n"
             "3. **Bảng giá Spa & tính phụ phí theo kg**: VD *\"Chó 12kg tắm sấy hết bao nhiêu?\"*\n"
-            "4. **Chăm sóc dinh dưỡng & Xử lý khi bé ốm**: VD *\"Chó bị tiêu chảy phải làm sao?\"*, *\"Mèo con ăn gì?\"*\n"
+            "4. **Nuôi dưỡng & Huấn luyện thực tế**: Chi phí 1 tháng, dạy đi vệ sinh, lịch tiêm phòng, triệt sản, chống rụng lông & sơ cứu khi bé ốm.\n"
             "5. **Voucher, Hạng VIP, Bảo hành, Ship & Đơn hàng**: VD *\"Có mã giảm giá nào?\"*, *\"Kiểm tra đơn hàng ở đâu?\"*\n\n"
-            "Bạn cứ đặt câu hỏi tự nhiên, mình luôn lắng nghe và hỗ trợ bạn ngay!"
+            "Bạn cứ đặt câu hỏi tự nhiên, mình luôn sẵn sàng hỗ trợ bạn ngay!"
         )
 
-    def _handle_pet_list_menu(self, norm_q: str, user_name: Optional[str]) -> str:
+    def _handle_buy_category(self, pet_type: str, user_name: Optional[str]) -> str:
         prefix = self._greeting_prefix(user_name)
-        tokens = set(preprocess_vi_tokens(norm_q))
+        if pet_type == "Chó":
+            return (
+                f"{prefix}🐶 **Chào mừng bạn đến chọn bé Cún tại Meow & Woof!** (Hiện có đủ **20 giống Chó cảnh thuần chủng**, giá từ **4,200,000 đ – 12,500,000 đ**):\n"
+                "• **Nhỏ gọn, dễ nuôi, hợp chung cư**: Chihuahua (**4,200,000 đ**), Lạp Xưởng (**4,300,000 đ**), Pug Mặt Xệ (**4,500,000 đ**), Poodle Tiny (**4,800,000 đ**)\n"
+                "• **Hot trend, siêu đáng yêu**: Corgi Chân Lùn (**7,900,000 đ**), Phốc Sóc Trắng Tuyết (**7,200,000 đ**), Bichon Frise (**6,900,000 đ**), Shiba Inu (**9,500,000 đ**)\n"
+                "• **Năng động / giống lớn**: Golden Retriever (**6,200,000 đ**), Husky (**7,500,000 đ**), Alaska (**8,500,000 đ**), Samoyed (**8,800,000 đ**)\n"
+                "🛡️ *Cam kết*: Đã tiêm 1-2 mũi, tẩy giun & bảo hành 15 ngày Parvo/Care. Áp mã **`GENZVIP20`** giảm thêm tối đa **500,000 đ**!\n"
+                "👉 Bạn dự định tìm bé **ngân sách khoảng bao nhiêu** hoặc **tên giống nào** (VD *\"Corgi\"*, *\"Chó dưới 5 triệu\"*) để mình gửi chi tiết nhé?"
+            )
+        if pet_type == "Mèo":
+            return (
+                f"{prefix}🐱 **Meow & Woof hiện có sẵn 12 giống Mèo cảnh thuần chủng** (từ **3,800,000 đ – 13,500,000 đ**, sạch sẽ & tự đi cát):\n"
+                "• **Giá mềm, dễ nuôi**: Mèo Xiêm (**3,800,000 đ**), Mèo Anh Lông Ngắn ALN (**4,500,000 đ**), Mèo Mỹ Lông Ngắn (**4,900,000 đ**)\n"
+                "• **Lông xù, quý tộc**: Mèo Anh Lông Dài ALD (**5,200,000 đ**), Tai Cụp Scottish (**5,600,000 đ**), Ba Tư (**5,800,000 đ**), Ragdoll Mắt Xanh (**7,500,000 đ**)\n"
+                "• **Độc lạ, cá tính**: Chân Ngắn Munchkin (**8,200,000 đ**), Bengal Vân Báo (**8,900,000 đ**), Maine Coon (**11,500,000 đ**), Sphynx (**13,500,000 đ**)\n"
+                "🛡️ *Cam kết*: Kèm sổ tiêm phòng, bảo hành 15 ngày & tặng ưu đãi mã **`GENZVIP20`** (giảm tối đa 500,000 đ)!\n"
+                "👉 Bạn thích bé nào hoặc muốn lọc theo ngân sách (VD *\"Mèo dưới 6 triệu\"*) ạ?"
+            )
+        return (
+            f"{prefix}🐾 **Meow & Woof hiện có 32 giống Chó Mèo cảnh thuần chủng** sẵn sàng về nhà mới:\n"
+            "• **20 giống Chó cảnh** (**4,200,000 đ – 12,500,000 đ**): Nổi bật có Poodle, Pug, Corgi, Phốc Sóc, Shiba, Golden, Husky, Samoyed.\n"
+            "• **12 giống Mèo cảnh** (**3,800,000 đ – 13,500,000 đ**): Nổi bật có Mèo Anh Lông Ngắn, Tai Cụp Scottish, Ragdoll, Ba Tư, Munchkin, Xiêm.\n"
+            "🎁 Dùng mã **`GENZVIP20`** giảm **20%** (tối đa **500,000 đ**) + **`FREESHIP30K`** khi đặt hàng trên web!\n"
+            "👉 Bạn đang muốn tìm **Chó** hay **Mèo**, và tầm ngân sách khoảng bao nhiêu để mình gợi ý chuẩn nhất ạ?"
+        )
+
+    def _handle_rag_matches(
+        self,
+        raw_q: str,
+        matches: List[Dict[str, Any]],
+        pet_type: Optional[str],
+        user_name: Optional[str],
+    ) -> str:
+        prefix = self._greeting_prefix(user_name)
+        label = pet_type if pet_type in ("Chó", "Mèo") else "thú cưng / sản phẩm"
+        lines = [f"{prefix}🔎 **Dựa trên mô tả của bạn (*\"{raw_q.strip()[:50]}\"*), các {label} phù hợp nhất tại Meow & Woof là**:"]
+        for p in matches:
+            lines.append(
+                f"• **{p['name']}** (`{p['sku']}`): **{int(p['price']):,} đ** (Còn {p.get('stock', 1)}) — {p.get('description', '')}"
+            )
+        lines.append("👉 Bạn muốn xem chi tiết, cách chăm sóc hay hướng dẫn đặt mua bé nào trong danh sách trên ạ?")
+        return "\n".join(lines)
+
+    def _handle_short_affirmative(self, mem: Dict[str, Any], user_name: Optional[str]) -> str:
+        prefix = self._greeting_prefix(user_name)
+        last_pet = mem.get("last_pet")
+        if last_pet:
+            price = float(last_pet.get("price", 0) or 0)
+            disc = min(price * 0.20, 500000.0) if price >= 100000 else 0.0
+            final_p = max(0.0, price - disc)
+            care_line = (
+                "• **Dinh dưỡng khuyên dùng**: Hạt **Royal Canin Indoor 27** (`465,000 đ`) + **Cát Tofu** (`125,000 đ`).\n"
+                if last_pet.get("pet_type") == "Mèo"
+                else (
+                    "• **Dinh dưỡng khuyên dùng**: Hạt **SmartHeart Vị Bò Nướng** (`215,000 đ`) + **Nutri-Plus Gel Virbac** (`185,000 đ`).\n"
+                    if last_pet.get("pet_type") == "Chó"
+                    else ""
+                )
+            )
+            return (
+                f"{prefix}👍 Dưới đây là **thông tin trọn gói cho {last_pet['name']}** (`{last_pet['sku']}`):\n"
+                f"• **Giá ưu đãi với mã `GENZVIP20`**: Chỉ còn **{int(final_p):,} đ** (giảm {int(disc):,} đ).\n"
+                f"{care_line}"
+                f"• **Giao hàng**: {self.kb.policies['shipping']} (Nhập thêm **`FREESHIP30K`** trừ 30,000 đ).\n"
+                f"👉 Để đặt giữ bé hoặc tư vấn thêm, bạn vào **Giỏ hàng (`/cart`)** hoặc gọi Hotline **`{self.kb.shop_info['hotline']}`** nhé!"
+            )
+        return (
+            f"{prefix}👍 Tuyệt vời! Bạn muốn mình tư vấn cụ thể hơn về **Chó cảnh**, **Mèo cảnh**, **Bảng giá Spa** hay **Mã giảm giá** ạ?"
+        )
+
+    def _handle_pet_age_gender_origin(
+        self,
+        pet_type: Optional[str],
+        topic_pet: Optional[Dict[str, Any]],
+        user_name: Optional[str],
+    ) -> str:
+        prefix = self._greeting_prefix(user_name)
+        subject = f"**{topic_pet['name']}**" if topic_pet else ("các bé **Chó/Mèo cảnh**" if pet_type in (None, "BOTH") else f"các bé **{pet_type} cảnh**")
+        return (
+            f"{prefix}📋 **Thông tin độ tuổi, giới tính & nguồn gốc của {subject} tại Meow & Woof**:\n"
+            "• **Độ tuổi xuất chuồng**: Đủ **2 – 2.5 tháng tuổi**, đã cai sữa mẹ, ăn hạt khỏe và hoàn thành 1–2 mũi vắc xin + tẩy giun.\n"
+            "• **Giới tính & Màu lông**: Shop luôn có đủ **bé Đực và bé Cái** nhiều màu để bạn lựa chọn theo sở thích.\n"
+            "• **Nguồn gốc**: Thuần chủng tuyển chọn từ trại phối uy tín, có sổ theo dõi sức khỏe thú y & bảo hành 15 ngày Parvo/Care.\n"
+            f"📹 Muốn xem **ảnh/video thực tế từng bé** ngay lúc này, bạn nhắn Zalo **`{self.kb.shop_info['hotline']}`** hoặc ghé **{self.kb.shop_info['address']}** nhé!"
+        )
+
+    def _handle_monthly_cost(
+        self,
+        pet_type: Optional[str],
+        topic_pet: Optional[Dict[str, Any]],
+        user_name: Optional[str],
+    ) -> str:
+        prefix = self._greeting_prefix(user_name)
+        if topic_pet and topic_pet.get("pet_type") == "Mèo":
+            pet_type = "Mèo"
+        elif topic_pet and topic_pet.get("pet_type") == "Chó":
+            pet_type = "Chó"
+
+        if pet_type == "Mèo":
+            return (
+                f"{prefix}💰 **Chi phí nuôi Mèo cảnh trung bình mỗi tháng (~250,000 – 450,000 đ/tháng)**:\n"
+                "• **Hạt dinh dưỡng**: Hạt Royal Canin Indoor 27 2kg (**465,000 đ**, ăn được 1.5 – 2 tháng → ~**250,000 đ/tháng**).\n"
+                "• **Cát vệ sinh**: 1–2 túi **Cát Tofu 6L** (`125,000 đ`/túi) + vài thanh **Pate Ciao** (`35,000 đ`/gói).\n"
+                "• **Tắm rửa**: Mèo rất sạch, 3–4 tuần mới cần tắm **Sữa tắm SOS (`145,000 đ`)** hoặc đi Spa (**150,000 đ**)."
+            )
+        if pet_type == "Chó":
+            return (
+                f"{prefix}💰 **Chi phí nuôi Chó cảnh trung bình mỗi tháng (~300,000 – 600,000 đ/tháng)**:\n"
+                "• **Thức ăn hạt**: Hạt **SmartHeart 3kg** (`215,000 đ` — bé nhỏ dùng 1.5–2 tháng, bé lớn 1 tháng).\n"
+                "• **Chăm sóc & Spa**: Tắm sấy Spa (**150,000 đ**) hoặc tự tắm bằng **Sữa tắm SOS (`145,000 đ`)** dùng cả 4–5 tháng.\n"
+                "• **Phòng bệnh định kỳ**: Tẩy giun/nhỏ gáy ve rận chỉ ~100,000–200,000 đ mỗi vài tháng (rất vừa túi tiền sinh viên/gia đình!)."
+            )
+        return (
+            f"{prefix}💰 **Chi phí nuôi thú cưng trung bình 1 tháng tại Việt Nam**:\n"
+            "• **Nuôi Mèo**: Khoảng **250,000 – 450,000 đ/tháng** (hạt Royal Canin 465K dùng ~2 tháng + cát Tofu 125K + ít pate Ciao 35K).\n"
+            "• **Nuôi Chó nhỏ/vừa**: Khoảng **300,000 – 600,000 đ/tháng** (hạt SmartHeart 215K/3kg + tắm Spa 150K).\n"
+            "💡 Dùng mã **`GENZVIP20`** khi mua combo hạt & phụ kiện tại shop sẽ tiết kiệm thêm **20%** nữa đó ạ!"
+        )
+
+    def _handle_training_behavior(self, norm_q: str, pet_type: Optional[str], user_name: Optional[str]) -> str:
+        prefix = self._greeting_prefix(user_name)
+        if any(w in norm_q for w in ["cao ghe", "sofa", "thau cat"]) or pet_type == "Mèo":
+            return (
+                f"{prefix}🐱 **Mẹo dạy Mèo đi vệ sinh vào thau cát & không cào sofa**:\n"
+                "1. **Đi vệ sinh đúng chỗ**: Đặt thau **Cát Tofu (`125,000 đ`)** ở góc yên tĩnh. Sau khi mèo ăn 15 phút, đặt bé vào thau và bới nhẹ chân trước để tạo phản xạ tự nhiên.\n"
+                "2. **Bảo vệ ghế sofa**: Đặt **Trụ Cào Móng Bọc Thừng Sisal** (`CAT-TOY-001` — **190,000 đ**) ngay cạnh sofa, rắc chút cỏ bạc hà (catnip) lên trụ để bé chuyển hướng cào ngay!"
+            )
+        if any(w in norm_q for w in ["sua", "can dep", "can do"]):
+            return (
+                f"{prefix}🐶 **Cách khắc phục Cún sủa đêm & cắn đồ dùng**:\n"
+                "1. **Giảm cắn phá**: Bé 2–5 tháng đang ngứa nướu thay răng — hãy chuẩn bị **Xương Cao Su Sạch Răng** (`DOG-TOY-001` — **68,000 đ**) để bé gặm thay vì cắn dép.\n"
+                "2. **Hạn chế sủa đêm**: Cho bé vận động nhẹ trước khi ngủ, giữ chỗ ngủ ấm áp gần ánh sáng dịu và không dỗ dành khi bé đang sủa đòi ra chuồng (đợi bé im mới thưởng)."
+            )
+        return (
+            f"{prefix}🐾 **Quy tắc vàng dạy Cún đi vệ sinh đúng chỗ & nghe lệnh trong 7 ngày**:\n"
+            "1. **Khung giờ vàng**: Đưa bé ra đúng khay vệ sinh ngay sau khi **ngủ dậy**, sau **bữa ăn 15–20 phút** và trước khi ngủ.\n"
+            "2. **Thưởng ngay lập tức**: Khi bé đi đúng chỗ, khen nhỏ nhẹ + thưởng 1 miếng bánh nhỏ; nếu lỡ đi sai tuyệt đối không quát mắng to, chỉ lau sạch bằng dung dịch khử mùi.\n"
+            "3. **Gặm nhai chống phá đồ**: Trang bị **Xương Cao Su (`68,000 đ`)** cho cún hoặc **Trụ Cào Móng (`190,000 đ`)** cho mèo nhé!"
+        )
+
+    def _handle_shedding_grooming(self, norm_q: str, pet_type: Optional[str], user_name: Optional[str]) -> str:
+        prefix = self._greeting_prefix(user_name)
+        return (
+            f"{prefix}✨ **Bí quyết chăm lông, giảm rụng lông & khử mùi cho thú cưng**:\n"
+            "• **Tần suất tắm chuẩn**: Chó tắm **7–10 ngày/lần**; Mèo tự liếm sạch nên **3–4 tuần/lần** là lý tưởng (tắm quá dày dễ khô da rụng lông thêm).\n"
+            "• **Dưỡng lông từ trong & ngoài**: Bổ sung hạt giàu Omega 3 & 6 (**SmartHeart `215,000 đ`** / **Royal Canin `465,000 đ`**), dùng **Sữa tắm SOS (`145,000 đ`)** và sấy khô kỹ kẽ chân/tai sau tắm.\n"
+            "• **Vệ sinh tai, cắt móng & chải lông chết**: 2 tuần/lần hoặc đặt gói **Tắm sấy & Vệ sinh tai móng (`150,000 đ`)** tại `/spa` để KTV làm sạch tuyến hôi và lông rối cực êm nhé!"
+        )
+
+    def _handle_vaccination_schedule(
+        self,
+        pet_type: Optional[str],
+        topic_pet: Optional[Dict[str, Any]],
+        user_name: Optional[str],
+    ) -> str:
+        prefix = self._greeting_prefix(user_name)
+        return (
+            f"{prefix}💉 **Lịch tiêm phòng & tẩy giun chuẩn thú y cho Chó Mèo**:\n"
+            "• **Mũi 1 (6–8 tuần tuổi)**: Chó tiêm 5 bệnh / Mèo tiêm 3–4 bệnh cơ bản.\n"
+            "• **Mũi 2 & Mũi 3 (cách nhau 3–4 tuần)**: Tiêm nhắc lại 7 bệnh (chó) hoặc 4 bệnh (mèo) để tạo miễn dịch trọn vẹn.\n"
+            "• **Tiêm phòng Dại**: Từ **12–16 tuần tuổi** (nhắc lại mỗi năm 1 lần).\n"
+            "• **Tẩy giun**: Dưới 6 tháng mỗi **1 tháng/lần**; trên 6 tháng mỗi **3–6 tháng/lần**.\n"
+            "🛡️ *An tâm*: 100% bé đón tại **Meow & Woof** đã được **tiêm sẵn 1–2 mũi + tẩy giun** và có **sổ theo dõi thú y** kèm theo!"
+        )
+
+    def _handle_spay_neuter(self, pet_type: Optional[str], user_name: Optional[str]) -> str:
+        prefix = self._greeting_prefix(user_name)
+        return (
+            f"{prefix}🩺 **Tư vấn Triệt sản & Sinh sản cho Chó Mèo**:\n"
+            "• **Độ tuổi triệt sản lý tưởng**: Mèo từ **5–7 tháng tuổi**; Chó từ **6–12 tháng tuổi** (sau khi tiêm đủ các mũi vắc xin).\n"
+            "• **Lợi ích**: Hết tình trạng mèo gào đực kêu đêm / đi tiểu đánh dấu, giảm stress và phòng ngừa viêm tử cung hoặc u tuyến vú.\n"
+            "• **Phối giống & Mang thai**: Nếu muốn cho bé sinh sản, nên đợi từ lần động dục thứ 2 (khoảng 10–12 tháng tuổi); thời gian mang thai trung bình của chó mèo khoảng **58–65 ngày**."
+        )
+
+    def _handle_pet_naming(self, pet_type: Optional[str], user_name: Optional[str]) -> str:
+        prefix = self._greeting_prefix(user_name)
+        return (
+            f"{prefix}🏷️ **Gợi ý những cái tên cực cute, dễ gọi giúp bé nhớ tên nhanh**:\n"
+            "• **Kiểu đồ ăn ngọt ngào**: *Mochi, Bánh Bao, Bơ, Sữa, Latte, Kem, Khoai Tây, Xúc Xích, Kẹo*\n"
+            "• **Kiểu tiếng Việt thuần thân thương**: *Bông, Mực, Cún, Lu, Bi, Tít, Mướp, Đậu, Xù*\n"
+            "• **Kiểu tiếng Anh sang xịn**: *Milo, Coco, Bella, Loki, Daisy, Leo, Ruby, Simba, Teddy*\n"
+            "💡 Mẹo: Chọn tên **1–2 âm tiết** có vần mở (*Bơ, Mochi, Milo*) để bé phản xạ quay lại ngay khi bạn gọi nhé!"
+        )
+
+    def _handle_cohabitation(self, user_name: Optional[str]) -> str:
+        prefix = self._greeting_prefix(user_name)
+        return (
+            f"{prefix}🤝 **Cách nuôi chung nhiều bé (Chó + Mèo hoặc Mèo mới + Mèo cũ) hòa thuận không đánh nhau**:\n"
+            "1. **Cách ly làm quen mùi (3–5 ngày đầu)**: Cho bé mới ở phòng/chuồng riêng, tráo khăn nằm hoặc đồ chơi qua lại để 2 bé quen mùi nhau trước.\n"
+            "2. **Cho nhìn mặt qua khe/lưới + thưởng pate**: Dùng thanh **Pate Ciao (`35,000 đ`)** đút song song cho cả 2 bé để tạo ấn tượng tích cực.\n"
+            "3. **Bố trí tách biệt đồ dùng**: Dùng 2 bát ăn và 2 thau cát riêng trong 2 tuần đầu để tránh tranh giành lãnh thổ nhé!"
+        )
+
+    def _handle_pet_list_menu(self, raw_q: str, norm_q: str, user_name: Optional[str]) -> str:
+        prefix = self._greeting_prefix(user_name)
+        ptype = self._detect_pet_type_intent(raw_q, norm_q)
         dogs = self.kb.search_pets(category="Chó", pets_only=True)
         cats = self.kb.search_pets(category="Mèo", pets_only=True)
 
-        if "meo" in tokens and "cho" not in tokens:
+        if ptype == "Mèo":
             cat_names = ", ".join(p.get("breed", "").replace("Mèo ", "") for p in cats)
             return (
                 f"{prefix}🐱 **Shop hiện có đầy đủ {len(cats)} giống Mèo cảnh thuần chủng** (từ **3,800,000 đ** đến **13,500,000 đ**):\n"
@@ -1356,7 +1874,7 @@ class SmartSemanticFallbackAdvisor:
                 "👉 Bạn thích bé nào (VD *Anh Lông Ngắn, Ragdoll, Tai Cụp, Xiêm...*) để mình báo giá & tình trạng kho nhé!"
             )
 
-        if "cho" in tokens and "meo" not in tokens:
+        if ptype == "Chó":
             dog_names = ", ".join(p.get("breed", "").replace("Chó ", "") for p in dogs)
             return (
                 f"{prefix}🐶 **Shop hiện có đầy đủ {len(dogs)} giống Chó cảnh thuần chủng** (từ **4,200,000 đ** đến **12,500,000 đ**):\n"
