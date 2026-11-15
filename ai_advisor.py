@@ -19,6 +19,7 @@ import json
 import math
 import os
 import re
+import time
 import unicodedata
 import urllib.error
 import urllib.parse
@@ -686,7 +687,7 @@ class GeminiFlashAdvisor:
     """Tích hợp mô hình Google Gemini 4 Hydrogen qua REST API bằng urllib."""
 
     PRIMARY_MODEL = "gemini-4-hydrogen"
-    FALLBACK_MODELS = ["gemini-4-hydrogen", "gemini-3-flash-preview", "gemini-3.8-flash"]
+    FALLBACK_MODELS = ["gemini-4-hydrogen"]
 
     def __init__(self, api_key: Optional[str] = None):
         _load_local_env()
@@ -745,41 +746,33 @@ class GeminiFlashAdvisor:
             "parts": [{"text": user_query}],
         })
 
-        model_configs: Dict[str, Dict[str, Any]] = {
-            "gemini-4-hydrogen": {"timeout": 20.0, "thinking_level": "high", "max_tokens": 8192},
-            "gemini-3-flash-preview": {"timeout": 12.0, "thinking_level": "low", "max_tokens": 8192},
-            "gemini-3.8-flash": {"timeout": 8.0, "thinking_level": None, "max_tokens": 4096},
+        model_name = self.PRIMARY_MODEL
+        payload = {
+            "systemInstruction": {
+                "parts": [{"text": system_instruction}]
+            },
+            "contents": contents,
+            "generationConfig": {
+                "temperature": 0.45,
+                "topP": 0.9,
+                "maxOutputTokens": 8192,
+                "thinkingConfig": {"thinkingLevel": "high"},
+            },
+        }
+        req_bytes = json.dumps(payload).encode("utf-8")
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={urllib.parse.quote(self.api_key)}"
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "MeowWoof-GeminiAdvisor/4.0",
         }
 
         last_err = ""
-        for model_name in self.FALLBACK_MODELS:
-            cfg = model_configs.get(model_name, {"timeout": 12.0, "thinking_level": None, "max_tokens": 8192})
-            gen_config: Dict[str, Any] = {
-                "temperature": 0.45,
-                "topP": 0.9,
-                "maxOutputTokens": cfg["max_tokens"],
-            }
-            if cfg.get("thinking_level"):
-                gen_config["thinkingConfig"] = {"thinkingLevel": cfg["thinking_level"]}
-
-            payload = {
-                "systemInstruction": {
-                    "parts": [{"text": system_instruction}]
-                },
-                "contents": contents,
-                "generationConfig": gen_config,
-            }
-            req_bytes = json.dumps(payload).encode("utf-8")
-
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={urllib.parse.quote(self.api_key)}"
-            headers = {
-                "Content-Type": "application/json",
-                "User-Agent": "MeowWoof-GeminiAdvisor/4.0",
-            }
-            timeout_sec = cfg["timeout"]
+        retryable_codes = {429, 500, 502, 503, 504}
+        max_attempts = 3
+        for attempt in range(max_attempts):
             try:
                 req = urllib.request.Request(url, data=req_bytes, headers=headers, method="POST")
-                with urllib.request.urlopen(req, timeout=timeout_sec) as response:
+                with urllib.request.urlopen(req, timeout=35.0) as response:
                     resp_json = json.loads(response.read().decode("utf-8"))
                     candidates = resp_json.get("candidates", [])
                     if candidates:
@@ -795,10 +788,16 @@ class GeminiFlashAdvisor:
                             return full_text, model_name
             except urllib.error.HTTPError as e:
                 last_err = f"HTTP {e.code}"
-                continue
+                if e.code in retryable_codes and attempt < max_attempts - 1:
+                    time.sleep(0.8 * (attempt + 1))
+                    continue
+                break
             except Exception as e:
                 last_err = str(e)
-                continue
+                if attempt < max_attempts - 1:
+                    time.sleep(0.8 * (attempt + 1))
+                    continue
+                break
 
         return None, f"{last_err or 'Offline'}"
 
