@@ -683,10 +683,10 @@ class PetShopKnowledgeBase:
 # =============================================================================
 
 class GeminiFlashAdvisor:
-    """Tích hợp mô hình Google Gemini 3.8 Flash qua REST API bằng urllib."""
+    """Tích hợp mô hình Google Gemini 4 Hydrogen qua REST API bằng urllib."""
 
-    PRIMARY_MODEL = "gemini-3.8-flash"
-    FALLBACK_MODELS = ["gemini-3.8-flash", "gemini-3-flash-preview", "gemini-3.1-flash-lite"]
+    PRIMARY_MODEL = "gemini-4-hydrogen"
+    FALLBACK_MODELS = ["gemini-4-hydrogen", "gemini-3-flash-preview", "gemini-3.8-flash"]
 
     def __init__(self, api_key: Optional[str] = None):
         _load_local_env()
@@ -745,28 +745,38 @@ class GeminiFlashAdvisor:
             "parts": [{"text": user_query}],
         })
 
-        payload = {
-            "systemInstruction": {
-                "parts": [{"text": system_instruction}]
-            },
-            "contents": contents,
-            "generationConfig": {
-                "temperature": 0.45,
-                "topP": 0.9,
-                "maxOutputTokens": 650,
-            },
+        model_configs: Dict[str, Dict[str, Any]] = {
+            "gemini-4-hydrogen": {"timeout": 20.0, "thinking_level": "high", "max_tokens": 8192},
+            "gemini-3-flash-preview": {"timeout": 12.0, "thinking_level": "low", "max_tokens": 8192},
+            "gemini-3.8-flash": {"timeout": 8.0, "thinking_level": None, "max_tokens": 4096},
         }
-        req_bytes = json.dumps(payload).encode("utf-8")
 
         last_err = ""
-        timeouts = {"gemini-3.8-flash": 2.2, "gemini-3-flash-preview": 4.5, "gemini-3.1-flash-lite": 2.0}
         for model_name in self.FALLBACK_MODELS:
+            cfg = model_configs.get(model_name, {"timeout": 12.0, "thinking_level": None, "max_tokens": 8192})
+            gen_config: Dict[str, Any] = {
+                "temperature": 0.45,
+                "topP": 0.9,
+                "maxOutputTokens": cfg["max_tokens"],
+            }
+            if cfg.get("thinking_level"):
+                gen_config["thinkingConfig"] = {"thinkingLevel": cfg["thinking_level"]}
+
+            payload = {
+                "systemInstruction": {
+                    "parts": [{"text": system_instruction}]
+                },
+                "contents": contents,
+                "generationConfig": gen_config,
+            }
+            req_bytes = json.dumps(payload).encode("utf-8")
+
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={urllib.parse.quote(self.api_key)}"
             headers = {
                 "Content-Type": "application/json",
-                "User-Agent": "MeowWoof-GeminiAdvisor/3.8",
+                "User-Agent": "MeowWoof-GeminiAdvisor/4.0",
             }
-            timeout_sec = timeouts.get(model_name, 3.5)
+            timeout_sec = cfg["timeout"]
             try:
                 req = urllib.request.Request(url, data=req_bytes, headers=headers, method="POST")
                 with urllib.request.urlopen(req, timeout=timeout_sec) as response:
@@ -774,8 +784,15 @@ class GeminiFlashAdvisor:
                     candidates = resp_json.get("candidates", [])
                     if candidates:
                         parts = candidates[0].get("content", {}).get("parts", [])
-                        if parts and "text" in parts[0]:
-                            return parts[0]["text"].strip(), model_name
+                        # Bo qua cac thought part noi bo, chi ghep toan bo van ban tra loi
+                        text_chunks = [
+                            p["text"]
+                            for p in parts
+                            if isinstance(p, dict) and not p.get("thought") and isinstance(p.get("text"), str)
+                        ]
+                        full_text = "".join(text_chunks).strip()
+                        if full_text:
+                            return full_text, model_name
             except urllib.error.HTTPError as e:
                 last_err = f"HTTP {e.code}"
                 continue
@@ -1976,7 +1993,7 @@ class PetShopAIAdvisor:
         return {
             "reply": final_reply,
             "engine": engine_used,
-            "model": "gemini-3.8-flash",
+            "model": model_info if reply_text else self.gemini.PRIMARY_MODEL,
             "situation_hint": situation_hint,
         }
 
