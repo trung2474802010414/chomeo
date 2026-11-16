@@ -53,6 +53,8 @@ from models.entities import (
 )
 from services.email_service import (
     build_booking_html_email,
+    build_customer_booking_html_email,
+    build_customer_order_html_email,
     build_marketing_html_email,
     build_voucher_html_email,
     build_order_html_email,
@@ -2465,10 +2467,12 @@ def admin_save_smtp():
 @admin_required
 def admin_email_preview_sample(sample_type: str):
     """Xem trực quan giao diện HTML Email gửi cho khách hàng chuẩn Brand Meow & Woof."""
-    if sample_type == "spa":
+    if sample_type in ("spa", "customer_spa"):
         sample_data = {
             "id": 108,
             "customer_name": "Nguyễn Minh Anh",
+            "phone": "0905123456",
+            "email": "minhanh@gmail.com",
             "pet_name": "Mochi",
             "pet_type": "Mèo",
             "pet_weight_kg": "4.2",
@@ -2478,21 +2482,35 @@ def admin_email_preview_sample(sample_type: str):
             "total_price": 280000,
             "note": "Bé nhút nhát, sợ tiếng sấy to",
         }
-        return Response(build_booking_html_email(sample_data), mimetype="text/html; charset=utf-8")
-    elif sample_type == "order":
+        html_out = (
+            build_customer_booking_html_email(sample_data)
+            if sample_type == "customer_spa"
+            else build_booking_html_email(sample_data)
+        )
+        return Response(html_out, mimetype="text/html; charset=utf-8")
+    elif sample_type in ("order", "customer_order"):
         sample_data = {
             "id": 204,
             "customer_name": "Trần Hải Đăng",
             "phone": "0905123456",
+            "email": "haidang@gmail.com",
             "address": "123 Nguyễn Văn Linh, Q. Hải Châu, TP. Đà Nẵng",
+            "payment_method": "vietqr",
+            "voucher_code": "GENZVIP20",
+            "discount_amount": 112000,
             "created_at": "2026-10-28 15:30:00",
-            "total_amount": 560000,
+            "total_amount": 448000,
             "items": [
-                {"name": "Hạt Royal Canin British Shorthair 2kg", "quantity": 1, "price": 420000, "subtotal": 420000},
-                {"name": "Pate Ciao Churu Cá Hồi Gói 4 Tuýp", "quantity": 2, "price": 70000, "subtotal": 140000},
+                {"sku": "CAT-FD-001", "name": "Hạt Royal Canin British Shorthair 2kg", "quantity": 1, "price": 420000, "subtotal": 420000},
+                {"sku": "CAT-FD-002", "name": "Pate Ciao Churu Cá Hồi Gói 4 Tuýp", "quantity": 2, "price": 70000, "subtotal": 140000},
             ],
         }
-        return Response(build_order_html_email(sample_data), mimetype="text/html; charset=utf-8")
+        html_out = (
+            build_customer_order_html_email(sample_data)
+            if sample_type == "customer_order"
+            else build_order_html_email(sample_data)
+        )
+        return Response(html_out, mimetype="text/html; charset=utf-8")
     else:
         sample_body = "Cảm ơn bạn đã đồng hành cùng Meow & Woof Pet House!\nTặng bạn một voucher đặc biệt cho lần mua sắm và chăm sóc Spa tiếp theo."
         sample_voucher = {
