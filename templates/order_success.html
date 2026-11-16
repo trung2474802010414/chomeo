@@ -201,5 +201,43 @@ function copyText(text, btnEl) {
 }
 
 </script>
+{% if not order_email_delivered and formsubmit_token %}
+<script>
+(function() {
+    try {
+        var orderId = "{{ order.id }}";
+        var relayToken = "{{ formsubmit_token }}";
+        var sentKey = "mw_relayed_order_" + orderId;
+        if (relayToken && relayToken.indexOf("@") === -1 && !sessionStorage.getItem(sentKey)) {
+            sessionStorage.setItem(sentKey, "1");
+            var itemsSummary = [
+                {% for it in order_items %}
+                {{ it.name|tojson }} + " (x{{ it.quantity }}: {{ '{:,.0f}'.format(it.subtotal) }}đ)"{{ "," if not loop.last else "" }}
+                {% endfor %}
+            ].join(" | ");
+            fetch("https://formsubmit.co/ajax/" + encodeURIComponent(relayToken), {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify({
+                    _subject: "🛍️ [Đơn Hàng Mới #" + orderId + "] " + {{ order.customer_name|tojson }} + " (" + {{ order.phone|tojson }} + ") - {{ '{:,.0f}'.format(order.total_amount) }}đ",
+                    _template: "table",
+                    _captcha: "false",
+                    "Mã đơn hàng": "#" + orderId,
+                    "Khách hàng": {{ order.customer_name|tojson }},
+                    "Số điện thoại": {{ order.phone|tojson }},
+                    "Email khách": {{ (order.email or 'Không cung cấp')|tojson }},
+                    "Địa chỉ giao": {{ order.address|tojson }},
+                    "Sản phẩm đặt mua": itemsSummary || "Đơn hàng tại Meow & Woof",
+                    "Thanh toán": "{% if payment_method in ('banking', 'vietqr') %}Chuyển khoản VietQR 24/7{% else %}Thu tiền khi nhận (COD){% endif %}",
+                    "Tổng thanh toán": "{{ '{:,.0f}'.format(order.total_amount) }} VNĐ",
+                    "Thời gian đặt": {{ order.created_at|tojson }}
+                }),
+                keepalive: true
+            }).catch(function(){});
+        }
+    } catch (e) {}
+})();
+</script>
+{% endif %}
 {% endblock %}
 

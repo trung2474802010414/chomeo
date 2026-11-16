@@ -57,6 +57,7 @@ from services.email_service import (
     build_voucher_html_email,
     build_order_html_email,
     get_admin_notification_email,
+    get_formsubmit_token_for_email,
     get_smtp_credentials,
     is_revoked_smtp_password,
     save_smtp_credentials,
@@ -873,6 +874,11 @@ def cart_page():
                     }
                 )
                 session["last_payment_method"] = payment_method
+                email_st = str(order_dict.get("email_delivery_status", "") or "")
+                session["last_order_email_delivered"] = (
+                    email_st.startswith("Đã gửi Gmail SMTP")
+                    or email_st.startswith("Đã gửi thẳng tới Gmail")
+                )
                 # Xóa sạch toàn bộ dữ liệu giỏ hàng & voucher sau khi đặt thành công
                 session["cart"] = {}
                 session.pop("applied_voucher", None)
@@ -920,6 +926,8 @@ def order_success_page(order_id: int):
         flash(f"Không tìm thấy đơn hàng mã #{order_id}.", "error")
         return redirect(url_for("shop_page"))
     payment_method = session.get("last_payment_method", "cod")
+    order_email_delivered = bool(session.get("last_order_email_delivered", False))
+    formsubmit_token = get_formsubmit_token_for_email(get_admin_notification_email())
     order_dict = order_obj.to_dict()
     return render_template(
         "order_success.html",
@@ -927,6 +935,8 @@ def order_success_page(order_id: int):
         order=order_dict,
         order_items=order_dict.get("items", []),
         payment_method=payment_method,
+        order_email_delivered=order_email_delivered,
+        formsubmit_token=formsubmit_token,
         bank_config=get_bank_config(),
     )
 

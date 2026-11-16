@@ -478,7 +478,8 @@ def create_order_transactional(payload: Dict[str, Any]) -> Dict[str, Any]:
     order._persist_to_json_file()
     order_dict = order.to_dict()
     order_dict["subtotal_before_discount"] = subtotal_sum
-    send_order_confirmation_email(order_dict)
+    email_log = send_order_confirmation_email(order_dict)
+    order_dict["email_delivery_status"] = email_log.get("delivery_status", "")
     return order_dict
 
 

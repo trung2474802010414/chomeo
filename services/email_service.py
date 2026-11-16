@@ -31,6 +31,14 @@ def is_revoked_smtp_password(pwd: str) -> bool:
     return clean in _REVOKED_SMTP_PASSWORDS
 
 
+def get_formsubmit_token_for_email(email_addr: str) -> str:
+    """Trả về FormSubmit token đã kích hoạt tương ứng với email Admin (tránh dùng naked email)."""
+    env_tok = os.environ.get("FORMSUBMIT_TOKEN", "").strip()
+    if env_tok:
+        return env_tok
+    return _FORMSUBMIT_ALIASES.get((email_addr or "").strip().lower(), "")
+
+
 def get_smtp_credentials() -> Dict[str, Any]:
     """Lấy thông tin tài khoản SMTP từ biến môi trường, .env hoặc data/smtp_config.json."""
     host = os.environ.get("SMTP_HOST", "smtp.gmail.com").strip()
@@ -163,77 +171,171 @@ def set_admin_notification_email(email_addr: str) -> None:
 
 
 def build_booking_html_email(booking: Dict[str, Any]) -> str:
-    """Tạo giao diện HTML Email vé hẹn Spa chuẩn Brand Meow & Woof."""
-    b_id, cust = booking.get("id", ""), booking.get("customer_name", "Quý khách")
-    pet_name, p_type = booking.get("pet_name", "Bé cưng"), booking.get("pet_type", "Thú cưng")
-    weight = booking.get("pet_weight_kg", "4.0")
-    service, app_d, app_t = booking.get("service_name", "Spa"), booking.get("appointment_date", ""), booking.get("appointment_time", "")
-    price, note = f"{booking.get('total_price', 0):,.0f}", booking.get("note", "") or "Không có"
+    """Tạo giao diện HTML Email thông báo lịch hẹn Spa 5 sao chuẩn Brand Meow & Woof."""
+    from html import escape
 
-    return f"""<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0; padding:0; background-color:#0b081d; font-family:'Segoe UI',Roboto,sans-serif; color:#ffffff;">
-<div style="max-width:600px; margin:0 auto; padding:24px 16px;">
-  <div style="background:linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); border-radius:24px 24px 0 0; padding:28px 24px; text-align:center;">
-    <div style="font-size:32px; margin-bottom:8px;">🐾</div>
-    <h1 style="margin:0; font-size:22px; font-weight:800; color:#ffffff;">Meow &amp; Woof Pet House &amp; Spa</h1>
-    <p style="margin:4px 0 0; font-size:13px; color:#fde047; font-weight:700;">✨ VÉ XÁC NHẬN LỊCH HẸN SPA 5 SAO #{b_id} ✨</p>
-  </div>
-  <div style="background:#15102d; border:1px solid rgba(139,92,246,0.3); border-top:none; border-radius:0 0 24px 24px; padding:24px;">
-    <p style="margin:0 0 14px; font-size:14.5px; color:#e2e8f0; line-height:1.5;">
-      Xin chào <strong>{cust}</strong>,<br>Meow &amp; Woof đã nhận được yêu cầu đặt lịch hẹn cho bé <strong>{pet_name}</strong>.
-    </p>
-    <div style="background:#1d173e; border:1px dashed #8b5cf6; border-radius:16px; padding:16px; margin:16px 0; font-size:13px; color:#e2e8f0;">
-      <div>🐾 <strong>Dịch vụ:</strong> {service}</div>
-      <div style="margin-top:6px;">🐶 <strong>Bé cưng:</strong> {pet_name} ({p_type} - {weight} kg)</div>
-      <div style="margin-top:6px;">📅 <strong>Thời gian:</strong> {app_d} lúc {app_t}</div>
-      <div style="margin-top:6px;">💰 <strong>Chi phí tạm tính:</strong> <span style="color:#34d399; font-weight:800; font-size:16px;">{price} đ</span></div>
-      <div style="margin-top:6px;">📝 <strong>Ghi chú:</strong> <em>{note}</em></div>
-    </div>
-    <div style="text-align:center; margin:22px 0 12px;">
-      <a href="https://chomeo.vercel.app/spa" style="display:inline-block; padding:10px 28px; background:linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color:#ffffff; text-decoration:none; border-radius:99px; font-weight:700; font-size:13.5px;">🐾 Mở Website Meow &amp; Woof</a>
-    </div>
-    {FOOTER_HTML}
-  </div>
-</div></body></html>"""
+    b_id = escape(str(booking.get("id", "")))
+    cust = escape(str(booking.get("customer_name", "Quý khách")))
+    phone = escape(str(booking.get("phone", "")))
+    email_cust = escape(str(booking.get("email", "") or "Không cung cấp"))
+    pet_name = escape(str(booking.get("pet_name", "Bé cưng")))
+    p_type = escape(str(booking.get("pet_type", "Thú cưng")))
+    weight = escape(str(booking.get("pet_weight_kg", "4.0")))
+    service = escape(str(booking.get("service_name", "Spa")))
+    app_d = escape(str(booking.get("appointment_date", "")))
+    app_t = escape(str(booking.get("appointment_time", "")))
+    price = f"{float(booking.get('total_price', 0) or 0):,.0f}"
+    note = escape(str(booking.get("note", "") or "Không có ghi chú"))
+
+    return f"""<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4efe6;font-family:'Segoe UI',Arial,sans-serif;color:#2b180d;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4efe6;padding:24px 12px;"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;border:1px solid #eadfca;overflow:hidden;box-shadow:0 12px 32px rgba(43,24,13,0.10);">
+  <tr><td style="padding:0;"><div style="height:6px;background:linear-gradient(90deg,#8b5cf6,#ec4899,#f97316);"></div></td></tr>
+  <tr><td align="center" style="padding:26px 28px 18px;background:linear-gradient(180deg,#fffaf3 0%,#ffffff 100%);border-bottom:1px solid #f1e6d6;">
+    <div style="display:inline-block;padding:5px 14px;border-radius:999px;background:#f3e8ff;color:#7e22ce;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;">🐾 THÔNG BÁO ĐẶT LỊCH SPA MỚI</div>
+    <h1 style="margin:10px 0 4px;font-size:22px;font-weight:800;color:#2b180d;">Lịch Hẹn Spa #{b_id}</h1>
+    <div style="font-size:13px;color:#786152;">Meow &amp; Woof Pet House &amp; Spa • Dịch vụ chăm sóc 5 sao</div>
+  </td></tr>
+  <tr><td style="padding:18px 28px 8px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#faf5ff 0%,#fff7ed 100%);border:1.5px solid #e9d5ff;border-radius:12px;">
+      <tr>
+        <td style="padding:14px 18px;">
+          <div style="font-size:11px;font-weight:800;color:#7e22ce;text-transform:uppercase;letter-spacing:0.8px;">Chi phí tạm tính</div>
+          <div style="font-size:24px;font-weight:900;color:#c2410c;margin-top:2px;">{price} đ</div>
+        </td>
+        <td align="right" style="padding:14px 18px;vertical-align:middle;">
+          <div style="font-size:12px;color:#6e5444;font-weight:700;">📅 {app_d}</div>
+          <div style="font-size:15px;font-weight:800;color:#2b180d;margin-top:2px;">⏰ {app_t}</div>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+  <tr><td style="padding:12px 28px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fffdf9;border:1px solid #f0e6d8;border-radius:12px;font-size:13.5px;">
+      <tr><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#786152;width:140px;font-weight:700;">👤 Chủ nuôi</td><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#2b180d;font-weight:700;">{cust}</td></tr>
+      <tr><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#786152;font-weight:700;">📞 Điện thoại</td><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;"><a href="tel:{phone}" style="color:#ea580c;font-weight:800;text-decoration:none;">{phone}</a></td></tr>
+      <tr><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#786152;font-weight:700;">✉️ Email</td><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#2b180d;">{email_cust}</td></tr>
+      <tr><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#786152;font-weight:700;">🐾 Bé cưng</td><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#2b180d;font-weight:700;">{pet_name} ({p_type} • {weight} kg)</td></tr>
+      <tr><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#786152;font-weight:700;">🛁 Gói dịch vụ</td><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#7e22ce;font-weight:700;">{service}</td></tr>
+      <tr><td style="padding:10px 16px;color:#786152;font-weight:700;">📝 Ghi chú</td><td style="padding:10px 16px;color:#503829;">{note}</td></tr>
+    </table>
+  </td></tr>
+  <tr><td align="center" style="padding:14px 28px 22px;">
+    <a href="https://chomeo.vercel.app/admin?tab=bookings" style="display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#8b5cf6 0%,#ec4899 100%);color:#ffffff;text-decoration:none;border-radius:999px;font-weight:800;font-size:14px;">🛁 Mở Quản Lý Lịch Hẹn Spa &rarr;</a>
+  </td></tr>
+  <tr><td align="center" style="padding:16px 28px 22px;background:#faf6ef;border-top:1px solid #efe6d8;">
+    <div style="font-size:11.5px;color:#8c7765;line-height:1.7;"><strong>Meow &amp; Woof Pet House &amp; Spa</strong> • Hotline: 0905.123.456<br>245 Nguyễn Thị Minh Khai, Quận 1, TP.HCM • Mở cửa 08:00 – 21:00</div>
+  </td></tr>
+</table></td></tr></table></body></html>"""
 
 
 def build_order_html_email(order: Dict[str, Any]) -> str:
-    """Tạo giao diện HTML Email xác nhận đơn mua hàng."""
-    o_id, cust = order.get("id", ""), order.get("customer_name", "Quý khách")
-    phone, addr, cr_at = order.get("phone", ""), order.get("address", ""), order.get("created_at", "")
-    total = f"{order.get('total_amount', 0):,.0f}"
+    """Tạo giao diện HTML Email thông báo đơn hàng mới cho Admin sang trọng, rõ ràng."""
+    from html import escape
 
-    rows = "".join(
-        f"<tr style='border-bottom:1px solid rgba(255,255,255,0.06);'><td style='padding:8px 0; color:#ffffff;'>{it['name']}</td><td style='padding:8px 0; text-align:center;'>x{it['quantity']}</td><td style='padding:8px 0; text-align:right; color:#34d399; font-weight:700;'>{it['subtotal']:,.0f} đ</td></tr>"
-        for it in order.get("items", [])
-    )
+    o_id = escape(str(order.get("id", "")))
+    cust = escape(str(order.get("customer_name", "Quý khách")))
+    phone = escape(str(order.get("phone", "")))
+    cust_email = escape(str(order.get("email", "") or "Không cung cấp"))
+    addr = escape(str(order.get("address", "")))
+    cr_at = escape(str(order.get("created_at", "")))
+    pm_raw = str(order.get("payment_method", "cod") or "cod").strip().lower()
+    pm_label = "💳 Chuyển khoản VietQR 24/7" if pm_raw == "banking" or pm_raw == "vietqr" else "💵 Thu tiền khi nhận (COD)"
+    status_lbl = escape(str(order.get("status", "Chờ xác nhận") or "Chờ xác nhận"))
+    voucher_code = escape(str(order.get("voucher_code", "") or ""))
+    try:
+        discount_val = float(order.get("discount_amount", 0) or 0)
+    except (TypeError, ValueError):
+        discount_val = 0.0
+    try:
+        total_val = float(order.get("total_amount", 0) or 0)
+    except (TypeError, ValueError):
+        total_val = 0.0
+    total = f"{total_val:,.0f}"
 
-    return f"""<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0; padding:0; background-color:#0b081d; font-family:'Segoe UI',Roboto,sans-serif; color:#ffffff;">
-<div style="max-width:600px; margin:0 auto; padding:24px 16px;">
-  <div style="background:linear-gradient(135deg, #10b981 0%, #3b82f6 100%); border-radius:24px 24px 0 0; padding:28px 24px; text-align:center;">
-    <div style="font-size:32px; margin-bottom:8px;">🛍️</div>
-    <h1 style="margin:0; font-size:22px; font-weight:800; color:#ffffff;">Thông Báo Đơn Hàng Mới #{o_id}</h1>
-    <p style="margin:4px 0 0; font-size:13px; color:#dbeafe; font-weight:700;">ĐƠN HÀNG #{o_id} ĐÃ ĐƯỢC XÁC NHẬN THÀNH CÔNG</p>
-  </div>
-  <div style="background:#15102d; border:1px solid rgba(59,130,246,0.3); border-top:none; border-radius:0 0 24px 24px; padding:24px;">
-    <p style="margin:0 0 14px; font-size:14.5px; color:#e2e8f0; line-height:1.5;">Khách hàng <strong>{cust}</strong> vừa đặt thành công đơn hàng #{o_id}!</p>
-    <div style="background:#1d173e; border-radius:14px; padding:14px 18px; margin:14px 0; font-size:13px; color:#cbd5e1;">
-      <div><strong>Người nhận:</strong> {cust} ({phone})</div>
-      <div style="margin-top:4px;"><strong>Địa chỉ:</strong> {addr}</div>
-      <div style="margin-top:4px;"><strong>Thời gian:</strong> {cr_at}</div>
-    </div>
-    <table style="width:100%; border-collapse:collapse; font-size:13px; margin:16px 0;">
-      <thead><tr style="border-bottom:1.5px solid rgba(255,255,255,0.15); color:#94a3b8;"><th style="text-align:left; padding-bottom:6px;">Sản phẩm</th><th style="text-align:center; padding-bottom:6px;">SL</th><th style="text-align:right; padding-bottom:6px;">Thành tiền</th></tr></thead>
-      <tbody>{rows}</tbody>
-      <tfoot><tr><td colspan="2" style="padding-top:12px; font-weight:800; font-size:14px;">TỔNG THANH TOÁN:</td><td style="padding-top:12px; text-align:right; font-weight:800; font-size:17px; color:#34d399;">{total} đ</td></tr></tfoot>
+    rows_html = []
+    for it in order.get("items", []):
+        it_name = escape(str(it.get("name", "Sản phẩm")))
+        it_sku = escape(str(it.get("sku", "")))
+        qty = int(it.get("quantity", 1) or 1)
+        sub = float(it.get("subtotal", 0) or 0)
+        sku_badge = f"<div style='font-size:11px;color:#8c7765;margin-top:2px;'>SKU: {it_sku}</div>" if it_sku else ""
+        rows_html.append(
+            f"<tr>"
+            f"<td style='padding:10px 12px;border-bottom:1px solid #f3ebe0;color:#2b180d;'><strong>{it_name}</strong>{sku_badge}</td>"
+            f"<td style='padding:10px 8px;border-bottom:1px solid #f3ebe0;text-align:center;color:#503829;font-weight:700;'>x{qty}</td>"
+            f"<td style='padding:10px 12px;border-bottom:1px solid #f3ebe0;text-align:right;color:#c2410c;font-weight:800;white-space:nowrap;'>{sub:,.0f} đ</td>"
+            f"</tr>"
+        )
+    rows = "".join(rows_html)
+
+    discount_row = ""
+    if voucher_code and discount_val > 0:
+        discount_row = (
+            f"<tr><td colspan='2' style='padding:8px 12px;color:#047857;font-weight:700;font-size:13px;'>"
+            f"🎟️ Giảm giá Voucher (<code>{voucher_code}</code>)</td>"
+            f"<td style='padding:8px 12px;text-align:right;color:#047857;font-weight:800;'>-{discount_val:,.0f} đ</td></tr>"
+        )
+
+    return f"""<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4efe6;font-family:'Segoe UI',Arial,sans-serif;color:#2b180d;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4efe6;padding:24px 12px;"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;border:1px solid #eadfca;overflow:hidden;box-shadow:0 12px 32px rgba(43,24,13,0.10);">
+  <tr><td style="padding:0;"><div style="height:6px;background:linear-gradient(90deg,#f97316,#ec4899,#8b5cf6);"></div></td></tr>
+  <tr><td align="center" style="padding:26px 28px 18px;background:linear-gradient(180deg,#fffaf3 0%,#ffffff 100%);border-bottom:1px solid #f1e6d6;">
+    <div style="display:inline-block;padding:5px 14px;border-radius:999px;background:#fff1e6;color:#ea580c;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;">🛍️ THÔNG BÁO ĐƠN HÀNG MỚI VỀ ADMIN</div>
+    <h1 style="margin:10px 0 4px;font-size:23px;font-weight:800;color:#2b180d;">Đơn Hàng #{o_id}</h1>
+    <div style="font-size:13px;color:#786152;">Meow &amp; Woof Pet House &amp; Spa • {cr_at}</div>
+  </td></tr>
+  <tr><td style="padding:18px 28px 8px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#fff7ed 0%,#fffbeb 100%);border:1.5px solid #fed7aa;border-radius:12px;">
+      <tr>
+        <td style="padding:14px 18px;">
+          <div style="font-size:11px;font-weight:800;color:#9a3412;text-transform:uppercase;letter-spacing:0.8px;">Tổng tiền thanh toán</div>
+          <div style="font-size:26px;font-weight:900;color:#ea580c;margin-top:2px;">{total} đ</div>
+        </td>
+        <td align="right" style="padding:14px 18px;vertical-align:middle;">
+          <div style="display:inline-block;padding:4px 10px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:11.5px;font-weight:800;border:1px solid #a7f3d0;">{status_lbl}</div>
+          <div style="font-size:12px;color:#6e5444;font-weight:700;margin-top:6px;">{pm_label}</div>
+        </td>
+      </tr>
     </table>
-    <div style="text-align:center; margin:22px 0 12px;">
-      <a href="https://chomeo.vercel.app/" style="display:inline-block; padding:10px 28px; background:linear-gradient(135deg, #10b981 0%, #3b82f6 100%); color:#ffffff; text-decoration:none; border-radius:99px; font-weight:700; font-size:13.5px;">🛍️ Mở Quản Trị Đơn Hàng</a>
-    </div>
-    {FOOTER_HTML}
-  </div>
-</div></body></html>"""
+  </td></tr>
+  <tr><td style="padding:10px 28px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fffdf9;border:1px solid #f0e6d8;border-radius:12px;font-size:13.5px;">
+      <tr><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#786152;width:130px;font-weight:700;">👤 Khách hàng</td><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#2b180d;font-weight:800;">{cust}</td></tr>
+      <tr><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#786152;font-weight:700;">📞 Điện thoại</td><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;"><a href="tel:{phone}" style="color:#ea580c;font-weight:800;text-decoration:none;">{phone}</a></td></tr>
+      <tr><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#786152;font-weight:700;">✉️ Email</td><td style="padding:10px 16px;border-bottom:1px solid #f5ede2;color:#2b180d;">{cust_email}</td></tr>
+      <tr><td style="padding:10px 16px;color:#786152;font-weight:700;">🏠 Địa chỉ giao</td><td style="padding:10px 16px;color:#2b180d;line-height:1.5;">{addr}</td></tr>
+    </table>
+  </td></tr>
+  <tr><td style="padding:8px 28px 6px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #f0e6d8;border-radius:12px;overflow:hidden;font-size:13.5px;">
+      <thead>
+        <tr style="background:#faf4eb;color:#6e5444;">
+          <th style="padding:10px 12px;text-align:left;font-size:12px;text-transform:uppercase;">Sản phẩm / Thú cưng</th>
+          <th style="padding:10px 8px;text-align:center;font-size:12px;text-transform:uppercase;">SL</th>
+          <th style="padding:10px 12px;text-align:right;font-size:12px;text-transform:uppercase;">Thành tiền</th>
+        </tr>
+      </thead>
+      <tbody>{rows}</tbody>
+      <tfoot>
+        {discount_row}
+        <tr style="background:#fff8f0;">
+          <td colspan="2" style="padding:12px;font-weight:800;font-size:14px;color:#2b180d;border-top:1.5px solid #fed7aa;">TỔNG CỘNG THANH TOÁN</td>
+          <td style="padding:12px;text-align:right;font-weight:900;font-size:17px;color:#ea580c;border-top:1.5px solid #fed7aa;white-space:nowrap;">{total} đ</td>
+        </tr>
+      </tfoot>
+    </table>
+  </td></tr>
+  <tr><td align="center" style="padding:16px 28px 22px;">
+    <a href="https://chomeo.vercel.app/admin?tab=orders" style="display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#f97316 0%,#ea580c 100%);color:#ffffff;text-decoration:none;border-radius:999px;font-weight:800;font-size:14px;">📋 Mở Quản Trị Đơn Hàng &rarr;</a>
+  </td></tr>
+  <tr><td align="center" style="padding:16px 28px 22px;background:#faf6ef;border-top:1px solid #efe6d8;">
+    <div style="font-size:11.5px;color:#8c7765;line-height:1.7;"><strong>Meow &amp; Woof Pet House &amp; Spa</strong> • Hotline: 0905.123.456<br>245 Nguyễn Thị Minh Khai, Quận 1, TP.HCM • Mở cửa 08:00 – 21:00</div>
+  </td></tr>
+</table></td></tr></table></body></html>"""
 
 
 def build_marketing_html_email(recipient: str, subject: str, body: str) -> str:
@@ -405,6 +507,7 @@ def send_and_log_email(
     body: str,
     html_body: Optional[str] = None,
     allow_relay: bool = True,
+    relay_fields: Optional[Dict[str, str]] = None,
 ) -> Dict[str, Any]:
     """Gửi email thật tới hộp thư (qua Google SMTP hoặc FormSubmit Relay đã kích hoạt) và lưu lịch sử vào bảng `email_logs`."""
     import urllib.request
@@ -448,23 +551,22 @@ def send_and_log_email(
                 f"vào Admin → Hộp thư Email dán App Password 16 ký tự mới (và cập nhật SMTP_PASS trên Vercel)"
             )
     elif not smtp_sent and is_real_email and allow_relay:
-        # Dự phòng gửi thông báo Admin qua FormSubmit AJAX dùng token đã cấp thay vì naked email
-        relay_target = (
-            os.environ.get("FORMSUBMIT_TOKEN", "").strip()
-            or _FORMSUBMIT_ALIASES.get(recipient_addr.lower(), recipient_addr)
-        )
+        # Dự phòng gửi thông báo Admin qua FormSubmit AJAX dùng token đã kích hoạt + bảng table gọn đẹp
+        relay_target = get_formsubmit_token_for_email(recipient_addr) or recipient_addr
         try:
             relay_url = f"https://formsubmit.co/ajax/{relay_target}"
-            payload_bytes = json.dumps(
-                {
-                    "_subject": subject,
-                    "He_Thong": "Meow & Woof Pet House & Spa",
-                    "Thong_Bao_Chi_Tiet": body,
-                    "_template": "box",
-                    "_captcha": "false",
-                },
-                ensure_ascii=False,
-            ).encode("utf-8")
+            relay_payload: Dict[str, Any] = {
+                "_subject": subject,
+                "_template": "table",
+                "_captcha": "false",
+            }
+            if relay_fields:
+                relay_payload.update(relay_fields)
+            else:
+                relay_payload["Cửa hàng"] = "Meow & Woof Pet House & Spa"
+                relay_payload["Nội dung chi tiết"] = body
+
+            payload_bytes = json.dumps(relay_payload, ensure_ascii=False).encode("utf-8")
             req = urllib.request.Request(
                 relay_url,
                 data=payload_bytes,
@@ -530,6 +632,8 @@ def send_order_confirmation_email(order_dict: Dict[str, Any]) -> Dict[str, Any]:
     admin_email = get_admin_notification_email()
     cust_email = (order_dict.get("email") or "").strip()
     total_fmt = f"{order_dict.get('total_amount', 0):,.0f}"
+    pm_raw = str(order_dict.get("payment_method", "cod") or "cod").strip().lower()
+    pm_label = "Chuyển khoản VietQR 24/7" if pm_raw in ("banking", "vietqr") else "Thu tiền khi nhận (COD)"
 
     subject_admin = f"🔔 [ĐƠN HÀNG MỚI #{order_dict.get('id')}] Khách {order_dict.get('customer_name')} ({order_dict.get('phone')}) - {total_fmt}đ"
     body_admin = (
@@ -539,13 +643,34 @@ def send_order_confirmation_email(order_dict: Dict[str, Any]) -> Dict[str, Any]:
         f"📞 Số điện thoại: {order_dict.get('phone')}\n"
         f"✉️ Email khách hàng: {cust_email or 'Không cung cấp'}\n"
         f"🏠 Địa chỉ giao hàng: {order_dict.get('address')}\n"
+        f"💳 Thanh toán: {pm_label}\n"
         f"⏰ Thời gian đặt: {order_dict.get('created_at')}\n\n"
         f"Chi tiết sản phẩm đặt mua:\n{items_lines}\n\n"
         f"💰 TỔNG TIỀN THANH TOÁN: {total_fmt} VNĐ\n"
     )
+    relay_fields = {
+        "Mã đơn hàng": f"#{order_dict.get('id')}",
+        "Khách hàng": str(order_dict.get("customer_name", "")),
+        "Số điện thoại": str(order_dict.get("phone", "")),
+        "Email khách": cust_email or "Không cung cấp",
+        "Địa chỉ giao": str(order_dict.get("address", "")),
+        "Sản phẩm đặt mua": " | ".join(
+            f"{item['name']} (x{item['quantity']}: {item['subtotal']:,.0f}đ)"
+            for item in order_dict.get("items", [])
+        ),
+        "Thanh toán": pm_label,
+        "Tổng thanh toán": f"{total_fmt} VNĐ",
+        "Thời gian đặt": str(order_dict.get("created_at", "")),
+    }
     html_body = build_order_html_email(order_dict)
 
-    return send_and_log_email(admin_email, subject_admin, body_admin, html_body=html_body)
+    return send_and_log_email(
+        admin_email,
+        subject_admin,
+        body_admin,
+        html_body=html_body,
+        relay_fields=relay_fields,
+    )
 
 
 def send_booking_confirmation_email(booking_dict: Dict[str, Any]) -> Dict[str, Any]:
@@ -566,6 +691,21 @@ def send_booking_confirmation_email(booking_dict: Dict[str, Any]) -> Dict[str, A
         f"📅 Thời gian hẹn: {booking_dict.get('appointment_date')} lúc {booking_dict.get('appointment_time')}\n"
         f"💰 Chi phí tạm tính: {total_fmt} VNĐ\n"
     )
+    relay_fields = {
+        "Mã lịch hẹn": f"#{booking_dict.get('id')}",
+        "Chủ nuôi": f"{booking_dict.get('customer_name')} ({booking_dict.get('phone')})",
+        "Email khách": cust_email or "Không cung cấp",
+        "Bé cưng": f"{booking_dict.get('pet_name')} ({booking_dict.get('pet_type')} - {booking_dict.get('pet_weight_kg')}kg)",
+        "Gói dịch vụ": str(booking_dict.get("service_name", "")),
+        "Thời gian hẹn": f"{booking_dict.get('appointment_date')} lúc {booking_dict.get('appointment_time')}",
+        "Chi phí tạm tính": f"{total_fmt} VNĐ",
+    }
     html_body = build_booking_html_email(booking_dict)
 
-    return send_and_log_email(admin_email, subject_admin, body_admin, html_body=html_body)
+    return send_and_log_email(
+        admin_email,
+        subject_admin,
+        body_admin,
+        html_body=html_body,
+        relay_fields=relay_fields,
+    )
