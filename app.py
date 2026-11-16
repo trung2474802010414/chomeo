@@ -682,11 +682,12 @@ def spa_page():
     if request.method == "POST":
         if form.validate_on_submit():
             d = form.data
+            cust_mail_val = d["email"] or (str(session.get("customer_email", "") or "").strip() if session.get("customer_logged_in") else "")
             fee = SpaBooking.calculate_service_price(d["service_name"], d["pet_weight_kg"])
             booking = SpaBooking(
                 customer_name=d["customer_name"],
                 phone=d["phone"],
-                email=d["email"],
+                email=cust_mail_val,
                 pet_name=d["pet_name"],
                 pet_type=d["pet_type"],
                 pet_weight_kg=d["pet_weight_kg"],
@@ -860,11 +861,12 @@ def cart_page():
             try:
                 payment_method = form.data.get("payment_method", "cod")
                 submitted_voucher = (request.form.get("voucher_code") or applied_code or "").strip().upper()
+                cust_order_email = form.data["email"] or (str(session.get("customer_email", "") or "").strip() if session.get("customer_logged_in") else "")
                 order_dict = create_order_transactional(
                     {
                         "customer_name": form.data["customer_name"],
                         "phone": form.data["phone"],
-                        "email": form.data["email"],
+                        "email": cust_order_email,
                         "address": form.data["address"],
                         "payment_method": payment_method,
                         "voucher_code": submitted_voucher,

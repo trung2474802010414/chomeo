@@ -404,7 +404,7 @@
                             <span>Địa chỉ Email nhận vé xác nhận</span>
                             <span style="font-size:11px; color:#047857; font-weight:600;">✉️ Giao diện vé chuẩn Brand VIP</span>
                         </label>
-                        <input type="email" name="email" value="{{ form.raw_data.get('email', '') }}" maxlength="120" class="form-control" placeholder="VD: minhanh@gmail.com (Không bắt buộc)">
+                        <input type="email" name="email" value="{{ form.raw_data.get('email') or (customer_email if customer_logged_in else '') }}" maxlength="120" class="form-control" placeholder="VD: minhanh@gmail.com (Nhận vé hẹn Spa qua Gmail)">
                         {% for err in form.errors.get('email', []) %}
                             <div class="form-error">{{ err }}</div>
                         {% endfor %}
