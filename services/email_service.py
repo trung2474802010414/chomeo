@@ -17,6 +17,20 @@ FOOTER_HTML = """<div style="border-top:1px solid rgba(255,255,255,0.08); paddin
 </div>"""
 
 
+# Mật khẩu cũ đã bị lộ/Google thu hồi không được dùng lại từ cookie/config cũ
+_REVOKED_SMTP_PASSWORDS = {"trismoetogzmbgii"}
+
+# Token FormSubmit mặc định sau khi Admin xác nhận email trên Vercel (tránh dùng naked email gây thư Activate)
+_FORMSUBMIT_ALIASES = {
+    "trungvt040106@gmail.com": "ca5afce49d988ba07deb8a95944c2875",
+}
+
+
+def is_revoked_smtp_password(pwd: str) -> bool:
+    clean = (pwd or "").strip().replace(" ", "")
+    return clean in _REVOKED_SMTP_PASSWORDS
+
+
 def get_smtp_credentials() -> Dict[str, Any]:
     """Lấy thông tin tài khoản SMTP từ biến môi trường, .env hoặc data/smtp_config.json."""
     host = os.environ.get("SMTP_HOST", "smtp.gmail.com").strip()
@@ -26,6 +40,8 @@ def get_smtp_credentials() -> Dict[str, Any]:
         port = 587
     user = os.environ.get("SMTP_USER", "").strip()
     pwd = os.environ.get("SMTP_PASS", "").strip()
+    if is_revoked_smtp_password(pwd):
+        pwd = ""
 
     if not user or not pwd:
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -41,7 +57,7 @@ def get_smtp_credentials() -> Dict[str, Any]:
                             k, v = k.strip(), v.strip().strip('"').strip("'")
                             if k == "SMTP_USER" and not user:
                                 user = v
-                            elif k == "SMTP_PASS" and not pwd:
+                            elif k == "SMTP_PASS" and not pwd and not is_revoked_smtp_password(v):
                                 pwd = v
                             elif k == "SMTP_HOST" and host == "smtp.gmail.com":
                                 host = v
@@ -60,19 +76,17 @@ def get_smtp_credentials() -> Dict[str, Any]:
                 with open(cfg_path, "r", encoding="utf-8") as f:
                     cfg = json.load(f)
                     user = user or cfg.get("smtp_user", "").strip()
-                    pwd = pwd or cfg.get("smtp_pass", "").strip()
+                    cfg_pwd = cfg.get("smtp_pass", "").strip()
+                    if not pwd and not is_revoked_smtp_password(cfg_pwd):
+                        pwd = cfg_pwd
                     host = cfg.get("smtp_host", host) or host
                     port = int(cfg.get("smtp_port", port) or port)
             except Exception:
                 pass
 
-    # Cấu hình Email & Mật khẩu ứng dụng Gmail mặc định vĩnh viễn của Admin
     DEFAULT_USER = "trungvt040106@gmail.com"
-    DEFAULT_PASS = "trismoetogzmbgii"
     if not user:
         user = DEFAULT_USER
-    if not pwd:
-        pwd = DEFAULT_PASS
 
     return {
         "smtp_host": host or "smtp.gmail.com",
@@ -85,6 +99,8 @@ def get_smtp_credentials() -> Dict[str, Any]:
 def save_smtp_credentials(smtp_user: str, smtp_pass: str, smtp_host: str = "smtp.gmail.com", smtp_port: int = 587) -> None:
     """Lưu cấu hình SMTP an toàn (tương thích 100% với Vercel Serverless & Local)."""
     clean_pass = smtp_pass.strip().replace(" ", "")
+    if is_revoked_smtp_password(clean_pass):
+        clean_pass = ""
     os.environ["SMTP_USER"] = smtp_user.strip()
     os.environ["SMTP_PASS"] = clean_pass
     os.environ["SMTP_HOST"] = smtp_host.strip() or "smtp.gmail.com"
@@ -323,6 +339,66 @@ def build_voucher_html_email(recipient: str, subject: str, body: str, voucher: O
 </table></td></tr></table></body></html>"""
 
 
+def _send_via_smtp(
+    smtp_host: str,
+    smtp_port: int,
+    smtp_user: str,
+    smtp_pass: str,
+    msg: EmailMessage,
+) -> tuple:
+    """
+    Gửi EmailMessage qua SMTP, tự động thử cổng 465 (SSL) nếu cổng 587 (STARTTLS) lỗi mạng,
+    và phân biệt rõ lỗi sai/thu hồi App Password (535) với lỗi kết nối.
+    """
+    attempts = [(smtp_port, smtp_port == 465)]
+    if smtp_port != 465:
+        attempts.append((465, True))
+
+    last_err = ""
+    for port, use_ssl in attempts:
+        stage = "connect"
+        try:
+            if use_ssl:
+                server_cm = smtplib.SMTP_SSL(smtp_host, port, timeout=10)
+            else:
+                server_cm = smtplib.SMTP(smtp_host, port, timeout=10)
+
+            with server_cm as server:
+                server.ehlo()
+                if not use_ssl:
+                    stage = "starttls"
+                    server.starttls()
+                    server.ehlo()
+                stage = "login"
+                server.login(smtp_user, smtp_pass)
+                stage = "send"
+                server.send_message(msg)
+            return True, "", False
+        except smtplib.SMTPAuthenticationError:
+            return (
+                False,
+                "Mật khẩu ứng dụng Gmail không đúng hoặc đã bị Google thu hồi (535) — vui lòng tạo mã 16 ký tự mới ở Admin → Hộp thư Email",
+                True,
+            )
+        except smtplib.SMTPServerDisconnected as exc:
+            if stage == "login":
+                # Gmail đóng socket ngay sau khi từ chối AUTH PLAIN (535) và client gửi tiếp AUTH LOGIN
+                return (
+                    False,
+                    "Mật khẩu ứng dụng Gmail không đúng hoặc đã bị Google thu hồi (535) — vui lòng tạo mã 16 ký tự mới ở Admin → Hộp thư Email",
+                    True,
+                )
+            last_err = str(exc)
+            continue
+        except Exception as exc:
+            last_err = str(exc)
+            if stage == "login":
+                break
+            continue
+
+    return False, f"Lỗi SMTP ({last_err})", False
+
+
 def send_and_log_email(
     recipient: str,
     subject: str,
@@ -330,7 +406,7 @@ def send_and_log_email(
     html_body: Optional[str] = None,
     allow_relay: bool = True,
 ) -> Dict[str, Any]:
-    """Gửi email thật tới hộp thư Admin (qua Google SMTP hoặc FormSubmit Relay) và lưu lịch sử vào bảng `email_logs`."""
+    """Gửi email thật tới hộp thư (qua Google SMTP hoặc FormSubmit Relay đã kích hoạt) và lưu lịch sử vào bảng `email_logs`."""
     import urllib.request
 
     recipient_addr = recipient.strip() if recipient and recipient.strip() else get_admin_notification_email()
@@ -347,33 +423,38 @@ def send_and_log_email(
         and "@example.com" not in recipient_addr
         and recipient_addr != "boss_admin@gmail.com"
     )
+    smtp_sent = False
+    smtp_err = ""
 
     if smtp_user and smtp_pass and "@petshop.local" not in recipient_addr and "@example.com" not in recipient_addr:
-        try:
-            msg = EmailMessage()
-            msg["Subject"] = subject
-            msg["From"] = f"Meow & Woof Pet House <{smtp_user}>"
-            msg["To"] = recipient_addr
-            msg.set_content(body)
-            if html_body:
-                msg.add_alternative(html_body, subtype="html")
+        msg = EmailMessage()
+        msg["Subject"] = subject
+        msg["From"] = f"Meow & Woof Pet House <{smtp_user}>"
+        msg["To"] = recipient_addr
+        msg.set_content(body)
+        if html_body:
+            msg.add_alternative(html_body, subtype="html")
 
-            with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_pass)
-                server.send_message(msg)
+        smtp_sent, smtp_err, _ = _send_via_smtp(smtp_host, smtp_port, smtp_user, smtp_pass, msg)
+        if smtp_sent:
             status = f"Đã gửi Gmail SMTP thành công tới {recipient_addr}"
-        except Exception as exc:
-            status = f"Lỗi SMTP ({exc}) — Đã lưu bản sao tại Hộp thư Admin"
-    elif is_real_email and not allow_relay:
-        status = (
-            f"Chưa gửi tới {recipient_addr}: cần dán Mật khẩu ứng dụng Gmail (App Password) "
-            f"ở tab Hộp thư Email để gửi thư HTML đẹp"
+        else:
+            status = f"{smtp_err} — Đã lưu bản sao tại Hộp thư Admin"
+
+    if not smtp_sent and is_real_email and not allow_relay:
+        if not smtp_pass:
+            status = (
+                f"Chưa gửi tới {recipient_addr}: chưa có Mật khẩu ứng dụng Gmail hợp lệ — "
+                f"vào Admin → Hộp thư Email dán App Password 16 ký tự mới (và cập nhật SMTP_PASS trên Vercel)"
+            )
+    elif not smtp_sent and is_real_email and allow_relay:
+        # Dự phòng gửi thông báo Admin qua FormSubmit AJAX dùng token đã cấp thay vì naked email
+        relay_target = (
+            os.environ.get("FORMSUBMIT_TOKEN", "").strip()
+            or _FORMSUBMIT_ALIASES.get(recipient_addr.lower(), recipient_addr)
         )
-    elif is_real_email:
-        # Gửi qua cổng chuyển tiếp FormSubmit AJAX không cần mật khẩu
         try:
-            relay_url = f"https://formsubmit.co/ajax/{recipient_addr}"
+            relay_url = f"https://formsubmit.co/ajax/{relay_target}"
             payload_bytes = json.dumps(
                 {
                     "_subject": subject,
@@ -396,17 +477,23 @@ def send_and_log_email(
                 },
                 method="POST",
             )
-            with urllib.request.urlopen(req, timeout=6) as resp:
+            with urllib.request.urlopen(req, timeout=5) as resp:
                 resp_json = json.loads(resp.read().decode("utf-8", errors="ignore"))
                 msg_info = str(resp_json.get("message", ""))
                 if resp_json.get("success") in (True, "true"):
                     status = f"Đã gửi thẳng tới Gmail {recipient_addr} (FormSubmit Relay)"
                 elif "activate" in msg_info.lower() or "confirm" in msg_info.lower():
-                    status = f"Chờ bấm Activate trong Gmail {recipient_addr} (Kiểm tra hộp thư/Spam)"
+                    status = (
+                        f"Chờ bấm nút 'ACTIVATE FORM' trong Gmail {recipient_addr} "
+                        f"(hoặc dán App Password Gmail 16 ký tự ở tab Hộp thư Email)"
+                    )
                 else:
                     status = f"Đã gửi thông báo tới {recipient_addr}"
         except Exception:
-            status = f"Đã lưu thông báo ({recipient_addr}) — Điền Mật khẩu ứng dụng Gmail để gửi thẳng SMTP"
+            if smtp_err:
+                status = f"{smtp_err} — Đã lưu bản sao tại Hộp thư Admin"
+            else:
+                status = f"Đã lưu thông báo ({recipient_addr}) — Điền Mật khẩu ứng dụng Gmail để gửi thẳng SMTP"
 
     log_entry = EmailLog(
         recipient=recipient_addr[:145],

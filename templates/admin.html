@@ -2224,27 +2224,6 @@ Cảm ơn bạn đã luôn đồng hành cùng tụi mình. Meow & Woof dành t�
                             </div>
                         </div>
                     </form>
-                    <script>
-                    function pingFormSubmitOnSave() {
-                        try {
-                            var mailEl = document.getElementById('adminNotifyEmailInput');
-                            var email = mailEl ? mailEl.value.trim() : '';
-                            if (email && email.indexOf('@') > 0) {
-                                fetch('https://formsubmit.co/ajax/' + encodeURIComponent(email), {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                                    body: JSON.stringify({
-                                        _subject: '🔔 [Meow & Woof] Kích hoạt nhận thông báo đơn hàng cho Admin!',
-                                        Thong_Bao: 'Email Admin ' + email + ' đã được kết nối thành công với hệ thống đặt hàng Meow & Woof Pet House & Spa!',
-                                        _template: 'box',
-                                        _captcha: 'false'
-                                    }),
-                                    keepalive: true
-                                }).catch(function(){});
-                            }
-                        } catch (e) {}
-                    }
-                    </script>
                 </div>
 
                 <!-- GHIM CẤU HÌNH ĐÃ LƯU VĨNH VIỄN (VERCEL ENVIRONMENT VARIABLES) -->

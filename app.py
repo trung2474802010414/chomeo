@@ -58,6 +58,7 @@ from services.email_service import (
     build_order_html_email,
     get_admin_notification_email,
     get_smtp_credentials,
+    is_revoked_smtp_password,
     save_smtp_credentials,
     send_and_log_email,
     send_booking_confirmation_email,
@@ -424,7 +425,7 @@ def restore_persistent_accounts_before_request() -> None:
     if raw_smtp_pass and not os.environ.get("SMTP_PASS"):
         try:
             pass_str = urllib.parse.unquote(raw_smtp_pass).strip()
-            if pass_str:
+            if pass_str and not is_revoked_smtp_password(pass_str):
                 save_smtp_credentials(get_admin_notification_email(), pass_str, "smtp.gmail.com", 587)
         except Exception:
             pass
@@ -2401,15 +2402,26 @@ def admin_save_smtp():
 
     if admin_notify_mail and "@" in admin_notify_mail:
         set_admin_notification_email(admin_notify_mail)
-        if smtp_pass:
+        revoked_input = bool(smtp_pass and is_revoked_smtp_password(smtp_pass))
+        if smtp_pass and not revoked_input:
             save_smtp_credentials(admin_notify_mail, smtp_pass, "smtp.gmail.com", 587)
-        test_res = send_test_email(admin_notify_mail)
-        delivery_st = test_res.get("delivery_status", "")
-        session["trigger_formsubmit_ping"] = admin_notify_mail
-        flash(
-            f"🎉 Đã lưu Email Admin ('{admin_notify_mail}')! Trạng thái gửi: {delivery_st}.",
-            "success",
-        )
+
+        if revoked_input:
+            flash(
+                "⚠️ Mật khẩu ứng dụng Gmail này đã bị Google thu hồi vì từng lộ công khai. "
+                "Vui lòng tạo mã 16 ký tự mới tại myaccount.google.com/apppasswords rồi dán vào lại!",
+                "error",
+            )
+            delivery_st = ""
+        else:
+            test_res = send_test_email(admin_notify_mail)
+            delivery_st = test_res.get("delivery_status", "")
+            flash_cat = "success" if delivery_st.startswith("Đã gửi Gmail SMTP") else "error"
+            flash(
+                f"Đã lưu Email Admin ('{admin_notify_mail}')! Trạng thái gửi: {delivery_st}.",
+                flash_cat,
+            )
+
         resp = make_response(redirect(url_for("admin_page", tab="emails")))
         try:
             resp.set_cookie(
@@ -2419,7 +2431,9 @@ def admin_save_smtp():
                 samesite="Lax",
                 httponly=False,
             )
-            if smtp_pass:
+            if revoked_input:
+                resp.delete_cookie("mw_smtp_pass")
+            elif smtp_pass:
                 resp.set_cookie(
                     "mw_smtp_pass",
                     urllib.parse.quote(smtp_pass.replace(" ", "")),
