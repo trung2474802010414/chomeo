@@ -23,7 +23,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Schnauzer",
         "price": 6500000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-001-schnauzer.jpg",
         "description": "Bé Schnauzer lông xù màu tiêu muối cực kỳ thông minh, quấn chủ, đã tiêm 2 mũi vaccine Vanguard và tẩy giun đầy đủ.",
     },
     {
@@ -34,7 +34,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Poodle",
         "price": 4800000,
         "stock": 4,
-        "image_url": "https://images.unsplash.com/photo-1616149562385-1d84e79478bb?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-002-poodle.jpg",
         "description": "Bé Poodle Tiny lông xoăn tít như gấu Teddy, không rụng lông, ăn hạt tốt và đã huấn luyện đi vệ sinh đúng chỗ.",
     },
     {
@@ -56,7 +56,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Phốc Sóc (Pomeranian)",
         "price": 7200000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-004-pomeranian.jpg",
         "description": "Bé Phốc Sóc mặt gấu bộ lông trắng bông xù dày dặn, lanh lợi, kèm sổ theo dõi sức khỏe thú y.",
     },
     {
@@ -78,7 +78,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Shiba Inu",
         "price": 9500000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-006-shiba.jpg",
         "description": "Shiba Inu mặt bánh bao hay cười, tính cách sạch sẽ, trung thành, đầy đủ giấy tờ tiêm chủng.",
     },
     {
@@ -89,7 +89,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Chihuahua",
         "price": 4200000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1605897472359-85e4b94d685d?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-007-chihuahua.jpg",
         "description": "Chihuahua kích thước nhỏ nhắn, lanh lợi, cực kỳ quấn chủ và thích hợp nuôi trong căn hộ chung cư.",
     },
     {
@@ -111,7 +111,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Alaska",
         "price": 8500000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1568572933382-74d440642117?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-009-alaska.jpg",
         "description": "Bé Alaska khung xương to khỏe, lông dày 2 lớp, tính cách hiền lành, quấn người và ăn uống rất tốt.",
     },
     {
@@ -133,7 +133,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Akita",
         "price": 12500000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-011-akita.jpg",
         "description": "Quốc khuyển Nhật Bản nổi tiếng trung thành, dáng đứng uy vệ, khỏe mạnh và điềm đạm.",
     },
     {
@@ -144,7 +144,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Samoyed",
         "price": 8800000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1529472119196-cb724127a98e?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-012-samoyed.jpg",
         "description": "Samoyed bộ lông trắng muốt như mây, khuôn mặt luôn tươi cười, thân thiện và dịu dàng.",
     },
     {
@@ -155,7 +155,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Chow Chow",
         "price": 9200000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-013-chowchow.jpg",
         "description": "Bé Chow Chow dáng gấu mũm mĩm, bờm lông xù quanh cổ như sư tử nhỏ cực kỳ ngộ nghĩnh.",
     },
     {
@@ -166,7 +166,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Pug Mặt Xệ",
         "price": 4500000,
         "stock": 4,
-        "image_url": "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-014-pug.jpg",
         "description": "Pug mặt xệ mắt tròn xoe biểu cảm đáng yêu, lông ngắn dễ chăm sóc, ăn khỏe và rất hiền.",
     },
     {
@@ -177,7 +177,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Bull Pháp",
         "price": 8200000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1583512603805-3cc6b41f3edb?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-015-bullphap.jpg",
         "description": "Bull Pháp tai dơi cơ bắp săn chắc, tính tình vui nhộn, ít sủa, rất hợp nuôi trong gia đình.",
     },
     {
@@ -188,7 +188,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Phú Quốc",
         "price": 4600000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-016-phuquoc.jpg",
         "description": "Chó Phú Quốc xoáy kiếm rõ nét, chân màng vịt, cực kỳ khôn ngoan, khỏe mạnh và trung thành.",
     },
     {
@@ -210,7 +210,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Beagle",
         "price": 5500000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1505628346881-b72b27e84530?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-018-beagle.jpg",
         "description": "Beagle tai cụp dài, bộ lông 3 màu bóng mượt, tính cách năng động, hòa đồng với mọi người.",
     },
     {
@@ -221,7 +221,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Bichon Frise",
         "price": 6900000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-pet-019-bichon.jpg",
         "description": "Bichon Frise đầu tròn như kẹo bông gòn trắng tinh khôi, không hôi, không rụng lông.",
     },
     {
@@ -247,7 +247,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Anh Lông Ngắn (ALN)",
         "price": 4500000,
         "stock": 4,
-        "image_url": "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-001-aln.jpg",
         "description": "Mèo Anh Lông Ngắn má phệ, lông dày mượt màu xám xanh cổ điển, tính cách điềm tĩnh, biết đi vệ sinh vào thau cát.",
     },
     {
@@ -258,7 +258,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Tai Cụp Scottish Fold",
         "price": 5600000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-002-scottish.jpg",
         "description": "Bé mèo Scottish Fold tai cụp sát đầu, mắt to tròn long lanh, rất quấn người và thích được vuốt ve.",
     },
     {
@@ -269,7 +269,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Chân Ngắn Munchkin",
         "price": 8200000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-003-munchkin.jpg",
         "description": "Bé Munchkin 4 chân ngắn lũn cũn chạy nhảy siêu đáng yêu, ăn hạt Royal Canin và pate rất ngoan.",
     },
     {
@@ -280,7 +280,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Ragdoll",
         "price": 7500000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-004-ragdoll.jpg",
         "description": "Giống mèo công chúa Ragdoll bộ lông dài mềm mại và đôi mắt xanh biếc, hiền lành và dịu dàng.",
     },
     {
@@ -291,7 +291,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Anh Lông Dài (ALD)",
         "price": 5200000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-005-ald.jpg",
         "description": "Mèo Anh Lông Dài bộ lông bông xù quý phái, tính cách nhẹ nhàng, quấn chủ và đã tiêm phòng đầy đủ.",
     },
     {
@@ -302,7 +302,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Ba Tư (Persian)",
         "price": 5800000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-006-persian.jpg",
         "description": "Mèo Ba Tư khuôn mặt bầu bĩnh đáng yêu, tính tình hiền lành, thích nằm lòng chủ vuốt ve.",
     },
     {
@@ -313,7 +313,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Bengal",
         "price": 8900000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-007-bengal.jpg",
         "description": "Mèo Bengal sở hữu bộ lông hoa hồng vân báo rừng cực chất, thông minh, nhanh nhẹn và khỏe mạnh.",
     },
     {
@@ -324,7 +324,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Maine Coon",
         "price": 11500000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1561948955-570b270e7c36?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-008-mainecoon.jpg",
         "description": "Giống mèo khổng lồ Maine Coon với chùm lông tai linh miêu oai vệ nhưng tính cách cực kỳ ngọt ngào.",
     },
     {
@@ -335,7 +335,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Xiêm (Siamese)",
         "price": 3800000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1513245543132-31f507417b26?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-009-siamese.jpg",
         "description": "Mèo Xiêm điểm màu tai và mặt đặc trưng, thông minh, lanh lợi và cực kỳ gắn bó với chủ nhân.",
     },
     {
@@ -346,7 +346,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Nga Mắt Xanh",
         "price": 6400000,
         "stock": 2,
-        "image_url": "https://images.unsplash.com/photo-1511044568932-338cba0ad803?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-010-russianblue.jpg",
         "description": "Bộ lông xám ánh bạc mịn như nhung cùng đôi mắt xanh lục bảo quyến rũ, sạch sẽ và ít rụng lông.",
     },
     {
@@ -368,7 +368,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Mỹ Lông Ngắn",
         "price": 4900000,
         "stock": 3,
-        "image_url": "https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-pet-012-ash.jpg",
         "description": "Mèo Mỹ Lông Ngắn vân xoáy cổ điển sắc nét, sức đề kháng cao, dễ ăn và rất giỏi bắt chuột.",
     },
 
@@ -394,7 +394,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Mèo Tai Cụp Scottish Fold",
         "price": 35000,
         "stock": 45,
-        "image_url": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/cat-fd-002-pate.jpg",
         "description": "Súp thưởng vị cá ngừ và gà giúp kích thích vị giác và bổ sung nước cho mèo mọi lứa tuổi.",
     },
     {
@@ -460,7 +460,7 @@ SEED_CATALOG: List[Dict[str, Any]] = [
         "breed": "Chó Corgi Chân Lùn",
         "price": 68000,
         "stock": 16,
-        "image_url": "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&w=700&q=80",
+        "image_url": "/static/images/catalog/dog-toy-001-chewbone.jpg",
         "description": "Đồ chơi cao su tự nhiên hỗ trợ làm sạch mảng bám răng cho chó ngứa răng.",
     },
     {

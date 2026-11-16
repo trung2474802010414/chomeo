@@ -110,7 +110,7 @@ var spotlightPets = [
         name: "Mèo Anh Lông Ngắn (ALN) Xám",
         price: "8.500.000 đ",
         sub: "Giống: Mèo Anh Lông Ngắn • Má bánh bao • Cực nũng nịu",
-        img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&auto=format&fit=crop&q=80",
+        img: "/static/images/catalog/cat-pet-001-aln.jpg",
         tag: "🐱 Best-Seller Siêu Cưng",
         link: "{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Anh Lông Ngắn (ALN)') }}"
     },
@@ -118,7 +118,7 @@ var spotlightPets = [
         name: "Chó Poodle Tiny Nâu Đỏ",
         price: "6.800.000 đ",
         sub: "Giống: Poodle Tiny • Thông minh số 1 • Không rụng lông",
-        img: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&auto=format&fit=crop&q=80",
+        img: "/static/images/catalog/dog-pet-002-poodle.jpg",
         tag: "⭐ Bé Ngoan Dễ Nuôi",
         link: "{{ url_for('shop_page', pet_type='Chó', breed='Chó Poodle') }}"
     },
@@ -126,7 +126,7 @@ var spotlightPets = [
         name: "Mèo Scottish Fold Tai Cụp",
         price: "11.000.000 đ",
         sub: "Giống: Scottish Fold • Tai cụp tròn xoe • Mắt to tròn",
-        img: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600&auto=format&fit=crop&q=80",
+        img: "/static/images/catalog/cat-pet-002-scottish.jpg",
         tag: "✨ Siêu Phẩm Quý Tộc",
         link: "{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Scottish Fold') }}"
     }
@@ -182,7 +182,7 @@ function switchSpotlightPet(idx) {
         <!-- Chó Poodle -->
         <a href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Poodle') }}" class="breed-card-mini">
             <div class="breed-avatar-wrap">
-                <img src="data:image/jpeg;base64,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" alt="Chó Poodle" class="breed-avatar-img" loading="lazy">
+                <img src="/static/images/catalog/dog-pet-002-poodle.jpg" alt="Chó Poodle" class="breed-avatar-img" loading="lazy">
             </div>
             <span class="breed-name-title">🐶 Chó Poodle</span>
             <span class="breed-desc-tag">Lông xoăn • Không rụng</span>
@@ -200,7 +200,7 @@ function switchSpotlightPet(idx) {
         <!-- Chó Schnauzer -->
         <a href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Schnauzer') }}" class="breed-card-mini">
             <div class="breed-avatar-wrap">
-                <img src="https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?auto=format&fit=crop&w=250&q=80" alt="Chó Schnauzer" class="breed-avatar-img" loading="lazy">
+                <img src="/static/images/catalog/dog-pet-001-schnauzer.jpg" alt="Chó Schnauzer" class="breed-avatar-img" loading="lazy">
             </div>
             <span class="breed-name-title">🐶 Chó Schnauzer</span>
             <span class="breed-desc-tag">Mặt bác học • Quấn chủ</span>
@@ -209,7 +209,7 @@ function switchSpotlightPet(idx) {
         <!-- Chó Phốc Sóc -->
         <a href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Phốc Sóc (Pomeranian)') }}" class="breed-card-mini">
             <div class="breed-avatar-wrap">
-                <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=250&q=80" alt="Chó Phốc Sóc" class="breed-avatar-img" loading="lazy">
+                <img src="/static/images/catalog/dog-pet-004-pomeranian.jpg" alt="Chó Phốc Sóc" class="breed-avatar-img" loading="lazy">
             </div>
             <span class="breed-name-title">🐶 Chó Phốc Sóc</span>
             <span class="breed-desc-tag">Bông xù mặt gấu</span>
@@ -227,7 +227,7 @@ function switchSpotlightPet(idx) {
         <!-- Chó Shiba Inu -->
         <a href="{{ url_for('shop_page', pet_type='Chó', breed='Chó Shiba Inu') }}" class="breed-card-mini">
             <div class="breed-avatar-wrap">
-                <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=250&q=80" alt="Chó Shiba Inu" class="breed-avatar-img" loading="lazy">
+                <img src="/static/images/catalog/dog-pet-006-shiba.jpg" alt="Chó Shiba Inu" class="breed-avatar-img" loading="lazy">
             </div>
             <span class="breed-name-title">🐶 Chó Shiba Inu</span>
             <span class="breed-desc-tag">Mặt cười • Chuẩn Nhật</span>
@@ -236,7 +236,7 @@ function switchSpotlightPet(idx) {
         <!-- Mèo Anh Lông Ngắn -->
         <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Anh Lông Ngắn (ALN)') }}" class="breed-card-mini">
             <div class="breed-avatar-wrap">
-                <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=250&q=80" alt="Mèo ALN" class="breed-avatar-img" loading="lazy">
+                <img src="/static/images/catalog/cat-pet-001-aln.jpg" alt="Mèo ALN" class="breed-avatar-img" loading="lazy">
             </div>
             <span class="breed-name-title">🐱 Mèo ALN</span>
             <span class="breed-desc-tag">Má bánh bao • Siêu nịnh</span>
@@ -245,7 +245,7 @@ function switchSpotlightPet(idx) {
         <!-- Mèo Munchkin Chân Ngắn -->
         <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Chân Ngắn Munchkin') }}" class="breed-card-mini">
             <div class="breed-avatar-wrap">
-                <img src="https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=250&q=80" alt="Mèo Munchkin" class="breed-avatar-img" loading="lazy">
+                <img src="/static/images/catalog/cat-pet-003-munchkin.jpg" alt="Mèo Munchkin" class="breed-avatar-img" loading="lazy">
             </div>
             <span class="breed-name-title">🐱 Mèo Munchkin</span>
             <span class="breed-desc-tag">Chân lùn cute • Quấn chủ</span>
@@ -254,7 +254,7 @@ function switchSpotlightPet(idx) {
         <!-- Mèo Scottish Fold -->
         <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Tai Cụp Scottish Fold') }}" class="breed-card-mini">
             <div class="breed-avatar-wrap">
-                <img src="https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=250&q=80" alt="Mèo Scottish" class="breed-avatar-img" loading="lazy">
+                <img src="/static/images/catalog/cat-pet-002-scottish.jpg" alt="Mèo Scottish" class="breed-avatar-img" loading="lazy">
             </div>
             <span class="breed-name-title">🐱 Mèo Scottish</span>
             <span class="breed-desc-tag">Tai cụp tròn xoe</span>
@@ -263,7 +263,7 @@ function switchSpotlightPet(idx) {
         <!-- Mèo Ragdoll -->
         <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Ragdoll') }}" class="breed-card-mini">
             <div class="breed-avatar-wrap">
-                <img src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&w=250&q=80" alt="Mèo Ragdoll" class="breed-avatar-img" loading="lazy">
+                <img src="/static/images/catalog/cat-pet-004-ragdoll.jpg" alt="Mèo Ragdoll" class="breed-avatar-img" loading="lazy">
             </div>
             <span class="breed-name-title">🐱 Mèo Ragdoll</span>
             <span class="breed-desc-tag">Mắt xanh công chúa</span>
@@ -272,7 +272,7 @@ function switchSpotlightPet(idx) {
         <!-- Mèo Ba Tư -->
         <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Ba Tư (Persian)') }}" class="breed-card-mini">
             <div class="breed-avatar-wrap">
-                <img src="https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=250&q=80" alt="Mèo Ba Tư" class="breed-avatar-img" loading="lazy">
+                <img src="/static/images/catalog/cat-pet-006-persian.jpg" alt="Mèo Ba Tư" class="breed-avatar-img" loading="lazy">
             </div>
             <span class="breed-name-title">🐱 Mèo Ba Tư</span>
             <span class="breed-desc-tag">Mặt tịt đáng yêu</span>
@@ -281,7 +281,7 @@ function switchSpotlightPet(idx) {
         <!-- Mèo Bengal -->
         <a href="{{ url_for('shop_page', pet_type='Mèo', breed='Mèo Bengal') }}" class="breed-card-mini">
             <div class="breed-avatar-wrap">
-                <img src="https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=250&q=80" alt="Mèo Bengal" class="breed-avatar-img" loading="lazy">
+                <img src="/static/images/catalog/cat-pet-007-bengal.jpg" alt="Mèo Bengal" class="breed-avatar-img" loading="lazy">
             </div>
             <span class="breed-name-title">🐱 Mèo Bengal</span>
             <span class="breed-desc-tag">Vân hoa hồng báo rừng</span>
