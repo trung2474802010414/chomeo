@@ -1371,7 +1371,9 @@ def clear_cart_route():
 @app.route("/network")
 def network_page():
     """Trang Lập trình mạng (CLO3): Gọi REST API bằng urllib + API Key & xử lý XML/JSON."""
-    species = request.args.get("species", "cat").strip().lower()
+    species = request.args.get("species", "all").strip().lower()
+    if species not in ("all", "cat", "dog"):
+        species = "all"
     search_breed = request.args.get("search_breed", "").strip()
     api_key = request.args.get("api_key", "").strip()
 
@@ -1379,7 +1381,7 @@ def network_page():
         species=species,
         api_key=api_key,
         search_breed=search_breed,
-        limit=8,
+        limit=32,
     )
     xml_preview = export_products_to_xml()
 

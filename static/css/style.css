@@ -3070,54 +3070,297 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     box-shadow: 0 4px 10px rgba(251, 146, 60, 0.3);
 }
 
-/* Thẻ Bách Khoa Toàn Thư Giống Chó Mèo (Network Breed Card) */
+/* Thẻ Bách Khoa Toàn Thư Giống Chó Mèo (Network Breed Card & Grid) */
+.breed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(345px, 1fr));
+    gap: 24px;
+    align-items: stretch;
+}
+
+@media (max-width: 768px) {
+    .breed-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .breed-card-modern {
     background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    padding: 22px;
+    border: 1.5px solid #f5d0b5;
+    border-radius: 24px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 4px 18px rgba(180, 100, 60, 0.05);
+    box-shadow: 0 8px 24px rgba(180, 100, 60, 0.07);
     transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .breed-card-modern:hover {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
     border-color: #fb923c;
-    box-shadow: 0 16px 36px rgba(249, 115, 22, 0.16);
+    box-shadow: 0 18px 40px rgba(249, 115, 22, 0.16);
     background: #ffffff;
 }
 
-.breed-top-row {
+.breed-photo-wrap {
+    position: relative;
+    width: 100%;
+    height: 225px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fff7ed 0%, #ffe4e6 100%);
+    border-bottom: 1px solid #fde2c8;
+}
+
+.breed-photo-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.breed-card-modern:hover .breed-photo-wrap img {
+    transform: scale(1.06);
+}
+
+.breed-photo-badges-top {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 8px;
-    margin-bottom: 14px;
+    z-index: 2;
+}
+
+.breed-photo-badges-bottom {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
 }
 
 .breed-origin-pill {
-    padding: 4px 12px;
+    padding: 5px 12px;
     border-radius: 99px;
     font-size: 12px;
-    font-weight: 700;
-    background: #fff7ed;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.94);
     border: 1px solid #fed7aa;
-    color: var(--text-body);
+    color: #9a3412;
+    box-shadow: 0 4px 12px rgba(43, 24, 13, 0.12);
+    backdrop-filter: blur(6px);
+}
+
+.breed-care-badge {
+    padding: 5px 11px;
+    border-radius: 99px;
+    font-size: 11.5px;
+    font-weight: 800;
+    background: rgba(236, 253, 245, 0.95);
+    border: 1px solid #a7f3d0;
+    color: #047857;
+    box-shadow: 0 4px 12px rgba(4, 120, 87, 0.12);
+}
+
+.breed-price-pill {
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ea580c 0%, #e11d48 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(225, 29, 72, 0.32);
+}
+
+.breed-species-pill {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 11.5px;
+    font-weight: 800;
+    background: rgba(43, 24, 13, 0.78);
+    color: #fff7ed;
+    backdrop-filter: blur(4px);
+}
+
+.breed-card-body {
+    padding: 20px 22px 16px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.breed-card-footer {
+    padding: 0 22px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: 10px;
+}
+
+.breed-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.breed-metric-box {
+    background: #fffaf5;
+    border: 1px solid #fed7aa;
+    border-radius: 14px;
+    padding: 8px 10px;
+    text-align: center;
+}
+
+.breed-metric-label {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #9a6b53;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.breed-metric-val {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #2b180d;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.breed-scores-box {
+    background: #fffdf9;
+    border: 1px solid #f5e1ce;
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.breed-score-row {
+    display: grid;
+    grid-template-columns: 115px 1fr 34px;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #5c4033;
+}
+
+.breed-score-track {
+    height: 7px;
+    border-radius: 99px;
+    background: #f5e6d8;
+    overflow: hidden;
+}
+
+.breed-score-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #fb923c 0%, #f43f5e 100%);
 }
 
 .temperament-tag {
     display: inline-block;
-    padding: 3px 10px;
+    padding: 4px 10px;
     border-radius: 99px;
     font-size: 11.5px;
     font-weight: 700;
     background: #fff7ed;
     border: 1px solid #fed7aa;
     color: #c2410c;
-    margin: 2px 3px 2px 0;
+    margin: 2px 4px 2px 0;
+}
+
+.breed-care-tip-box {
+    background: linear-gradient(135deg, #fff7ed 0%, #fff1f2 100%);
+    border: 1px dashed #fdba74;
+    border-radius: 14px;
+    padding: 11px 13px;
+    margin-top: auto;
+    font-size: 12.2px;
+    color: #5c4033;
+    line-height: 1.55;
+}
+
+.breed-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 99px;
+    font-size: 12.5px;
+    font-weight: 700;
+    background: #fffaf5;
+    border: 1.5px solid #fed7aa;
+    color: #7c4a2d;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.breed-filter-chip:hover {
+    border-color: #fb923c;
+    background: #fff7ed;
+    color: #ea580c;
+    transform: translateY(-1px);
+}
+
+.breed-filter-chip.active {
+    background: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%);
+    border-color: transparent;
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(244, 63, 94, 0.25);
+}
+
+.breed-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(43, 24, 13, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.breed-modal-overlay.open {
+    display: flex;
+}
+
+.breed-modal-card {
+    background: #ffffff;
+    border: 2px solid #fed7aa;
+    border-radius: 26px;
+    max-width: 720px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(43, 24, 13, 0.28);
+    animation: modalPopIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPopIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 /* ==========================================================================

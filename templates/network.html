@@ -1,34 +1,70 @@
 {% extends "base.html" %}
 
-{% block title %}Cẩm nang Tra cứu Giống Chó Mèo Quốc Tế - Meow &amp; Woof Pet House{% endblock %}
+{% block title %}Cẩm Nang Giống Chó Mèo Thuần Chủng & Chăm Sóc Chuẩn Thú Y - Meow &amp; Woof Pet House{% endblock %}
 
 {% block content %}
-<!-- Banner Cẩm Nang Giống Quốc Tế -->
-<div class="spa-hero-banner" style="margin-bottom:26px;">
-    <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:99px; background:#fff7ed; border:1px solid #fed7aa; font-size:12.5px; font-weight:800; color:#ea580c; margin-bottom:12px;">
-        <span>🌍 Bách Khoa Toàn Thư Giống Thú Cưng Quốc Tế 🐾</span>
-    </div>
-    <h1 style="font-size:28px; font-weight:800; color:#2b180d; margin-bottom:10px; letter-spacing:-0.4px;">
-        Tra Cứu &amp; Khám Phá Nguồn Gốc 32+ Giống Chó Mèo Thuần Chủng
-    </h1>
-    <p style="font-size:14.5px; color:#6e5444; max-width:860px; margin-bottom:18px; line-height:1.6;">
-        Dữ liệu bách khoa toàn thư tích hợp giao thức mạng TheCatAPI &amp; TheDogAPI. Khám phá chi tiết nguồn gốc lịch sử, tuổi thọ, cân nặng tiêu chuẩn, đặc điểm tính cách và hướng dẫn chăm sóc đúng chuẩn cho từng giống.
-    </p>
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <span class="spa-tier-pill" style="color:#6ee7b7; border-color:rgba(110,231,183,0.35); background:rgba(16,185,129,0.14);">🐾 32+ Giống Chó Mèo Thuần Chủng</span>
-        <span class="spa-tier-pill" style="color:#93c5fd; border-color:rgba(147,197,253,0.3); background:rgba(59,130,246,0.12);">⚡ Kết Nối REST API Chuẩn Quốc Tế</span>
-        <span class="spa-tier-pill" style="color:#fde68a; border-color:rgba(253,230,138,0.3); background:rgba(245,158,11,0.14);">🩺 Cẩm Nang Chăm Sóc &amp; Lời Khuyên Bác Sĩ</span>
+<!-- Banner Cẩm Nang Giống Quốc Tế & Tư Vấn Chọn Boss -->
+<div class="spa-hero-banner" style="margin-bottom:26px; position:relative; overflow:hidden;">
+    <div style="display:grid; grid-template-columns: 1.55fr 1fr; gap:24px; align-items:center;">
+        <div>
+            <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:99px; background:#ffffff; border:1.5px solid #fdba74; font-size:12.5px; font-weight:800; color:#c2410c; margin-bottom:12px; box-shadow:0 4px 12px rgba(234,88,12,0.08);">
+                <span>📖 Cẩm Nang Thú Cưng &amp; Bách Khoa 32 Giống Thuần Chủng</span>
+            </div>
+            <h1 style="font-size:28px; font-weight:800; color:#2b180d; margin-bottom:10px; letter-spacing:-0.4px; line-height:1.28;">
+                Chọn Đúng Bé Thú Cưng Hợp Không Gian Sống &amp; Phong Cách Của Bạn
+            </h1>
+            <p style="font-size:14.5px; color:#5c4033; max-width:780px; margin-bottom:18px; line-height:1.65;">
+                Tra cứu trực quan hình ảnh thực tế, tính cách, tuổi thọ, cân nặng tiêu chuẩn cùng <strong>thực đơn dinh dưỡng, lịch tắm Spa và lưu ý sức khỏe chuẩn thú y</strong> cho trọn bộ <strong>12 giống mèo cảnh</strong> &amp; <strong>20 giống chó cảnh</strong> đang có mặt tại Meow &amp; Woof.
+            </p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <span class="spa-tier-pill" style="color:#047857; border-color:#a7f3d0; background:#ecfdf5; font-size:12.5px;">
+                    🐾 32 Giống Thuần Chủng (12 Mèo • 20 Chó)
+                </span>
+                <span class="spa-tier-pill" style="color:#0369a1; border-color:#bae6fd; background:#f0f9ff; font-size:12.5px;">
+                    🥣 Thực Đơn &amp; Lịch Grooming Chi Tiết
+                </span>
+                <span class="spa-tier-pill" style="color:#b45309; border-color:#fde68a; background:#fffbeb; font-size:12.5px;">
+                    🩺 Lưu Ý Sức Khỏe Từ Bác Sĩ Thú Y
+                </span>
+            </div>
+        </div>
+
+        <!-- Hộp Gợi Ý Chọn Giống Nhanh Cho Người Mới -->
+        <div style="background:#ffffff; border:1.5px solid #fed7aa; border-radius:22px; padding:18px 20px; box-shadow:0 10px 28px rgba(180,100,60,0.08);">
+            <div style="font-size:13.5px; font-weight:800; color:#c2410c; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                <span>💡 Gợi Ý Chọn Boss Nhanh Trong 5 Giây</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:9px; font-size:12.8px; color:#5c4033;">
+                <div style="display:flex; align-items:flex-start; gap:8px; background:#fffaf5; padding:8px 11px; border-radius:12px; border:1px solid #fde2c8;">
+                    <span>🏢</span>
+                    <div><strong>Ở chung cư / Phòng nhỏ:</strong> Ưu tiên <em>Mèo Anh Lông Ngắn, Munchkin, Poodle, Pug, Corgi, Chihuahua</em>.</div>
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:8px; background:#fffaf5; padding:8px 11px; border-radius:12px; border:1px solid #fde2c8;">
+                    <span>🧹</span>
+                    <div><strong>Dị ứng lông / Thích sạch sẽ:</strong> Chọn <em>Chó Poodle, Bichon Frise, Schnauzer, Mèo Sphynx, Mèo Cornish Rex</em>.</div>
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:8px; background:#fffaf5; padding:8px 11px; border-radius:12px; border:1px solid #fde2c8;">
+                    <span>👨‍👩‍👧</span>
+                    <div><strong>Gia đình có trẻ nhỏ:</strong> Tuyệt vời nhất với <em>Golden Retriever, Labrador, Ragdoll, Mèo Tai Cụp, Beagle</em>.</div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Khung Tra Cứu Bộ Lọc Sinh Động -->
-<div class="card" style="margin-bottom:28px;">
-    <div class="card-header" style="flex-wrap:wrap; gap:14px;">
+<!-- Khung Tra Cứu & Bộ Lọc Nhu Cầu Sống Thông Minh -->
+<div class="card" style="margin-bottom:26px; border:1.5px solid #fed7aa;">
+    <div class="card-header" style="flex-wrap:wrap; gap:14px; border-bottom:1px solid #fde2c8; padding-bottom:16px; margin-bottom:18px;">
         <div>
-            <h2 class="card-title">Tra Cứu Nhanh Theo Loài &amp; Xuất Xứ</h2>
-            <p class="section-subtitle">Chuyển đổi giữa Chó hoặc Mèo và gõ từ khóa tên giống hoặc quốc gia xuất xứ</p>
+            <h2 class="card-title" style="font-size:19px; color:#2b180d;">🔍 Bộ Lọc Giống Thú Cưng Theo Nhu Cầu &amp; Hoàn Cảnh Sống</h2>
+            <p class="section-subtitle" style="color:#7c5a46; margin-top:2px;">
+                Chọn loài thú cưng, bấm vào tiêu chí lối sống hoặc gõ tên giống để tìm ngay bé phù hợp nhất
+            </p>
         </div>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="{{ url_for('network_page', species='all') }}" class="btn {% if species == 'all' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+                🐾 Tất Cả (32 Giống)
+            </a>
             <a href="{{ url_for('network_page', species='cat') }}" class="btn {% if species == 'cat' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
                 🐱 12 Giống Mèo Quý Tộc
             </a>
@@ -38,95 +74,429 @@
         </div>
     </div>
 
-    <form method="GET" action="{{ url_for('network_page') }}" style="display:grid; grid-template-columns: 1.2fr 2fr auto; gap:14px; align-items:end;">
+    <!-- Form Tìm Kiếm -->
+    <form method="GET" action="{{ url_for('network_page') }}" style="display:grid; grid-template-columns: 1.1fr 2.2fr auto; gap:14px; align-items:end; margin-bottom:18px;">
         <div>
-            <label class="form-label">Chọn loài thú cưng:</label>
+            <label class="form-label" style="color:#5c4033; font-weight:700;">Nhóm thú cưng:</label>
             <select name="species" class="form-control" onchange="this.form.submit()">
-                <option value="cat" {% if species == 'cat' %}selected{% endif %}>🐱 Giống Mèo Cảnh (TheCatAPI)</option>
-                <option value="dog" {% if species == 'dog' %}selected{% endif %}>🐶 Giống Chó Cảnh (TheDogAPI)</option>
+                <option value="all" {% if species == 'all' %}selected{% endif %}>🐾 Tất cả Chó &amp; Mèo (32 giống)</option>
+                <option value="cat" {% if species == 'cat' %}selected{% endif %}>🐱 Giống Mèo Cảnh (12 giống - TheCatAPI)</option>
+                <option value="dog" {% if species == 'dog' %}selected{% endif %}>🐶 Giống Chó Cảnh (20 giống - TheDogAPI)</option>
             </select>
         </div>
         <div>
-            <label class="form-label">Từ khóa tên giống hoặc quốc gia:</label>
-            <input type="text" name="search_breed" value="{{ search_breed }}" maxlength="60" class="form-control" placeholder="VD: British, Scottish, Poodle, Corgi, Anh, Pháp, Nhật Bản...">
+            <label class="form-label" style="color:#5c4033; font-weight:700;">Tìm nhanh theo tên giống, đặc điểm hoặc quốc gia:</label>
+            <input type="text" id="liveBreedSearch" name="search_breed" value="{{ search_breed }}" maxlength="60" class="form-control" placeholder="Gõ tên giống (VD: Poodle, Corgi, Anh lông ngắn, Ragdoll, Nhật Bản, Anh, Pháp...)">
         </div>
-        <div>
-            <button type="submit" class="btn btn-teal" style="height:44px; padding:0 24px;">🔍 Tra Cứu</button>
+        <div style="display:flex; gap:8px;">
+            <button type="submit" class="btn btn-primary" style="height:44px; padding:0 22px;">🔍 Tìm Kiếm</button>
+            {% if search_breed or species != 'all' %}
+            <a href="{{ url_for('network_page', species='all') }}" class="btn btn-outline" style="height:44px; display:inline-flex; align-items:center; padding:0 14px;" title="Đặt lại bộ lọc">↺ Đặt lại</a>
+            {% endif %}
         </div>
     </form>
+
+    <!-- Các Chip Lọc Nhanh Theo Lối Sống (1-Click Lifestyle Filter) -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding-top:4px;">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;" id="lifestyleChipGroup">
+            <span style="font-size:12.5px; font-weight:800; color:#7c4a2d; margin-right:4px;">Lọc nhanh:</span>
+            <button type="button" class="breed-filter-chip active" data-filter-tag="all" onclick="filterBreedsByLifestyle('all', this)">
+                ✨ Tất cả nhu cầu
+            </button>
+            <button type="button" class="breed-filter-chip" data-filter-tag="apartment" onclick="filterBreedsByLifestyle('apartment', this)">
+                🏢 Hợp ở chung cư
+            </button>
+            <button type="button" class="breed-filter-chip" data-filter-tag="beginner" onclick="filterBreedsByLifestyle('beginner', this)">
+                🌱 Dễ nuôi cho người mới
+            </button>
+            <button type="button" class="breed-filter-chip" data-filter-tag="low_shed" onclick="filterBreedsByLifestyle('low_shed', this)">
+                🧹 Ít rụng lông • Sạch sẽ
+            </button>
+            <button type="button" class="breed-filter-chip" data-filter-tag="family" onclick="filterBreedsByLifestyle('family', this)">
+                👨‍👩‍👧 Quấn chủ &amp; Yêu trẻ nhỏ
+            </button>
+        </div>
+        <div style="font-size:13px; font-weight:800; color:#9a3412; background:#fff7ed; border:1px solid #fed7aa; padding:6px 14px; border-radius:99px;">
+            Đang hiển thị: <span id="visibleBreedCount">{{ breed_result.breeds|length }}</span> giống thú cưng
+        </div>
+    </div>
 </div>
 
-<!-- Lưới Thẻ Giống Thú Cưng Đẳng Cấp & Bắt Mắt -->
-<div class="breed-grid">
+<!-- Lưới Thẻ Bách Khoa Giống Thú Cưng (3 Cột Chuyên Nghiệp) -->
+<div class="breed-grid" id="breedGridContainer">
     {% for b in breed_result.breeds %}
-    <div class="breed-card-modern">
+    <div class="breed-card-modern"
+         data-tags="{{ (b.tags or [])|join(',') }}"
+         data-search="{{ (b.name ~ ' ' ~ b.origin ~ ' ' ~ b.temperament ~ ' ' ~ b.description ~ ' ' ~ b.living_space)|lower }}">
         <div>
-            <!-- Thanh trên cùng: Xuất xứ & Link Cửa hàng (Được phân tách độc lập, không đè chữ) -->
-            <div class="breed-top-row">
-                <span class="breed-origin-pill">
-                    📍 {{ b.origin }}
-                </span>
-                <a href="{{ url_for('shop_page', pet_type=('Mèo' if species == 'cat' else 'Chó')) }}" style="font-size:12.5px; font-weight:700; color:#ff5d8f; text-decoration:none;">
-                    Xem tại Shop &rarr;
-                </a>
-            </div>
-
-            <!-- Tên Giống & Biểu Tượng -->
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
-                <div style="width:46px; height:46px; border-radius:14px; background:linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%); border:1px solid #fed7aa; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">
-                    {% if species == 'cat' %}🐱{% else %}🐶{% endif %}
+            <!-- Ảnh Thực Tế Của Giống + Badge Xuất Xứ & Giá Tham Khảo Tại Shop -->
+            <div class="breed-photo-wrap">
+                <img src="{{ b.image_url }}" alt="{{ b.name }}" loading="lazy">
+                <div class="breed-photo-badges-top">
+                    <span class="breed-origin-pill">📍 {{ b.origin }}</span>
+                    <span class="breed-care-badge">✨ {{ b.care_level }}</span>
                 </div>
-                <div>
-                    <h3 style="font-size:17.5px; font-weight:800; color:#2b180d; margin:0; line-height:1.3;">
-                        {{ b.name }}
-                    </h3>
-                    <div style="font-size:12px; color:#a39ecb; margin-top:2px;">Dữ liệu: {{ breed_result.source }}</div>
+                <div class="breed-photo-badges-bottom">
+                    <span class="breed-species-pill">
+                        {% if b.pet_type == 'Mèo' %}🐱 Mèo Cảnh{% else %}🐶 Chó Cảnh{% endif %}
+                    </span>
+                    {% if b.shop_price %}
+                    <span class="breed-price-pill">
+                        Tại Shop: {{ "{:,.0f}".format(b.shop_price) }} đ
+                    </span>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- 2 Ô Chỉ Số Chuẩn: Tuổi thọ & Cân nặng -->
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:14px;">
-                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:8px 12px;">
-                    <div style="font-size:11px; color:#94a3b8; font-weight:600;">TUỔI THỌ TB:</div>
-                    <div style="font-size:13.5px; font-weight:800; color:#34d399; margin-top:2px;">{{ b.life_span }}</div>
+            <div class="breed-card-body">
+                <!-- Tên Giống Song Ngữ Việt - Quốc Tế -->
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                        <h3 style="font-size:18px; font-weight:800; color:#2b180d; margin:0; line-height:1.3;">
+                            {{ b.vi_name or b.name }}
+                        </h3>
+                        {% if b.stock and b.stock > 0 %}
+                        <span style="flex-shrink:0; font-size:11px; font-weight:800; color:#047857; background:#ecfdf5; border:1px solid #a7f3d0; padding:2px 8px; border-radius:99px;">
+                            Sẵn {{ b.stock }} bé
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div style="font-size:12.5px; font-weight:700; color:#9a6b53; margin-top:3px;">
+                        🌍 Tên quốc tế: <span style="color:#c2410c;">{{ b.en_name or b.name }}</span> • Bộ lông: {{ b.coat_type }}
+                    </div>
                 </div>
-                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:8px 12px;">
-                    <div style="font-size:11px; color:#94a3b8; font-weight:600;">CÂN NẶNG CHUẨN:</div>
-                    <div style="font-size:13.5px; font-weight:800; color:#60a5fa; margin-top:2px;">{{ b.weight_metric }}</div>
+
+                <!-- 3 Ô Chỉ Số Tiêu Chuẩn: Tuổi thọ • Cân nặng • Không gian -->
+                <div class="breed-metric-grid">
+                    <div class="breed-metric-box">
+                        <div class="breed-metric-label">⏳ Tuổi thọ</div>
+                        <div class="breed-metric-val" style="color:#047857;">{{ b.life_span }}</div>
+                    </div>
+                    <div class="breed-metric-box">
+                        <div class="breed-metric-label">⚖️ Cân nặng</div>
+                        <div class="breed-metric-val" style="color:#0369a1;">{{ b.weight_metric }}</div>
+                    </div>
+                    <div class="breed-metric-box" title="{{ b.living_space }}">
+                        <div class="breed-metric-label">🏠 Không gian</div>
+                        <div class="breed-metric-val" style="color:#b45309;">{{ b.living_space }}</div>
+                    </div>
+                </div>
+
+                <!-- Thanh Đánh Giá Trực Quan 3 Tiêu Chí Nuôi Thực Tế -->
+                <div class="breed-scores-box">
+                    <div class="breed-score-row">
+                        <span>💖 Độ quấn chủ</span>
+                        <div class="breed-score-track">
+                            <div class="breed-score-fill" style="width: {{ (b.affection_score or 5) * 20 }}%;"></div>
+                        </div>
+                        <span style="text-align:right; color:#c2410c;">{{ b.affection_score or 5 }}/5</span>
+                    </div>
+                    <div class="breed-score-row">
+                        <span>🌱 Dễ chăm sóc</span>
+                        <div class="breed-score-track">
+                            <div class="breed-score-fill" style="width: {{ (b.easy_care_score or 4) * 20 }}%; background:linear-gradient(90deg, #10b981 0%, #059669 100%);"></div>
+                        </div>
+                        <span style="text-align:right; color:#047857;">{{ b.easy_care_score or 4 }}/5</span>
+                    </div>
+                    <div class="breed-score-row">
+                        <span>🏢 Hợp căn hộ</span>
+                        <div class="breed-score-track">
+                            <div class="breed-score-fill" style="width: {{ (b.apartment_score or 4) * 20 }}%; background:linear-gradient(90deg, #38bdf8 0%, #0284c7 100%);"></div>
+                        </div>
+                        <span style="text-align:right; color:#0369a1;">{{ b.apartment_score or 4 }}/5</span>
+                    </div>
+                </div>
+
+                <!-- Các Thẻ Tính Cách Nổi Bật -->
+                <div style="margin-bottom:10px;">
+                    <div style="font-size:11px; color:#7c5a46; font-weight:800; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.3px;">
+                        Tính cách đặc trưng:
+                    </div>
+                    <div>
+                        {% for trait in b.temperament.split(',') %}
+                            <span class="temperament-tag">{{ trait.strip() }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Mô Tả Ngắn Gọn & Thân Thiện -->
+                <p style="font-size:13px; color:#4a3326; line-height:1.6; margin-bottom:12px;">
+                    {{ b.description }}
+                </p>
+
+                <!-- Hộp Cẩm Nang Nhanh: Dinh Dưỡng & Spa -->
+                <div class="breed-care-tip-box">
+                    <div style="margin-bottom:5px;">
+                        <strong style="color:#c2410c;">🥣 Dinh dưỡng:</strong> {{ b.nutrition_guide }}
+                    </div>
+                    <div>
+                        <strong style="color:#0369a1;">🛁 Lịch Spa:</strong> {{ b.grooming_guide }}
+                    </div>
                 </div>
             </div>
-
-            <!-- Các Thẻ Tính Cách Nổi Bật (Temperament Pills) -->
-            <div style="margin-bottom:14px;">
-                <div style="font-size:11.5px; color:#6e5444; font-weight:700; margin-bottom:6px;">TÍNH CÁCH ĐẶC TRƯNG:</div>
-                <div>
-                    {% for trait in b.temperament.split(',') %}
-                        <span class="temperament-tag">{{ trait.strip() }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Mô Tả Chi Tiết -->
-            <p style="font-size:13px; color:#6e5444; line-height:1.6; margin-bottom:16px;">
-                {{ b.description }}
-            </p>
         </div>
 
-        <!-- Nút Chuyển Tiếp Sang Cửa Hàng -->
-        <a href="{{ url_for('shop_page', pet_type=('Mèo' if species == 'cat' else 'Chó')) }}" class="btn btn-outline btn-block" style="font-size:13px; font-weight:700; padding:9px 16px;">
-            🐾 Khám Phá Bé {{ b.name.split('(')[0].strip() }} Tại Shop &rarr;
-        </a>
+        <!-- Chân Thẻ: Xem Cẩm Nang Chi Tiết (Modal) & Xem Bé Tại Shop -->
+        <div class="breed-card-footer">
+            <button type="button"
+                    class="btn btn-outline"
+                    style="font-size:12.5px; font-weight:800; padding:10px 12px;"
+                    onclick='openBreedGuideModal({{ b|tojson }})'>
+                📖 Cẩm Nang Nuôi
+            </button>
+            {% if b.product_id %}
+            <a href="{{ url_for('product_detail_page', product_id=b.product_id) }}"
+               class="btn btn-primary"
+               style="font-size:12.5px; font-weight:800; padding:10px 14px; text-align:center;">
+                🛒 Đón Bé Tại Shop &rarr;
+            </a>
+            {% else %}
+            <a href="{{ url_for('shop_page', pet_type=b.pet_type, breed=b.shop_breed) }}"
+               class="btn btn-primary"
+               style="font-size:12.5px; font-weight:800; padding:10px 14px; text-align:center;">
+                🛒 Xem Tại Shop &rarr;
+            </a>
+            {% endif %}
+        </div>
     </div>
     {% else %}
-    <div style="grid-column: 1 / -1; text-align:center; padding:48px 20px; background:rgba(255,255,255,0.03); border:1px dashed rgba(255,255,255,0.15); border-radius:20px;">
-        <div style="font-size:36px; margin-bottom:12px;">🔍</div>
+    <div style="grid-column: 1 / -1; text-align:center; padding:48px 20px; background:#fffaf5; border:1.5px dashed #fdba74; border-radius:22px;">
+        <div style="font-size:40px; margin-bottom:12px;">🐾</div>
         <h3 style="color:#2b180d; font-weight:800; margin-bottom:8px;">Không tìm thấy giống thú cưng phù hợp</h3>
-        <p style="color:#94a3b8; font-size:14px; max-width:500px; margin:0 auto 18px;">
-            Không tìm thấy giống thú cưng nào khớp với từ khóa "{{ search_breed }}". Bạn hãy thử nhập tên tiếng Anh hoặc tên quốc gia khác nhé!
+        <p style="color:#7c5a46; font-size:14px; max-width:520px; margin:0 auto 18px;">
+            Không tìm thấy giống nào khớp với từ khóa "{{ search_breed }}". Bạn hãy thử tìm bằng tên tiếng Việt (VD: Mèo Anh, Tai Cụp, Poodle, Corgi) hoặc tên quốc gia nhé!
         </p>
-        <a href="{{ url_for('network_page') }}" class="btn btn-primary btn-sm">Xem lại danh sách chuẩn</a>
+        <a href="{{ url_for('network_page', species='all') }}" class="btn btn-primary btn-sm">Xem trọn bộ 32 giống thú cưng</a>
     </div>
     {% endfor %}
 </div>
-{% endblock %}
 
+<!-- Thông Báo Khi Bộ Lọc JS Không Khớp -->
+<div id="noFilterMatchBox" style="display:none; text-align:center; padding:42px 20px; background:#fffaf5; border:1.5px dashed #fdba74; border-radius:22px; margin-top:16px;">
+    <div style="font-size:38px; margin-bottom:10px;">🔎</div>
+    <h3 style="color:#2b180d; font-weight:800; margin-bottom:6px;">Chưa có giống nào khớp đồng thời với bộ lọc này</h3>
+    <p style="color:#7c5a46; font-size:13.5px; margin-bottom:14px;">Bạn hãy thử xóa từ khóa tìm kiếm hoặc chọn tiêu chí lối sống khác nhé!</p>
+    <button type="button" class="btn btn-primary btn-sm" onclick="resetClientBreedFilter()">Hiển thị lại tất cả giống</button>
+</div>
+
+<!-- Cẩm Nang Vàng Dành Cho Người Mới Nuôi Thú Cưng -->
+<div class="card" style="margin-top:34px; border:1.5px solid #fed7aa; background:linear-gradient(135deg, #fffdf9 0%, #fff7ed 100%);">
+    <div class="card-header" style="margin-bottom:18px;">
+        <div>
+            <h2 class="card-title" style="font-size:20px; color:#2b180d;">🩺 Cẩm Nang Vàng Khi Đón Thú Cưng Mới Về Nhà (Chuẩn Thú Y)</h2>
+            <p class="section-subtitle" style="color:#7c5a46;">3 nguyên tắc quan trọng giúp bé chó mèo luôn khỏe mạnh, ăn ngoan và nhanh quấn chủ</p>
+        </div>
+        <a href="{{ url_for('spa_page') }}" class="btn btn-primary btn-sm">🛁 Đặt Lịch Spa Cho Bé</a>
+    </div>
+
+    <div class="spa-step-journey" style="margin-top:0;">
+        <div class="spa-step-card">
+            <span class="spa-step-badge">GIAI ĐOẠN 1 • 7 NGÀY ĐẦU</span>
+            <h3 style="font-size:16px; font-weight:800; color:#2b180d; margin-bottom:8px;">🏡 Làm Quen Không Gian &amp; Thức Ăn</h3>
+            <p style="font-size:13px; color:#5c4033; line-height:1.6; margin:0;">
+                Giữ nguyên loại hạt/pate bé đang ăn tại Shop trong 5–7 ngày đầu rồi mới trộn chuyển dần. Tuyệt đối <strong>không tắm nước ngay trong tuần đầu</strong> khi bé mới đổi môi trường để tránh cảm lạnh và stress.
+            </p>
+        </div>
+        <div class="spa-step-card">
+            <span class="spa-step-badge">GIAI ĐOẠN 2 • PHÁC ĐỒ VACCINE</span>
+            <h3 style="font-size:16px; font-weight:800; color:#2b180d; margin-bottom:8px;">💉 Lịch Tiêm Phòng &amp; Tẩy Giun</h3>
+            <p style="font-size:13px; color:#5c4033; line-height:1.6; margin:0;">
+                Mũi vaccine đầu tiên bắt đầu từ 6–8 tuần tuổi, nhắc lại mũi 2 &amp; mũi 3 cách nhau 21–28 ngày, kèm mũi phòng Dại khi đủ 12 tuần tuổi. Tẩy giun định kỳ mỗi 1–3 tháng/lần theo cân nặng thực tế.
+            </p>
+        </div>
+        <div class="spa-step-card">
+            <span class="spa-step-badge">GIAI ĐOẠN 3 • SPA &amp; GROOMING</span>
+            <h3 style="font-size:16px; font-weight:800; color:#2b180d; margin-bottom:8px;">🛁 Chăm Sóc Lông, Tai &amp; Tuyến Hôi</h3>
+            <p style="font-size:13px; color:#5c4033; line-height:1.6; margin:0;">
+                Chải lông mỗi ngày để loại bỏ lông rụng và ngừa búi rối. Đưa bé đi <strong>Spa tắm sấy khử khuẩn, cắt mài móng, cạo lông bàn chân và nhỏ vệ sinh tai</strong> định kỳ mỗi 2–4 tuần/lần.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Khung Thông Tin Đồng Bộ Dữ Liệu API & XML (Gọn Gàng, Chuyên Nghiệp) -->
+<details class="card" style="margin-top:20px; padding:14px 20px; border:1px solid #fde2c8; background:#fffaf5;">
+    <summary style="cursor:pointer; font-size:13px; font-weight:800; color:#7c5a46; display:flex; justify-content:space-between; align-items:center;">
+        <span>⚡ Thông tin kết nối Dữ liệu Quốc tế (TheCatAPI / TheDogAPI • Nguồn: {{ breed_result.source }}) &amp; Xuất danh mục XML</span>
+        <span style="font-size:12px; color:#ea580c; font-weight:700;">Nhấn để xem chi tiết &darr;</span>
+    </summary>
+    <div style="margin-top:14px; padding-top:14px; border-top:1px dashed #fed7aa; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:12.5px; color:#5c4033;">
+        <div>
+            <div><strong>Giao thức đồng bộ:</strong> Python <code>urllib.request</code> kèm Header xác thực <code>x-api-key: {{ breed_result.api_key_masked }}</code></div>
+            <div style="margin-top:4px;"><strong>Trạng thái bộ nhớ đệm:</strong> {{ breed_result.source_mode }} ({{ breed_result.breeds|length }} giống hiển thị)</div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="{{ url_for('export_xml_route') }}" class="btn btn-outline btn-sm">📥 Tải Danh Mục Sản Phẩm (XML)</a>
+            <a href="{{ url_for('shop_page') }}" class="btn btn-primary btn-sm">🛍️ Đi Tới Cửa Hàng Thú Cưng</a>
+        </div>
+    </div>
+</details>
+
+<!-- Modal Chi Tiết Cẩm Nang Nuôi & Sức Khỏe Từng Giống -->
+<div class="breed-modal-overlay" id="breedGuideModal" onclick="if(event.target === this) closeBreedGuideModal()">
+    <div class="breed-modal-card">
+        <div style="position:relative; height:230px; background:#fff7ed; overflow:hidden;">
+            <img id="modalBreedImg" src="" alt="" style="width:100%; height:100%; object-fit:cover;">
+            <button type="button"
+                    onclick="closeBreedGuideModal()"
+                    style="position:absolute; top:14px; right:14px; width:38px; height:38px; border-radius:50%; border:none; background:rgba(43,24,13,0.75); color:#ffffff; font-size:18px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                &times;
+            </button>
+            <div style="position:absolute; bottom:12px; left:16px; right:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <span id="modalBreedOrigin" class="breed-origin-pill"></span>
+                <span id="modalBreedPrice" class="breed-price-pill"></span>
+            </div>
+        </div>
+
+        <div style="padding:22px 26px 26px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+                <div>
+                    <h2 id="modalBreedTitle" style="font-size:22px; font-weight:800; color:#2b180d; margin:0;"></h2>
+                    <div id="modalBreedSubtitle" style="font-size:13px; font-weight:700; color:#9a6b53; margin-top:3px;"></div>
+                </div>
+                <span id="modalBreedCareLevel" class="breed-care-badge"></span>
+            </div>
+
+            <p id="modalBreedDesc" style="font-size:13.8px; color:#4a3326; line-height:1.65; margin-bottom:16px;"></p>
+
+            <!-- 3 Chỉ Số Tiêu Chuẩn Trong Modal -->
+            <div class="breed-metric-grid" style="margin-bottom:16px;">
+                <div class="breed-metric-box">
+                    <div class="breed-metric-label">⏳ Tuổi thọ trung bình</div>
+                    <div id="modalBreedLife" class="breed-metric-val" style="color:#047857;"></div>
+                </div>
+                <div class="breed-metric-box">
+                    <div class="breed-metric-label">⚖️ Cân nặng trưởng thành</div>
+                    <div id="modalBreedWeight" class="breed-metric-val" style="color:#0369a1;"></div>
+                </div>
+                <div class="breed-metric-box">
+                    <div class="breed-metric-label">🏠 Không gian phù hợp</div>
+                    <div id="modalBreedSpace" class="breed-metric-val" style="color:#b45309;"></div>
+                </div>
+            </div>
+
+            <!-- 3 Hộp Hướng Dẫn Chuyên Sâu: Dinh dưỡng, Spa & Thú y -->
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                <div style="background:#fffaf5; border:1px solid #fed7aa; border-radius:14px; padding:12px 14px;">
+                    <div style="font-size:12.5px; font-weight:800; color:#c2410c; margin-bottom:3px;">🥣 Khẩu Phần Dinh Dưỡng Khuyên Dùng</div>
+                    <div id="modalBreedNutrition" style="font-size:13px; color:#4a3326; line-height:1.55;"></div>
+                </div>
+                <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:14px; padding:12px 14px;">
+                    <div style="font-size:12.5px; font-weight:800; color:#0369a1; margin-bottom:3px;">🛁 Lịch Tắm Spa &amp; Chăm Sóc Bộ Lông</div>
+                    <div id="modalBreedGrooming" style="font-size:13px; color:#334155; line-height:1.55;"></div>
+                </div>
+                <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:14px; padding:12px 14px;">
+                    <div style="font-size:12.5px; font-weight:800; color:#047857; margin-bottom:3px;">🩺 Lưu Ý Sức Khỏe &amp; Phòng Bệnh Từ Bác Sĩ Thú Y</div>
+                    <div id="modalBreedHealth" style="font-size:13px; color:#1e3a2f; line-height:1.55;"></div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:flex-end;">
+                <a href="{{ url_for('spa_page') }}" class="btn btn-outline" style="font-size:13px; font-weight:800;">
+                    🛁 Đặt Lịch Spa Cho Giống Này
+                </a>
+                <a id="modalBreedShopBtn" href="{{ url_for('shop_page') }}" class="btn btn-primary" style="font-size:13px; font-weight:800;">
+                    🛒 Xem &amp; Đón Bé Tại Cửa Hàng &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentLifestyleTag = 'all';
+
+function applyClientBreedFilters() {
+    const searchInput = document.getElementById('liveBreedSearch');
+    const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+    const cards = document.querySelectorAll('#breedGridContainer .breed-card-modern');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+        const tags = (card.getAttribute('data-tags') || '').split(',');
+        const searchBlob = (card.getAttribute('data-search') || '').toLowerCase();
+        const matchTag = (currentLifestyleTag === 'all') || tags.includes(currentLifestyleTag);
+        const matchQuery = (!query) || searchBlob.includes(query);
+
+        if (matchTag && matchQuery) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    const countEl = document.getElementById('visibleBreedCount');
+    if (countEl) countEl.textContent = visibleCount;
+
+    const emptyBox = document.getElementById('noFilterMatchBox');
+    if (emptyBox) {
+        emptyBox.style.display = (cards.length > 0 && visibleCount === 0) ? 'block' : 'none';
+    }
+}
+
+function filterBreedsByLifestyle(tag, btnEl) {
+    currentLifestyleTag = tag;
+    document.querySelectorAll('#lifestyleChipGroup .breed-filter-chip').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    applyClientBreedFilters();
+}
+
+function resetClientBreedFilter() {
+    const searchInput = document.getElementById('liveBreedSearch');
+    if (searchInput) searchInput.value = '';
+    const allBtn = document.querySelector('#lifestyleChipGroup .breed-filter-chip[data-filter-tag="all"]');
+    filterBreedsByLifestyle('all', allBtn);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('liveBreedSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', applyClientBreedFilters);
+    }
+});
+
+function openBreedGuideModal(breed) {
+    const modal = document.getElementById('breedGuideModal');
+    if (!modal || !breed) return;
+
+    document.getElementById('modalBreedImg').src = breed.image_url || '';
+    document.getElementById('modalBreedImg').alt = breed.name || '';
+    document.getElementById('modalBreedOrigin').textContent = '📍 Xuất xứ: ' + (breed.origin || 'Quốc tế');
+    document.getElementById('modalBreedPrice').textContent = breed.shop_price
+        ? ('Tại Shop: ' + Number(breed.shop_price).toLocaleString('vi-VN') + ' đ')
+        : 'Liên hệ Shop';
+    document.getElementById('modalBreedTitle').textContent = breed.vi_name || breed.name || '';
+    document.getElementById('modalBreedSubtitle').textContent =
+        '🌍 Tên quốc tế: ' + (breed.en_name || breed.name || '') + ' • Bộ lông: ' + (breed.coat_type || 'Tiêu chuẩn');
+    document.getElementById('modalBreedCareLevel').textContent = '✨ ' + (breed.care_level || 'Dễ nuôi');
+    document.getElementById('modalBreedDesc').textContent = breed.description || '';
+    document.getElementById('modalBreedLife').textContent = breed.life_span || '';
+    document.getElementById('modalBreedWeight').textContent = breed.weight_metric || '';
+    document.getElementById('modalBreedSpace').textContent = breed.living_space || '';
+    document.getElementById('modalBreedNutrition').textContent = breed.nutrition_guide || '';
+    document.getElementById('modalBreedGrooming').textContent = breed.grooming_guide || '';
+    document.getElementById('modalBreedHealth').textContent = breed.health_note || '';
+
+    const shopBtn = document.getElementById('modalBreedShopBtn');
+    if (shopBtn) {
+        if (breed.product_id) {
+            shopBtn.href = '/product/' + breed.product_id;
+        } else {
+            shopBtn.href = '/shop?pet_type=' + encodeURIComponent(breed.pet_type || '') + '&breed=' + encodeURIComponent(breed.shop_breed || '');
+        }
+    }
+
+    modal.classList.add('open');
+}
+
+function closeBreedGuideModal() {
+    const modal = document.getElementById('breedGuideModal');
+    if (modal) modal.classList.remove('open');
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeBreedGuideModal();
+});
+</script>
+{% endblock %}
