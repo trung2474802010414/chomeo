@@ -293,10 +293,22 @@ def query_products(
 
 
 def get_product_detail_and_related(product_id: int) -> Optional[Dict[str, Any]]:
-    """Lấy thông tin chi tiết của 1 Thú cưng/Sản phẩm và các thú cưng/phụ kiện liên quan."""
+    """Lấy thông tin chi tiết của 1 Thú cưng/Sản phẩm, hồ sơ giống và các thú cưng/phụ kiện liên quan."""
+    from services.network_service import FALLBACK_BREEDS
+
     target = Product.get_by_id(product_id)
     if not target:
         return None
+
+    target_dict = target.to_dict()
+    breed_guide = None
+    all_handbook_breeds = FALLBACK_BREEDS.get("cat", []) + FALLBACK_BREEDS.get("dog", [])
+    for b in all_handbook_breeds:
+        if (target.sku and b.get("sku") == target.sku) or (
+            target.breed and b.get("shop_breed") == target.breed
+        ):
+            breed_guide = dict(b)
+            break
 
     all_items = [p.to_dict() for p in Product.iter_all(order_by="id DESC") if p.id != product_id]
 
@@ -313,7 +325,8 @@ def get_product_detail_and_related(product_id: int) -> Optional[Dict[str, Any]]:
     ][:4]
 
     return {
-        "product": target.to_dict(),
+        "product": target_dict,
+        "breed_guide": breed_guide,
         "related_pets": related_pets,
         "related_supplies": related_supplies,
     }

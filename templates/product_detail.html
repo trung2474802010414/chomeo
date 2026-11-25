@@ -4,140 +4,411 @@
 {% block title %}{{ p.name }} - Meow &amp; Woof Pet House{% endblock %}
 
 {% block content %}
-<!-- Thanh điều hướng Breadcrumb -->
-<div class="breadcrumb-bar">
-    <a href="{{ url_for('home_page') }}">Trang chủ</a>
-    <span>/</span>
-    <a href="{{ url_for('shop_page') }}">Cửa hàng</a>
-    <span>/</span>
-    <a href="{{ url_for('shop_page', category=p.category) }}">{{ p.category }}</a>
-    {% if p.breed %}
-    <span>/</span>
-    <a href="{{ url_for('shop_page', pet_type=p.pet_type, breed=p.breed) }}">{{ p.breed }}</a>
-    {% endif %}
-    <span>/</span>
-    <span>{{ p.name }}</span>
+<!-- Thanh điều hướng Breadcrumb & Lối tắt nhanh -->
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+    <div class="breadcrumb-bar" style="margin-bottom:0;">
+        <a href="{{ url_for('home_page') }}">🏠 Trang chủ</a>
+        <span>/</span>
+        <a href="{{ url_for('shop_page') }}">Cửa hàng</a>
+        <span>/</span>
+        <a href="{{ url_for('shop_page', category=p.category) }}">{{ p.category }}</a>
+        {% if p.breed %}
+        <span>/</span>
+        <a href="{{ url_for('shop_page', pet_type=p.pet_type, breed=p.breed) }}">{{ p.breed }}</a>
+        {% endif %}
+        <span>/</span>
+        <span style="color:#c2410c; font-weight:800;">{{ p.name }}</span>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <a href="{{ url_for('shop_page', pet_type=p.pet_type) }}" class="btn btn-outline btn-sm">
+            &larr; Tiếp tục xem {{ p.pet_type }}
+        </a>
+        <a href="{{ url_for('network_page', species=('cat' if p.pet_type == 'Mèo' else ('dog' if p.pet_type == 'Chó' else 'all'))) }}" class="btn btn-outline btn-sm">
+            📖 Cẩm nang Giống
+        </a>
+    </div>
 </div>
 
-<!-- Khung thông tin chi tiết Thú cưng / Sản phẩm (Tham khảo PetHouse) -->
-<div class="detail-card" style="background:#ffffff; border:1.5px solid #fed7aa; box-shadow:0 10px 30px rgba(180,100,60,0.06); border-radius:24px; padding:28px; margin-bottom:36px;">
-    <div class="detail-grid">
-        <!-- Cột trái: Ảnh lớn -->
-        <div class="detail-image-box">
-            {% if p.image_url %}
-                <img src="{{ p.image_url }}" alt="{{ p.name }}">
-            {% else %}
-                <div style="text-align:center; padding:40px;">
-                    <div class="product-svg-wrap" style="width:110px; height:110px; margin:0 auto 12px;">
-                        {{ render_product_svg(p.category, p.pet_type) }}
+<!-- Khung Hồ Sơ Chi Tiết Thú Cưng / Sản Phẩm Cao Cấp -->
+<div class="pet-detail-shell">
+    <div class="pet-detail-layout">
+        <!-- CỘT TRÁI: Ảnh Lớn Sắc Nét + Huy Hiệu Bảo Chứng + Chỉ Số Tính Cách -->
+        <div>
+            <div class="pet-gallery-frame">
+                {% if p.image_url %}
+                    <img src="{{ p.image_url }}" alt="{{ p.name }}">
+                {% else %}
+                    <div style="text-align:center; padding:60px 20px;">
+                        <div class="product-svg-wrap" style="width:120px; height:120px; margin:0 auto 14px;">
+                            {{ render_product_svg(p.category, p.pet_type) }}
+                        </div>
+                        <div style="font-weight:800; color:#7c5a46;">{{ p.category }}</div>
                     </div>
-                    <div style="font-weight:700; color:var(--text-muted);">{{ p.category }}</div>
+                {% endif %}
+
+                <div class="pet-gallery-float-top">
+                    <span class="breed-origin-pill">
+                        {% if breed_guide and breed_guide.origin %}
+                            📍 Xuất xứ: {{ breed_guide.origin }}
+                        {% else %}
+                            ✨ Meow &amp; Woof Pet House
+                        {% endif %}
+                    </span>
+                    {% if breed_guide and breed_guide.care_level %}
+                    <span class="breed-care-badge">✨ {{ breed_guide.care_level }}</span>
+                    {% else %}
+                    <span class="breed-care-badge">✔ Chính hãng 100%</span>
+                    {% endif %}
                 </div>
+
+                <div class="pet-gallery-float-bottom">
+                    <span class="breed-species-pill">
+                        {% if p.pet_type == 'Mèo' %}🐱 Mèo Cảnh{% elif p.pet_type == 'Chó' %}🐶 Chó Cảnh{% else %}🐾 {{ p.pet_type }}{% endif %}
+                    </span>
+                    <span class="breed-price-pill">
+                        {% if p.stock > 0 %}Sẵn có: {{ p.stock }} {% if p.category in ('Chó cảnh', 'Mèo cảnh') %}bé{% else %}món{% endif %}{% else %}Tạm hết hàng{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- 4 Huy Hiệu Bảo Chứng Sức Khỏe & Dịch Vụ -->
+            {% if p.category in ('Chó cảnh', 'Mèo cảnh') %}
+            <div class="pet-passport-grid">
+                <div class="pet-passport-badge">
+                    <div class="pet-passport-icon">💉</div>
+                    <div>
+                        <div style="font-size:12.5px; font-weight:800; color:#2b180d;">Đã Tiêm Vaccine</div>
+                        <div style="font-size:11.5px; color:#7c5a46;">Tẩy giun &amp; ngừa bệnh định kỳ</div>
+                    </div>
+                </div>
+                <div class="pet-passport-badge">
+                    <div class="pet-passport-icon">🛡️</div>
+                    <div>
+                        <div style="font-size:12.5px; font-weight:800; color:#2b180d;">Bảo Hành 30 Ngày</div>
+                        <div style="font-size:11.5px; color:#7c5a46;">Cam kết sức khỏe toàn diện</div>
+                    </div>
+                </div>
+                <div class="pet-passport-badge">
+                    <div class="pet-passport-icon">📘</div>
+                    <div>
+                        <div style="font-size:12.5px; font-weight:800; color:#2b180d;">Sổ Khám Thú Y</div>
+                        <div style="font-size:11.5px; color:#7c5a46;">Theo dõi lịch tiêm trọn đời</div>
+                    </div>
+                </div>
+                <div class="pet-passport-badge">
+                    <div class="pet-passport-icon">🚚</div>
+                    <div>
+                        <div style="font-size:12.5px; font-weight:800; color:#2b180d;">Đưa Đón Tận Nhà</div>
+                        <div style="font-size:11.5px; color:#7c5a46;">Vận chuyển thú cưng an toàn</div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="pet-passport-grid">
+                <div class="pet-passport-badge">
+                    <div class="pet-passport-icon">✅</div>
+                    <div>
+                        <div style="font-size:12.5px; font-weight:800; color:#2b180d;">Hàng Chính Hãng</div>
+                        <div style="font-size:11.5px; color:#7c5a46;">Nguồn gốc rõ ràng, hạn dùng xa</div>
+                    </div>
+                </div>
+                <div class="pet-passport-badge">
+                    <div class="pet-passport-icon">🩺</div>
+                    <div>
+                        <div style="font-size:12.5px; font-weight:800; color:#2b180d;">Chuẩn Thú Y</div>
+                        <div style="font-size:11.5px; color:#7c5a46;">An toàn cho hệ tiêu hóa &amp; da lông</div>
+                    </div>
+                </div>
+                <div class="pet-passport-badge">
+                    <div class="pet-passport-icon">🔄</div>
+                    <div>
+                        <div style="font-size:12.5px; font-weight:800; color:#2b180d;">Đổi Trả 7 Ngày</div>
+                        <div style="font-size:11.5px; color:#7c5a46;">Miễn phí nếu lỗi nhà sản xuất</div>
+                    </div>
+                </div>
+                <div class="pet-passport-badge">
+                    <div class="pet-passport-icon">🚚</div>
+                    <div>
+                        <div style="font-size:12.5px; font-weight:800; color:#2b180d;">Giao Nhanh 24/7</div>
+                        <div style="font-size:11.5px; color:#7c5a46;">Đóng gói chống sốc cẩn thận</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Khung Chỉ Số Tính Cách & Độ Phù Hợp (Khi có dữ liệu Giống) -->
+            {% if breed_guide %}
+            <div style="background:#fffdf9; border:1.5px solid #fde2c8; border-radius:18px; padding:15px 18px; margin-top:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span style="font-size:12.5px; font-weight:800; color:#9a3412; text-transform:uppercase; letter-spacing:0.3px;">
+                        📊 Đánh Giá Độ Phù Hợp Của {{ breed_guide.vi_name }}
+                    </span>
+                    <span style="font-size:11.5px; font-weight:700; color:#047857;">Chuẩn Bách Khoa Quốc Tế</span>
+                </div>
+                <div class="breed-scores-box" style="margin-bottom:10px; background:#ffffff;">
+                    <div class="breed-score-row">
+                        <span>💖 Độ quấn chủ</span>
+                        <div class="breed-score-track">
+                            <div class="breed-score-fill" style="width: {{ (breed_guide.affection_score or 5) * 20 }}%;"></div>
+                        </div>
+                        <span style="text-align:right; color:#c2410c;">{{ breed_guide.affection_score or 5 }}/5</span>
+                    </div>
+                    <div class="breed-score-row">
+                        <span>🌱 Dễ chăm sóc</span>
+                        <div class="breed-score-track">
+                            <div class="breed-score-fill" style="width: {{ (breed_guide.easy_care_score or 4) * 20 }}%; background:linear-gradient(90deg, #10b981 0%, #059669 100%);"></div>
+                        </div>
+                        <span style="text-align:right; color:#047857;">{{ breed_guide.easy_care_score or 4 }}/5</span>
+                    </div>
+                    <div class="breed-score-row">
+                        <span>🏢 Hợp căn hộ</span>
+                        <div class="breed-score-track">
+                            <div class="breed-score-fill" style="width: {{ (breed_guide.apartment_score or 4) * 20 }}%; background:linear-gradient(90deg, #38bdf8 0%, #0284c7 100%);"></div>
+                        </div>
+                        <span style="text-align:right; color:#0369a1;">{{ breed_guide.apartment_score or 4 }}/5</span>
+                    </div>
+                </div>
+                <div>
+                    <span style="font-size:11.5px; font-weight:800; color:#7c5a46; margin-right:6px;">Tính cách nổi bật:</span>
+                    {% for trait in breed_guide.temperament.split(',') %}
+                        <span class="temperament-tag">{{ trait.strip() }}</span>
+                    {% endfor %}
+                </div>
+            </div>
             {% endif %}
         </div>
 
-        <!-- Cột phải: Thông số & Đặt mua -->
+        <!-- CỘT PHẢI: Thông Tin Chi Tiết, Hồ Sơ Bento 6 Ô Sáng Rõ & Đặt Mua -->
         <div>
+            <!-- Hàng Badge Phân Loại & Tồn Kho -->
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
-                <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}">
-                    {{ p.pet_type }}
+                <span class="badge {% if p.pet_type == 'Mèo' %}badge-cat{% elif p.pet_type == 'Chó' %}badge-dog{% else %}badge-both{% endif %}" style="font-size:12.5px; padding:5px 12px;">
+                    {% if p.pet_type == 'Mèo' %}🐱 Mèo{% elif p.pet_type == 'Chó' %}🐶 Chó{% else %}🐾 {{ p.pet_type }}{% endif %}
                 </span>
                 {% if p.breed %}
-                <a href="{{ url_for('shop_page', pet_type=p.pet_type, breed=p.breed) }}" class="badge" style="background:#e0f2fe; color:#0369a1; text-decoration:none;">
-                    Giống: {{ p.breed }}
+                <a href="{{ url_for('shop_page', pet_type=p.pet_type, breed=p.breed) }}" class="badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; text-decoration:none; font-size:12.5px; padding:5px 12px; font-weight:800;">
+                    🧬 Giống: {{ p.breed }}
                 </a>
                 {% endif %}
-                <span class="badge {% if p.stock == 0 %}badge-stock-out{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}">
-                    {% if p.stock > 0 %}Còn {{ p.stock }} ({{ p.stock_status }}){% else %}Tạm hết hàng{% endif %}
+                <span class="badge {% if p.stock == 0 %}badge-stock-out{% elif p.stock <= 5 %}badge-stock-low{% else %}badge-stock-ok{% endif %}" style="font-size:12.5px; padding:5px 12px;">
+                    {% if p.stock > 0 %}✨ Còn {{ p.stock }} ({{ p.stock_status }}){% else %}Tạm hết hàng{% endif %}
                 </span>
             </div>
 
-            <h1 class="detail-title" style="color:#2b180d !important; font-size:26px; font-weight:900; margin-bottom:10px;">{{ p.name }}</h1>
-            <div style="font-size:13px; color:#6e5444; margin-bottom:14px;">Mã định danh (SKU): <code style="background:#fff7ed; color:#ea580c; border:1px solid #fed7aa; padding:2px 7px; border-radius:6px; font-weight:800;">{{ p.sku }}</code> | Phân nhóm: <strong style="color:#2b180d;">{{ p.category }}</strong></div>
+            <!-- Tiêu Đề & Mã Định Danh SKU -->
+            <h1 class="detail-title" style="color:#2b180d !important; font-size:27px; font-weight:900; margin-bottom:8px; line-height:1.28;">
+                {{ p.name }}
+            </h1>
+            <div style="font-size:13px; color:#6e5444; margin-bottom:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span>Mã định danh (SKU): <code style="background:#fff7ed; color:#ea580c; border:1px solid #fed7aa; padding:2px 8px; border-radius:6px; font-weight:800;">{{ p.sku }}</code></span>
+                <span>•</span>
+                <span>Phân nhóm: <strong style="color:#2b180d;">{{ p.category }}</strong></span>
+                {% if breed_guide and breed_guide.en_name %}
+                <span>•</span>
+                <span>Tên quốc tế: <strong style="color:#c2410c;">{{ breed_guide.en_name }}</strong></span>
+                {% endif %}
+            </div>
 
-            <div class="detail-price-box" style="background:#fff7ed; border:1.5px solid #fed7aa; border-radius:16px; padding:16px 22px; margin:16px 0 20px; display:flex; justify-content:space-between; align-items:center;">
+            <!-- Khung Giá Niêm Yết & Ưu Đãi Đi Kèm -->
+            <div class="pet-price-banner">
                 <div>
-                    <div style="font-size:12.5px; color:var(--text-muted); font-weight:600;">Giá niêm yết tại Pet House:</div>
-                    <div class="detail-price" style="font-size:28px; font-weight:900; color:#047857;">{{ "{:,.0f}".format(p.price) }} đ</div>
+                    <div style="font-size:12.5px; color:#7c5a46; font-weight:700; margin-bottom:2px;">
+                        {% if p.category in ('Chó cảnh', 'Mèo cảnh') %}Chi phí đón bé tại Meow &amp; Woof Pet House:{% else %}Giá niêm yết chính hãng tại Pet House:{% endif %}
+                    </div>
+                    <div class="detail-price" style="font-size:31px; font-weight:900; color:#047857; letter-spacing:-0.5px;">
+                        {{ "{:,.0f}".format(p.price) }} đ
+                    </div>
                 </div>
-                <div style="text-align:right; font-size:13px; color:#15803d; font-weight:600;">
-                    &#10004; Kiểm định chất lượng &amp; sức khỏe
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+                    <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; padding:4px 11px; border-radius:99px; font-size:12px; font-weight:800;">
+                        &#10004; Kiểm định chất lượng &amp; sức khỏe
+                    </span>
+                    <span style="background:#fffbeb; color:#b45309; border:1px solid #fde68a; padding:4px 11px; border-radius:99px; font-size:12px; font-weight:800;">
+                        🎁 Tặng ưu đãi -15% phí Spa Grooming lần đầu
+                    </span>
                 </div>
             </div>
 
-            <p style="font-size:15px; color:var(--text-body); margin-bottom:18px; line-height:1.65;">
-                {{ p.description }}
-            </p>
-
-            <!-- Bảng thông số kỹ thuật / Hồ sơ thú cưng (Màu cam đậm & than đậm, tương phản cực cao trên mọi màn hình) -->
-            <table class="specs-table" style="width:100%; border-collapse:collapse; margin-bottom:22px; font-size:14px; border:1.5px solid #fed7aa; border-radius:14px; overflow:hidden; box-shadow:0 4px 14px rgba(251,146,60,0.06);">
-                <tbody>
-                    <tr>
-                        <th style="width:36%; background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Danh mục</th>
-                        <td style="background:#ffffff; color:#1c1917; font-weight:700; padding:12px 16px; border:1.5px solid #fed7aa;">{{ p.category }}</td>
-                    </tr>
-                    <tr>
-                        <th style="background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Loài thú cưng</th>
-                        <td style="background:#ffffff; color:#1c1917; font-weight:700; padding:12px 16px; border:1.5px solid #fed7aa;">{{ p.pet_type }}</td>
-                    </tr>
-                    <tr>
-                        <th style="background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Giống / Dòng liên quan</th>
-                        <td style="background:#ffffff; color:#1c1917; font-weight:700; padding:12px 16px; border:1.5px solid #fed7aa;">{{ p.breed if p.breed else 'Phù hợp cho mọi giống ' + p.pet_type }}</td>
-                    </tr>
-                    {% if p.category in ('Chó cảnh', 'Mèo cảnh') %}
-                    <tr>
-                        <th style="background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Độ tuổi &amp; Tiêm chủng</th>
-                        <td style="background:#ffffff; color:#1c1917; font-weight:700; padding:12px 16px; border:1.5px solid #fed7aa;">Từ 2 - 2.5 tháng tuổi, đã tiêm phòng vaccine &amp; tẩy giun định kỳ</td>
-                    </tr>
-                    <tr>
-                        <th style="background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Chế độ bảo hành</th>
-                        <td style="background:#ffffff; color:#047857; font-weight:800; padding:12px 16px; border:1.5px solid #fed7aa;">Bảo hành sức khỏe 30 ngày, tặng kèm sổ khám &amp; gói tư vấn dinh dưỡng trọn đời</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <th style="background:#fff7ed; color:#7c2d12; font-weight:900; padding:12px 16px; border:1.5px solid #fed7aa;">Xuất xứ &amp; Bảo quản</th>
-                        <td style="background:#ffffff; color:#1c1917; font-weight:700; padding:12px 16px; border:1.5px solid #fed7aa;">Phân phối chính hãng tại Meow &amp; Woof Pet House, hạn sử dụng dài</td>
-                    </tr>
+            <!-- Mô Tả Chi Tiết -->
+            <div style="background:#fffdf9; border-left:4px solid #fb923c; border-radius:8px 14px 14px 8px; padding:12px 16px; margin-bottom:18px;">
+                <p style="font-size:14.5px; color:#3d271d; margin:0; line-height:1.65; font-weight:500;">
+                    {{ p.description }}
+                    {% if breed_guide and p.category in ('Chó cảnh', 'Mèo cảnh') and breed_guide.description not in p.description %}
+                        {{ breed_guide.description }}
                     {% endif %}
-                </tbody>
-            </table>
+                </p>
+            </div>
 
-            <!-- Nút hành động -->
-            <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                <form method="POST" action="{{ url_for('add_to_cart_route') }}" style="flex:1; min-width:200px;">
+            <!-- Lưới Hồ Sơ Thông Số Bento 6 Ô Sáng Rõ (Thay cho bảng đen cũ, luôn tương phản cao trên mọi trình duyệt) -->
+            <div class="pet-spec-bento">
+                {% if p.category in ('Chó cảnh', 'Mèo cảnh') %}
+                <div class="pet-spec-item">
+                    <div class="pet-spec-label">🏷️ Giống &amp; Phân nhóm</div>
+                    <div class="pet-spec-value">{{ p.breed if p.breed else p.category }} ({{ p.pet_type }})</div>
+                </div>
+                <div class="pet-spec-item">
+                    <div class="pet-spec-label">🌍 Nguồn gốc xuất xứ</div>
+                    <div class="pet-spec-value">{{ breed_guide.origin if breed_guide else 'Thuần chủng chuẩn quốc tế' }}</div>
+                </div>
+                <div class="pet-spec-item">
+                    <div class="pet-spec-label">🎂 Độ tuổi &amp; Tiêm chủng</div>
+                    <div class="pet-spec-value">2 – 2.5 tháng • Đã tiêm vaccine &amp; tẩy giun</div>
+                </div>
+                <div class="pet-spec-item">
+                    <div class="pet-spec-label">⏳ Tuổi thọ &amp; Cân nặng chuẩn</div>
+                    <div class="pet-spec-value">
+                        {% if breed_guide %}{{ breed_guide.life_span }} • {{ breed_guide.weight_metric }}{% else %}10 – 15 năm • Cân đối khỏe mạnh{% endif %}
+                    </div>
+                </div>
+                <div class="pet-spec-item">
+                    <div class="pet-spec-label">✨ Bộ lông &amp; Chăm sóc</div>
+                    <div class="pet-spec-value">
+                        {% if breed_guide %}{{ breed_guide.coat_type }} ({{ breed_guide.care_level }}){% else %}Lông dày mượt, dễ chải &amp; vệ sinh{% endif %}
+                    </div>
+                </div>
+                <div class="pet-spec-item">
+                    <div class="pet-spec-label">🏠 Không gian sống phù hợp</div>
+                    <div class="pet-spec-value">
+                        {% if breed_guide %}{{ breed_guide.living_space }}{% else %}Căn hộ chung cư / Nhà phố{% endif %}
+                    </div>
+                </div>
+                <div class="pet-spec-item full-span">
+                    <div class="pet-spec-label" style="color:#047857;">🛡️ Chế độ bảo hành &amp; Quyền lợi đặc biệt</div>
+                    <div class="pet-spec-value" style="color:#065f46;">
+                        Bảo hành sức khỏe 30 ngày 1 đổi 1, tặng kèm sổ khám thú y, microchip định danh &amp; gói tư vấn dinh dưỡng trọn đời
+                    </div>
+                </div>
+                {% else %}
+                <div class="pet-spec-item">
+                    <div class="pet-spec-label">🏷️ Danh mục sản phẩm</div>
+                    <div class="pet-spec-value">{{ p.category }}</div>
+                </div>
+                <div class="pet-spec-item">
+                    <div class="pet-spec-label">🐾 Dành cho loài</div>
+                    <div class="pet-spec-value">{{ p.pet_type }}</div>
+                </div>
+                <div class="pet-spec-item">
+                    <div class="pet-spec-label">🧬 Giống thú cưng phù hợp</div>
+                    <div class="pet-spec-value">{{ p.breed if p.breed else 'Phù hợp cho mọi giống ' ~ p.pet_type }}</div>
+                </div>
+                <div class="pet-spec-item">
+                    <div class="pet-spec-label">📦 Xuất xứ &amp; Bảo quản</div>
+                    <div class="pet-spec-value">Phân phối chính hãng • Hạn sử dụng dài</div>
+                </div>
+                <div class="pet-spec-item full-span">
+                    <div class="pet-spec-label" style="color:#047857;">🛡️ Chính sách chất lượng &amp; Đổi trả</div>
+                    <div class="pet-spec-value" style="color:#065f46;">
+                        Cam kết sản phẩm an toàn chuẩn thú y, hỗ trợ đổi trả miễn phí trong 7 ngày nếu phát sinh lỗi từ nhà sản xuất
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Thanh Chọn Số Lượng & Tổ Hợp Nút Đặt Mua / Thêm Giỏ / Đặt Lịch Spa -->
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <!-- Bộ chọn số lượng -->
+                <div class="pet-qty-stepper" title="Chọn số lượng">
+                    <button type="button" class="pet-qty-btn" onclick="adjustDetailQty(-1)" {% if p.stock <= 0 %}disabled{% endif %}>&minus;</button>
+                    <input type="number" id="detailQtyDisplay" class="pet-qty-input" value="1" min="1" max="{{ p.stock if p.stock > 0 else 1 }}" readonly>
+                    <button type="button" class="pet-qty-btn" onclick="adjustDetailQty(1)" {% if p.stock <= 0 %}disabled{% endif %}>&#43;</button>
+                </div>
+
+                <!-- Nút Đặt Mua Ngay (Chuyển tới Giỏ hàng) -->
+                <form method="POST" action="{{ url_for('add_to_cart_route') }}" style="flex:1.3; min-width:210px;">
                     <input type="hidden" name="product_id" value="{{ p.id }}">
+                    <input type="hidden" name="quantity" class="detail-qty-sync" value="1">
                     <input type="hidden" name="next_url" value="{{ url_for('cart_page') }}">
-                    <button type="submit" class="btn btn-primary btn-lg btn-block" {% if p.stock <= 0 %}disabled{% endif %}>
-                        {% if p.stock > 0 %}Đặt Mua Ngay / Thêm Vào Giỏ{% else %}Tạm Hết Hàng{% endif %}
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" style="height:48px; font-size:14.5px; font-weight:800;" {% if p.stock <= 0 %}disabled{% endif %}>
+                        {% if p.stock > 0 %}🛒 Đặt Mua Ngay{% else %}Tạm Hết Hàng{% endif %}
                     </button>
                 </form>
 
+                <!-- Nút Giữ Trang & Thêm Vào Giỏ -->
                 <form method="POST" action="{{ url_for('add_to_cart_route') }}">
                     <input type="hidden" name="product_id" value="{{ p.id }}">
+                    <input type="hidden" name="quantity" class="detail-qty-sync" value="1">
                     <input type="hidden" name="next_url" value="{{ request.path }}">
-                    <button type="submit" class="btn btn-outline btn-lg" {% if p.stock <= 0 %}disabled{% endif %}>
-                        + Giữ trang &amp; Thêm giỏ
+                    <button type="submit" class="btn btn-outline btn-lg" style="height:48px; font-size:14px; font-weight:800;" {% if p.stock <= 0 %}disabled{% endif %}>
+                        + Thêm vào giỏ
                     </button>
                 </form>
 
-                <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-lg">Đặt lịch Spa</a>
+                <!-- Nút Đặt Lịch Spa -->
+                <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-lg" style="height:48px; display:inline-flex; align-items:center; font-size:14px; font-weight:800;">
+                    🛁 Đặt lịch Spa
+                </a>
             </div>
 
-            <ul class="policy-list" style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:14px; padding:14px 18px; margin-top:20px; font-size:13.5px; color:#047857; font-weight:600; list-style-position:inside;">
-                <li style="margin-bottom:6px;"><strong style="color:#065f46;">✓ Cam kết từ Meow &amp; Woof Pet House:</strong> Hỗ trợ giao thú cưng &amp; phụ kiện tận nơi an toàn.</li>
-                <li><strong style="color:#065f46;">✓ Ưu đãi Spa đi kèm:</strong> Giảm ngay 15% phí tắm sấy &amp; cắt tỉa lông (Grooming) lần đầu khi mua kèm tại cửa hàng.</li>
+            <!-- Danh Sách Chính Sách Hậu Mãi -->
+            <ul class="policy-list" style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:16px; padding:14px 18px; margin-top:18px; font-size:13.2px; color:#047857; font-weight:600; list-style:none;">
+                <li style="margin-bottom:6px; display:flex; align-items:flex-start; gap:8px;">
+                    <span>✅</span>
+                    <span><strong style="color:#065f46;">Cam kết từ Meow &amp; Woof Pet House:</strong> Hỗ trợ giao thú cưng &amp; phụ kiện tận nơi an toàn, kiểm tra trước khi nhận.</span>
+                </li>
+                <li style="display:flex; align-items:flex-start; gap:8px;">
+                    <span>🎁</span>
+                    <span><strong style="color:#065f46;">Đặc quyền khách hàng:</strong> Giảm ngay 15% phí tắm sấy &amp; cắt tỉa tạo kiểu (Grooming) lần đầu khi đặt mua tại cửa hàng.</span>
+                </li>
             </ul>
         </div>
     </div>
 </div>
+
+<!-- KHU VỰC CẨM NANG CHĂM SÓC RIÊNG CHO GIỐNG NÀY (Nếu có hồ sơ giống) -->
+{% if breed_guide %}
+<section class="pet-care-banner">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+            <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:800; color:#c2410c; background:#fff7ed; border:1px solid #fdba74; padding:4px 12px; border-radius:99px; margin-bottom:6px;">
+                🩺 HƯỚNG DẪN CHĂM SÓC CHUẨN THÚ Y
+            </div>
+            <h2 style="font-size:21px; font-weight:900; color:#2b180d; margin:0;">
+                Cẩm Nang Nuôi &amp; Chăm Sóc {{ breed_guide.vi_name }} Khỏe Mạnh
+            </h2>
+        </div>
+        <a href="{{ url_for('network_page', species=('cat' if p.pet_type == 'Mèo' else 'dog'), search_breed=breed_guide.en_name) }}" class="btn btn-outline btn-sm">
+            📖 Xem trong Bách khoa 32 Giống &rarr;
+        </a>
+    </div>
+
+    <div class="pet-care-cards">
+        <div style="background:#ffffff; border:1.5px solid #fed7aa; border-radius:18px; padding:16px 18px; box-shadow:0 4px 14px rgba(180,100,60,0.04);">
+            <div style="font-size:14px; font-weight:800; color:#c2410c; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                <span>🥣</span> <span>Khẩu Phần &amp; Thực Đơn Dinh Dưỡng</span>
+            </div>
+            <p style="font-size:13.2px; color:#4a3326; line-height:1.6; margin:0;">
+                {{ breed_guide.nutrition_guide }}
+            </p>
+        </div>
+
+        <div style="background:#ffffff; border:1.5px solid #bae6fd; border-radius:18px; padding:16px 18px; box-shadow:0 4px 14px rgba(2,132,199,0.04);">
+            <div style="font-size:14px; font-weight:800; color:#0369a1; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                <span>🛁</span> <span>Lịch Tắm Spa &amp; Chải Lông Grooming</span>
+            </div>
+            <p style="font-size:13.2px; color:#334155; line-height:1.6; margin:0;">
+                {{ breed_guide.grooming_guide }}
+            </p>
+        </div>
+
+        <div style="background:#ffffff; border:1.5px solid #a7f3d0; border-radius:18px; padding:16px 18px; box-shadow:0 4px 14px rgba(4,120,87,0.04);">
+            <div style="font-size:14px; font-weight:800; color:#047857; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                <span>🩺</span> <span>Lưu Ý Sức Khỏe Từ Bác Sĩ Thú Y</span>
+            </div>
+            <p style="font-size:13.2px; color:#1e3a2f; line-height:1.6; margin:0;">
+                {{ breed_guide.health_note }}
+            </p>
+        </div>
+    </div>
+</section>
+{% endif %}
 
 <!-- KHU VỰC 1: CÁC GIỐNG CHÓ / MÈO LIÊN QUAN -->
 {% if related_pets %}
 <section style="margin-bottom: 40px;">
     <div class="section-header">
         <div>
-            <h2 class="section-title">Các Bé {{ p.pet_type }} Cảnh Cùng Loài &amp; Giống Liên Quan</h2>
-            <p class="section-subtitle">Tham khảo thêm các bé thú cưng thuần chủng khỏe mạnh đang có mặt tại Pet House</p>
+            <h2 class="section-title">🐾 Các Bé {{ p.pet_type }} Cảnh Thuần Chủng Liên Quan</h2>
+            <p class="section-subtitle">Tham khảo thêm các bé thú cưng khỏe mạnh, đáng yêu đang có sẵn tại Meow &amp; Woof Pet House</p>
         </div>
         <a href="{{ url_for('shop_page', pet_type=p.pet_type) }}" class="btn btn-outline btn-sm">Xem tất cả {{ p.pet_type }} &rarr;</a>
     </div>
@@ -155,8 +426,8 @@
 <section style="margin-bottom: 24px;">
     <div class="section-header">
         <div>
-            <h2 class="section-title">Đồ Vật, Thức Ăn &amp; Phụ Kiện Khuyên Dùng Kèm Theo</h2>
-            <p class="section-subtitle">Các sản phẩm dinh dưỡng, vệ sinh và đồ chơi phù hợp nhất cho {{ p.breed if p.breed else p.pet_type }}</p>
+            <h2 class="section-title">🛍️ Combo Thức Ăn &amp; Phụ Kiện Khuyên Dùng Cho {{ p.breed if p.breed else p.pet_type }}</h2>
+            <p class="section-subtitle">Chuẩn bị đầy đủ hạt dinh dưỡng, pate, cát vệ sinh và đồ chơi giúp bé nhanh làm quen nhà mới</p>
         </div>
         <a href="{{ url_for('shop_page', pet_type=p.pet_type) }}" class="btn btn-outline btn-sm">Xem toàn bộ phụ kiện &rarr;</a>
     </div>
@@ -168,5 +439,19 @@
     </div>
 </section>
 {% endif %}
-{% endblock %}
 
+<script>
+function adjustDetailQty(delta) {
+    const input = document.getElementById('detailQtyDisplay');
+    if (!input) return;
+    const maxStock = parseInt(input.getAttribute('max') || '1', 10) || 1;
+    let nextVal = (parseInt(input.value || '1', 10) || 1) + delta;
+    if (nextVal < 1) nextVal = 1;
+    if (nextVal > maxStock) nextVal = maxStock;
+    input.value = nextVal;
+    document.querySelectorAll('.detail-qty-sync').forEach(el => {
+        el.value = nextVal;
+    });
+}
+</script>
+{% endblock %}

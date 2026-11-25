@@ -649,7 +649,8 @@ def shop_page():
 def product_detail_page(product_id: int):
     """
     Trang Chi tiết Thú cưng / Sản phẩm (Tham khảo PetHouse):
-    Hiển thị ảnh lớn, thông số chi tiết, danh sách các giống liên quan (`related_pets`)
+    Hiển thị ảnh lớn, thông số chi tiết, hồ sơ giống (`breed_guide`),
+    danh sách các giống liên quan (`related_pets`)
     và danh sách thức ăn / phụ kiện / đồ dùng liên quan (`related_supplies`).
     """
     detail_bundle = get_product_detail_and_related(product_id)
@@ -662,6 +663,7 @@ def product_detail_page(product_id: int):
         active_page="shop",
         p=detail_bundle["product"],
         product=detail_bundle["product"],
+        breed_guide=detail_bundle.get("breed_guide"),
         related_pets=detail_bundle["related_pets"],
         related_supplies=detail_bundle["related_supplies"],
     )
@@ -1323,17 +1325,19 @@ def add_to_cart_route():
 
     product_id = request.form.get("product_id", "").strip()
     next_url = request.form.get("next_url") or url_for("shop_page")
+    qty_raw = request.form.get("quantity", "1").strip()
+    add_qty = int(qty_raw) if qty_raw.isdigit() and int(qty_raw) > 0 else 1
 
     if product_id.isdigit():
         prod = Product.get_by_id(int(product_id))
         if prod and prod.stock > 0:
             cart = get_session_cart()
             current_qty = cart.get(product_id, 0)
-            if current_qty + 1 <= prod.stock:
-                cart[product_id] = current_qty + 1
+            if current_qty + add_qty <= prod.stock:
+                cart[product_id] = current_qty + add_qty
                 session["cart"] = cart
                 session.modified = True
-                flash(f"Đã thêm '{prod.name}' vào giỏ hàng!", "success")
+                flash(f"Đã thêm {add_qty} x '{prod.name}' vào giỏ hàng!", "success")
             else:
                 flash(f"Sản phẩm '{prod.name}' chỉ còn tối đa {prod.stock} món trong kho.", "error")
     return redirect(next_url)
