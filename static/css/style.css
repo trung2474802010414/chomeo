@@ -3327,13 +3327,13 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .breed-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(43, 24, 13, 0.6);
-    backdrop-filter: blur(5px);
+    background: rgba(43, 24, 13, 0.62);
+    backdrop-filter: blur(6px);
     z-index: 9999;
     display: none;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 18px;
 }
 
 .breed-modal-overlay.open {
@@ -3342,14 +3342,162 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .breed-modal-card {
     background: #ffffff;
-    border: 2px solid #fed7aa;
-    border-radius: 26px;
-    max-width: 720px;
+    border: 2px solid #fdba74;
+    border-radius: 28px;
+    max-width: 960px;
     width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 24px 60px rgba(43, 24, 13, 0.28);
+    max-height: 92vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 28px 70px rgba(43, 24, 13, 0.34);
     animation: modalPopIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    color-scheme: light;
+}
+
+.breed-modal-header {
+    background: linear-gradient(135deg, #fff7ed 0%, #fff1f2 55%, #fef3c7 100%);
+    border-bottom: 1.5px solid #fed7aa;
+    padding: 18px 26px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.breed-modal-close-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 99px;
+    border: 1.5px solid #fdba74;
+    background: #ffffff;
+    color: #9a3412;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.breed-modal-close-btn:hover {
+    background: #ea580c;
+    border-color: #ea580c;
+    color: #ffffff;
+}
+
+.breed-modal-body {
+    padding: 24px 26px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.breed-modal-grid {
+    display: grid;
+    grid-template-columns: 345px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 840px) {
+    .breed-modal-grid {
+        grid-template-columns: 1fr;
+    }
+    .breed-modal-header,
+    .breed-modal-body,
+    .breed-modal-footer {
+        padding: 16px 18px;
+    }
+}
+
+.breed-modal-portrait {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid #fed7aa;
+    background: linear-gradient(135deg, #fff7ed 0%, #ffe4e6 100%);
+    box-shadow: 0 10px 26px rgba(180, 100, 60, 0.12);
+    margin-bottom: 14px;
+}
+
+.breed-modal-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 28%;
+    display: block;
+}
+
+.breed-modal-bento-mini {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+    margin-bottom: 14px;
+}
+
+.breed-modal-mini-tile {
+    background: #fffaf5;
+    border: 1.5px solid #fde2c8;
+    border-radius: 14px;
+    padding: 10px 12px;
+}
+
+.breed-modal-mini-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #9a5b3c;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    margin-bottom: 3px;
+}
+
+.breed-modal-mini-val {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #2b180d;
+    line-height: 1.35;
+}
+
+.breed-guide-step-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    border-radius: 18px;
+    padding: 15px 17px;
+    margin-bottom: 12px;
+    border: 1.5px solid #fed7aa;
+    background: #fffaf5;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.breed-guide-step-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(180, 100, 60, 0.08);
+}
+
+.breed-guide-step-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.breed-modal-footer {
+    background: #fffaf5;
+    border-top: 1.5px solid #fde2c8;
+    padding: 14px 26px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 @keyframes modalPopIn {

@@ -332,66 +332,163 @@
     </div>
 </details>
 
-<!-- Modal Chi Tiết Cẩm Nang Nuôi & Sức Khỏe Từng Giống -->
+<!-- Modal Chi Tiết Cẩm Nang Nuôi & Sức Khỏe Từng Giống (Thiết kế 2 cột Magazine Chuyên Nghiệp, Dễ Đọc) -->
 <div class="breed-modal-overlay" id="breedGuideModal" onclick="if(event.target === this) closeBreedGuideModal()">
     <div class="breed-modal-card">
-        <div style="position:relative; height:230px; background:#fff7ed; overflow:hidden;">
-            <img id="modalBreedImg" src="" alt="" style="width:100%; height:100%; object-fit:cover;">
-            <button type="button"
-                    onclick="closeBreedGuideModal()"
-                    style="position:absolute; top:14px; right:14px; width:38px; height:38px; border-radius:50%; border:none; background:rgba(43,24,13,0.75); color:#ffffff; font-size:18px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                &times;
-            </button>
-            <div style="position:absolute; bottom:12px; left:16px; right:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                <span id="modalBreedOrigin" class="breed-origin-pill"></span>
-                <span id="modalBreedPrice" class="breed-price-pill"></span>
+        <!-- Thanh Tiêu Đề Modal Sáng Rõ -->
+        <div class="breed-modal-header">
+            <div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
+                    <span id="modalBreedSpeciesBadge" class="breed-species-pill" style="background:#2b180d; color:#fff7ed;"></span>
+                    <span id="modalBreedOrigin" class="breed-origin-pill"></span>
+                    <span id="modalBreedCareLevel" class="breed-care-badge"></span>
+                    <span id="modalBreedStockBadge" style="font-size:11.5px; font-weight:800; color:#047857; background:#ecfdf5; border:1px solid #a7f3d0; padding:4px 10px; border-radius:99px;"></span>
+                </div>
+                <h2 id="modalBreedTitle" style="font-size:24px; font-weight:900; color:#2b180d; margin:0; line-height:1.25;"></h2>
+                <div id="modalBreedSubtitle" style="font-size:13.5px; font-weight:700; color:#9a5b3c; margin-top:3px;"></div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span id="modalBreedPrice" class="breed-price-pill" style="font-size:13.5px; padding:7px 15px;"></span>
+                <button type="button" class="breed-modal-close-btn" onclick="closeBreedGuideModal()">
+                    <span>&times;</span> <span>Đóng</span>
+                </button>
             </div>
         </div>
 
-        <div style="padding:22px 26px 26px;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+        <!-- Thân Modal 2 Cột Trực Quan -->
+        <div class="breed-modal-body">
+            <div class="breed-modal-grid">
+                <!-- CỘT TRÁI: Ảnh Chân Dung Không Bị Cắt + 4 Ô Chỉ Số + Thanh Điểm Phù Hợp -->
                 <div>
-                    <h2 id="modalBreedTitle" style="font-size:22px; font-weight:800; color:#2b180d; margin:0;"></h2>
-                    <div id="modalBreedSubtitle" style="font-size:13px; font-weight:700; color:#9a6b53; margin-top:3px;"></div>
+                    <div class="breed-modal-portrait">
+                        <img id="modalBreedImg" src="" alt="">
+                    </div>
+
+                    <!-- 4 Ô Thông Số Nhanh (2x2 Bento) -->
+                    <div class="breed-modal-bento-mini">
+                        <div class="breed-modal-mini-tile">
+                            <div class="breed-modal-mini-label">⏳ Tuổi thọ TB</div>
+                            <div id="modalBreedLife" class="breed-modal-mini-val" style="color:#047857;"></div>
+                        </div>
+                        <div class="breed-modal-mini-tile">
+                            <div class="breed-modal-mini-label">⚖️ Cân nặng chuẩn</div>
+                            <div id="modalBreedWeight" class="breed-modal-mini-val" style="color:#0369a1;"></div>
+                        </div>
+                        <div class="breed-modal-mini-tile">
+                            <div class="breed-modal-mini-label">✨ Đặc điểm bộ lông</div>
+                            <div id="modalBreedCoat" class="breed-modal-mini-val" style="color:#9a3412;"></div>
+                        </div>
+                        <div class="breed-modal-mini-tile">
+                            <div class="breed-modal-mini-label">🏠 Không gian sống</div>
+                            <div id="modalBreedSpace" class="breed-modal-mini-val" style="color:#b45309;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Thanh Điểm Đánh Giá & Tag Tính Cách -->
+                    <div style="background:#fffdf9; border:1.5px solid #fde2c8; border-radius:16px; padding:13px 15px;">
+                        <div style="font-size:12px; font-weight:800; color:#9a3412; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:8px;">
+                            📊 Chỉ Số Đánh Giá Thực Tế
+                        </div>
+                        <div class="breed-scores-box" style="background:#ffffff; margin-bottom:10px;">
+                            <div class="breed-score-row">
+                                <span>💖 Độ quấn chủ</span>
+                                <div class="breed-score-track">
+                                    <div id="modalScoreAffectionBar" class="breed-score-fill" style="width:100%;"></div>
+                                </div>
+                                <span id="modalScoreAffectionText" style="text-align:right; color:#c2410c;">5/5</span>
+                            </div>
+                            <div class="breed-score-row">
+                                <span>🌱 Dễ chăm sóc</span>
+                                <div class="breed-score-track">
+                                    <div id="modalScoreCareBar" class="breed-score-fill" style="width:80%; background:linear-gradient(90deg, #10b981 0%, #059669 100%);"></div>
+                                </div>
+                                <span id="modalScoreCareText" style="text-align:right; color:#047857;">4/5</span>
+                            </div>
+                            <div class="breed-score-row">
+                                <span>🏢 Hợp căn hộ</span>
+                                <div class="breed-score-track">
+                                    <div id="modalScoreAptBar" class="breed-score-fill" style="width:100%; background:linear-gradient(90deg, #38bdf8 0%, #0284c7 100%);"></div>
+                                </div>
+                                <span id="modalScoreAptText" style="text-align:right; color:#0369a1;">5/5</span>
+                            </div>
+                        </div>
+                        <div style="font-size:11.5px; font-weight:800; color:#7c5a46; margin-bottom:5px;">TÍNH CÁCH ĐẶC TRƯNG:</div>
+                        <div id="modalBreedTemperamentTags"></div>
+                    </div>
                 </div>
-                <span id="modalBreedCareLevel" class="breed-care-badge"></span>
+
+                <!-- CỘT PHẢI: Tổng Quan Dễ Đọc & 3 Thẻ Phác Đồ Chăm Sóc Chuẩn Thú Y -->
+                <div>
+                    <!-- Khối 1: Tổng Quan & Đối Tượng Phù Hợp -->
+                    <div style="background:linear-gradient(135deg, #fffdf9 0%, #fff7ed 100%); border:1.5px solid #fed7aa; border-radius:18px; padding:16px 18px; margin-bottom:16px;">
+                        <div style="font-size:13px; font-weight:900; color:#c2410c; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                            <span>🌟</span> <span>Tổng Quan &amp; Đặc Điểm Nhận Diện</span>
+                        </div>
+                        <p id="modalBreedDesc" style="font-size:14.2px; color:#2b180d; line-height:1.65; margin:0 0 12px 0; font-weight:500;"></p>
+                        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;" id="modalBreedSuitabilityChips"></div>
+                    </div>
+
+                    <!-- Khối 2: 3 Phác Đồ Chăm Sóc Trọng Tâm -->
+                    <div style="font-size:13px; font-weight:900; color:#2b180d; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                        <span>📖</span> <span>Cẩm Nang Nuôi &amp; Chăm Sóc Trọng Tâm (Chuẩn Thú Y)</span>
+                    </div>
+
+                    <!-- Bước 1: Dinh dưỡng -->
+                    <div class="breed-guide-step-card" style="background:#fffaf5; border-color:#fed7aa;">
+                        <div class="breed-guide-step-icon" style="background:#ffedd5; border:1px solid #fdba74;">🥣</div>
+                        <div style="flex:1;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+                                <span style="font-size:14.5px; font-weight:900; color:#c2410c;">1. Thực Đơn &amp; Chế Độ Dinh Dưỡng</span>
+                                <span style="font-size:11px; font-weight:800; color:#9a3412; background:#ffedd5; padding:2px 9px; border-radius:99px;">Khẩu phần hàng ngày</span>
+                            </div>
+                            <div id="modalBreedNutrition" style="font-size:13.8px; color:#2b180d; line-height:1.6; font-weight:600; margin-bottom:5px;"></div>
+                            <div style="font-size:12.2px; color:#7c5a46;">
+                                &#10004; <em>Mẹo nhỏ:</em> Chia 2–3 bữa cố định trong ngày, luôn đặt khay nước lọc sạch và trộn chuyển thức ăn từ từ trong 5–7 ngày đầu.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bước 2: Spa & Grooming -->
+                    <div class="breed-guide-step-card" style="background:#f0f9ff; border-color:#bae6fd;">
+                        <div class="breed-guide-step-icon" style="background:#e0f2fe; border:1px solid #7dd3fc;">🛁</div>
+                        <div style="flex:1;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+                                <span style="font-size:14.5px; font-weight:900; color:#0369a1;">2. Lịch Tắm Spa &amp; Chăm Sóc Bộ Lông</span>
+                                <span style="font-size:11px; font-weight:800; color:#075985; background:#e0f2fe; padding:2px 9px; border-radius:99px;">Chu kỳ Grooming</span>
+                            </div>
+                            <div id="modalBreedGrooming" style="font-size:13.8px; color:#0f172a; line-height:1.6; font-weight:600; margin-bottom:5px;"></div>
+                            <div style="font-size:12.2px; color:#475569;">
+                                &#10004; <em>Mẹo nhỏ:</em> Kết hợp vệ sinh tai khử mùi, cắt mài móng và cạo lông đệm bàn chân định kỳ mỗi 2–4 tuần tại Meow &amp; Woof Spa.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bước 3: Sức khỏe & Vaccine -->
+                    <div class="breed-guide-step-card" style="background:#ecfdf5; border-color:#a7f3d0; margin-bottom:0;">
+                        <div class="breed-guide-step-icon" style="background:#d1fae5; border:1px solid #6ee7b7;">🩺</div>
+                        <div style="flex:1;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+                                <span style="font-size:14.5px; font-weight:900; color:#047857;">3. Phác Đồ Vaccine &amp; Lưu Ý Sức Khỏe</span>
+                                <span style="font-size:11px; font-weight:800; color:#065f46; background:#d1fae5; padding:2px 9px; border-radius:99px;">Lời khuyên Bác sĩ</span>
+                            </div>
+                            <div id="modalBreedHealth" style="font-size:13.8px; color:#064e3b; line-height:1.6; font-weight:600; margin-bottom:5px;"></div>
+                            <div style="font-size:12.2px; color:#047857;">
+                                &#10004; <em>Cam kết tại Shop:</em> Bé đã được tiêm phòng &amp; tẩy giun theo tháng tuổi, kèm sổ khám và bảo hành sức khỏe 30 ngày.
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <p id="modalBreedDesc" style="font-size:13.8px; color:#4a3326; line-height:1.65; margin-bottom:16px;"></p>
-
-            <!-- 3 Chỉ Số Tiêu Chuẩn Trong Modal -->
-            <div class="breed-metric-grid" style="margin-bottom:16px;">
-                <div class="breed-metric-box">
-                    <div class="breed-metric-label">⏳ Tuổi thọ trung bình</div>
-                    <div id="modalBreedLife" class="breed-metric-val" style="color:#047857;"></div>
-                </div>
-                <div class="breed-metric-box">
-                    <div class="breed-metric-label">⚖️ Cân nặng trưởng thành</div>
-                    <div id="modalBreedWeight" class="breed-metric-val" style="color:#0369a1;"></div>
-                </div>
-                <div class="breed-metric-box">
-                    <div class="breed-metric-label">🏠 Không gian phù hợp</div>
-                    <div id="modalBreedSpace" class="breed-metric-val" style="color:#b45309;"></div>
-                </div>
+        <!-- Chân Modal Cố Định: Cam Kết & Nút Hành Động -->
+        <div class="breed-modal-footer">
+            <div style="font-size:12.8px; font-weight:700; color:#5c4033; display:flex; align-items:center; gap:6px;">
+                <span>🎁</span>
+                <span>Đặc quyền đón bé tại Meow &amp; Woof: <strong>Bảo hành 30 ngày</strong> &bull; <strong>Giảm 15% phí Spa Grooming lần đầu</strong></span>
             </div>
-
-            <!-- 3 Hộp Hướng Dẫn Chuyên Sâu: Dinh dưỡng, Spa & Thú y -->
-            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
-                <div style="background:#fffaf5; border:1px solid #fed7aa; border-radius:14px; padding:12px 14px;">
-                    <div style="font-size:12.5px; font-weight:800; color:#c2410c; margin-bottom:3px;">🥣 Khẩu Phần Dinh Dưỡng Khuyên Dùng</div>
-                    <div id="modalBreedNutrition" style="font-size:13px; color:#4a3326; line-height:1.55;"></div>
-                </div>
-                <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:14px; padding:12px 14px;">
-                    <div style="font-size:12.5px; font-weight:800; color:#0369a1; margin-bottom:3px;">🛁 Lịch Tắm Spa &amp; Chăm Sóc Bộ Lông</div>
-                    <div id="modalBreedGrooming" style="font-size:13px; color:#334155; line-height:1.55;"></div>
-                </div>
-                <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:14px; padding:12px 14px;">
-                    <div style="font-size:12.5px; font-weight:800; color:#047857; margin-bottom:3px;">🩺 Lưu Ý Sức Khỏe &amp; Phòng Bệnh Từ Bác Sĩ Thú Y</div>
-                    <div id="modalBreedHealth" style="font-size:13px; color:#1e3a2f; line-height:1.55;"></div>
-                </div>
-            </div>
-
-            <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:flex-end;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
                 <a href="{{ url_for('spa_page') }}" class="btn btn-outline" style="font-size:13px; font-weight:800;">
                     🛁 Đặt Lịch Spa Cho Giống Này
                 </a>
@@ -462,21 +559,84 @@ function openBreedGuideModal(breed) {
 
     document.getElementById('modalBreedImg').src = breed.image_url || '';
     document.getElementById('modalBreedImg').alt = breed.name || '';
+    document.getElementById('modalBreedSpeciesBadge').textContent =
+        (breed.pet_type === 'Mèo') ? '🐱 Mèo Cảnh Thuần Chủng' : '🐶 Chó Cảnh Thuần Chủng';
     document.getElementById('modalBreedOrigin').textContent = '📍 Xuất xứ: ' + (breed.origin || 'Quốc tế');
+    document.getElementById('modalBreedCareLevel').textContent = '✨ ' + (breed.care_level || 'Dễ nuôi');
+
+    const stockEl = document.getElementById('modalBreedStockBadge');
+    if (stockEl) {
+        if (breed.stock && breed.stock > 0) {
+            stockEl.style.display = 'inline-block';
+            stockEl.textContent = '✔ Sẵn ' + breed.stock + ' bé tại Shop';
+        } else {
+            stockEl.style.display = 'none';
+        }
+    }
+
     document.getElementById('modalBreedPrice').textContent = breed.shop_price
         ? ('Tại Shop: ' + Number(breed.shop_price).toLocaleString('vi-VN') + ' đ')
         : 'Liên hệ Shop';
     document.getElementById('modalBreedTitle').textContent = breed.vi_name || breed.name || '';
     document.getElementById('modalBreedSubtitle').textContent =
-        '🌍 Tên quốc tế: ' + (breed.en_name || breed.name || '') + ' • Bộ lông: ' + (breed.coat_type || 'Tiêu chuẩn');
-    document.getElementById('modalBreedCareLevel').textContent = '✨ ' + (breed.care_level || 'Dễ nuôi');
+        '🌍 Tên quốc tế: ' + (breed.en_name || breed.name || '') + ' • Mã giống: ' + (breed.sku || 'PET-HOUSE');
+
     document.getElementById('modalBreedDesc').textContent = breed.description || '';
     document.getElementById('modalBreedLife').textContent = breed.life_span || '';
     document.getElementById('modalBreedWeight').textContent = breed.weight_metric || '';
+    document.getElementById('modalBreedCoat').textContent = breed.coat_type || 'Bộ lông tiêu chuẩn';
     document.getElementById('modalBreedSpace').textContent = breed.living_space || '';
     document.getElementById('modalBreedNutrition').textContent = breed.nutrition_guide || '';
     document.getElementById('modalBreedGrooming').textContent = breed.grooming_guide || '';
     document.getElementById('modalBreedHealth').textContent = breed.health_note || '';
+
+    // Cập nhật 3 thanh điểm
+    const aff = Number(breed.affection_score || 5);
+    const care = Number(breed.easy_care_score || 4);
+    const apt = Number(breed.apartment_score || 4);
+    document.getElementById('modalScoreAffectionBar').style.width = (aff * 20) + '%';
+    document.getElementById('modalScoreAffectionText').textContent = aff + '/5';
+    document.getElementById('modalScoreCareBar').style.width = (care * 20) + '%';
+    document.getElementById('modalScoreCareText').textContent = care + '/5';
+    document.getElementById('modalScoreAptBar').style.width = (apt * 20) + '%';
+    document.getElementById('modalScoreAptText').textContent = apt + '/5';
+
+    // Cập nhật tag tính cách
+    const tempContainer = document.getElementById('modalBreedTemperamentTags');
+    if (tempContainer) {
+        tempContainer.innerHTML = '';
+        const traits = String(breed.temperament || '').split(',');
+        traits.forEach(t => {
+            const clean = t.trim();
+            if (clean) {
+                const span = document.createElement('span');
+                span.className = 'temperament-tag';
+                span.textContent = clean;
+                tempContainer.appendChild(span);
+            }
+        });
+    }
+
+    // Cập nhật chip đối tượng phù hợp
+    const suitContainer = document.getElementById('modalBreedSuitabilityChips');
+    if (suitContainer) {
+        suitContainer.innerHTML = '<span style="font-size:12px; font-weight:800; color:#7c5a46; margin-right:4px;">👉 Rất phù hợp với:</span>';
+        const tagMap = {
+            apartment: '🏢 Ở chung cư / Căn hộ',
+            beginner: '🌱 Người mới nuôi lần đầu',
+            low_shed: '🧹 Yêu thích sạch sẽ • Ít rụng lông',
+            family: '👨‍👩‍👧 Gia đình & Trẻ nhỏ'
+        };
+        const tags = Array.isArray(breed.tags) ? breed.tags : [];
+        tags.forEach(tg => {
+            if (tagMap[tg]) {
+                const pill = document.createElement('span');
+                pill.style.cssText = 'font-size:11.5px; font-weight:800; color:#047857; background:#ecfdf5; border:1px solid #a7f3d0; padding:3px 10px; border-radius:99px;';
+                pill.textContent = tagMap[tg];
+                suitContainer.appendChild(pill);
+            }
+        });
+    }
 
     const shopBtn = document.getElementById('modalBreedShopBtn');
     if (shopBtn) {
