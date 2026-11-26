@@ -1,451 +1,376 @@
 {% extends "base.html" %}
 
-{% block title %}Hồ Sơ Khách Hàng &amp; Lịch Sử Mua Hàng - Meow &amp; Woof Pet House{% endblock %}
+{% block title %}Hồ Sơ Khách Hàng &amp; Lịch Sử Giao Dịch - Meow &amp; Woof Pet House{% endblock %}
 
 {% block content %}
-<div class="section-header" style="margin-bottom:24px; flex-wrap:wrap; gap:14px;">
-    <div>
-        <div style="display:inline-flex; align-items:center; gap:8px; padding:4px 12px; border-radius:99px; background:#ecfdf5; border:1.5px solid #a7f3d0; color:#047857; font-size:12px; font-weight:800; margin-bottom:8px;">
-            <span>🔄 ĐỒNG BỘ 100% VỚI HỆ THỐNG QUẢN TRỊ ADMIN</span>
-        </div>
-        <h1 class="section-title" style="margin:0;">👤 Hồ Sơ Khách Hàng &amp; Lịch Sử Giao Dịch</h1>
-        <p class="section-subtitle" style="margin:6px 0 0;">
-            Quản lý thông tin tài khoản cá nhân, hạng thành viên VIP và theo dõi toàn bộ đơn mua hàng, lịch hẹn Spa theo thời gian thực
-        </p>
-    </div>
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        {% if customer_profile %}
-        <button type="button" onclick="var el=document.getElementById('editProfileBox'); el.style.display=(el.style.display==='none'?'block':'none');" class="btn btn-teal">
-            ✏️ Chỉnh sửa thông tin cá nhân
-        </button>
-        {% elif not session.get('customer_logged_in') %}
-        <a href="{{ url_for('login_page') }}" class="btn btn-primary">🔑 Đăng nhập / Đăng ký Thành viên</a>
-        {% endif %}
-        <a href="{{ url_for('shop_page') }}" class="btn btn-outline">&larr; Tiếp tục mua sắm</a>
-    </div>
-</div>
-
-<!-- =========================================================================
-     PHẦN 1: THẺ HỒ SƠ THÀNH VIÊN & THÔNG TIN KHÁCH HÀNG
-     ========================================================================= -->
-{% if customer_profile or session.get('customer_logged_in') %}
 {% set prof_name = customer_profile.full_name if customer_profile else session.get('customer_name', 'Khách hàng') %}
 {% set prof_user = customer_profile.username if customer_profile else session.get('customer_username', 'member') %}
 {% set prof_phone = customer_profile.phone if customer_profile else session.get('customer_phone', phone) %}
 {% set prof_email = customer_profile.email if customer_profile else session.get('customer_email', '') %}
-{% set prof_created = customer_profile.created_at if customer_profile else 'Thành viên chính thức' %}
+{% set prof_created = customer_profile.created_at if customer_profile else '2026' %}
 
-<div class="card" style="margin-bottom:24px; padding:26px; border:1px solid rgba(139,92,246,0.45); background:#ffffff; border:1.5px solid #fed7aa; box-shadow:0 8px 24px rgba(251,146,60,0.08);">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
-        <!-- Avatar + Thông tin định danh -->
-        <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
-            <div style="width:78px; height:78px; border-radius:22px; background:linear-gradient(135deg, #fb923c 0%, #f43f5e 100%); display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:900; color:#ffffff; box-shadow:0 6px 18px rgba(251,146,60,0.25); border:2px solid #fed7aa;">
+<!-- =========================================================================
+     KHUNG 1: HỒ SƠ THÀNH VIÊN & CHỈ SỐ TỔNG QUAN GỌN TRÊN 1 THẺ DUY NHẤT
+     ========================================================================= -->
+<div class="card" style="margin-bottom:18px; padding:20px 24px; background:linear-gradient(135deg, #ffffff 0%, #fffaf5 60%, #fff7ed 100%); border:1.5px solid #fed7aa; border-radius:22px; box-shadow:0 8px 24px rgba(180,100,60,0.07);">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <!-- Cột trái: Avatar + Tên + Hạng VIP + Thông tin liên hệ 1 dòng -->
+        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; flex:1; min-width:280px;">
+            <div style="width:62px; height:62px; border-radius:18px; background:linear-gradient(135deg, #fb923c 0%, #f43f5e 100%); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:900; color:#ffffff; box-shadow:0 6px 16px rgba(251,146,60,0.25); border:2px solid #fed7aa; flex-shrink:0;">
                 {{ (((prof_name or 'U')[:1])|upper) }}
             </div>
-            <div>
-                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                    <h2 style="margin:0; font-size:23px; font-weight:900; color:#2a170b;">{{ prof_name }}</h2>
-                    <span style="padding:4px 12px; border-radius:99px; font-size:12px; font-weight:800; background:{{ vip_bg|default('#ecfdf5') }}; color:{{ vip_color|default('#047857') }}; border:1.5px solid {{ vip_border|default('#a7f3d0') }};">
-                        {{ vip_tier }}
+            <div style="min-width:0;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <h1 style="margin:0; font-size:21px; font-weight:900; color:#2b180d;">{{ prof_name }}</h1>
+                    <span style="padding:3px 11px; border-radius:99px; font-size:11.5px; font-weight:800; background:{{ vip_bg|default('#ecfdf5') }}; color:{{ vip_color|default('#047857') }}; border:1.5px solid {{ vip_border|default('#a7f3d0') }};">
+                        👑 {{ vip_tier|default('Thành viên mới') }}
                     </span>
-                    <span style="padding:3px 10px; border-radius:99px; font-size:11.5px; font-weight:700; background:#ecfdf5; color:#047857; border:1.5px solid #a7f3d0;">
-                        ✓ Đã xác thực &amp; Đồng bộ Admin
+                    <span style="padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;">
+                        ✓ Đồng bộ Admin
                     </span>
                 </div>
-                <div style="display:flex; flex-wrap:wrap; gap:18px; margin-top:10px; font-size:13.5px; color:#4a3425;">
-                    <div>🪪 Tài khoản: <code style="color:#0284c7; font-weight:800;">@{{ prof_user }}</code></div>
-                    <div>📞 Điện thoại: <strong style="color:#2a170b;">{{ prof_phone or 'Chưa cập nhật' }}</strong></div>
-                    <div>📧 Email: <strong style="color:#d97706;">{{ prof_email or 'Chưa cập nhật' }}</strong></div>
-                    <div>📅 Ngày tham gia: <span style="color:#6e5444;">{{ prof_created[:10] if prof_created else '2026' }}</span></div>
+                <div style="display:flex; flex-wrap:wrap; gap:14px; margin-top:6px; font-size:12.8px; color:#5c4033;">
+                    {% if customer_profile or session.get('customer_logged_in') %}
+                    <span>🪪 <code style="color:#0284c7; font-weight:800;">@{{ prof_user }}</code></span>
+                    {% endif %}
+                    <span>📞 <strong style="color:#2b180d;">{{ prof_phone or 'Chưa cập nhật' }}</strong></span>
+                    {% if prof_email %}
+                    <span>📧 <strong style="color:#c2410c;">{{ prof_email }}</strong></span>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Nút mở khung chỉnh sửa thông tin -->
-        <div>
-            <button type="button" onclick="var el=document.getElementById('editProfileBox'); el.style.display=(el.style.display==='none'?'block':'none');" style="padding:10px 18px; border-radius:12px; border:1px solid #fed7aa; background:#fff7ed; color:#c2410c; font-weight:800; font-size:13px; cursor:pointer;">
-                ⚙️ Cập nhật Hồ sơ &amp; Mật khẩu
-            </button>
+        <!-- Cột phải: 3 Ô Thống Kê Nhỏ Gọn + Nút Mở Sửa Hồ Sơ / Bảng VIP -->
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <div style="background:#ffffff; border:1.5px solid #bae6fd; border-radius:14px; padding:8px 14px; text-align:center; min-width:95px;">
+                    <div style="font-size:10.5px; color:#0369a1; font-weight:800; text-transform:uppercase;">📦 Đơn mua</div>
+                    <div style="font-size:17px; font-weight:900; color:#0284c7;">{{ orders|length }} đơn</div>
+                </div>
+                <div style="background:#ffffff; border:1.5px solid #fed7aa; border-radius:14px; padding:8px 14px; text-align:center; min-width:95px;">
+                    <div style="font-size:10.5px; color:#c2410c; font-weight:800; text-transform:uppercase;">🛁 Lịch Spa</div>
+                    <div style="font-size:17px; font-weight:900; color:#ea580c;">{{ bookings|length }} lịch</div>
+                </div>
+                <div style="background:#ffffff; border:1.5px solid #a7f3d0; border-radius:14px; padding:8px 14px; text-align:center; min-width:130px;">
+                    <div style="font-size:10.5px; color:#047857; font-weight:800; text-transform:uppercase;">💰 Tổng chi tiêu</div>
+                    <div style="font-size:17px; font-weight:900; color:#047857;">{{ "{:,.0f}".format((total_spent or 0)|float) }} đ</div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="button" onclick="toggleProfileSection('vipPolicyBox')" class="btn btn-outline btn-sm" style="height:38px; border-radius:12px; font-weight:800; font-size:12.5px; background:#ffffff;">
+                    👑 Quyền lợi VIP
+                </button>
+                {% if customer_profile or session.get('customer_logged_in') %}
+                <button type="button" onclick="toggleProfileSection('editProfileBox')" class="btn btn-teal btn-sm" style="height:38px; border-radius:12px; font-weight:800; font-size:12.5px;">
+                    ✏️ Sửa hồ sơ
+                </button>
+                {% else %}
+                <a href="{{ url_for('login_page') }}" class="btn btn-primary btn-sm" style="height:38px; display:inline-flex; align-items:center; border-radius:12px; font-weight:800;">
+                    🔑 Đăng nhập
+                </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 
-    <!-- KHUNG CHỈNH SỬA HỒ SƠ CÁ NHÂN (ĐỒNG BỘ TRỰC TIẾP VỚI ADMIN) -->
-    <div id="editProfileBox" style="display:none; margin-top:22px; padding-top:20px; border-top:1px dashed #fed7aa;">
-        <h3 style="margin:0 0 12px; font-size:16px; color:#ea580c;">✏️ Cập Nhật Thông Tin Cá Nhân (Đồng bộ ngay với Admin)</h3>
+    <!-- Thanh Tiến Trình VIP 1 Dòng Gọn Gàng -->
+    <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #fed7aa; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:12.5px;">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-weight:800; color:#9a3412;">🎁 Ưu đãi hạng hiện tại:</span>
+            <span style="color:#047857; font-weight:700;">{{ vip_discount_text|default('Tích điểm thăng hạng tự động qua mọi đơn hàng & lịch Spa') }}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex:1; max-width:420px; min-width:240px;">
+            <div style="flex:1; height:7px; background:#f5e6d8; border-radius:99px; overflow:hidden;">
+                <div style="width:{{ overall_milestone_pct|default(tier_progress)|default(0) }}%; height:100%; background:linear-gradient(90deg, #fb923c, #e11d48); border-radius:99px;"></div>
+            </div>
+            <span style="font-size:11.5px; font-weight:800; color:#c2410c; white-space:nowrap;">
+                {% if next_tier_needed and next_tier_needed > 0 %}
+                    +{{ "{:,.0f}".format(next_tier_needed) }}đ lên {{ next_tier_name }}
+                {% else %}
+                    ✓ Đạt hạng cao nhất
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- PANEL ẨN/HIỆN 1: CHỈNH SỬA HỒ SƠ CÁ NHÂN (Mở khi bấm "✏️ Sửa hồ sơ") -->
+    {% if customer_profile or session.get('customer_logged_in') %}
+    <div id="editProfileBox" style="display:none; margin-top:16px; padding:16px 18px; background:#ffffff; border:1.5px solid #fdba74; border-radius:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <strong style="font-size:14.5px; color:#c2410c;">✏️ Cập Nhật Thông Tin Cá Nhân &amp; Mật Khẩu (Đồng bộ Admin)</strong>
+            <button type="button" onclick="toggleProfileSection('editProfileBox')" class="btn btn-outline btn-sm" style="padding:3px 10px;">✕ Đóng</button>
+        </div>
         <form method="POST" action="{{ url_for('update_customer_profile_route') }}">
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px;">
-                <div class="form-group" style="margin:0;">
-                    <label class="form-label" style="font-size:12.5px; color:#2a170b;">Họ và tên khách hàng (*)</label>
-                    <input type="text" name="full_name" value="{{ prof_name }}" class="form-control" required>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+                <div>
+                    <label class="form-label" style="font-size:12px;">Họ và tên (*)</label>
+                    <input type="text" name="full_name" value="{{ prof_name }}" class="form-control" style="height:38px;" required>
                 </div>
-                <div class="form-group" style="margin:0;">
-                    <label class="form-label" style="font-size:12.5px; color:#2a170b;">Số điện thoại liên hệ &amp; tích điểm (*)</label>
-                    <input type="tel" name="phone" value="{{ prof_phone }}" pattern="^0[0-9]{8,10}$" class="form-control" required>
+                <div>
+                    <label class="form-label" style="font-size:12px;">Số điện thoại (*)</label>
+                    <input type="tel" name="phone" value="{{ prof_phone }}" pattern="^0[0-9]{8,10}$" class="form-control" style="height:38px;" required>
                 </div>
-                <div class="form-group" style="margin:0;">
-                    <label class="form-label" style="font-size:12.5px; color:#2a170b;">Địa chỉ Email nhận hóa đơn (*)</label>
-                    <input type="email" name="email" value="{{ prof_email }}" class="form-control" required>
+                <div>
+                    <label class="form-label" style="font-size:12px;">Email nhận hóa đơn (*)</label>
+                    <input type="email" name="email" value="{{ prof_email }}" class="form-control" style="height:38px;" required>
                 </div>
-                <div class="form-group" style="margin:0;">
-                    <label class="form-label" style="font-size:12.5px; color:#2a170b;">Đổi mật khẩu mới (Để trống nếu giữ nguyên)</label>
-                    <input type="password" name="new_password" placeholder="Nhập mật khẩu mới (>= 4 ký tự)..." class="form-control">
+                <div>
+                    <label class="form-label" style="font-size:12px;">Mật khẩu mới (Để trống nếu giữ nguyên)</label>
+                    <input type="password" name="new_password" placeholder="Từ 6 ký tự trở lên..." class="form-control" style="height:38px;">
                 </div>
             </div>
-            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
-                <button type="button" onclick="document.getElementById('editProfileBox').style.display='none';" class="btn btn-outline btn-sm">Đóng</button>
-                <button type="submit" class="btn btn-teal btn-sm" style="padding:8px 22px; font-weight:800;">💾 Lưu Hồ Sơ Cá Nhân</button>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+                <button type="submit" class="btn btn-teal btn-sm" style="padding:7px 20px; font-weight:800;">💾 Lưu Thay Đổi</button>
             </div>
         </form>
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
-<!-- =========================================================================
-     PHẦN 2: 4 THẺ CHỈ SỐ TỔNG QUAN CỦA KHÁCH HÀNG (CÂN ĐỐI, HIỆN ĐẠI, KHÔNG LỆCH KHUNG)
-     ========================================================================= -->
-{% if phone or customer_profile or orders or bookings %}
-<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:26px;">
-    <!-- Thẻ 1: Tổng đơn mua -->
-    <div style="background:#ffffff; border:1.5px solid #fed7aa; box-shadow:0 6px 20px rgba(251,146,60,0.06); border-radius:18px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; min-height:148px;">
-        <div>
-            <div style="font-size:12px; color:#0284c7; text-transform:uppercase; font-weight:800; letter-spacing:0.5px;">📦 Tổng Đơn Đã Mua</div>
-            <div style="font-size:30px; font-weight:900; color:#0284c7; margin-top:6px; line-height:1.2;">{{ orders|length }} đơn</div>
+    <!-- PANEL ẨN/HIỆN 2: BẢNG 4 MỐC THĂNG HẠNG VIP (Mở khi bấm "👑 Quyền lợi VIP") -->
+    {% if vip_milestones %}
+    <div id="vipPolicyBox" style="display:none; margin-top:16px; padding:16px 18px; background:#ffffff; border:1.5px solid #fed7aa; border-radius:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <strong style="font-size:14.5px; color:#2b180d;">👑 Bảng 4 Mốc Chi Tiêu &amp; Đặc Quyền Thành Viên VIP</strong>
+            <button type="button" onclick="toggleProfileSection('vipPolicyBox')" class="btn btn-outline btn-sm" style="padding:3px 10px;">✕ Đóng</button>
         </div>
-        <div style="font-size:12.5px; color:#6e5444; margin-top:8px; border-top:1px dashed #fed7aa; padding-top:8px;">
-            Lịch sử đơn mua sắm của bạn
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+            {% for m in vip_milestones %}
+            <div style="background:{% if m.is_current %}{{ m.bg }}{% else %}#fffaf5{% endif %}; border:1.5px solid {% if m.is_current %}{{ m.color }}{% else %}#fde2c8{% endif %}; border-radius:12px; padding:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <strong style="font-size:14px; color:{{ m.color }};">{{ m.tier_icon }} {{ m.tier_name }}</strong>
+                    <span style="font-size:11px; font-weight:800; color:{{ m.color }};">{% if m.discount_pct > 0 %}-{{ m.discount_pct }}%{% else %}0%{% endif %}</span>
+                </div>
+                <div style="font-size:11.5px; color:#6e5444; margin-bottom:4px;">Mốc: <strong>{{ m.threshold_text }}</strong></div>
+                <div style="font-size:11.8px; color:#2b180d; font-weight:600;">{{ m.discount_text }}</div>
+            </div>
+            {% endfor %}
         </div>
     </div>
-
-    <!-- Thẻ 2: Lịch hẹn Spa -->
-    <div style="background:#ffffff; border:1.5px solid #fed7aa; box-shadow:0 6px 20px rgba(251,146,60,0.06); border-radius:18px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; min-height:148px;">
-        <div>
-            <div style="font-size:12px; color:#ea580c; text-transform:uppercase; font-weight:800; letter-spacing:0.5px;">🛁 Lịch Hẹn Spa &amp; Grooming</div>
-            <div style="font-size:30px; font-weight:900; color:#ea580c; margin-top:6px; line-height:1.2;">{{ bookings|length }} lịch</div>
-        </div>
-        <div style="font-size:12.5px; color:#6e5444; margin-top:8px; border-top:1px dashed #fed7aa; padding-top:8px;">
-            Theo dõi dịch vụ chăm sóc thú cưng
-        </div>
-    </div>
-
-    <!-- Thẻ 3: Tổng chi tiêu tích lũy -->
-    <div style="background:#ffffff; border:1.5px solid #fed7aa; box-shadow:0 6px 20px rgba(251,146,60,0.06); border-radius:18px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; min-height:148px;">
-        <div>
-            <div style="font-size:12px; color:#047857; text-transform:uppercase; font-weight:800; letter-spacing:0.5px;">💰 Tổng Chi Tiêu Tích Lũy</div>
-            <div style="font-size:26px; font-weight:900; color:#047857; margin-top:6px; line-height:1.2;">{{ "{:,.0f}".format((total_spent or 0)|float) }} đ</div>
-        </div>
-        <div style="font-size:12.5px; color:#6e5444; margin-top:8px; border-top:1px dashed #fed7aa; padding-top:8px;">
-            Tự động cộng dồn đơn hàng &amp; Spa
-        </div>
-    </div>
-
-    <!-- Thẻ 4: Hạng Thành Viên VIP (Gọn gàng, cân đối hoàn hảo) -->
-    <div style="background:#ffffff; border:1.5px solid #fed7aa; box-shadow:0 6px 20px rgba(251,146,60,0.06); border-radius:18px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; min-height:148px;">
-        <div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:12px; color:#d97706; text-transform:uppercase; font-weight:800; letter-spacing:0.5px;">👑 Hạng Thành Viên</span>
-                <span style="padding:3px 10px; border-radius:99px; background:{{ vip_bg|default('#ecfdf5') }}; border:1.5px solid {{ vip_border|default('#a7f3d0') }}; color:{{ vip_color|default('#047857') }}; font-size:12px; font-weight:800;">
-                    {{ vip_tier }}
-                </span>
-            </div>
-            <div style="font-size:12.5px; color:#ea580c; font-weight:700; margin-top:8px; line-height:1.35;">
-                🎁 {{ vip_discount_text|default('Ưu đãi tự động khi đặt mua &amp; Spa') }}
-            </div>
-        </div>
-
-        <div style="margin-top:10px; border-top:1px dashed #fed7aa; padding-top:8px;">
-            <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#6e5444; font-weight:700; margin-bottom:5px;">
-                <span>Tiến trình:</span>
-                {% if next_tier_needed and next_tier_needed > 0 %}
-                <span style="color:#c2410c; font-weight:800;">Cần +{{ "{:,.0f}".format(next_tier_needed) }} đ lên {{ next_tier_name }}</span>
-                {% else %}
-                <span style="color:#047857; font-weight:800;">✓ Đã đạt mốc cao nhất!</span>
-                {% endif %}
-            </div>
-            <div style="width:100%; height:7px; background:#f1f5f9; border-radius:99px; overflow:hidden;">
-                <div style="width:{{ overall_milestone_pct|default(tier_progress)|default(0) }}%; height:100%; background:linear-gradient(90deg, #fb923c, #ea580c); border-radius:99px; transition:width 0.4s ease;"></div>
-            </div>
-            <div style="margin-top:6px; text-align:right;">
-                <a href="#vipPolicySection" style="font-size:11px; color:#ea580c; font-weight:800; text-decoration:none;">
-                    Xem 4 mốc thăng hạng chi tiết &darr;
-                </a>
-            </div>
-        </div>
-    </div>
+    {% endif %}
 </div>
 
 <!-- =========================================================================
-     PHẦN 2B: BẢNG QUY ĐỊNH CHI TIẾT CÁC MỐC TIỀN & ĐẶC QUYỀN HẠNG THÀNH VIÊN VIP
+     KHUNG 2: THANH CHUYỂN TAB GIAO DỊCH & TRA CỨU SĐT GỌN TRÊN 1 HÀNG
      ========================================================================= -->
-<div id="vipPolicySection" class="card" style="margin-bottom:26px; padding:22px 24px; background:#ffffff; border:1.5px solid #fed7aa; box-shadow:0 8px 24px rgba(251,146,60,0.06); border-radius:20px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; border-bottom:1px solid #fed7aa; padding-bottom:14px;">
-        <div>
-            <div style="display:inline-flex; align-items:center; gap:8px;">
-                <span style="font-size:22px;">👑</span>
-                <h3 style="margin:0; font-size:18px; font-weight:900; color:#2b180d;">Bảng Quy Định Các Mốc Tiền &amp; Đặc Quyền Thăng Hạng Thành Viên</h3>
-            </div>
-            <p style="margin:4px 0 0; color:#6e5444; font-size:13px;">
-                Hệ thống tự động cộng dồn toàn bộ chi tiêu từ Đơn Mua Hàng &amp; Dịch Vụ Spa để xét thăng hạng tức thì.
-            </p>
-        </div>
-        <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:99px; background:#fff7ed; border:1px solid #fed7aa; font-size:13px; font-weight:800; color:#c2410c;">
-            <span>💰 Tổng tích lũy của bạn:</span>
-            <span style="color:#047857; font-size:15px;">{{ "{:,.0f}".format((total_spent or 0)|float) }} đ</span>
-        </div>
+<div class="card" style="margin-bottom:18px; padding:12px 18px; border:1.5px solid #fed7aa; background:#ffffff; border-radius:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <!-- Các nút lọc Tab hiển thị -->
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;" id="historyTabGroup">
+        <button type="button" class="breed-filter-chip active" style="padding:6px 14px; font-size:12.5px;" onclick="switchHistoryTab('all', this)">
+            ✨ Tất cả giao dịch ({{ (orders|length) + (bookings|length) }})
+        </button>
+        <button type="button" class="breed-filter-chip" style="padding:6px 14px; font-size:12.5px;" onclick="switchHistoryTab('orders', this)">
+            📦 Đơn mua hàng ({{ orders|length }})
+        </button>
+        <button type="button" class="breed-filter-chip" style="padding:6px 14px; font-size:12.5px;" onclick="switchHistoryTab('spa', this)">
+            🛁 Lịch hẹn Spa ({{ bookings|length }})
+        </button>
     </div>
 
-    <!-- Grid 4 Mốc tiền lớn chi tiết -->
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:14px;">
-        {% for m in vip_milestones %}
-        <div style="background:{% if m.is_current %}{{ m.bg }}{% else %}#ffffff{% endif %}; border:{% if m.is_current %}2px solid {{ m.color }}{% elif m.is_unlocked %}1.5px solid #a7f3d0{% else %}1.5px solid #fed7aa{% endif %}; border-radius:16px; padding:18px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:{% if m.is_current %}0 6px 20px rgba(0,0,0,0.06){% else %}none{% endif %};">
-            <div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <span style="font-size:24px;">{{ m.tier_icon }}</span>
-                    {% if m.is_current %}
-                    <span style="background:{{ m.color }}; color:#ffffff; font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px;">
-                        ⭐ Hạng Hiện Tại
-                    </span>
-                    {% elif m.is_unlocked %}
-                    <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px;">
-                        ✓ Đã Mở Khóa
-                    </span>
-                    {% else %}
-                    <span style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px;">
-                        🔒 Cần Thêm {{ "{:,.0f}".format(m.needed_amount) }} đ
-                    </span>
-                    {% endif %}
-                </div>
-
-                <div style="font-size:17px; font-weight:900; color:{{ m.color }}; margin-bottom:4px;">
-                    {{ m.tier_name }}
-                </div>
-                
-                <div style="font-size:12px; color:#6e5444; margin-bottom:12px;">
-                    Mốc chi tiêu: <strong style="color:#2b180d; font-size:14px;">{{ m.threshold_text }}</strong>
-                </div>
-
-                <div style="background:#ffffff; border:1px solid {% if m.is_current %}{{ m.border }}{% else %}#fed7aa{% endif %}; border-radius:12px; padding:12px; margin-bottom:12px;">
-                    <div style="font-size:11.5px; font-weight:800; color:#2b180d; margin-bottom:4px;">🎁 Quyền lợi áp dụng:</div>
-                    <div style="font-size:12.5px; color:{% if m.discount_pct > 0 %}#ea580c{% else %}#64748b{% endif %}; font-weight:700;">
-                        {{ m.discount_text }}
-                    </div>
-                </div>
-            </div>
-
-            <div style="font-size:11px; color:#64748b; padding-top:8px; border-top:1px dashed #fed7aa; display:flex; justify-content:space-between; align-items:center;">
-                <span>Chiết khấu tự động</span>
-                <strong style="color:{{ m.color }}; font-size:13px;">{% if m.discount_pct > 0 %}-{{ m.discount_pct }}%{% else %}0%{% endif %}</strong>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    <!-- Lời nhắc mua sắm để thăng hạng -->
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:18px; padding-top:14px; border-top:1px dashed #fed7aa;">
-        <div style="font-size:12.5px; color:#6e5444;">
-            💡 <strong>Mẹo tích lũy:</strong> Mọi đơn mua thú cưng, phụ kiện thức ăn tại Cửa hàng hoặc đặt lịch Grooming Spa đều được cộng dồn 100% vào tài khoản của bạn.
-        </div>
-        <div style="display:flex; gap:10px;">
-            <a href="{{ url_for('shop_page') }}" class="btn btn-primary btn-sm" style="font-weight:800; padding:8px 16px;">
-                🐾 Mua Sắm Ngay
-            </a>
-            <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-sm" style="font-weight:800; padding:8px 16px;">
-                🛁 Đặt Lịch Spa
-            </a>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- Thanh tra cứu nhanh bằng Số điện thoại (Dành cho khách tra cứu SĐT khác hoặc chưa đăng nhập) -->
-<div class="card" style="margin-bottom:26px; padding:18px 22px; border:1px solid #fae4d4; background:#ffffff; box-shadow:0 6px 20px rgba(251,146,60,0.06);">
-    <form method="GET" action="{{ url_for('order_history_page') }}" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:space-between;">
-        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex:1; min-width:260px;">
-            <span style="font-size:14px; font-weight:800; color:#2a170b; white-space:nowrap;">🔍 Tra cứu theo SĐT đặt hàng:</span>
-            <input
-                type="tel"
-                name="phone"
-                value="{{ phone }}"
-                pattern="^0[0-9]{8,10}$"
-                minlength="9"
-                maxlength="11"
-                class="form-control"
-                placeholder="Nhập SĐT đặt hàng (VD: 0909916319)..."
-                required
-                style="max-width:320px; height:42px; font-size:14px;"
-            >
-            <button type="submit" class="btn btn-teal btn-sm" style="height:42px; padding:0 20px; font-weight:800;">
-                Tra Cứu Đơn Hàng
-            </button>
-        </div>
-        {% if not session.get('customer_logged_in') %}
-        <div style="font-size:13px; color:#4a3425;">
-            💡 Đã có tài khoản? <a href="{{ url_for('login_page') }}" style="color:#d97706; font-weight:800; text-decoration:underline;">Đăng nhập ngay</a> để tự động đồng bộ hồ sơ!
-        </div>
-        {% endif %}
+    <!-- Form tra cứu nhanh theo SĐT -->
+    <form method="GET" action="{{ url_for('order_history_page') }}" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <span style="font-size:12.5px; font-weight:800; color:#5c4033;">🔍 Tra cứu SĐT:</span>
+        <input type="tel" name="phone" value="{{ phone }}" pattern="^0[0-9]{8,10}$" minlength="9" maxlength="11" class="form-control" placeholder="Nhập SĐT (VD: 0905123456)..." required style="width:190px; height:36px; font-size:13px; font-weight:700;">
+        <button type="submit" class="btn btn-teal btn-sm" style="height:36px; padding:0 14px; font-weight:800;">Tìm</button>
+        <a href="{{ url_for('shop_page') }}" class="btn btn-outline btn-sm" style="height:36px; display:inline-flex; align-items:center; padding:0 12px; font-size:12px;">+ Mua thêm</a>
     </form>
 </div>
 
+<!-- =========================================================================
+     KHUNG 3: DANH SÁCH ĐƠN HÀNG & LỊCH SPA DẠNG Ô CHỮ NHẬT GỌN GÀNG, CÂN ĐỐI
+     ========================================================================= -->
 {% if phone or customer_profile or orders or bookings %}
-    <div class="grid-2" style="align-items:start; gap:24px;">
-        <!-- CỘT 1: LỊCH SỬ ĐƠN HÀNG MUA SẮM -->
-        <div>
-            <div class="card" style="margin-bottom:0;">
-                <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:16px;">
-                    <div>
-                        <h2 class="card-title" style="color:#2a170b; font-size:18px;">📦 Lịch Sử Đơn Mua Hàng ({{ orders|length }} đơn)</h2>
-                        <p class="section-subtitle" style="margin:2px 0 0;">Trạng thái đơn hàng được đồng bộ trực tiếp từ Quản trị viên</p>
-                    </div>
-                </div>
+<div id="historySplitGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:18px; align-items:start;">
 
-                {% if orders %}
-                    {% for o in orders %}
-                    {% set st = o.status|default('Chờ xác nhận') %}
-                    <div style="background:#ffffff; border:1px solid #fae4d4; border-radius:16px; padding:18px; margin-bottom:16px; box-shadow:0 6px 20px rgba(251,146,60,0.06);">
-                        <!-- Header đơn hàng -->
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px dashed #fed7aa; padding-bottom:12px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-                            <div>
-                                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                                    <strong style="color:#2a170b; font-size:16.5px;">Đơn hàng #DH{{ o.id }}</strong>
-                                    {% if o.payment_method == 'COD' %}
-                                    <span style="padding:2px 8px; border-radius:6px; font-size:11px; font-weight:800; background:rgba(245,158,11,0.18); color:#d97706; border:1px solid rgba(245,158,11,0.35);">💵 Tiền mặt COD</span>
-                                    {% else %}
-                                    <span style="padding:2px 8px; border-radius:6px; font-size:11px; font-weight:800; background:rgba(56,189,248,0.18); color:#0284c7; border:1px solid rgba(56,189,248,0.35);">💳 Chuyển khoản VietQR</span>
-                                    {% endif %}
-                                </div>
-                                <div style="font-size:12px; color:#6e5444; margin-top:4px;">⏰ Thời gian đặt: {{ o.created_at }}</div>
-                            </div>
-
-                            <!-- Badge trạng thái đồng bộ với Admin -->
-                            <div>
-                                {% if st == 'Hoàn thành' %}
-                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:#ecfdf5; color:#047857; border:1.5px solid #a7f3d0;">✅ Hoàn thành</span>
-                                {% elif st == 'Đang giao hàng' %}
-                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:#e0f2fe; color:#0284c7; border:1.5px solid #bae6fd;">🚚 Đang giao hàng</span>
-                                {% elif st == 'Đang đóng gói' %}
-                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:#fff7ed; color:#ea580c; border:1.5px solid #fed7aa;">📦 Đang đóng gói</span>
-                                {% elif st == 'Đã hủy' %}
-                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:#fef2f2; color:#dc2626; border:1.5px solid #fecaca;">❌ Đã hủy</span>
-                                {% else %}
-                                <span style="padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; background:#fef3c7; color:#d97706; border:1.5px solid #fde68a;">⏳ Chờ xác nhận</span>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Thông tin người nhận -->
-                        <div style="font-size:13px; color:#4a3425; margin-bottom:12px; line-height:1.6;">
-                            <div>👤 Người nhận: <strong style="color:#2a170b;">{{ o.customer_name }}</strong> &bull; SĐT: <code style="color:#0284c7;">{{ o.phone }}</code></div>
-                            {% if o.email %}
-                            <div>📧 Email nhận biên lai: <span style="color:#d97706;">{{ o.email }}</span></div>
-                            {% endif %}
-                            <div>📍 Địa chỉ giao: <strong style="color:#2a170b;">{{ o.address }}</strong></div>
-                        </div>
-
-                        <!-- Danh sách mặt hàng trong đơn -->
-                        <div style="background:#fffbf8; border:1px solid #fae4d4; border-radius:12px; padding:12px 14px; margin-bottom:14px;">
-                            <div style="font-size:11.5px; color:#6e5444; text-transform:uppercase; margin-bottom:8px; font-weight:800; letter-spacing:0.4px;">Chi tiết sản phẩm đã mua ({{ (o['items'] if (o['items'] is defined and o['items'] is not none and o['items'] is not callable) else [])|length }} món):</div>
-                            {% for it in ((o['items'] if (o['items'] is defined and o['items'] is not none and o['items'] is not callable) else []) or []) %}
-                            {% set it_img = it.image_url or (product_image_map.get(it.sku) if product_image_map else None) or (product_image_map.get(it.name) if product_image_map else None) %}
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13.5px; color:#2a170b; padding:8px 0; {% if not loop.last %}border-bottom:1px dashed #fed7aa;{% endif %}">
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    {% if it_img %}
-                                    <img src="{{ it_img }}" alt="{{ it.name }}" style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:1px solid #fed7aa; flex-shrink:0;">
-                                    {% else %}
-                                    <span style="width:40px; height:40px; border-radius:8px; background:#fff7ed; border:1px solid #fed7aa; display:inline-flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">🐾</span>
-                                    {% endif %}
-                                    <div>
-                                        <strong style="color:#2b180d; display:block; line-height:1.3;">{{ it.name }}</strong>
-                                        <span style="display:inline-block; margin-top:2px; padding:1px 7px; border-radius:6px; background:#fff7ed; border:1px solid #fed7aa; color:#c2410c; font-size:11.5px; font-weight:800;">SL: x{{ it.quantity }}</span>
-                                    </div>
-                                </div>
-                                <span style="color:#047857; font-weight:800; white-space:nowrap; font-size:14px;">{{ "{:,.0f}".format((it.subtotal or 0)|float) }} đ</span>
-                            </div>
-                            {% endfor %}
-                        </div>
-
-                        <!-- Tổng tiền & Nút xem hóa đơn -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:6px;">
-                            <div>
-                                <span style="font-size:12.5px; color:#6e5444;">Tổng thanh toán:</span>
-                                <strong style="font-size:19px; color:#047857; margin-left:6px;">{{ "{:,.0f}".format((o.total_amount or 0)|float) }} đ</strong>
-                            </div>
-                            <a href="{{ url_for('order_success_page', order_id=o.id) }}" class="btn btn-outline btn-sm" style="font-size:12.5px; padding:6px 14px;">
-                                🧾 Xem Hóa Đơn &amp; Mã QR
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div style="text-align:center; padding:36px 16px; color:#6e5444;">
-                        <div style="font-size:36px; margin-bottom:8px;">📦</div>
-                        <p style="margin:0 0 12px; font-size:14px;">Bạn chưa có đơn mua hàng nào được ghi nhận.</p>
-                        <a href="{{ url_for('shop_page') }}" class="btn btn-primary btn-sm">🐾 Khám phá cửa hàng ngay</a>
-                    </div>
-                {% endif %}
+    <!-- CỘT 1: ĐƠN MUA HÀNG (Ô CHỮ NHẬT GỌN, CUỘN MƯỢT KHI NHIỀU ĐƠN) -->
+    <div id="historyOrdersCol" class="card" style="margin-bottom:0; padding:18px 20px; border:1.5px solid #fed7aa; border-radius:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid #fde2c8;">
+            <div>
+                <h2 class="card-title" style="color:#2b180d; font-size:17px; margin:0;">📦 Đơn Mua Hàng ({{ orders|length }})</h2>
+                <p class="section-subtitle" style="margin:2px 0 0; font-size:12px;">Đồng bộ trạng thái thời gian thực với Admin</p>
             </div>
+            <a href="{{ url_for('shop_page') }}" class="btn btn-outline btn-sm" style="font-size:11.5px; padding:4px 10px;">🛍️ Cửa hàng</a>
         </div>
 
-        <!-- CỘT 2: LỊCH SỬ ĐẶT LỊCH SPA -->
-        <div>
-            <div class="card" style="margin-bottom:0;">
-                <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:16px;">
-                    <div>
-                        <h2 class="card-title" style="color:#2a170b; font-size:18px;">🛁 Lịch Hẹn Spa &amp; Thú Y ({{ bookings|length }} lịch)</h2>
-                        <p class="section-subtitle" style="margin:2px 0 0;">Danh sách lịch chăm sóc, tắm sấy và cắt tỉa cho Boss</p>
+        {% if orders %}
+        <div style="display:flex; flex-direction:column; gap:12px; max-height:540px; overflow-y:auto; padding-right:4px;">
+            {% for o in orders %}
+            {% set st = o.status|default('Chờ xác nhận') %}
+            {% set item_list = ((o['items'] if (o['items'] is defined and o['items'] is not none and o['items'] is not callable) else []) or []) %}
+            <div style="background:#fffaf5; border:1.5px solid #fed7aa; border-radius:16px; padding:14px 16px; transition:border-color 0.2s ease;">
+                <!-- Hàng 1: Mã đơn + Phương thức TT + Ngày giờ | Trạng thái -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <strong style="color:#ffffff; background:linear-gradient(135deg, #fb923c, #f43f5e); padding:2px 10px; border-radius:8px; font-size:13.5px; font-weight:900;">#DH{{ o.id }}</strong>
+                        {% if (o.payment_method or '')|lower in ('cod', 'tiền mặt') %}
+                        <span style="padding:2px 8px; border-radius:6px; font-size:11px; font-weight:800; background:#fef3c7; color:#b45309; border:1px solid #fde68a;">💵 COD</span>
+                        {% else %}
+                        <span style="padding:2px 8px; border-radius:6px; font-size:11px; font-weight:800; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;">💳 VietQR</span>
+                        {% endif %}
+                        <span style="font-size:11.5px; color:#8c7161;">&bull; {{ (o.created_at or '')[:16] }}</span>
                     </div>
+
+                    {% if st == 'Hoàn thành' %}
+                    <span style="padding:3px 10px; border-radius:99px; font-size:11.5px; font-weight:800; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;">✅ Hoàn thành</span>
+                    {% elif st == 'Đang giao hàng' %}
+                    <span style="padding:3px 10px; border-radius:99px; font-size:11.5px; font-weight:800; background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd;">🚚 Đang giao</span>
+                    {% elif st == 'Đang đóng gói' %}
+                    <span style="padding:3px 10px; border-radius:99px; font-size:11.5px; font-weight:800; background:#fff7ed; color:#ea580c; border:1px solid #fed7aa;">📦 Đóng gói</span>
+                    {% elif st == 'Đã hủy' %}
+                    <span style="padding:3px 10px; border-radius:99px; font-size:11.5px; font-weight:800; background:#fef2f2; color:#dc2626; border:1px solid #fecaca;">❌ Đã hủy</span>
+                    {% else %}
+                    <span style="padding:3px 10px; border-radius:99px; font-size:11.5px; font-weight:800; background:#fef3c7; color:#b45309; border:1px solid #fde68a;">⏳ Chờ xác nhận</span>
+                    {% endif %}
                 </div>
 
-                {% if bookings %}
-                    {% for b in bookings %}
-                    <div style="background:#ffffff; border:1px solid #fae4d4; border-radius:16px; padding:18px; margin-bottom:16px; box-shadow:0 6px 20px rgba(251,146,60,0.06);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #fed7aa; padding-bottom:10px; margin-bottom:12px;">
-                            <div>
-                                <strong style="color:#2a170b; font-size:16px;">Lịch Spa #SPA{{ b.id }}</strong>
-                                <div style="font-size:12px; color:#6e5444; margin-top:2px;">Ngày đặt: {{ (b.created_at or "")[:10] }}</div>
-                            </div>
-                            <span class="badge {% if b.status == 'Đã hoàn tất' %}badge-stock-ok{% elif b.status == 'Đã hủy' %}badge-stock-low{% else %}badge-both{% endif %}" style="font-size:12px;">
-                                {{ b.status }}
-                            </span>
-                        </div>
+                <!-- Hàng 2: Người nhận & Địa chỉ gọn trên 1 dòng -->
+                <div style="font-size:12.5px; color:#4a3425; margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{{ o.customer_name }} ({{ o.phone }}) - {{ o.address }}">
+                    👤 <strong>{{ o.customer_name }}</strong> (<code>{{ o.phone }}</code>) &bull; 📍 {{ o.address }}
+                </div>
 
-                        <div style="font-size:13.5px; color:#4a3425; line-height:1.65;">
-                            <div>🐾 Bé cưng: <strong style="color:#d97706;">{{ b.pet_name }}</strong> ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)</div>
-                            <div>✨ Gói dịch vụ: <strong style="color:#ea580c;">{{ b.service_name }}</strong></div>
-                            <div style="color:#047857; font-weight:700; margin-top:2px;">
-                                📅 Ngày hẹn: {{ b.appointment_date }} lúc ⏰ {{ b.appointment_time }}
-                            </div>
-                            {% if b.note %}
-                            <div style="font-size:12px; color:#6e5444; margin-top:4px;">📝 Dặn dò: <em>{{ b.note }}</em></div>
-                            {% endif %}
-                        </div>
-
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px;">
-                            <span style="font-size:13px; color:#4a3425;">Chi phí dịch vụ:</span>
-                            <strong style="font-size:18px; color:#047857;">{{ "{:,.0f}".format((b.total_price or 0)|float) }} đ</strong>
-                        </div>
+                <!-- Hàng 3: Danh sách món hàng dạng Chip ngang gọn nhẹ (Không kéo dài thẻ) -->
+                {% if item_list %}
+                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+                    {% for it in item_list %}
+                    {% set it_img = it.image_url or (product_image_map.get(it.sku) if product_image_map else None) or (product_image_map.get(it.name) if product_image_map else None) %}
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:#ffffff; border:1px solid #fde2c8; border-radius:10px; padding:4px 9px; font-size:12px; max-width:100%;">
+                        {% if it_img %}
+                        <img src="{{ it_img }}" alt="{{ it.name }}" style="width:24px; height:24px; border-radius:6px; object-fit:cover; flex-shrink:0;">
+                        {% else %}
+                        <span>🐾</span>
+                        {% endif %}
+                        <span style="color:#2b180d; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:185px;">{{ it.name }}</span>
+                        <span style="color:#c2410c; font-weight:900;">x{{ it.quantity }}</span>
                     </div>
                     {% endfor %}
-                {% else %}
-                    <div style="text-align:center; padding:36px 16px; color:#6e5444;">
-                        <div style="font-size:36px; margin-bottom:8px;">🛁</div>
-                        <p style="margin:0 0 12px; font-size:14px;">Bạn chưa có lịch hẹn Spa nào.</p>
-                        <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-sm">✨ Đặt lịch Spa ngay</a>
-                    </div>
+                </div>
                 {% endif %}
+
+                <!-- Hàng 4: Tổng tiền & Nút Xem Hóa Đơn QR -->
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px dashed #fed7aa;">
+                    <div>
+                        <span style="font-size:12px; color:#6e5444;">Tổng thanh toán:</span>
+                        <strong style="font-size:16.5px; color:#047857; font-weight:900; margin-left:4px;">{{ "{:,.0f}".format((o.total_amount or 0)|float) }} đ</strong>
+                    </div>
+                    <a href="{{ url_for('order_success_page', order_id=o.id) }}" class="btn btn-outline btn-sm" style="font-size:11.8px; padding:5px 12px; font-weight:800;">
+                        🧾 Hóa Đơn &amp; QR &rarr;
+                    </a>
+                </div>
             </div>
+            {% endfor %}
         </div>
+        {% else %}
+        <div style="text-align:center; padding:32px 16px; color:#6e5444;">
+            <div style="font-size:32px; margin-bottom:6px;">📦</div>
+            <p style="margin:0 0 12px; font-size:13.5px;">Chưa có đơn mua hàng nào.</p>
+            <a href="{{ url_for('shop_page') }}" class="btn btn-primary btn-sm">🐾 Mua sắm ngay</a>
+        </div>
+        {% endif %}
     </div>
+
+    <!-- CỘT 2: LỊCH HẸN SPA (Ô CHỮ NHẬT GỌN, ĐỒNG BỘ CHIỀU CAO) -->
+    <div id="historySpaCol" class="card" style="margin-bottom:0; padding:18px 20px; border:1.5px solid #fed7aa; border-radius:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid #fde2c8;">
+            <div>
+                <h2 class="card-title" style="color:#2b180d; font-size:17px; margin:0;">🛁 Lịch Hẹn Spa &amp; Thú Y ({{ bookings|length }})</h2>
+                <p class="section-subtitle" style="margin:2px 0 0; font-size:12px;">Lịch chăm sóc, tắm sấy và cắt tỉa cho Boss</p>
+            </div>
+            <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-sm" style="font-size:11.5px; padding:4px 10px;">+ Đặt lịch Spa</a>
+        </div>
+
+        {% if bookings %}
+        <div style="display:flex; flex-direction:column; gap:12px; max-height:540px; overflow-y:auto; padding-right:4px;">
+            {% for b in bookings %}
+            <div style="background:#fffaf5; border:1.5px solid #fed7aa; border-radius:16px; padding:14px 16px;">
+                <!-- Hàng 1: Mã lịch + Ngày giờ hẹn | Trạng thái -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <strong style="color:#ffffff; background:linear-gradient(135deg, #0ea5e9, #0284c7); padding:2px 10px; border-radius:8px; font-size:13.5px; font-weight:900;">#SPA{{ b.id }}</strong>
+                        <span style="font-size:12px; font-weight:800; color:#0369a1;">📅 {{ b.appointment_date }} &bull; ⏰ {{ b.appointment_time }}</span>
+                    </div>
+                    <span class="badge {% if b.status == 'Hoàn thành' or b.status == 'Đã hoàn tất' %}badge-stock-ok{% elif b.status == 'Đã hủy' %}badge-stock-low{% else %}badge-both{% endif %}" style="font-size:11.5px;">
+                        {{ b.status }}
+                    </span>
+                </div>
+
+                <!-- Hàng 2: Thông tin thú cưng & Gói dịch vụ -->
+                <div style="font-size:13px; color:#2b180d; margin-bottom:6px;">
+                    🐾 Bé cưng: <strong style="color:#c2410c;">{{ b.pet_name }}</strong> ({{ b.pet_type }}, {{ b.pet_weight_kg }}kg)
+                    &bull; ✨ <strong style="color:#0369a1;">{{ b.service_name }}</strong>
+                </div>
+                {% if b.note %}
+                <div style="font-size:12px; color:#6e5444; background:#ffffff; border:1px solid #fde2c8; border-radius:8px; padding:5px 10px; margin-bottom:8px;">
+                    📝 Ghi chú: <em>{{ b.note }}</em>
+                </div>
+                {% endif %}
+
+                <!-- Hàng 3: Chi phí dịch vụ -->
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px dashed #fed7aa;">
+                    <div>
+                        <span style="font-size:12px; color:#6e5444;">Chi phí dịch vụ:</span>
+                        <strong style="font-size:16.5px; color:#047857; font-weight:900; margin-left:4px;">{{ "{:,.0f}".format((b.total_price or 0)|float) }} đ</strong>
+                    </div>
+                    <a href="{{ url_for('spa_page') }}" style="font-size:11.8px; font-weight:800; color:#0369a1; text-decoration:none;">
+                        🛁 Đặt lịch mới &rarr;
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:32px 16px; color:#6e5444;">
+            <div style="font-size:32px; margin-bottom:6px;">🛁</div>
+            <p style="margin:0 0 12px; font-size:13.5px;">Chưa có lịch hẹn Spa nào.</p>
+            <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-sm">✨ Đặt lịch Spa ngay</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
 {% else %}
-    <!-- Khi khách chưa đăng nhập và chưa nhập SĐT -->
-    <div class="card text-center" style="padding:48px 20px; border:1px dashed rgba(255,255,255,0.15);">
-        <div style="font-size:52px; margin-bottom:14px;">👤</div>
-        <h3 style="font-size:20px; color:#2a170b; margin-bottom:8px;">Đăng nhập để quản lý Hồ sơ &amp; Lịch sử mua hàng</h3>
-        <p style="color:#4a3425; max-width:580px; margin:0 auto 20px; font-size:14.5px;">
-            Đăng nhập tài khoản thành viên để xem thông tin cá nhân, tích lũy hạng VIP và theo dõi mọi đơn hàng đồng bộ trực tiếp với Admin, hoặc nhập số điện thoại vào ô tra cứu phía trên.
-        </p>
-        <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-            <a href="{{ url_for('login_page') }}" class="btn btn-primary">🔑 Đăng nhập / Đăng ký</a>
-            <a href="{{ url_for('shop_page') }}" class="btn btn-outline">🐾 Khám phá Cửa hàng</a>
-        </div>
+<div class="card text-center" style="padding:40px 20px; border:1.5px dashed #fdba74; background:#fffaf5;">
+    <div style="font-size:44px; margin-bottom:10px;">👤</div>
+    <h3 style="font-size:19px; color:#2b180d; margin-bottom:6px;">Đăng nhập để quản lý Hồ sơ &amp; Lịch sử giao dịch</h3>
+    <p style="color:#5c4033; max-width:540px; margin:0 auto 18px; font-size:14px;">
+        Đăng nhập tài khoản thành viên để xem thông tin cá nhân, tích lũy hạng VIP và theo dõi mọi đơn hàng đồng bộ trực tiếp với Admin, hoặc nhập số điện thoại vào ô tra cứu phía trên.
+    </p>
+    <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+        <a href="{{ url_for('login_page') }}" class="btn btn-primary">🔑 Đăng nhập / Đăng ký</a>
+        <a href="{{ url_for('shop_page') }}" class="btn btn-outline">🐾 Khám phá Cửa hàng</a>
     </div>
+</div>
 {% endif %}
+
+<script>
+function toggleProfileSection(boxId) {
+    const target = document.getElementById(boxId);
+    if (!target) return;
+    const isHidden = (target.style.display === 'none' || !target.style.display);
+    ['editProfileBox', 'vipPolicyBox'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && id !== boxId) el.style.display = 'none';
+    });
+    target.style.display = isHidden ? 'block' : 'none';
+}
+
+function switchHistoryTab(mode, btnEl) {
+    document.querySelectorAll('#historyTabGroup .breed-filter-chip').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+
+    const ordersCol = document.getElementById('historyOrdersCol');
+    const spaCol = document.getElementById('historySpaCol');
+    if (!ordersCol || !spaCol) return;
+
+    if (mode === 'orders') {
+        ordersCol.style.display = '';
+        spaCol.style.display = 'none';
+    } else if (mode === 'spa') {
+        ordersCol.style.display = 'none';
+        spaCol.style.display = '';
+    } else {
+        ordersCol.style.display = '';
+        spaCol.style.display = '';
+    }
+}
+</script>
 {% endblock %}
