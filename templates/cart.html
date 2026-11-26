@@ -72,6 +72,13 @@
                         <div style="font-size:11px; color:#8c7161; text-transform:uppercase; font-weight:700;">Thành tiền:</div>
                         <strong style="color:#047857 !important; font-size:18px !important; font-weight:900 !important; display:block;">{{ "{:,.0f}".format(item.subtotal) }} đ</strong>
                     </div>
+                    <form method="POST" action="{{ url_for('update_cart_route') }}" style="margin:0;">
+                        <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                        <input type="hidden" name="remove" value="1">
+                        <button type="submit" class="btn btn-danger btn-sm" style="padding:6px 10px; border-radius:10px;" title="Xóa mặt hàng này khỏi giỏ">
+                            🗑️
+                        </button>
+                    </form>
                 </div>
             </div>
             {% endfor %}

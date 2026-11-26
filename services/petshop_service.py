@@ -142,14 +142,24 @@ def generate_vietqr_url(amount: float, memo: str) -> str:
     )
 
 
-def init_db_and_seed() -> None:
+def init_db_and_seed(force_reset: bool = False) -> None:
     """Khởi tạo các bảng SQLite, tự động nâng cấp cột mới và nạp dữ liệu mẫu."""
+    from models.entities import DELETED_PRODUCTS_PATH, PRODUCTS_STORE_PATH
+
     Product.create_table()
     SpaBooking.create_table()
     Order.create_table()
     EmailLog.create_table()
     User.create_table()
     Voucher.create_table()
+
+    if force_reset:
+        for p_path in (PRODUCTS_STORE_PATH, DELETED_PRODUCTS_PATH):
+            try:
+                if os.path.exists(p_path):
+                    os.remove(p_path)
+            except Exception:
+                pass
 
     with DatabaseSession() as db:
         for tbl in ("spa_bookings", "orders"):
@@ -173,22 +183,34 @@ def init_db_and_seed() -> None:
         if "image_url" not in prod_cols:
             db.execute("ALTER TABLE products ADD COLUMN image_url TEXT DEFAULT ''")
 
-    existing_by_sku = {p.sku: p for p in Product.iter_all()}
+    _, del_skus = Product.get_deleted_products_set()
+    custom_map = Product.get_custom_store_map()
+    existing_by_sku = {str(p.sku).strip().upper(): p for p in Product.iter_all()}
     for item in SEED_CATALOG:
-        sku = item["sku"]
+        sku = str(item["sku"]).strip().upper()
+        if not force_reset and sku in del_skus:
+            continue
         if sku not in existing_by_sku:
-            Product(**item).save()
-        else:
+            Product(**item).save(persist_json=False)
+        elif force_reset or sku not in custom_map:
             existing = existing_by_sku[sku]
             changed = False
-            if item.get("image_url") and getattr(existing, "image_url", "") != item["image_url"]:
-                existing.image_url = item["image_url"]
-                changed = True
-            if item.get("breed") and getattr(existing, "breed", "") != item["breed"]:
-                existing.breed = item["breed"]
-                changed = True
+            if force_reset:
+                for k, v in item.items():
+                    if getattr(existing, k, None) != v:
+                        setattr(existing, k, v)
+                        changed = True
+            else:
+                if item.get("image_url") and getattr(existing, "image_url", "") != item["image_url"]:
+                    existing.image_url = item["image_url"]
+                    changed = True
+                if item.get("breed") and getattr(existing, "breed", "") != item["breed"]:
+                    existing.breed = item["breed"]
+                    changed = True
             if changed:
-                existing.save()
+                existing.save(persist_json=False)
+
+    Product.sync_from_json_store()
 
     SpaBooking.sync_from_json_store()
     first_booking = next(SpaBooking.iter_all(), None)
@@ -773,19 +795,21 @@ def compute_dashboard_stats(
         u_spent = sum(float(o_d.get("total_amount") or 0) for o_d in u_orders if o_d.get("status") != "Đã hủy") + sum(float(b_d.get("total_price") or 0) for b_d in u_bookings if b_d.get("status") != "Đã hủy")
 
         if u_spent >= 15000000:
-            tier = "Kim Cương"
+            tier = "Hạng Kim Cương"
         elif u_spent >= 5000000:
-            tier = "Vàng"
+            tier = "Hạng Vàng"
         elif u_spent >= 1000000:
-            tier = "Bạc"
+            tier = "Hạng Bạc"
         else:
-            tier = "Đồng"
+            tier = "Thành viên mới"
 
         customers_list.append(
             {
                 "id": u.id,
+                "user_id": u.id,
                 "username": u.username,
                 "name": u.fullname,
+                "full_name": u.fullname,
                 "phone": u.phone,
                 "email": u.email,
                 "created_at": u.created_at,
@@ -800,16 +824,19 @@ def compute_dashboard_stats(
         )
 
     # Bổ sung khách đặt đơn mà thông tin SĐT chưa trùng với tài khoản nào
+    _, del_user_phones = User.get_deleted_users_set()
     guest_map: Dict[str, Dict[str, Any]] = {}
     for o in all_orders:
-        if o.id in matched_order_ids:
+        if o.id in matched_order_ids or (o.phone and o.phone in del_user_phones):
             continue
         g = guest_map.setdefault(
             o.phone,
             {
                 "id": 0,
+                "user_id": 0,
                 "username": "khach_vang_lai",
                 "name": o.customer_name,
+                "full_name": o.customer_name,
                 "phone": o.phone,
                 "email": o.email,
                 "created_at": o.created_at,
@@ -817,7 +844,7 @@ def compute_dashboard_stats(
                 "orders_count": 0,
                 "bookings_count": 0,
                 "total_spent": 0.0,
-                "vip_tier": "Đồng",
+                "vip_tier": "Thành viên mới",
                 "orders_history": [],
                 "bookings_history": [],
             },
@@ -830,11 +857,11 @@ def compute_dashboard_stats(
     for g_info in guest_map.values():
         spent = g_info["total_spent"]
         if spent >= 15000000:
-            g_info["vip_tier"] = "Kim Cương"
+            g_info["vip_tier"] = "Hạng Kim Cương"
         elif spent >= 5000000:
-            g_info["vip_tier"] = "Vàng"
+            g_info["vip_tier"] = "Hạng Vàng"
         elif spent >= 1000000:
-            g_info["vip_tier"] = "Bạc"
+            g_info["vip_tier"] = "Hạng Bạc"
         customers_list.append(g_info)
 
     return {

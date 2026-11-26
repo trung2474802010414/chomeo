@@ -160,7 +160,7 @@
                         </button>
                     </form>
                     {% if admin_tab == 'products' %}
-                    <button type="button" onclick="openProductModal()" class="btn btn-primary btn-sm btn-add-product-glow">+ Thêm sản phẩm mới</button>
+                    <button type="button" onclick="openAddProductModal()" class="btn btn-primary btn-sm btn-add-product-glow">+ Thêm sản phẩm mới</button>
                     {% else %}
                     <a href="{{ url_for('admin_page', tab='products', open_modal=1) }}" class="btn btn-primary btn-sm btn-add-product-glow">+ Thêm sản phẩm mới</a>
                     {% endif %}
@@ -485,7 +485,7 @@
                             </div>
                             <p class="section-subtitle" style="margin:0;">Quản lý toàn diện: tra cứu nhanh, kiểm tra tồn kho, thêm mới và chỉnh sửa trực quan.</p>
                         </div>
-                        <button type="button" class="btn-add-product-glow" onclick="openProductModal()">
+                        <button type="button" class="btn-add-product-glow" onclick="openAddProductModal()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -575,10 +575,10 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="admin-actions-cell">
-                                            <a href="{{ url_for('admin_page', tab='products', edit_id=p.id) }}" class="btn btn-outline btn-sm" title="Sửa thông tin sản phẩm">
+                                            <button type="button" onclick='openEditProductModal({{ p|tojson }})' class="btn btn-outline btn-sm" title="Sửa thông tin sản phẩm" style="cursor:pointer;">
                                                 ✏️ Sửa
-                                            </a>
-                                            <form method="POST" action="{{ url_for('admin_delete_product', product_id=p.id) }}" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA vĩnh viễn sản phẩm: {{ p.name }} (SKU: {{ p.sku }})?');" style="margin:0;">
+                                            </button>
+                                            <form method="POST" action="{{ url_for('admin_delete_product', product_id=p.id) }}" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA vĩnh viễn sản phẩm: {{ p.name|e }} (SKU: {{ p.sku|e }})?');" style="margin:0;">
                                                 <button type="submit" class="btn btn-danger btn-sm" title="Xóa sản phẩm">
                                                     🗑️ Xóa
                                                 </button>
@@ -614,13 +614,10 @@
                         <!-- Header Modal -->
                         <div class="admin-modal-header">
                             <div class="admin-modal-title">
-                                {% if edit_product %}
-                                    <span>✏️ Sửa Sản Phẩm #{{ edit_product.id }}</span>
-                                    <span class="badge badge-stock-low" style="font-size:12px;">Đang cập nhật</span>
-                                {% else %}
-                                    <span>✨ + Thêm Sản Phẩm Mới Vào Kho</span>
-                                    <span class="badge badge-both" style="font-size:12px;">Tạo mới</span>
-                                {% endif %}
+                                <span id="prodModalTitleText">{% if edit_product %}✏️ Sửa Sản Phẩm #{{ edit_product.id }}{% else %}✨ + Thêm Sản Phẩm Mới Vào Kho{% endif %}</span>
+                                <span id="prodModalBadgeText" class="badge {% if edit_product %}badge-stock-low{% else %}badge-both{% endif %}" style="font-size:12px;">
+                                    {% if edit_product %}Đang cập nhật{% else %}Tạo mới{% endif %}
+                                </span>
                             </div>
                             <button type="button" class="admin-modal-close-btn" onclick="closeProductModal()" title="Đóng cửa sổ">✕</button>
                         </div>
@@ -628,13 +625,16 @@
                         <!-- Form Thêm / Sửa -->
                         <form method="POST" action="{{ url_for('admin_save_product') }}" id="adminActualProductForm" style="display:flex; flex-direction:column; overflow:hidden;">
                             <input type="hidden" name="csrf_token" value="{{ product_form.csrf_token }}">
-                            <input type="hidden" name="product_id" value="{{ edit_product.id if edit_product else '' }}">
+                            <input type="hidden" name="product_id" id="prodModalId" value="{{ edit_product.id if edit_product else '' }}">
 
                             <div class="admin-modal-body">
                                 <div class="grid-2" style="gap:16px;">
                                     <div class="form-group">
-                                        <label class="form-label">Mã SKU * (3–30 ký tự duy nhất)</label>
-                                        <input type="text" name="sku" value="{{ edit_product.sku if edit_product else product_form.raw_data.get('sku', '') }}" pattern="^[A-Za-z0-9][A-Za-z0-9\-_]{2,29}$" minlength="3" maxlength="30" title="Mã SKU từ 3-30 ký tự gồm chữ, số, gạch ngang" class="form-control" placeholder="VD: DOG-PET-015" required>
+                                        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                                            <span>Mã SKU * (3–30 ký tự duy nhất)</span>
+                                            <button type="button" onclick="generateAutoSku()" style="border:1px solid #fdba74; background:#fff7ed; color:#c2410c; border-radius:6px; padding:1px 8px; font-size:11px; font-weight:800; cursor:pointer;">⚡ Tự tạo SKU</button>
+                                        </label>
+                                        <input type="text" name="sku" id="prodModalSku" value="{{ edit_product.sku if edit_product else product_form.raw_data.get('sku', '') }}" minlength="3" maxlength="30" class="form-control" placeholder="VD: DOG-PET-025" oninput="this.value=this.value.toUpperCase().replace(/\s+/g,'-')" required>
                                         {% for err in product_form.errors.get('sku', []) %}
                                             <div class="form-error">{{ err }}</div>
                                         {% endfor %}
@@ -655,7 +655,7 @@
 
                                 <div class="form-group">
                                     <label class="form-label">Tên sản phẩm / Tên thú cưng * (3–150 ký tự)</label>
-                                    <input type="text" name="name" value="{{ edit_product.name if edit_product else product_form.raw_data.get('name', '') }}" minlength="3" maxlength="150" class="form-control" placeholder="VD: Chó Corgi Chân Ngắn 2 Tháng Tuổi Thuần Chủng..." required>
+                                    <input type="text" name="name" id="prodModalName" value="{{ edit_product.name if edit_product else product_form.raw_data.get('name', '') }}" minlength="3" maxlength="150" class="form-control" placeholder="VD: Chó Corgi Chân Ngắn 2 Tháng Tuổi Thuần Chủng..." required>
                                     {% for err in product_form.errors.get('name', []) %}
                                         <div class="form-error">{{ err }}</div>
                                     {% endfor %}
@@ -699,14 +699,14 @@
                                 <div class="grid-2" style="gap:16px;">
                                     <div class="form-group">
                                         <label class="form-label">Giá niêm yết bán lẻ (VNĐ) *</label>
-                                        <input type="number" name="price" value="{{ edit_product.price|int if edit_product else product_form.raw_data.get('price', '150000') }}" min="1000" max="500000000" step="1000" class="form-control" placeholder="VD: 150000" required>
+                                        <input type="number" name="price" id="prodModalPrice" value="{{ edit_product.price|int if edit_product else product_form.raw_data.get('price', '150000') }}" min="1000" max="500000000" step="any" class="form-control" placeholder="VD: 150000" required>
                                         {% for err in product_form.errors.get('price', []) %}
                                             <div class="form-error">{{ err }}</div>
                                         {% endfor %}
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label">Số lượng tồn kho ban đầu *</label>
-                                        <input type="number" name="stock" value="{{ edit_product.stock if edit_product else product_form.raw_data.get('stock', '20') }}" min="0" max="10000" class="form-control" placeholder="VD: 20" required>
+                                        <label class="form-label">Số lượng tồn kho *</label>
+                                        <input type="number" name="stock" id="prodModalStock" value="{{ edit_product.stock if edit_product else product_form.raw_data.get('stock', '20') }}" min="0" max="10000" class="form-control" placeholder="VD: 20" required>
                                         {% for err in product_form.errors.get('stock', []) %}
                                             <div class="form-error">{{ err }}</div>
                                         {% endfor %}
@@ -741,7 +741,7 @@
 
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label class="form-label">Mô tả chi tiết sản phẩm / Bé thú cưng (Tối đa 1000 ký tự)</label>
-                                    <textarea name="description" rows="3" maxlength="1000" class="form-control" placeholder="Mô tả nguồn gốc, độ tuổi, tiêm phòng định kỳ hoặc hướng dẫn sử dụng sản phẩm...">{{ edit_product.description if edit_product else product_form.raw_data.get('description', '') }}</textarea>
+                                    <textarea name="description" id="prodModalDesc" rows="3" maxlength="1000" class="form-control" placeholder="Mô tả nguồn gốc, độ tuổi, tiêm phòng định kỳ hoặc hướng dẫn sử dụng sản phẩm...">{{ edit_product.description if edit_product else product_form.raw_data.get('description', '') }}</textarea>
                                     {% for err in product_form.errors.get('description', []) %}
                                         <div class="form-error">{{ err }}</div>
                                     {% endfor %}
@@ -751,7 +751,7 @@
                             <!-- Footer Modal -->
                             <div class="admin-modal-footer">
                                 <button type="button" class="btn btn-outline" onclick="closeProductModal()">✕ Hủy bỏ / Đóng</button>
-                                <button type="submit" class="btn-add-product-glow">
+                                <button type="submit" id="prodModalSubmitBtn" class="btn-add-product-glow">
                                     {% if edit_product %}💾 Lưu Cập Nhật Sản Phẩm{% else %}✨ + Lưu Sản Phẩm Mới Vào Kho{% endif %}
                                 </button>
                             </div>
@@ -763,12 +763,72 @@
                 <script>
                     var currentFilter = 'all';
 
+                    function generateAutoSku() {
+                        var petSelect = document.getElementById('adminPetTypeSelect');
+                        var catSelect = document.getElementById('adminCategorySelect');
+                        var prefix = 'PET';
+                        if (petSelect && petSelect.value === 'Chó') prefix = 'DOG';
+                        else if (petSelect && petSelect.value === 'Mèo') prefix = 'CAT';
+                        var sub = 'ITEM';
+                        if (catSelect && (catSelect.value === 'Chó cảnh' || catSelect.value === 'Mèo cảnh')) sub = 'PET';
+                        else if (catSelect && catSelect.value === 'Thức ăn') sub = 'FD';
+                        else if (catSelect && catSelect.value === 'Phụ kiện') sub = 'ACC';
+                        var rand = Math.floor(100 + Math.random() * 900);
+                        var skuInput = document.getElementById('prodModalSku');
+                        if (skuInput) skuInput.value = prefix + '-' + sub + '-' + rand;
+                    }
+
                     function openProductModal() {
                         var modal = document.getElementById('adminProductModal');
                         if (modal) {
                             modal.classList.add('active');
                             document.body.style.overflow = 'hidden';
                         }
+                    }
+
+                    function openAddProductModal() {
+                        document.getElementById('prodModalId').value = '';
+                        document.getElementById('prodModalName').value = '';
+                        document.getElementById('adminPetTypeSelect').value = 'Mèo';
+                        document.getElementById('adminCategorySelect').value = 'Mèo cảnh';
+                        syncAdminProductForm('pet_type');
+                        document.getElementById('adminBreedSelect').value = '';
+                        document.getElementById('prodModalPrice').value = '1500000';
+                        document.getElementById('prodModalStock').value = '5';
+                        document.getElementById('prodImageUrlInput').value = '';
+                        document.getElementById('prodModalDesc').value = '';
+                        updateAdminImgPreview('');
+                        generateAutoSku();
+
+                        document.getElementById('prodModalTitleText').textContent = '✨ + Thêm Sản Phẩm Mới Vào Kho';
+                        var badge = document.getElementById('prodModalBadgeText');
+                        badge.textContent = 'Tạo mới';
+                        badge.className = 'badge badge-both';
+                        document.getElementById('prodModalSubmitBtn').textContent = '✨ + Lưu Sản Phẩm Mới Vào Kho';
+                        openProductModal();
+                    }
+
+                    function openEditProductModal(p) {
+                        if (!p) return;
+                        document.getElementById('prodModalId').value = p.id || '';
+                        document.getElementById('prodModalSku').value = p.sku || '';
+                        document.getElementById('prodModalName').value = p.name || '';
+                        document.getElementById('adminPetTypeSelect').value = p.pet_type || 'Mèo';
+                        syncAdminProductForm('pet_type');
+                        document.getElementById('adminCategorySelect').value = p.category || 'Thức ăn';
+                        document.getElementById('adminBreedSelect').value = p.breed || '';
+                        document.getElementById('prodModalPrice').value = Math.round(Number(p.price || 150000));
+                        document.getElementById('prodModalStock').value = (p.stock != null) ? p.stock : 1;
+                        document.getElementById('prodImageUrlInput').value = p.image_url || '';
+                        document.getElementById('prodModalDesc').value = p.description || '';
+                        updateAdminImgPreview(p.image_url || '');
+
+                        document.getElementById('prodModalTitleText').textContent = '✏️ Sửa Sản Phẩm #' + p.id + ' (' + (p.sku || '') + ')';
+                        var badge = document.getElementById('prodModalBadgeText');
+                        badge.textContent = 'Đang cập nhật';
+                        badge.className = 'badge badge-stock-low';
+                        document.getElementById('prodModalSubmitBtn').textContent = '💾 Lưu Cập Nhật Sản Phẩm';
+                        openProductModal();
                     }
 
                     function closeProductModal() {
@@ -865,8 +925,8 @@
                         }
 
                         var petType = petSelect.value;
-                        var allowDogBreed = (petType === 'Chó');
-                        var allowCatBreed = (petType === 'Mèo');
+                        var allowDogBreed = (petType === 'Chó' || petType === 'Chó & Mèo');
+                        var allowCatBreed = (petType === 'Mèo' || petType === 'Chó & Mèo');
 
                         if (dogGroup) {
                             dogGroup.hidden = !allowDogBreed;
@@ -885,11 +945,11 @@
                             }
                         }
 
-                        if (breedSelect.value !== '') {
+                        if (changedSource === 'pet_type' && breedSelect.value !== '') {
                             var curOpt = breedSelect.options[breedSelect.selectedIndex];
                             var curSp = curOpt ? curOpt.getAttribute('data-species') : '';
-                            if ((petType === 'Chó' && curSp !== 'Chó') ||
-                                (petType === 'Mèo' && curSp !== 'Mèo') ||
+                            if ((petType === 'Chó' && curSp === 'Mèo') ||
+                                (petType === 'Mèo' && curSp === 'Chó') ||
                                 (petType === 'Chó & Mèo')) {
                                 breedSelect.value = '';
                             }
@@ -929,12 +989,42 @@
                         var file = fileInput.files[0];
                         var reader = new FileReader();
                         reader.onload = function(e) {
-                            var dataUrl = e.target.result;
-                            var urlInput = document.getElementById('prodImageUrlInput');
-                            if (urlInput) {
-                                urlInput.value = dataUrl;
-                                updateAdminImgPreview(dataUrl);
-                            }
+                            var rawDataUrl = e.target.result;
+                            var imgObj = new Image();
+                            imgObj.onload = function() {
+                                try {
+                                    var canvas = document.createElement('canvas');
+                                    var maxDim = 600;
+                                    var w = imgObj.width || 600;
+                                    var h = imgObj.height || 600;
+                                    if (w > maxDim || h > maxDim) {
+                                        if (w > h) {
+                                            h = Math.round((h * maxDim) / w);
+                                            w = maxDim;
+                                        } else {
+                                            w = Math.round((w * maxDim) / h);
+                                            h = maxDim;
+                                        }
+                                    }
+                                    canvas.width = w;
+                                    canvas.height = h;
+                                    var ctx = canvas.getContext('2d');
+                                    ctx.drawImage(imgObj, 0, 0, w, h);
+                                    var compressedUrl = canvas.toDataURL('image/jpeg', 0.8);
+                                    var urlInput = document.getElementById('prodImageUrlInput');
+                                    if (urlInput) {
+                                        urlInput.value = compressedUrl;
+                                        updateAdminImgPreview(compressedUrl);
+                                    }
+                                } catch (err) {
+                                    var urlInput2 = document.getElementById('prodImageUrlInput');
+                                    if (urlInput2) {
+                                        urlInput2.value = rawDataUrl;
+                                        updateAdminImgPreview(rawDataUrl);
+                                    }
+                                }
+                            };
+                            imgObj.src = rawDataUrl;
                         };
                         reader.readAsDataURL(file);
                     }
@@ -942,22 +1032,100 @@
                     document.addEventListener('DOMContentLoaded', function() {
                         syncAdminProductForm('init');
                         if (window.location.search.includes('open_modal=1') || window.location.hash === '#form-san-pham') {
-                            openProductModal();
+                            var curId = document.getElementById('prodModalId').value;
+                            var curSku = document.getElementById('prodModalSku').value;
+                            if (!curId && !curSku) {
+                                openAddProductModal();
+                            } else {
+                                openProductModal();
+                            }
                         }
                     });
                 </script>
 
                 {% elif admin_tab == 'bookings' %}
                 <!-- ==========================================================
-                     TAB 3: QUẢN LÝ LỊCH HẸN SPA (SỬA TRẠNG THÁI & XÓA)
+                     TAB 3: QUẢN LÝ LỊCH HẸN SPA (THÊM - SỬA - XÓA TRỰC QUAN)
                      ========================================================== -->
+                <!-- Khung Thêm Mới / Chỉnh Sửa Lịch Hẹn Spa Trực Tiếp Tại Admin -->
+                <div id="adminBookingFormCard" class="card" style="display:none; margin-bottom:20px; border:1.5px solid #fed7aa; background:#ffffff; border-radius:20px; padding:20px 24px;">
+                    <div class="card-header" style="border-bottom:1px solid #fed7aa; padding-bottom:12px; margin-bottom:16px;">
+                        <h2 class="card-title" id="adminBookingFormTitle" style="color:#b45309; margin:0;">➕ Thêm / Cập Nhật Lịch Hẹn Spa</h2>
+                        <button type="button" onclick="document.getElementById('adminBookingFormCard').style.display='none';" class="btn btn-outline btn-sm" style="border-radius:99px;">✕ Đóng</button>
+                    </div>
+                    <form method="POST" action="{{ url_for('admin_save_booking') }}">
+                        <input type="hidden" name="booking_id" id="bFormId" value="">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px;">
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Họ tên chủ nuôi (*)</label>
+                                <input type="text" name="customer_name" id="bFormCustomer" class="form-control" placeholder="VD: Nguyễn Minh Anh" required>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Số điện thoại (*)</label>
+                                <input type="tel" name="phone" id="bFormPhone" class="form-control" placeholder="VD: 0905123456" required>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Email khách hàng</label>
+                                <input type="email" name="email" id="bFormEmail" class="form-control" placeholder="VD: khachhang@gmail.com">
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Tên thú cưng (*)</label>
+                                <input type="text" name="pet_name" id="bFormPetName" class="form-control" placeholder="VD: Mochi" required>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Loài thú cưng (*)</label>
+                                <select name="pet_type" id="bFormPetType" class="form-control">
+                                    <option value="Mèo">🐱 Mèo</option>
+                                    <option value="Chó">🐶 Chó</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Cân nặng (kg) (*)</label>
+                                <input type="number" name="pet_weight_kg" id="bFormWeight" value="3.5" min="0.2" max="80" step="0.1" class="form-control" required>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Gói dịch vụ Spa (*)</label>
+                                <select name="service_name" id="bFormService" class="form-control">
+                                    {% for svc_name in spa_services.keys() %}
+                                    <option value="{{ svc_name }}">{{ svc_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Ngày hẹn (*)</label>
+                                <input type="date" name="appointment_date" id="bFormDate" value="{{ end_date }}" class="form-control" required>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Giờ hẹn (*)</label>
+                                <input type="text" name="appointment_time" id="bFormTime" value="09:30" class="form-control" placeholder="VD: 09:30" required>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Trạng thái</label>
+                                <select name="status" id="bFormStatus" class="form-control">
+                                    {% for st in stats.booking_statuses %}
+                                    <option value="{{ st }}">{{ st }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin:0; grid-column: span 2;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Ghi chú đặc biệt</label>
+                                <input type="text" name="note" id="bFormNote" class="form-control" placeholder="VD: Bé nhát nước, cần sấy ấm...">
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+                            <button type="button" onclick="document.getElementById('adminBookingFormCard').style.display='none';" class="btn btn-outline btn-sm" style="border-radius:99px;">Hủy</button>
+                            <button type="submit" class="btn btn-teal btn-sm" style="padding:8px 22px; font-weight:800; border-radius:99px;">💾 Lưu Lịch Hẹn Spa</button>
+                        </div>
+                    </form>
+                </div>
+
                 <div class="card">
                     <div class="card-header">
                         <div>
                             <h2 class="card-title">Danh sách Lịch hẹn Spa &amp; Khám ({{ bookings|length }} lịch)</h2>
-                            <p class="section-subtitle">Chọn trạng thái mới và bấm <strong>Lưu</strong> để cập nhật, hoặc bấm <strong>Xóa</strong> để hủy bỏ bản ghi.</p>
+                            <p class="section-subtitle">Hỗ trợ Thêm mới, Sửa chi tiết thông tin lịch hẹn, đổi trạng thái hoặc Xóa trực tiếp.</p>
                         </div>
-                        <a href="{{ url_for('spa_page') }}" class="btn btn-teal btn-sm">+ Tạo lịch hẹn mới</a>
+                        <button type="button" onclick="openAddBookingForm()" class="btn btn-teal btn-sm">+ Thêm lịch hẹn mới</button>
                     </div>
                     <div class="table-wrap">
                         <table class="clean-table">
@@ -970,7 +1138,7 @@
                                     <th>Ngày giờ hẹn</th>
                                     <th class="text-right">Chi phí</th>
                                     <th>Sửa trạng thái</th>
-                                    <th class="text-center">Xóa</th>
+                                    <th class="text-center">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -999,9 +1167,12 @@
                                         </form>
                                     </td>
                                     <td class="text-center">
-                                        <form method="POST" action="{{ url_for('admin_delete_booking', booking_id=b.id) }}" onsubmit="return confirm('Xóa lịch hẹn #{{ b.id }}?');">
-                                            <button type="submit" class="btn btn-danger btn-sm">&#128465; Xóa</button>
-                                        </form>
+                                        <div style="display:inline-flex; gap:6px; align-items:center;">
+                                            <button type="button" onclick='openEditBookingForm({{ b|tojson }})' class="btn btn-outline btn-sm" title="Sửa chi tiết lịch hẹn">✏️ Sửa</button>
+                                            <form method="POST" action="{{ url_for('admin_delete_booking', booking_id=b.id) }}" onsubmit="return confirm('Xóa lịch hẹn #{{ b.id }}?');" style="margin:0;">
+                                                <button type="submit" class="btn btn-danger btn-sm">&#128465; Xóa</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -1009,6 +1180,44 @@
                         </table>
                     </div>
                 </div>
+
+                <script>
+                function openAddBookingForm() {
+                    document.getElementById('bFormId').value = '';
+                    document.getElementById('bFormCustomer').value = '';
+                    document.getElementById('bFormPhone').value = '';
+                    document.getElementById('bFormEmail').value = '';
+                    document.getElementById('bFormPetName').value = '';
+                    document.getElementById('bFormPetType').value = 'Mèo';
+                    document.getElementById('bFormWeight').value = '3.5';
+                    document.getElementById('bFormTime').value = '09:30';
+                    document.getElementById('bFormStatus').value = 'Chờ xác nhận';
+                    document.getElementById('bFormNote').value = '';
+                    document.getElementById('adminBookingFormTitle').textContent = '➕ Tạo Lịch Hẹn Spa Mới';
+                    var card = document.getElementById('adminBookingFormCard');
+                    card.style.display = 'block';
+                    card.scrollIntoView({ behavior: 'smooth' });
+                }
+                function openEditBookingForm(b) {
+                    if (!b) return;
+                    document.getElementById('bFormId').value = b.id || '';
+                    document.getElementById('bFormCustomer').value = b.customer_name || '';
+                    document.getElementById('bFormPhone').value = b.phone || '';
+                    document.getElementById('bFormEmail').value = b.email || '';
+                    document.getElementById('bFormPetName').value = b.pet_name || '';
+                    document.getElementById('bFormPetType').value = b.pet_type || 'Mèo';
+                    document.getElementById('bFormWeight').value = b.pet_weight_kg || '3.5';
+                    document.getElementById('bFormService').value = b.service_name || '';
+                    document.getElementById('bFormDate').value = b.appointment_date || '';
+                    document.getElementById('bFormTime').value = b.appointment_time || '09:30';
+                    document.getElementById('bFormStatus').value = b.status || 'Chờ xác nhận';
+                    document.getElementById('bFormNote').value = b.note || '';
+                    document.getElementById('adminBookingFormTitle').textContent = '✏️ Chỉnh Sửa Lịch Hẹn Spa #' + b.id + ' (' + (b.customer_name || '') + ')';
+                    var card = document.getElementById('adminBookingFormCard');
+                    card.style.display = 'block';
+                    card.scrollIntoView({ behavior: 'smooth' });
+                }
+                </script>
 
 {% elif admin_tab == 'orders' %}
                 <!-- ==========================================================
@@ -1254,6 +1463,9 @@
                                 </form>
 
                                 <script type="application/json" id="orderData_{{ o.id }}">{{ (o.to_dict() if o.to_dict is defined else o)|tojson }}</script>
+                                <button type="button" onclick="openEditOrderForm({{ o.id }})" class="btn btn-outline btn-sm" style="height:38px; padding:0 14px; border-radius:99px; font-weight:800; white-space:nowrap; cursor:pointer;">
+                                    ✏️ Sửa đơn
+                                </button>
                                 <button type="button" onclick="openAdminInvoiceModal({{ o.id }})" class="btn btn-sm" style="height:38px; padding:0 16px; border-radius:99px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; cursor:pointer; background:#fff7ed; border:1.5px solid #fed7aa; color:#c2410c; font-weight:800;">
                                     📰 Xem Hóa đơn &amp; QR
                                 </button>
@@ -1275,7 +1487,71 @@
                     {% endfor %}
                 </div>
 
+                <!-- Khung Chỉnh Sửa Thông Tin Đơn Hàng Trực Tiếp Tại Admin -->
+                <div id="adminOrderEditCard" class="card" style="display:none; margin-top:20px; border:2px solid #fb923c; background:#ffffff; border-radius:20px; padding:20px 24px; box-shadow:0 12px 32px rgba(251,146,60,0.16);">
+                    <div class="card-header" style="border-bottom:1px solid #fed7aa; padding-bottom:12px; margin-bottom:16px;">
+                        <h2 class="card-title" id="adminOrderEditTitle" style="color:#c2410c; margin:0;">✏️ Chỉnh Sửa Thông Tin Đơn Hàng</h2>
+                        <button type="button" onclick="document.getElementById('adminOrderEditCard').style.display='none';" class="btn btn-outline btn-sm" style="border-radius:99px;">✕ Đóng</button>
+                    </div>
+                    <form method="POST" action="{{ url_for('admin_save_order') }}">
+                        <input type="hidden" name="order_id" id="oFormId" value="">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px;">
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Họ tên người nhận (*)</label>
+                                <input type="text" name="customer_name" id="oFormCustomer" class="form-control" required>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Số điện thoại (*)</label>
+                                <input type="tel" name="phone" id="oFormPhone" class="form-control" required>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Email người nhận</label>
+                                <input type="email" name="email" id="oFormEmail" class="form-control">
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Phương thức thanh toán</label>
+                                <select name="payment_method" id="oFormPayment" class="form-control">
+                                    <option value="cod">💵 Thanh toán COD khi nhận</option>
+                                    <option value="banking">💳 Chuyển khoản VietQR 24/7</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Trạng thái đơn hàng</label>
+                                <select name="status" id="oFormStatus" class="form-control">
+                                    {% for st_opt in order_statuses|default(['Chờ xác nhận', 'Đang đóng gói', 'Đang giao hàng', 'Hoàn thành', 'Đã hủy']) %}
+                                    <option value="{{ st_opt }}">{{ st_opt }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin:0; grid-column: 1 / -1;">
+                                <label class="form-label" style="font-weight:700; color:#1c1917;">Địa chỉ giao hàng tận nơi (*)</label>
+                                <input type="text" name="address" id="oFormAddress" class="form-control" required>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+                            <button type="button" onclick="document.getElementById('adminOrderEditCard').style.display='none';" class="btn btn-outline btn-sm" style="border-radius:99px;">Hủy</button>
+                            <button type="submit" class="btn btn-teal btn-sm" style="padding:8px 22px; font-weight:800; border-radius:99px;">💾 Lưu Cập Nhật Đơn Hàng</button>
+                        </div>
+                    </form>
+                </div>
+
                 <script>
+                function openEditOrderForm(orderId) {
+                    var el = document.getElementById('orderData_' + orderId);
+                    if (!el) return;
+                    var o = JSON.parse(el.textContent);
+                    document.getElementById('oFormId').value = o.id || '';
+                    document.getElementById('oFormCustomer').value = o.customer_name || '';
+                    document.getElementById('oFormPhone').value = o.phone || '';
+                    document.getElementById('oFormEmail').value = o.email || '';
+                    document.getElementById('oFormAddress').value = o.address || '';
+                    document.getElementById('oFormPayment').value = (o.payment_method && o.payment_method.toLowerCase() === 'banking') ? 'banking' : 'cod';
+                    document.getElementById('oFormStatus').value = o.status || 'Chờ xác nhận';
+                    document.getElementById('adminOrderEditTitle').textContent = '✏️ Chỉnh Sửa Đơn Hàng #DH' + o.id + ' (' + (o.customer_name || '') + ')';
+                    var card = document.getElementById('adminOrderEditCard');
+                    card.style.display = 'block';
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 var currentOrderPillStatus = 'ALL';
                 function setOrderStatusPill(btn, st) {
                     currentOrderPillStatus = st || 'ALL';
@@ -1714,13 +1990,13 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                                             <a href="{{ url_for('order_history_page', phone=c.phone) }}" target="_blank" class="btn btn-outline btn-sm" style="padding:4px 10px; border-radius:8px; font-size:12px; font-weight:700; border:1px solid #fed7aa; background:#fff7ed; color:#c2410c;">
                                                 📋 Lịch sử ({{ (c.orders_count|default(0)) + (c.bookings_count|default(0)) }})
                                             </a>
-                                            {% if c.user_id %}
-                                            <button type="button" onclick="openEditCustomerModal({{ c.user_id }}, '{{ c.username }}', '{{ c.full_name }}', '{{ c.phone }}', '{{ c.email }}')" class="btn btn-teal btn-sm" style="padding:4px 10px; border-radius:8px; font-size:12px; font-weight:800;">
+                                            <button type="button" onclick='openEditCustomerModalObj({{ c|tojson }})' class="btn btn-teal btn-sm" style="padding:4px 10px; border-radius:8px; font-size:12px; font-weight:800;">
                                                 ✏️ Sửa
                                             </button>
-                                            <form method="POST" action="{{ url_for('admin_delete_customer', user_id=c.user_id) }}" onsubmit="return confirm('Xác nhận xóa tài khoản @{{ c.username }}?');" style="margin:0;">
-                                                <button type="submit" class="btn btn-danger btn-sm" style="padding:4px 8px; border-radius:8px; font-size:12px;">
-                                                    🗑️
+                                            {% if c.user_id %}
+                                            <form method="POST" action="{{ url_for('admin_delete_customer', user_id=c.user_id) }}" onsubmit="return confirm('Xác nhận xóa tài khoản @{{ c.username|e }}?');" style="margin:0;">
+                                                <button type="submit" class="btn btn-danger btn-sm" style="padding:4px 8px; border-radius:8px; font-size:12px;" title="Xóa tài khoản khách hàng">
+                                                    🗑️ Xóa
                                                 </button>
                                             </form>
                                             {% endif %}
@@ -1775,15 +2051,19 @@ DOG-ACC-005,Dây Dắt Kèm Yếm Chống Giật,Phụ kiện,Chó,115000,15,Dâ
                     document.getElementById('adminCustomerFormCard').scrollIntoView({ behavior: 'smooth' });
                 }
                 function openEditCustomerModal(userId, username, fullname, phone, email) {
-                    document.getElementById('custFormUserId').value = userId;
-                    document.getElementById('custFormUsername').value = username;
-                    document.getElementById('custFormFullname').value = fullname;
-                    document.getElementById('custFormPhone').value = phone;
-                    document.getElementById('custFormEmail').value = email;
+                    document.getElementById('custFormUserId').value = userId || '';
+                    document.getElementById('custFormUsername').value = (username && username !== 'khach_vang_lai') ? username : ('user_' + (phone || '01'));
+                    document.getElementById('custFormFullname').value = fullname || '';
+                    document.getElementById('custFormPhone').value = phone || '';
+                    document.getElementById('custFormEmail').value = email || '';
                     document.getElementById('custFormPassword').value = '';
-                    document.getElementById('adminCustomerFormTitle').textContent = '✏️ Chỉnh Sửa Khách Hàng: @' + username;
+                    document.getElementById('adminCustomerFormTitle').textContent = '✏️ Chỉnh Sửa Khách Hàng: ' + (fullname || ('@' + username));
                     document.getElementById('adminCustomerFormCard').style.display = 'block';
                     document.getElementById('adminCustomerFormCard').scrollIntoView({ behavior: 'smooth' });
+                }
+                function openEditCustomerModalObj(c) {
+                    if (!c) return;
+                    openEditCustomerModal(c.user_id || c.id || '', c.username || '', c.full_name || c.name || '', c.phone || '', c.email || '');
                 }
                 </script>
 

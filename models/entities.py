@@ -128,6 +128,10 @@ def _get_deleted_bookings_set():
 
 BOOKINGS_STORE_PATH = resolve_writable_json_path("bookings_store.json")
 VOUCHERS_STORE_PATH = resolve_writable_json_path("vouchers_store.json")
+DELETED_VOUCHERS_PATH = resolve_writable_json_path("deleted_vouchers.json")
+PRODUCTS_STORE_PATH = resolve_writable_json_path("products_store.json")
+DELETED_PRODUCTS_PATH = resolve_writable_json_path("deleted_products.json")
+DELETED_USERS_PATH = resolve_writable_json_path("deleted_users.json")
 
 
 def hash_password(password: str) -> str:
@@ -162,6 +166,254 @@ class Product(BaseModel):
         data = super().to_dict()
         data["stock_status"] = self.stock_status
         return data
+
+    def save(self, persist_json: bool = True) -> "Product":
+        """Lưu sản phẩm vào SQLite và đồng bộ xuống products_store.json."""
+        self.sku = str(self.sku or "").strip().upper()
+        super().save()
+        if persist_json:
+            self._persist_to_json_file()
+        return self
+
+    def _persist_to_json_file(self) -> None:
+        try:
+            os.makedirs(os.path.dirname(PRODUCTS_STORE_PATH), exist_ok=True)
+            records: List[Dict[str, Any]] = []
+            if os.path.exists(PRODUCTS_STORE_PATH):
+                with open(PRODUCTS_STORE_PATH, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                    if isinstance(loaded, list):
+                        records = loaded
+
+            entry = self.to_dict()
+            sku_key = str(self.sku).strip().upper()
+            updated = False
+            for idx, item in enumerate(records):
+                if str(item.get("sku", "")).strip().upper() == sku_key or (
+                    self.id and item.get("id") == self.id
+                ):
+                    records[idx] = entry
+                    updated = True
+                    break
+            if not updated:
+                records.append(entry)
+
+            with open(PRODUCTS_STORE_PATH, "w", encoding="utf-8") as f:
+                json.dump(records[-120:], f, ensure_ascii=False, indent=2)
+
+            # Nếu sản phẩm từng nằm trong danh sách xóa, gỡ khỏi danh sách xóa
+            if os.path.exists(DELETED_PRODUCTS_PATH):
+                with open(DELETED_PRODUCTS_PATH, "r", encoding="utf-8") as df:
+                    del_list = json.load(df)
+                if isinstance(del_list, list):
+                    new_del = [
+                        d for d in del_list
+                        if isinstance(d, dict) and str(d.get("sku", "")).strip().upper() != sku_key
+                    ]
+                    if len(new_del) != len(del_list):
+                        with open(DELETED_PRODUCTS_PATH, "w", encoding="utf-8") as df:
+                            json.dump(new_del, df, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    @classmethod
+    def get_deleted_products_set(cls) -> Tuple[set, set]:
+        del_ids = set()
+        del_skus = set()
+        if os.path.exists(DELETED_PRODUCTS_PATH):
+            try:
+                with open(DELETED_PRODUCTS_PATH, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, list):
+                    for d in data:
+                        if isinstance(d, dict):
+                            if d.get("id") and str(d["id"]).isdigit():
+                                del_ids.add(int(d["id"]))
+                            s = str(d.get("sku", "")).strip().upper()
+                            if s:
+                                del_skus.add(s)
+            except Exception:
+                pass
+        return del_ids, del_skus
+
+    @classmethod
+    def get_custom_store_map(cls) -> Dict[str, Dict[str, Any]]:
+        out: Dict[str, Dict[str, Any]] = {}
+        if os.path.exists(PRODUCTS_STORE_PATH):
+            try:
+                with open(PRODUCTS_STORE_PATH, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, list):
+                    for item in data:
+                        if isinstance(item, dict):
+                            s = str(item.get("sku", "")).strip().upper()
+                            if s:
+                                out[s] = item
+            except Exception:
+                pass
+        return out
+
+    @classmethod
+    def delete_product_permanently(cls, product_id: int) -> Optional[Dict[str, Any]]:
+        """Xóa vĩnh viễn sản phẩm khỏi SQLite và lưu vết vào deleted_products.json."""
+        target = cls.get_by_id(product_id)
+        target_info = target.to_dict() if target else None
+        target_sku = str(getattr(target, "sku", "") or "").strip().upper() if target else ""
+
+        try:
+            del_list = []
+            if os.path.exists(DELETED_PRODUCTS_PATH):
+                with open(DELETED_PRODUCTS_PATH, "r", encoding="utf-8") as df:
+                    loaded = json.load(df)
+                    if isinstance(loaded, list):
+                        del_list = loaded
+            del_list.append({"id": product_id, "sku": target_sku})
+            os.makedirs(os.path.dirname(DELETED_PRODUCTS_PATH), exist_ok=True)
+            with open(DELETED_PRODUCTS_PATH, "w", encoding="utf-8") as df:
+                json.dump(del_list[-200:], df, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+        super().delete_by_id(product_id)
+
+        try:
+            if os.path.exists(PRODUCTS_STORE_PATH):
+                with open(PRODUCTS_STORE_PATH, "r", encoding="utf-8") as f:
+                    records = json.load(f)
+                if isinstance(records, list):
+                    filtered = [
+                        r for r in records
+                        if isinstance(r, dict)
+                        and r.get("id") != product_id
+                        and (not target_sku or str(r.get("sku", "")).strip().upper() != target_sku)
+                    ]
+                    with open(PRODUCTS_STORE_PATH, "w", encoding="utf-8") as f:
+                        json.dump(filtered, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        return target_info
+
+    @classmethod
+    def delete_by_id(cls, record_id: int) -> bool:
+        target = cls.get_by_id(record_id)
+        cls.delete_product_permanently(record_id)
+        return target is not None
+
+    @classmethod
+    def sync_from_json_store(cls) -> None:
+        """Đồng bộ các sản phẩm đã thêm/sửa/xóa từ products_store.json & deleted_products.json."""
+        try:
+            del_ids, del_skus = cls.get_deleted_products_set()
+            if del_ids or del_skus:
+                for p in list(cls.iter_all()):
+                    if p.id in del_ids or str(p.sku).strip().upper() in del_skus:
+                        super().delete_by_id(p.id)
+
+            custom_map = cls.get_custom_store_map()
+            if not custom_map:
+                return
+            existing_by_sku = {str(p.sku).strip().upper(): p for p in cls.iter_all()}
+            existing_by_id = {p.id: p for p in existing_by_sku.values() if p.id}
+
+            for sku_key, pd in custom_map.items():
+                if sku_key in del_skus:
+                    continue
+                pid = int(pd["id"]) if (pd.get("id") and str(pd["id"]).isdigit()) else None
+                if pid and pid in del_ids:
+                    continue
+                ex = existing_by_sku.get(sku_key) or (existing_by_id.get(pid) if pid else None)
+                if ex:
+                    changed = False
+                    for field in ("sku", "name", "category", "pet_type", "breed", "price", "stock", "image_url", "description"):
+                        if field in pd and pd[field] is not None:
+                            new_val = pd[field]
+                            if field == "price":
+                                new_val = float(new_val)
+                            elif field == "stock":
+                                new_val = int(new_val)
+                            if getattr(ex, field, None) != new_val:
+                                setattr(ex, field, new_val)
+                                changed = True
+                    if changed:
+                        super(Product, ex).save()
+                else:
+                    cat_val = str(pd.get("category", "Thức ăn")).strip()
+                    if cat_val not in CATEGORIES:
+                        cat_val = "Thức ăn"
+                    pt_val = str(pd.get("pet_type", "Chó & Mèo")).strip()
+                    if pt_val not in PET_TYPES:
+                        pt_val = "Chó & Mèo"
+                    new_p = cls(
+                        sku=sku_key,
+                        name=str(pd.get("name", sku_key)).strip()[:150],
+                        category=cat_val,
+                        pet_type=pt_val,
+                        breed=str(pd.get("breed", "") or "").strip()[:100],
+                        price=max(1000.0, float(pd.get("price", 100000) or 100000)),
+                        stock=max(0, int(pd.get("stock", 1) or 0)),
+                        image_url=str(pd.get("image_url", "") or "").strip(),
+                        description=str(pd.get("description", "") or "").strip()[:1000],
+                    )
+                    super(Product, new_p).save()
+        except Exception:
+            pass
+
+    @classmethod
+    def restore_products_delta(cls, delta: Dict[str, Any]) -> None:
+        """Khôi phục các thay đổi Thêm/Sửa/Xóa sản phẩm từ Cookie trình duyệt (trên Vercel Serverless)."""
+        if not isinstance(delta, dict):
+            return
+        try:
+            del_skus = [str(s).strip().upper() for s in delta.get("deleted_skus", []) if s]
+            del_ids = [int(i) for i in delta.get("deleted_ids", []) if str(i).isdigit()]
+            if del_skus or del_ids:
+                for p in list(cls.iter_all()):
+                    if p.id in del_ids or str(p.sku).strip().upper() in del_skus:
+                        cls.delete_product_permanently(p.id)
+
+            upserts = delta.get("upserts", [])
+            if isinstance(upserts, list) and upserts:
+                existing_by_sku = {str(p.sku).strip().upper(): p for p in cls.iter_all()}
+                existing_by_id = {p.id: p for p in existing_by_sku.values() if p.id}
+                for pd in upserts:
+                    if not isinstance(pd, dict):
+                        continue
+                    sku_key = str(pd.get("sku", "")).strip().upper()
+                    if not sku_key or sku_key in del_skus:
+                        continue
+                    pid = int(pd["id"]) if (pd.get("id") and str(pd["id"]).isdigit()) else None
+                    ex = existing_by_sku.get(sku_key) or (existing_by_id.get(pid) if pid else None)
+                    if ex:
+                        for field in ("sku", "name", "category", "pet_type", "breed", "price", "stock", "image_url", "description"):
+                            if field in pd and pd[field] is not None and pd[field] != "":
+                                val = pd[field]
+                                if field == "price":
+                                    val = max(1000.0, float(val))
+                                elif field == "stock":
+                                    val = max(0, int(val))
+                                setattr(ex, field, val)
+                        ex.save()
+                    else:
+                        cat_val = str(pd.get("category", "Thức ăn")).strip()
+                        if cat_val not in CATEGORIES:
+                            cat_val = "Thức ăn"
+                        pt_val = str(pd.get("pet_type", "Chó & Mèo")).strip()
+                        if pt_val not in PET_TYPES:
+                            pt_val = "Chó & Mèo"
+                        new_p = cls(
+                            sku=sku_key,
+                            name=str(pd.get("name", sku_key)).strip()[:150],
+                            category=cat_val,
+                            pet_type=pt_val,
+                            breed=str(pd.get("breed", "") or "").strip()[:100],
+                            price=max(1000.0, float(pd.get("price", 100000) or 100000)),
+                            stock=max(0, int(pd.get("stock", 1) or 0)),
+                            image_url=str(pd.get("image_url", "") or "").strip(),
+                            description=str(pd.get("description", "") or "").strip()[:1000],
+                        )
+                        new_p.save()
+        except Exception:
+            pass
 
 
 class SpaBooking(BaseModel):
@@ -835,12 +1087,84 @@ class User(BaseModel):
 
             with open(USERS_STORE_PATH, "w", encoding="utf-8") as f:
                 json.dump(records, f, ensure_ascii=False, indent=2)
+
+            if os.path.exists(DELETED_USERS_PATH):
+                with open(DELETED_USERS_PATH, "r", encoding="utf-8") as df:
+                    del_list = json.load(df)
+                if isinstance(del_list, list):
+                    new_del = [
+                        d for d in del_list
+                        if isinstance(d, dict) and str(d.get("username", "")).strip().lower() != u_lower
+                    ]
+                    if len(new_del) != len(del_list):
+                        with open(DELETED_USERS_PATH, "w", encoding="utf-8") as df:
+                            json.dump(new_del, df, ensure_ascii=False, indent=2)
         except Exception:
             pass
 
     @classmethod
+    def get_deleted_users_set(cls) -> Tuple[set, set]:
+        del_usernames = set()
+        del_phones = set()
+        if os.path.exists(DELETED_USERS_PATH):
+            try:
+                with open(DELETED_USERS_PATH, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, list):
+                    for d in data:
+                        if isinstance(d, dict):
+                            u = str(d.get("username", "")).strip().lower().replace("@", "")
+                            p = str(d.get("phone", "")).strip()
+                            if u:
+                                del_usernames.add(u)
+                            if p:
+                                del_phones.add(p)
+            except Exception:
+                pass
+        return del_usernames, del_phones
+
+    @classmethod
+    def delete_user_permanently(cls, user_id: int) -> Optional[Dict[str, Any]]:
+        target = cls.get_by_id(user_id)
+        target_info = target.to_dict() if target else None
+        t_uname = str(getattr(target, "username", "") or "").strip().lower() if target else ""
+        t_phone = str(getattr(target, "phone", "") or "").strip() if target else ""
+
+        try:
+            del_list = []
+            if os.path.exists(DELETED_USERS_PATH):
+                with open(DELETED_USERS_PATH, "r", encoding="utf-8") as df:
+                    loaded = json.load(df)
+                    if isinstance(loaded, list):
+                        del_list = loaded
+            del_list.append({"id": user_id, "username": t_uname, "phone": t_phone})
+            os.makedirs(os.path.dirname(DELETED_USERS_PATH), exist_ok=True)
+            with open(DELETED_USERS_PATH, "w", encoding="utf-8") as df:
+                json.dump(del_list[-200:], df, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+        super().delete_by_id(user_id)
+        cls.sync_all_to_json_file()
+        return target_info
+
+    @classmethod
+    def delete_by_id(cls, record_id: int) -> bool:
+        target = cls.get_by_id(record_id)
+        cls.delete_user_permanently(record_id)
+        return target is not None
+
+    @classmethod
     def sync_from_json_store(cls) -> None:
         """Khôi phục danh sách tài khoản từ data/users_store.json vào SQLite khi khởi động."""
+        try:
+            del_unames, _ = cls.get_deleted_users_set()
+            if del_unames:
+                for u in list(cls.iter_all()):
+                    if str(u.username).strip().lower() in del_unames:
+                        super().delete_by_id(u.id)
+        except Exception:
+            pass
         if not os.path.exists(USERS_STORE_PATH):
             return
         try:
@@ -878,6 +1202,11 @@ class User(BaseModel):
     def restore_accounts_list(cls, accounts: List[Dict[str, str]]) -> None:
         """Khôi phục danh sách tài khoản từ Cookie/LocalStorage/JSON vào SQLite và cập nhật thông tin mới nhất."""
         try:
+            del_unames, _ = cls.get_deleted_users_set()
+            if del_unames:
+                for u in list(cls.iter_all()):
+                    if str(u.username).strip().lower() in del_unames:
+                        super().delete_by_id(u.id)
             existing_map = {str(getattr(u, "username", "") or "").strip().lower().replace("@", ""): u for u in cls.iter_all()}
             for acc in accounts:
                 if not isinstance(acc, dict):
@@ -892,6 +1221,8 @@ class User(BaseModel):
                 if not uname or not p_hash:
                     continue
                 u_key = uname.lower()
+                if u_key in del_unames:
+                    continue
                 if u_key in existing_map:
                     ex_u = existing_map[u_key]
                     changed = False
@@ -1079,8 +1410,65 @@ class Voucher(BaseModel):
 
             with open(VOUCHERS_STORE_PATH, "w", encoding="utf-8") as f:
                 json.dump(records, f, ensure_ascii=False, indent=2)
+
+            if os.path.exists(DELETED_VOUCHERS_PATH):
+                with open(DELETED_VOUCHERS_PATH, "r", encoding="utf-8") as df:
+                    del_list = json.load(df)
+                if isinstance(del_list, list):
+                    new_del = [
+                        d for d in del_list
+                        if isinstance(d, dict) and str(d.get("code", "")).strip().upper() != code_upper
+                    ]
+                    if len(new_del) != len(del_list):
+                        with open(DELETED_VOUCHERS_PATH, "w", encoding="utf-8") as df:
+                            json.dump(new_del, df, ensure_ascii=False, indent=2)
         except Exception:
             pass
+
+    @classmethod
+    def get_deleted_vouchers_set(cls) -> set:
+        del_codes = set()
+        if os.path.exists(DELETED_VOUCHERS_PATH):
+            try:
+                with open(DELETED_VOUCHERS_PATH, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, list):
+                    for d in data:
+                        if isinstance(d, dict):
+                            c = str(d.get("code", "")).strip().upper()
+                            if c:
+                                del_codes.add(c)
+            except Exception:
+                pass
+        return del_codes
+
+    @classmethod
+    def delete_voucher_permanently(cls, voucher_id: int) -> Optional[Dict[str, Any]]:
+        target = cls.get_by_id(voucher_id)
+        target_info = target.to_dict() if target else None
+        t_code = str(getattr(target, "code", "") or "").strip().upper() if target else ""
+        try:
+            del_list = []
+            if os.path.exists(DELETED_VOUCHERS_PATH):
+                with open(DELETED_VOUCHERS_PATH, "r", encoding="utf-8") as df:
+                    loaded = json.load(df)
+                    if isinstance(loaded, list):
+                        del_list = loaded
+            del_list.append({"id": voucher_id, "code": t_code})
+            os.makedirs(os.path.dirname(DELETED_VOUCHERS_PATH), exist_ok=True)
+            with open(DELETED_VOUCHERS_PATH, "w", encoding="utf-8") as df:
+                json.dump(del_list[-100:], df, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        super().delete_by_id(voucher_id)
+        cls.sync_all_to_json_file()
+        return target_info
+
+    @classmethod
+    def delete_by_id(cls, record_id: int) -> bool:
+        target = cls.get_by_id(record_id)
+        cls.delete_voucher_permanently(record_id)
+        return target is not None
 
     @classmethod
     def sync_all_to_json_file(cls) -> List[Dict[str, Any]]:
@@ -1095,6 +1483,14 @@ class Voucher(BaseModel):
 
     @classmethod
     def sync_from_json_store(cls) -> None:
+        try:
+            del_codes = cls.get_deleted_vouchers_set()
+            if del_codes:
+                for v in list(cls.iter_all()):
+                    if str(v.code).strip().upper() in del_codes:
+                        super().delete_by_id(v.id)
+        except Exception:
+            pass
         if not os.path.exists(VOUCHERS_STORE_PATH):
             return
         try:
@@ -1108,12 +1504,17 @@ class Voucher(BaseModel):
     @classmethod
     def restore_vouchers_list(cls, vouchers: List[Dict[str, Any]]) -> None:
         try:
+            del_codes = cls.get_deleted_vouchers_set()
+            if del_codes:
+                for v in list(cls.iter_all()):
+                    if str(v.code).strip().upper() in del_codes:
+                        super().delete_by_id(v.id)
             existing_map = {str(v.code).strip().upper(): v for v in cls.iter_all()}
             for vd in vouchers:
                 if not isinstance(vd, dict):
                     continue
                 code_str = str(vd.get("code", "")).strip().upper()
-                if not code_str:
+                if not code_str or code_str in del_codes:
                     continue
                 if code_str in existing_map:
                     ex = existing_map[code_str]

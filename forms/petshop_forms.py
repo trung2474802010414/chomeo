@@ -68,7 +68,8 @@ class ProductForm(BaseFlaskForm):
     """Form Thêm / Cập nhật sản phẩm trong trang `/admin`."""
 
     def _clean_fields(self) -> None:
-        sku = str(self.raw_data.get("sku", "")).strip().upper()
+        raw_sku = str(self.raw_data.get("sku", "")).strip().upper()
+        sku = re.sub(r"\s+", "-", raw_sku)
         name = str(self.raw_data.get("name", "")).strip()
         category = str(self.raw_data.get("category", "")).strip()
         pet_type = str(self.raw_data.get("pet_type", "")).strip()

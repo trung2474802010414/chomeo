@@ -374,9 +374,119 @@ def _sync_vouchers_vault_cookie(resp: Response, all_vouchers: List[Dict[str, Any
     return resp
 
 
+def _read_cookie_products_delta() -> Dict[str, Any]:
+    """Đọc trạng thái Thêm / Sửa / Xóa sản phẩm từ Cookie trình duyệt (bền vững trên Vercel Serverless)."""
+    raw_c = request.cookies.get("mw_products_delta", "")
+    if not raw_c:
+        return {"upserts": [], "deleted_skus": [], "deleted_ids": []}
+    try:
+        import base64
+        import zlib
+
+        if raw_c.startswith("z:"):
+            compressed = base64.urlsafe_b64decode(raw_c[2:].encode("ascii"))
+            decoded = json.loads(zlib.decompress(compressed).decode("utf-8"))
+        else:
+            decoded = json.loads(urllib.parse.unquote(raw_c))
+        if isinstance(decoded, dict):
+            return {
+                "upserts": decoded.get("upserts", []) if isinstance(decoded.get("upserts"), list) else [],
+                "deleted_skus": decoded.get("deleted_skus", []) if isinstance(decoded.get("deleted_skus"), list) else [],
+                "deleted_ids": decoded.get("deleted_ids", []) if isinstance(decoded.get("deleted_ids"), list) else [],
+            }
+    except Exception:
+        pass
+    return {"upserts": [], "deleted_skus": [], "deleted_ids": []}
+
+
+def _sync_products_delta_cookie(
+    resp: Response,
+    upserted_prod: Dict[str, Any] = None,
+    deleted_sku: str = None,
+    deleted_id: int = None,
+    clear_all: bool = False,
+) -> Response:
+    """Đính kèm thay đổi Thêm/Sửa/Xóa sản phẩm vào Cookie mw_products_delta (< 3.5KB)."""
+    try:
+        if clear_all:
+            resp.delete_cookie("mw_products_delta")
+            return resp
+
+        import base64
+        import zlib
+
+        delta = _read_cookie_products_delta()
+        upserts: List[Dict[str, Any]] = delta.get("upserts", [])
+        del_skus: List[str] = [str(s).strip().upper() for s in delta.get("deleted_skus", []) if s]
+        del_ids: List[int] = [int(i) for i in delta.get("deleted_ids", []) if str(i).isdigit()]
+
+        if deleted_sku:
+            s_up = str(deleted_sku).strip().upper()
+            if s_up and s_up not in del_skus:
+                del_skus.append(s_up)
+            upserts = [u for u in upserts if str(u.get("sku", "")).strip().upper() != s_up]
+
+        if deleted_id is not None:
+            if int(deleted_id) not in del_ids:
+                del_ids.append(int(deleted_id))
+            upserts = [u for u in upserts if u.get("id") != int(deleted_id)]
+
+        if upserted_prod and isinstance(upserted_prod, dict):
+            s_up = str(upserted_prod.get("sku", "")).strip().upper()
+            p_id = upserted_prod.get("id")
+            if s_up in del_skus:
+                del_skus = [x for x in del_skus if x != s_up]
+            if p_id in del_ids:
+                del_ids = [x for x in del_ids if x != p_id]
+
+            img_val = str(upserted_prod.get("image_url", "") or "").strip()
+            if img_val.startswith("data:image/") and len(img_val) > 600:
+                img_val = ""
+
+            compact_p = {
+                "id": p_id,
+                "sku": s_up,
+                "name": str(upserted_prod.get("name", ""))[:120],
+                "category": str(upserted_prod.get("category", "Thức ăn")),
+                "pet_type": str(upserted_prod.get("pet_type", "Chó & Mèo")),
+                "breed": str(upserted_prod.get("breed", "") or "")[:80],
+                "price": float(upserted_prod.get("price", 100000) or 100000),
+                "stock": int(upserted_prod.get("stock", 0) or 0),
+                "image_url": img_val,
+                "description": str(upserted_prod.get("description", "") or "")[:240],
+            }
+            upserts = [
+                u for u in upserts
+                if str(u.get("sku", "")).strip().upper() != s_up and (not p_id or u.get("id") != p_id)
+            ]
+            upserts.append(compact_p)
+
+        payload = {
+            "upserts": upserts[-20:],
+            "deleted_skus": del_skus[-40:],
+            "deleted_ids": del_ids[-40:],
+        }
+        raw_bytes = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        encoded = "z:" + base64.urlsafe_b64encode(zlib.compress(raw_bytes, level=9)).decode("ascii")
+        resp.set_cookie(
+            "mw_products_delta",
+            encoded,
+            max_age=365 * 24 * 3600,
+            samesite="Lax",
+            httponly=False,
+        )
+    except Exception:
+        pass
+    return resp
+
+
 @app.before_request
 def restore_persistent_accounts_before_request() -> None:
-    """Tự động đồng bộ tài khoản, đơn hàng, lịch Spa, ngân hàng và email Admin từ JSON & Cookie trước mỗi request."""
+    """Tự động đồng bộ sản phẩm, tài khoản, đơn hàng, lịch Spa, ngân hàng và email Admin từ JSON & Cookie trước mỗi request."""
+    Product.sync_from_json_store()
+    prod_delta = _read_cookie_products_delta()
+    if prod_delta.get("upserts") or prod_delta.get("deleted_skus") or prod_delta.get("deleted_ids"):
+        Product.restore_products_delta(prod_delta)
     User.sync_from_json_store()
     vault = _read_cookie_accounts_vault()
     cur_backup = session.get("current_user_backup")
@@ -1344,21 +1454,31 @@ def add_to_cart_route():
 
 
 @app.route("/cart/update", methods=["POST"])
+@app.route("/cart/remove", methods=["POST"])
 def update_cart_route():
-    """Tăng/giảm số lượng sản phẩm trong giỏ hàng."""
+    """Tăng/giảm số lượng hoặc xóa 1 sản phẩm trong giỏ hàng."""
     product_id = request.form.get("product_id", "").strip()
-    delta = int(request.form.get("delta", "0") or "0")
+    remove_flag = request.form.get("remove", "").strip() == "1" or request.path.endswith("/remove")
+    try:
+        delta = int(request.form.get("delta", "0") or "0")
+    except ValueError:
+        delta = 0
     cart = get_session_cart()
 
     if product_id in cart:
-        prod = Product.get_by_id(int(product_id))
-        new_qty = cart[product_id] + delta
-        if new_qty <= 0 or not prod:
+        prod = Product.get_by_id(int(product_id)) if product_id.isdigit() else None
+        if remove_flag:
             cart.pop(product_id, None)
-        elif new_qty <= prod.stock:
-            cart[product_id] = new_qty
+            flash(f"Đã xóa '{prod.name if prod else ('#' + product_id)}' khỏi giỏ hàng.", "success")
         else:
-            flash(f"Kho chỉ còn {prod.stock} sản phẩm '{prod.name}'.", "error")
+            new_qty = cart[product_id] + delta
+            if new_qty <= 0 or not prod:
+                cart.pop(product_id, None)
+                flash(f"Đã xóa '{prod.name if prod else ('#' + product_id)}' khỏi giỏ hàng.", "success")
+            elif new_qty <= prod.stock:
+                cart[product_id] = new_qty
+            else:
+                flash(f"Kho chỉ còn {prod.stock} sản phẩm '{prod.name}'.", "error")
         session["cart"] = cart
         session.modified = True
     return redirect(url_for("cart_page"))
@@ -1965,32 +2085,139 @@ def admin_save_product():
 
     if form.validate_on_submit():
         d = form.data
-        if product_id.isdigit():
-            prod = Product.get_by_id(int(product_id))
-            if prod:
-                for k, v in d.items():
-                    setattr(prod, k, v)
-                prod.save()
-                flash(f"Đã cập nhật sản phẩm #{prod.id} ({prod.name}).", "success")
-        else:
-            new_prod = Product(**d)
-            new_prod.save()
-            flash(f"Đã thêm sản phẩm mới '{new_prod.name}' vào kho!", "success")
+        saved_prod = None
+        try:
+            if product_id.isdigit() and int(product_id) > 0:
+                prod = Product.get_by_id(int(product_id))
+                if prod:
+                    for k, v in d.items():
+                        setattr(prod, k, v)
+                    prod.save()
+                    saved_prod = prod
+                    flash(f"✅ Đã cập nhật sản phẩm #{prod.id} ({prod.name}) thành công!", "success")
+                else:
+                    new_prod = Product(**d)
+                    new_prod.save()
+                    saved_prod = new_prod
+                    flash(f"✅ Đã lưu sản phẩm '{new_prod.name}' vào kho!", "success")
+            else:
+                # Kiểm tra nếu mã SKU đã tồn tại thì cập nhật sản phẩm đó hoặc báo thành công
+                existing_sku_prod = next(
+                    (p for p in Product.iter_all() if str(p.sku).strip().upper() == d["sku"]),
+                    None,
+                )
+                if existing_sku_prod:
+                    for k, v in d.items():
+                        setattr(existing_sku_prod, k, v)
+                    existing_sku_prod.save()
+                    saved_prod = existing_sku_prod
+                    flash(f"✅ Mã SKU '{d['sku']}' đã có sẵn — hệ thống đã cập nhật thông tin mới cho '{existing_sku_prod.name}'!", "success")
+                else:
+                    new_prod = Product(**d)
+                    new_prod.save()
+                    saved_prod = new_prod
+                    flash(f"🎉 Đã thêm sản phẩm mới '{new_prod.name}' (SKU: {new_prod.sku}) vào kho!", "success")
+        except ValidationError as exc:
+            flash(f"Lỗi kiểm tra dữ liệu sản phẩm: {exc}", "error")
+            return redirect(url_for("admin_page", tab="products", open_modal="1", edit_id=product_id or ""))
+
+        resp = make_response(redirect(url_for("admin_page", tab="products")))
+        if saved_prod:
+            resp = _sync_products_delta_cookie(resp, upserted_prod=saved_prod.to_dict())
+        return resp
     else:
         err_msgs = "; ".join(f"{k}: {', '.join(v)}" for k, v in form.errors.items())
-        flash(f"Dữ liệu sản phẩm chưa hợp lệ: {err_msgs}", "error")
-
-    return redirect(url_for("admin_page", tab="products"))
+        flash(f"⚠️ Dữ liệu sản phẩm chưa hợp lệ: {err_msgs}", "error")
+        return redirect(url_for("admin_page", tab="products", open_modal="1", edit_id=product_id or ""))
 
 
 @app.route("/admin/products/<int:product_id>/delete", methods=["POST"])
 @admin_required
 def admin_delete_product(product_id: int):
-    if Product.delete_by_id(product_id):
-        flash(f"Đã xóa sản phẩm #{product_id}.", "success")
+    target_info = Product.delete_product_permanently(product_id)
+    if target_info:
+        flash(f"🗑️ Đã xóa vĩnh viễn sản phẩm #{product_id} ({target_info.get('name', '')}) khỏi kho.", "success")
     else:
-        flash(f"Không tìm thấy sản phẩm #{product_id}.", "error")
-    return redirect(url_for("admin_page", tab="products"))
+        flash(f"🗑️ Đã xóa sản phẩm #{product_id} khỏi danh sách hiển thị.", "success")
+    resp = make_response(redirect(url_for("admin_page", tab="products")))
+    return _sync_products_delta_cookie(
+        resp,
+        deleted_sku=(target_info.get("sku") if target_info else ""),
+        deleted_id=product_id,
+    )
+
+
+@app.route("/admin/bookings/save", methods=["POST"])
+@admin_required
+def admin_save_booking():
+    """Admin thêm mới hoặc chỉnh sửa toàn diện thông tin lịch hẹn Spa ngay trong Dashboard."""
+    booking_id = request.form.get("booking_id", "").strip()
+    customer_name = request.form.get("customer_name", "").strip()
+    phone = request.form.get("phone", "").strip()
+    email = request.form.get("email", "").strip()
+    pet_name = request.form.get("pet_name", "").strip() or "Bé cưng"
+    pet_type = request.form.get("pet_type", "Mèo").strip()
+    if pet_type not in ("Chó", "Mèo"):
+        pet_type = "Mèo"
+    try:
+        pet_weight_kg = max(0.2, min(80.0, float(request.form.get("pet_weight_kg", "3.5") or 3.5)))
+    except ValueError:
+        pet_weight_kg = 3.5
+
+    service_name = request.form.get("service_name", "").strip()
+    if service_name not in SPA_SERVICES:
+        service_name = next(iter(SPA_SERVICES.keys()))
+    appointment_date = request.form.get("appointment_date", "").strip() or datetime.now().strftime("%Y-%m-%d")
+    appointment_time = request.form.get("appointment_time", "").strip() or "09:30"
+    status_val = request.form.get("status", "Chờ xác nhận").strip()
+    note = request.form.get("note", "").strip()[:300]
+
+    if len(customer_name) < 2 or not phone:
+        flash("Vui lòng nhập đầy đủ Họ tên chủ nuôi và Số điện thoại.", "error")
+        return redirect(url_for("admin_page", tab="bookings"))
+
+    total_price = SpaBooking.calculate_service_price(service_name, pet_weight_kg)
+    try:
+        if booking_id.isdigit() and int(booking_id) > 0:
+            b_obj = SpaBooking.get_by_id(int(booking_id))
+            if b_obj:
+                b_obj.customer_name = customer_name
+                b_obj.phone = phone
+                b_obj.email = email
+                b_obj.pet_name = pet_name
+                b_obj.pet_type = pet_type
+                b_obj.pet_weight_kg = pet_weight_kg
+                b_obj.service_name = service_name
+                b_obj.appointment_date = appointment_date
+                b_obj.appointment_time = appointment_time
+                b_obj.total_price = total_price
+                b_obj.status = status_val
+                b_obj.note = note
+                b_obj.save()
+                flash(f"✅ Đã cập nhật lịch hẹn Spa #{b_obj.id} của khách '{customer_name}' (Bé {pet_name})!", "success")
+        else:
+            new_b = SpaBooking(
+                customer_name=customer_name,
+                phone=phone,
+                email=email,
+                pet_name=pet_name,
+                pet_type=pet_type,
+                pet_weight_kg=pet_weight_kg,
+                service_name=service_name,
+                appointment_date=appointment_date,
+                appointment_time=appointment_time,
+                total_price=total_price,
+                status=status_val,
+                note=note,
+            )
+            new_b.save()
+            flash(f"🎉 Đã tạo lịch hẹn Spa mới #{new_b.id} cho khách '{customer_name}' (Bé {pet_name})!", "success")
+    except ValidationError as exc:
+        flash(f"Không thể lưu lịch hẹn Spa: {exc}", "error")
+
+    all_bookings = SpaBooking.sync_all_to_json_file()
+    resp = make_response(redirect(url_for("admin_page", tab="bookings")))
+    return _sync_bookings_vault_cookie(resp, all_bookings)
 
 
 @app.route("/admin/bookings/<int:booking_id>/status", methods=["POST"])
@@ -2049,6 +2276,41 @@ def admin_delete_booking(booking_id: int):
     except Exception:
         pass
     return resp
+
+
+@app.route("/admin/orders/save", methods=["POST"])
+@admin_required
+def admin_save_order():
+    """Admin chỉnh sửa thông tin người nhận, SĐT, Email, Địa chỉ giao hàng, Phương thức TT & Trạng thái đơn hàng."""
+    order_id = request.form.get("order_id", "").strip()
+    customer_name = request.form.get("customer_name", "").strip()
+    phone = request.form.get("phone", "").strip()
+    email = request.form.get("email", "").strip()
+    address = request.form.get("address", "").strip()
+    payment_method = request.form.get("payment_method", "cod").strip()
+    status_val = request.form.get("status", "Chờ xác nhận").strip()
+
+    if not order_id.isdigit() or not customer_name or not phone or not address:
+        flash("Vui lòng nhập đầy đủ Tên người nhận, SĐT và Địa chỉ giao hàng.", "error")
+        return redirect(url_for("admin_page", tab="orders"))
+
+    order_obj = Order.get_by_id(int(order_id))
+    if order_obj:
+        order_obj.customer_name = customer_name[:100]
+        order_obj.phone = phone[:20]
+        order_obj.email = email[:120]
+        order_obj.address = address[:250]
+        order_obj.payment_method = payment_method
+        if status_val in ORDER_STATUSES:
+            order_obj.status = status_val
+        order_obj.save()
+        flash(f"✅ Đã cập nhật thông tin đơn hàng #DH{order_obj.id} của khách '{customer_name}' thành công!", "success")
+    else:
+        flash(f"Không tìm thấy đơn hàng #{order_id}.", "error")
+
+    all_orders = Order.sync_all_to_json_file()
+    resp = make_response(redirect(url_for("admin_page", tab="orders")))
+    return _sync_orders_vault_cookie(resp, all_orders)
 
 
 @app.route("/admin/orders/<int:order_id>/status", methods=["POST"])
@@ -2170,12 +2432,14 @@ def admin_save_customer():
 @admin_required
 def admin_delete_customer(user_id: int):
     """Admin xóa tài khoản khách hàng khỏi hệ thống."""
-    if User.delete_by_id(user_id):
-        flash(f"Đã xóa tài khoản khách hàng #{user_id} khỏi hệ thống.", "success")
+    target_info = User.delete_user_permanently(user_id)
+    if target_info:
+        flash(f"🗑️ Đã xóa tài khoản khách hàng #{user_id} (@{target_info.get('username', '')}) khỏi hệ thống.", "success")
     else:
-        flash(f"Không tìm thấy tài khoản khách hàng #{user_id}.", "error")
+        flash(f"🗑️ Đã xóa tài khoản khách hàng #{user_id}.", "success")
     all_users = User.sync_all_to_json_file()
     resp = make_response(redirect(url_for("admin_page", tab="customers")))
+    resp.delete_cookie("accounts_vault")
     return _sync_users_vault_cookie(resp, all_users)
 
 
@@ -2223,8 +2487,9 @@ def admin_restock_product(product_id: int):
             pass
 
     prod.save()
-    flash(f"Đã cập nhật kho cho '{prod.name}' (Tồn kho hiện tại: {prod.stock}).", "success")
-    return redirect(url_for("admin_page", tab="inventory_alerts"))
+    flash(f"✅ Đã cập nhật kho cho '{prod.name}' (Tồn kho hiện tại: {prod.stock}).", "success")
+    resp = make_response(redirect(url_for("admin_page", tab="inventory_alerts")))
+    return _sync_products_delta_cookie(resp, upserted_prod=prod.to_dict())
 
 
 @app.route("/admin/vouchers/save", methods=["POST"])
@@ -2408,9 +2673,10 @@ def admin_send_marketing_email():
 @app.route("/admin/system/resync-seed", methods=["POST"])
 @admin_required
 def admin_resync_seed():
-    init_db_and_seed()
-    flash("Đã đồng bộ và kiểm tra toàn bộ 42 sản phẩm chuẩn trong SEED_CATALOG thành công!", "success")
-    return redirect(url_for("admin_page", tab="system_settings"))
+    init_db_and_seed(force_reset=True)
+    flash("Đã khôi phục và đồng bộ toàn bộ 42 sản phẩm chuẩn trong SEED_CATALOG thành công!", "success")
+    resp = make_response(redirect(url_for("admin_page", tab="system_settings")))
+    return _sync_products_delta_cookie(resp, clear_all=True)
 
 
 @app.route("/admin/system/save-smtp", methods=["POST"])
