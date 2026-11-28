@@ -34,14 +34,14 @@
         <!-- DANH SÁCH SẢN PHẨM DẠNG CARD CHỐNG CHÌM MÀU TUYỆT ĐỐI -->
         <div class="cart-items-wrapper">
             {% for item in cart_items %}
-            <div class="cart-item-row" style="background:#ffffff !important; border:1.5px solid #fae4d4 !important; border-radius:16px; padding:16px 18px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; box-shadow:0 4px 18px rgba(180,100,60,0.05);">
+            <div class="cart-item-row" style="background:#ffffff !important; border:1.5px solid #fae4d4 !important; border-radius:14px; padding:12px 15px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; box-shadow:0 4px 14px rgba(180,100,60,0.05);">
                 <!-- Cột trái: Icon & Tên sản phẩm & SKU -->
-                <div style="display:flex; align-items:center; gap:14px; flex:1; min-width:230px;">
-                    <div style="width:50px; height:50px; border-radius:14px; background:linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%); border:1px solid #fed7aa; display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0;">
+                <div style="display:flex; align-items:center; gap:11px; flex:1; min-width:210px;">
+                    <div style="width:42px; height:42px; border-radius:11px; background:linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%); border:1px solid #fed7aa; display:flex; align-items:center; justify-content:center; font-size:21px; flex-shrink:0;">
                         {% if 'chó' in item.name.lower() %}🐶{% elif 'mèo' in item.name.lower() %}🐱{% elif 'hạt' in item.name.lower() or 'pate' in item.name.lower() or 'thức ăn' in item.name.lower() %}🥩{% elif 'vệ sinh' in item.name.lower() or 'cát' in item.name.lower() %}✨{% else %}📦{% endif %}
                     </div>
                     <div style="flex:1;">
-                        <strong style="color:#2b180d !important; font-size:15.5px !important; font-weight:800 !important; display:block; margin-bottom:4px; line-height:1.35;">{{ item.name }}</strong>
+                        <strong style="color:#2b180d !important; font-size:14px !important; font-weight:800 !important; display:block; margin-bottom:3px; line-height:1.32;">{{ item.name }}</strong>
                         <div style="font-size:12px; color:#6e5444; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                             <span style="color:#8c7161;">Mã SKU:</span>
                             <code style="color:#0369a1; background:#e0f2fe; padding:2px 6px; border-radius:6px; font-weight:700;">{{ item.sku }}</code>
@@ -151,21 +151,21 @@
                 <span>🎟️ Giảm giá Voucher (<strong id="voucherAppliedCodeText">{{ applied_voucher.code if applied_voucher else '' }}</strong>):</span>
                 <strong id="voucherDiscountValueText">-{{ "{:,.0f}".format(discount_amount|default(0)) }} đ</strong>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:8px; border-top:1px solid #fed7aa;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; padding-top:8px; border-top:1px solid #fed7aa;">
                 <div>
-                    <span style="font-size:14px; font-weight:800; color:#2b180d; text-transform:uppercase; letter-spacing:0.5px;">TỔNG TIỀN THANH TOÁN:</span>
-                    <div style="font-size:12px; color:#8c7161; margin-top:2px;">(Đã bao gồm thuế VAT &amp; ưu đãi Voucher)</div>
+                    <span style="font-size:13px; font-weight:800; color:#2b180d; text-transform:uppercase; letter-spacing:0.4px;">TỔNG TIỀN THANH TOÁN:</span>
+                    <div style="font-size:11.5px; color:#8c7161; margin-top:2px;">(Đã bao gồm thuế VAT &amp; ưu đãi Voucher)</div>
                 </div>
-                <strong id="finalCartTotalText" style="font-size:28px; font-weight:900; color:#047857; letter-spacing:-0.5px;">{{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</strong>
+                <strong id="finalCartTotalText" style="font-size:21px; font-weight:900; color:#047857; letter-spacing:-0.4px;">{{ "{:,.0f}".format(final_cart_total|default(cart_total)) }} đ</strong>
             </div>
         </div>
         {% else %}
         <!-- GIỎ HÀNG TRỐNG -->
-        <div class="text-center" style="padding:48px 16px;">
-            <div style="font-size:48px; margin-bottom:14px;">🛒</div>
-            <h3 style="color:#2b180d; font-size:19px; margin-bottom:8px;">Giỏ hàng của bạn đang trống</h3>
-            <p style="color:#6e5444; margin-bottom:24px; font-size:14.5px;">Hãy khám phá hàng chục giống chó mèo cảnh thuần chủng và đồ dùng phụ kiện tại cửa hàng!</p>
-            <a href="{{ url_for('shop_page') }}" class="btn btn-primary" style="padding:12px 28px; font-weight:800;">🐾 Mua sắm ngay tại Cửa hàng</a>
+        <div class="text-center" style="padding:32px 14px;">
+            <div style="font-size:38px; margin-bottom:10px;">🛒</div>
+            <h3 style="color:#2b180d; font-size:17px; margin-bottom:6px;">Giỏ hàng của bạn đang trống</h3>
+            <p style="color:#6e5444; margin-bottom:18px; font-size:13.5px;">Hãy khám phá hàng chục giống chó mèo cảnh thuần chủng và đồ dùng phụ kiện tại cửa hàng!</p>
+            <a href="{{ url_for('shop_page') }}" class="btn btn-primary" style="padding:9px 22px; font-weight:800;">🐾 Mua sắm ngay tại Cửa hàng</a>
         </div>
         {% endif %}
     </div>

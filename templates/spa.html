@@ -5,49 +5,49 @@
 {% block content %}
 <!-- THÔNG BÁO VÉ SPA XÁC NHẬN NỔI BẬT DỄ NHÌN (KHI KHÁCH VỪA ĐẶT THÀNH CÔNG) -->
 {% if booking_success %}
-<div class="card" style="margin-bottom:24px; padding:24px; border:2px solid #10b981; background:#ffffff; box-shadow:0 16px 40px rgba(16,185,129,0.15); border-radius:20px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1px dashed #a7f3d0; padding-bottom:14px;">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div style="font-size:36px;">🎟️</div>
+<div class="card" style="margin-bottom:18px; padding:18px 20px; border:2px solid #10b981; background:#ffffff; box-shadow:0 12px 30px rgba(16,185,129,0.14); border-radius:18px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; border-bottom:1px dashed #a7f3d0; padding-bottom:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="font-size:28px;">🎟️</div>
             <div>
-                <span class="badge badge-stock-ok" style="font-size:12px; font-weight:800;">✓ ĐẶT LỊCH SPA THÀNH CÔNG</span>
-                <h2 style="font-size:22px; color:#2b180d; margin:4px 0 0;">Mã Phiếu Hẹn: #SPA{{ booking_success.id }}</h2>
+                <span class="badge badge-stock-ok" style="font-size:11px; font-weight:800;">✓ ĐẶT LỊCH SPA THÀNH CÔNG</span>
+                <h2 style="font-size:18px; color:#2b180d; margin:3px 0 0;">Mã Phiếu Hẹn: #SPA{{ booking_success.id }}</h2>
             </div>
         </div>
         <div style="text-align:right;">
-            <span style="font-size:12px; color:#6e5444;">Tổng chi phí dịch vụ:</span>
-            <div style="font-size:24px; font-weight:900; color:#047857;">{{ "{:,.0f}".format(booking_success.total_price) }} đ</div>
+            <span style="font-size:11.5px; color:#6e5444;">Tổng chi phí dịch vụ:</span>
+            <div style="font-size:19.5px; font-weight:900; color:#047857;">{{ "{:,.0f}".format(booking_success.total_price) }} đ</div>
         </div>
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; font-size:13.5px; color:#2b180d; margin-bottom:20px;">
-        <div style="background:#fff7ed; padding:12px 14px; border-radius:12px; border:1px solid #fed7aa;">
-            <div style="color:#6e5444; font-size:11.5px; text-transform:uppercase;">Dịch vụ đã chọn:</div>
-            <strong style="color:#2b180d; font-size:15px;">{{ booking_success.service_name }}</strong>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)); gap:10px; font-size:13px; color:#2b180d; margin-bottom:14px;">
+        <div style="background:#fff7ed; padding:10px 12px; border-radius:10px; border:1px solid #fed7aa;">
+            <div style="color:#6e5444; font-size:11px; text-transform:uppercase;">Dịch vụ đã chọn:</div>
+            <strong style="color:#2b180d; font-size:13.5px;">{{ booking_success.service_name }}</strong>
         </div>
-        <div style="background:#fff7ed; padding:12px 14px; border-radius:12px; border:1px solid #fed7aa;">
-            <div style="color:#6e5444; font-size:11.5px; text-transform:uppercase;">Bé cưng:</div>
-            <strong style="color:#d97706; font-size:15px;">{{ booking_success.pet_name }}</strong> ({{ booking_success.pet_type }}, {{ booking_success.pet_weight_kg }}kg)
+        <div style="background:#fff7ed; padding:10px 12px; border-radius:10px; border:1px solid #fed7aa;">
+            <div style="color:#6e5444; font-size:11px; text-transform:uppercase;">Bé cưng:</div>
+            <strong style="color:#d97706; font-size:13.5px;">{{ booking_success.pet_name }}</strong> ({{ booking_success.pet_type }}, {{ booking_success.pet_weight_kg }}kg)
         </div>
-        <div style="background:#fff7ed; padding:12px 14px; border-radius:12px; border:1px solid #fed7aa;">
-            <div style="color:#6e5444; font-size:11.5px; text-transform:uppercase;">Thời gian hẹn:</div>
-            <strong style="color:#059669; font-size:15px;">📅 {{ booking_success.appointment_date }} ⏰ {{ booking_success.appointment_time }}</strong>
+        <div style="background:#fff7ed; padding:10px 12px; border-radius:10px; border:1px solid #fed7aa;">
+            <div style="color:#6e5444; font-size:11px; text-transform:uppercase;">Thời gian hẹn:</div>
+            <strong style="color:#059669; font-size:13.5px;">📅 {{ booking_success.appointment_date }} ⏰ {{ booking_success.appointment_time }}</strong>
         </div>
-        <div style="background:#fff7ed; padding:12px 14px; border-radius:12px; border:1px solid #fed7aa;">
-            <div style="color:#6e5444; font-size:11.5px; text-transform:uppercase;">Khách hàng &amp; SĐT:</div>
+        <div style="background:#fff7ed; padding:10px 12px; border-radius:10px; border:1px solid #fed7aa;">
+            <div style="color:#6e5444; font-size:11px; text-transform:uppercase;">Khách hàng &amp; SĐT:</div>
             <strong style="color:#2b180d;">{{ booking_success.customer_name }}</strong> (<code>{{ booking_success.phone }}</code>)
         </div>
     </div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-top:1px dashed #a7f3d0; padding-top:16px;">
-        <div style="font-size:12.5px; color:#6e5444;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-top:1px dashed #a7f3d0; padding-top:12px;">
+        <div style="font-size:12px; color:#6e5444;">
             ✉️ Trạng thái: Vé điện tử đã gửi tới {% if booking_success.email %}<strong>{{ booking_success.email }}</strong>{% else %}hộp thư hệ thống{% endif %}.
         </div>
-        <div style="display:flex; gap:10px;">
-            <a href="{{ url_for('order_history_page', phone=booking_success.phone) }}" class="btn btn-teal" style="font-weight:800; padding:10px 20px;">
+        <div style="display:flex; gap:8px;">
+            <a href="{{ url_for('order_history_page', phone=booking_success.phone) }}" class="btn btn-teal btn-sm" style="font-weight:800; padding:7px 14px;">
                 📋 Xem Toàn Bộ Lịch Sử Hẹn &amp; Mua Hàng &rarr;
             </a>
-            <a href="{{ url_for('spa_page') }}" class="btn btn-outline" style="padding:10px 16px;">
+            <a href="{{ url_for('spa_page') }}" class="btn btn-outline btn-sm" style="padding:7px 13px;">
                 + Đặt thêm lịch khác
             </a>
         </div>
@@ -57,16 +57,16 @@
 
 <!-- Banner Giới Thiệu Dịch Vụ Spa 5 Sao Chuẩn Hoàng Gia -->
 <div class="spa-hero-banner">
-    <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:99px; background:#fff7ed; border:1px solid #fed7aa; font-size:12.5px; font-weight:800; color:#ea580c; margin-bottom:12px;">
+    <div style="display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:99px; background:#fff7ed; border:1px solid #fed7aa; font-size:11.5px; font-weight:800; color:#ea580c; margin-bottom:8px;">
         <span>✨ Meow &amp; Woof Luxury Pet Spa &amp; Grooming 5 Sao 🐾</span>
     </div>
-    <h1 style="font-size:28px; font-weight:800; color:#2b180d; margin-bottom:10px; letter-spacing:-0.4px;">
+    <h1 style="font-size:21.5px; font-weight:800; color:#2b180d; margin-bottom:8px; letter-spacing:-0.4px;">
         Chăm Sóc "Boss" Toàn Diện Với Quy Trình Chuẩn Quốc Tế
     </h1>
-    <p style="font-size:14.5px; color:#6e5444; max-width:820px; margin-bottom:20px; line-height:1.6;">
+    <p style="font-size:13px; color:#6e5444; max-width:780px; margin-bottom:14px; line-height:1.55;">
         Hệ thống phòng tắm sấy ion âm vô trùng chống hoảng sợ, liệu trình sục bọt massage thảo dược SOS, cắt tỉa tạo form Teddy thịnh hành và bác sĩ thú y trực tiếp kiểm tra da lông miễn phí.
     </p>
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
         <span class="spa-tier-pill" style="color:#047857; border-color:rgba(110,231,183,0.35); background:rgba(16,185,129,0.14);">🛡️ 100% Khử trùng tia cực tím UV</span>
         <span class="spa-tier-pill" style="color:#0369a1; border-color:rgba(147,197,253,0.3); background:rgba(59,130,246,0.12);">🌿 Sữa tắm thảo dược hữu cơ SOS</span>
         <span class="spa-tier-pill" style="color:#92400e; border-color:rgba(253,230,138,0.3); background:rgba(245,158,11,0.14);">🩺 Bác sĩ thú y kiểm tra da lông miễn phí</span>
@@ -74,13 +74,13 @@
     </div>
 </div>
 
-<div class="grid-2" style="align-items:start; gap:24px;">
+<div class="grid-2" style="align-items:start; gap:18px;">
     <!-- ================= CỘT TRÁI: DANH SÁCH GÓI DỊCH VỤ SPA & QUY TRÌNH ================= -->
     <div>
-        <div class="card" style="margin-bottom:24px;">
-            <div class="card-header" style="margin-bottom:14px;">
+        <div class="card" style="margin-bottom:18px;">
+            <div class="card-header" style="margin-bottom:12px;">
                 <div>
-                    <h2 class="card-title" style="font-size:21px; display:flex; align-items:center; gap:8px;">
+                    <h2 class="card-title" style="font-size:17.5px; display:flex; align-items:center; gap:7px;">
                         <span>🛁 Gói Dịch Vụ Spa &amp; Chăm Sóc Đẳng Cấp</span>
                     </h2>
                     <p class="section-subtitle">Chạm vào bất kỳ gói nào để tự động cập nhật vào phiếu hẹn &amp; tính giá minh bạch</p>
@@ -442,14 +442,14 @@
                             <div style="font-size:12px; color:#d97706; font-weight:700;" id="ticketTimeSummary">📅 <span id="summaryDate">Hôm nay</span> lúc ⏰ <span id="summaryTime">09:30</span></div>
                         </div>
                         <div style="text-align:right;">
-                            <div style="font-size:11px; color:#6e5444; text-transform:uppercase;">TỔNG TẠM TÍNH:</div>
-                            <div id="spaPricePreview" style="font-size:22px; font-weight:900; color:#047857; letter-spacing:-0.5px;">150.000 đ</div>
+                            <div style="font-size:10.5px; color:#6e5444; text-transform:uppercase;">TỔNG TẠM TÍNH:</div>
+                            <div id="spaPricePreview" style="font-size:18.5px; font-weight:900; color:#047857; letter-spacing:-0.4px;">150.000 đ</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Nút Submit -->
-                <button type="submit" class="btn-add-product-glow" style="width:100%; justify-content:center; padding:15px; font-size:16px; font-weight:800; margin-top:14px; letter-spacing:0.2px;">
+                <button type="submit" class="btn-add-product-glow" style="width:100%; justify-content:center; padding:11px; font-size:14px; font-weight:800; margin-top:12px; letter-spacing:0.2px;">
                     🐾 Xác Nhận Đặt Lịch Spa Cho Boss Ngay
                 </button>
                 <div style="text-align:center; margin-top:8px; font-size:12px; color:#6e5444;">

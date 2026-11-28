@@ -4,19 +4,19 @@
 
 {% block content %}
 <!-- Khung Đầu Trang Gọn Gàng: Tiêu Đề + Tìm Kiếm + Bộ Lọc 1-Chạm -->
-<div class="spa-hero-banner" style="padding:20px 24px; margin-bottom:20px;">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:14px;">
+<div class="spa-hero-banner" style="padding:16px 20px; margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
         <div>
-            <div style="display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:99px; background:#ffffff; border:1.5px solid #fdba74; font-size:11.5px; font-weight:800; color:#c2410c; margin-bottom:6px;">
+            <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:#ffffff; border:1.5px solid #fdba74; font-size:11px; font-weight:800; color:#c2410c; margin-bottom:5px;">
                 <span>📖 Bách Khoa 32 Giống Chó Mèo Thuần Chủng &amp; Cẩm Nang Thú Y</span>
             </div>
-            <h1 style="font-size:23px; font-weight:900; color:#2b180d; margin:0; letter-spacing:-0.3px;">
+            <h1 style="font-size:19.5px; font-weight:900; color:#2b180d; margin:0; letter-spacing:-0.3px;">
                 Tra Cứu Nhanh 12 Giống Mèo &amp; 20 Giống Chó Cảnh Tại Meow &amp; Woof
             </h1>
         </div>
 
         <!-- Nút Chuyển Nhanh Nhóm Loài -->
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
             <a href="{{ url_for('network_page', species='all') }}" class="btn {% if species == 'all' %}btn-primary{% else %}btn-outline{% endif %} btn-sm" style="background:{% if species != 'all' %}#ffffff{% endif %};">
                 🐾 Tất Cả (32 Giống)
             </a>
@@ -30,8 +30,8 @@
     </div>
 
     <!-- Thanh Tìm Kiếm Gọn Trên 1 Hàng -->
-    <form method="GET" action="{{ url_for('network_page') }}" style="display:grid; grid-template-columns: 220px 1fr auto; gap:10px; align-items:center; background:#ffffff; padding:10px 12px; border-radius:16px; border:1.5px solid #fed7aa; margin-bottom:12px;">
-        <select name="species" class="form-control" onchange="this.form.submit()" style="height:40px; font-size:13px; font-weight:700;">
+    <form method="GET" action="{{ url_for('network_page') }}" style="display:grid; grid-template-columns: 200px 1fr auto; gap:8px; align-items:center; background:#ffffff; padding:8px 10px; border-radius:14px; border:1.5px solid #fed7aa; margin-bottom:10px;">
+        <select name="species" class="form-control" onchange="this.form.submit()" style="height:36px; font-size:12.5px; font-weight:700;">
             <option value="all" {% if species == 'all' %}selected{% endif %}>🐾 Tất cả Chó &amp; Mèo (32)</option>
             <option value="cat" {% if species == 'cat' %}selected{% endif %}>🐱 Giống Mèo Cảnh (12)</option>
             <option value="dog" {% if species == 'dog' %}selected{% endif %}>🐶 Giống Chó Cảnh (20)</option>

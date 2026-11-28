@@ -56,8 +56,8 @@ html {
 
 body {
     font-family: "Plus Jakarta Sans", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    font-size: 15px;
-    line-height: 1.6;
+    font-size: 13.5px;
+    line-height: 1.52;
     color: var(--text-main);
     background-color: var(--bg-page);
     background-image:
@@ -72,9 +72,9 @@ body {
 }
 
 .container {
-    max-width: 1240px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 18px;
 }
 
 /* ==========================================================================
@@ -84,9 +84,9 @@ body {
     background: #ffffff;
     border-bottom: 1px solid var(--border);
     color: var(--text-muted);
-    font-size: 13px;
+    font-size: 11.5px;
     font-weight: 600;
-    padding: 8px 0;
+    padding: 5px 0;
 }
 
 .topbar-inner {
@@ -94,12 +94,12 @@ body {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
 }
 
 .topbar-badges {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
     flex-wrap: wrap;
 }
@@ -108,9 +108,9 @@ body {
     background-color: #fff7ed;
     border: 1px solid var(--border-warm);
     color: #c2410c;
-    padding: 3px 12px;
+    padding: 2px 10px;
     border-radius: 99px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
 }
 
@@ -128,31 +128,37 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 13px 20px;
-    gap: 20px;
-    flex-wrap: wrap;
+    padding: 8px 18px;
+    gap: 12px;
+    flex-wrap: nowrap;
 }
 
 .brand-link {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 9px;
     text-decoration: none;
     color: var(--text-main);
+    flex-shrink: 0;
 }
 
 .brand-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
     background: linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%);
     border: 1.5px solid #fed7aa;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #ea580c;
-    box-shadow: 0 4px 16px rgba(251, 146, 60, 0.2);
+    box-shadow: 0 3px 12px rgba(251, 146, 60, 0.2);
     transition: transform 0.2s ease;
+}
+
+.brand-icon svg {
+    width: 20px;
+    height: 20px;
 }
 
 .brand-link:hover .brand-icon {
@@ -160,15 +166,15 @@ body {
 }
 
 .brand-title {
-    font-size: 21px;
+    font-size: 16.5px;
     font-weight: 800;
     color: var(--text-main);
-    letter-spacing: -0.4px;
+    letter-spacing: -0.3px;
     line-height: 1.15;
 }
 
 .brand-sub {
-    font-size: 12px;
+    font-size: 10.5px;
     font-weight: 700;
     color: #ea580c;
 }
@@ -176,21 +182,22 @@ body {
 .nav-menu {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 4px;
+    flex-wrap: nowrap;
 }
 
 .nav-item {
     text-decoration: none;
     color: var(--text-body);
     font-weight: 700;
-    font-size: 13.5px;
-    padding: 8px 16px;
+    font-size: 12.5px;
+    padding: 6px 11px;
     border-radius: 99px;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
+    white-space: nowrap;
 }
 
 .nav-item:hover {
@@ -206,19 +213,35 @@ body {
     box-shadow: 0 2px 10px rgba(251, 146, 60, 0.15);
 }
 
+.nav-profile-pill {
+    padding: 5px 11px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    font-size: 12px;
+    color: #503829;
+}
+
 .nav-cart-btn {
     background: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%);
     color: #ffffff !important;
-    padding: 8px 18px;
+    padding: 6px 13px;
     border-radius: 99px;
     font-weight: 800;
-    font-size: 13.5px;
+    font-size: 12.5px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 18px rgba(251, 146, 60, 0.35);
+    gap: 6px;
+    box-shadow: 0 4px 14px rgba(251, 146, 60, 0.35);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+}
+
+@media (max-width: 980px) {
+    .navbar-inner,
+    .nav-menu {
+        flex-wrap: wrap;
+    }
 }
 
 .nav-cart-btn:hover {
@@ -229,9 +252,9 @@ body {
 .cart-badge {
     background-color: #ffffff;
     color: #ea580c;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
-    padding: 1px 7px;
+    padding: 1px 6px;
     border-radius: 99px;
 }
 
@@ -242,9 +265,9 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 10px 20px;
-    font-size: 14px;
+    gap: 6px;
+    padding: 8px 15px;
+    font-size: 13px;
     font-weight: 700;
     border-radius: 99px;
     border: 1.5px solid transparent;
@@ -308,13 +331,13 @@ body {
 }
 
 .btn-sm {
-    padding: 7px 14px;
-    font-size: 13px;
+    padding: 5px 11px;
+    font-size: 12px;
 }
 
 .btn-lg {
-    padding: 13px 26px;
-    font-size: 15.5px;
+    padding: 10px 18px;
+    font-size: 13.5px;
 }
 
 .btn-block {
@@ -323,8 +346,8 @@ body {
 
 .badge {
     display: inline-block;
-    padding: 4px 12px;
-    font-size: 12px;
+    padding: 3px 9px;
+    font-size: 11px;
     font-weight: 700;
     border-radius: 99px;
     letter-spacing: 0.1px;
@@ -370,19 +393,19 @@ body {
    HERO BANNER & FEATURE CARDS (PASTEL PEACH & HONEY TRÊN NỀN TRẮNG)
    ========================================================================== */
 .hero-section {
-    padding: 32px 0 28px;
+    padding: 16px 0 16px;
 }
 
 .hero-card {
     background: linear-gradient(135deg, #fff7ed 0%, #fff1f2 40%, #fef3c7 100%);
     border: 1.5px solid #fed7aa;
-    border-radius: var(--radius-lg);
-    padding: 42px;
+    border-radius: 22px;
+    padding: 24px 28px;
     display: grid;
-    grid-template-columns: 1.25fr 0.95fr;
-    gap: 36px;
+    grid-template-columns: 1.25fr 0.92fr;
+    gap: 24px;
     align-items: center;
-    box-shadow: 0 16px 40px rgba(251, 146, 60, 0.08);
+    box-shadow: 0 12px 32px rgba(251, 146, 60, 0.08);
     position: relative;
     overflow: hidden;
 }
@@ -390,7 +413,7 @@ body {
 @media (max-width: 900px) {
     .hero-card {
         grid-template-columns: 1fr;
-        padding: 26px;
+        padding: 18px;
     }
 }
 
@@ -401,21 +424,21 @@ body {
     background-color: #ffffff;
     color: #ea580c;
     border: 1.5px solid #fed7aa;
-    padding: 6px 16px;
+    padding: 4px 12px;
     border-radius: 99px;
-    font-size: 13px;
+    font-size: 11.5px;
     font-weight: 800;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 14px rgba(251, 146, 60, 0.12);
+    margin-bottom: 10px;
+    box-shadow: 0 3px 10px rgba(251, 146, 60, 0.12);
 }
 
 .hero-title {
-    font-size: 36px;
+    font-size: 27px;
     font-weight: 800;
     color: var(--text-main);
-    line-height: 1.22;
-    letter-spacing: -0.6px;
-    margin-bottom: 14px;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
 }
 
 .hero-title .text-highlight {
@@ -425,49 +448,55 @@ body {
 }
 
 .hero-desc {
-    font-size: 15.5px;
+    font-size: 13.5px;
     color: #6e5444;
-    margin-bottom: 24px;
-    line-height: 1.7;
+    margin-bottom: 16px;
+    line-height: 1.58;
 }
 
 .hero-actions {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     flex-wrap: wrap;
+}
+
+.hero-actions .btn-lg {
+    padding: 9px 14px;
+    font-size: 12.5px;
+    white-space: nowrap;
 }
 
 /* Thẻ Thú Cưng Xu Hướng Tương Tác (Pet Spotlight) */
 .hero-pet-spotlight {
     background: #ffffff;
     border: 1.5px solid #fed7aa;
-    border-radius: 26px;
-    padding: 18px;
-    box-shadow: 0 14px 34px rgba(251, 146, 60, 0.12);
+    border-radius: 20px;
+    padding: 13px;
+    box-shadow: 0 10px 26px rgba(251, 146, 60, 0.12);
     backdrop-filter: blur(16px);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 9px;
     position: relative;
 }
 
 .spotlight-top-badge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 12px;
+    gap: 6px;
+    font-size: 11px;
     font-weight: 800;
     color: #b45309;
     background: #fef3c7;
     border: 1px solid #fde68a;
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: 99px;
     width: fit-content;
 }
 
 .spotlight-pulse-dot {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background-color: #10b981;
     box-shadow: 0 0 8px #10b981;
@@ -480,8 +509,8 @@ body {
 }
 
 .spotlight-img-wrap {
-    height: 220px;
-    border-radius: 18px;
+    height: 168px;
+    border-radius: 14px;
     overflow: hidden;
     position: relative;
     border: 1px solid var(--border);
@@ -500,53 +529,53 @@ body {
 
 .spotlight-overlay-tag {
     position: absolute;
-    bottom: 12px;
-    left: 12px;
+    bottom: 10px;
+    left: 10px;
     background: rgba(43, 24, 13, 0.85);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #ffffff;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: 99px;
 }
 
 .spotlight-info {
-    padding: 0 4px;
+    padding: 0 3px;
 }
 
 .spotlight-name {
-    font-size: 16px;
+    font-size: 14.5px;
     font-weight: 800;
     color: var(--text-main);
     line-height: 1.3;
 }
 
 .spotlight-price {
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 800;
     color: #ea580c;
     white-space: nowrap;
 }
 
 .spotlight-sub {
-    font-size: 12.5px;
+    font-size: 11.5px;
     color: var(--text-muted);
     margin-top: 2px;
 }
 
 .spotlight-tabs {
     display: flex;
-    gap: 6px;
-    margin-top: 4px;
+    gap: 5px;
+    margin-top: 2px;
 }
 
 .spotlight-tab-btn {
     flex: 1;
-    padding: 7px 6px;
-    border-radius: 10px;
-    font-size: 12px;
+    padding: 5px 4px;
+    border-radius: 9px;
+    font-size: 11.5px;
     font-weight: 700;
     background: #fff7ed;
     border: 1px solid #fed7aa;
@@ -573,39 +602,39 @@ body {
 /* 4 Khối Đặc Quyền */
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 18px;
-    margin: 26px 0 38px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 18px 0 26px;
 }
 
 .feature-box {
     background: #ffffff;
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 22px;
+    border-radius: 16px;
+    padding: 15px 16px;
     display: flex;
-    gap: 16px;
+    gap: 12px;
     align-items: flex-start;
-    box-shadow: 0 4px 18px rgba(180, 100, 60, 0.05);
+    box-shadow: 0 4px 14px rgba(180, 100, 60, 0.05);
     transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .feature-box:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     border-color: #fb923c;
-    box-shadow: 0 14px 34px rgba(249, 115, 22, 0.12);
+    box-shadow: 0 12px 26px rgba(249, 115, 22, 0.12);
     background: #ffffff;
 }
 
 .feature-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 22px;
+    font-size: 18px;
     flex-shrink: 0;
     background: #fff7ed;
     color: #ea580c;
@@ -613,23 +642,23 @@ body {
 }
 
 .feature-box h3 {
-    font-size: 16px;
+    font-size: 14.5px;
     font-weight: 800;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     color: var(--text-main);
 }
 
 .feature-box p {
-    font-size: 13.5px;
+    font-size: 12.5px;
     color: #6e5444;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* ==========================================================================
    SECTIONS, CARDS & PRODUCT GRID (PASTEL PEACH & HONEY TRÊN NỀN TRẮNG)
    ========================================================================== */
 .page-section {
-    padding: 28px 0 52px;
+    padding: 18px 0 38px;
     flex: 1;
 }
 
@@ -637,46 +666,46 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
 }
 
 .section-title {
-    font-size: 25px;
+    font-size: 20.5px;
     font-weight: 800;
     color: var(--navy);
     letter-spacing: -0.4px;
 }
 
 .section-subtitle {
-    font-size: 14.5px;
+    font-size: 13px;
     color: var(--text-muted);
-    margin-top: 3px;
+    margin-top: 2px;
 }
 
 .card {
     background-color: var(--bg-card);
     border: 1.5px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 26px;
+    padding: 18px 20px;
     box-shadow: var(--shadow-sm);
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 14px;
-    margin-bottom: 18px;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
     border-bottom: 1.5px dashed var(--border);
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
 }
 
 .card-title {
-    font-size: 18.5px;
+    font-size: 16px;
     font-weight: 800;
     color: var(--navy);
 }
@@ -686,38 +715,38 @@ body {
     background: #ffffff;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 22px;
-    margin-bottom: 28px;
-    box-shadow: 0 4px 20px rgba(180, 100, 60, 0.06);
+    padding: 15px 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(180, 100, 60, 0.06);
 }
 
 .filter-grid {
     display: grid;
     grid-template-columns: 2fr 1.2fr 1.2fr 1fr 1fr 1.2fr auto;
-    gap: 12px;
+    gap: 10px;
     align-items: end;
 }
 
 @media (max-width: 1024px) {
     .filter-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     }
 }
 
 .quick-pills {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
-    margin-top: 16px;
-    padding-top: 14px;
+    margin-top: 12px;
+    padding-top: 10px;
     border-top: 1px solid var(--border);
 }
 
 .pill-link {
     text-decoration: none;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
-    padding: 7px 16px;
+    padding: 5px 12px;
     border-radius: 99px;
     background-color: #fffbf8;
     color: var(--text-body);
@@ -737,31 +766,31 @@ body {
 /* Product Grid (Card Bo Tròn Pastel Peach & Honey) */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(252px, 1fr));
+    gap: 16px;
 }
 
 .product-card {
     background: #ffffff;
     border: 1px solid var(--border);
-    border-radius: 22px;
+    border-radius: 18px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 4px 18px rgba(180, 100, 60, 0.06);
+    box-shadow: 0 4px 14px rgba(180, 100, 60, 0.06);
     transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.28s ease;
 }
 
 .product-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 36px rgba(249, 115, 22, 0.16);
+    transform: translateY(-5px);
+    box-shadow: 0 14px 30px rgba(249, 115, 22, 0.16);
     border-color: #fb923c;
     background: #ffffff;
 }
 
 .product-visual {
-    height: 225px;
+    height: 174px;
     background: linear-gradient(180deg, #fffbf8 0%, #fef5ee 100%);
     border-bottom: 1px solid var(--border);
     position: relative;
@@ -769,15 +798,15 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 12px;
     overflow: hidden;
 }
 
 .product-badges-top {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    right: 12px;
+    top: 10px;
+    left: 10px;
+    right: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -789,51 +818,51 @@ body {
 }
 
 .product-svg-wrap {
-    width: 78px;
-    height: 78px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background-color: #ffffff;
     border: 1.5px solid var(--border-warm);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.12);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.12);
 }
 
 .product-cat-name {
-    margin-top: 8px;
-    font-size: 12px;
+    margin-top: 6px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--text-muted);
 }
 
 .product-content {
-    padding: 18px 20px 14px;
+    padding: 13px 15px 10px;
     flex: 1;
 }
 
 .product-sku {
-    font-size: 11.5px;
+    font-size: 10.5px;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
 }
 
 .product-name {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--text-main);
-    line-height: 1.35;
-    margin-bottom: 8px;
+    line-height: 1.32;
+    margin-bottom: 5px;
     transition: color 0.18s ease;
 }
 
 .product-desc {
-    font-size: 13px;
+    font-size: 12.2px;
     color: #6e5444 !important;
-    line-height: 1.5;
+    line-height: 1.45;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -841,17 +870,17 @@ body {
 }
 
 .product-bottom {
-    padding: 14px 20px 18px;
+    padding: 10px 15px 13px;
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: #fffbf8;
 }
 
 .product-price {
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 800;
     color: #ea580c;
     letter-spacing: -0.3px;
@@ -863,8 +892,9 @@ body {
     border: 1.5px solid #fed7aa !important;
     color: #ea580c !important;
     font-weight: 700 !important;
-    padding: 6px 13px;
-    border-radius: 10px;
+    padding: 5px 11px;
+    font-size: 12px;
+    border-radius: 9px;
     transition: all 0.2s ease;
     white-space: nowrap;
 }
@@ -882,8 +912,9 @@ body {
     color: #ffffff !important;
     font-weight: 800 !important;
     border: none !important;
-    padding: 6px 14px;
-    border-radius: 10px;
+    padding: 5px 11px;
+    font-size: 12px;
+    border-radius: 9px;
     box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35) !important;
     white-space: nowrap;
 }
@@ -897,27 +928,27 @@ body {
    FORMS & INPUTS (PASTEL PEACH & HONEY TRÊN NỀN TRẮNG)
    ========================================================================== */
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .form-label {
     display: block;
-    font-size: 13.5px;
+    font-size: 12.5px;
     font-weight: 700;
     color: var(--text-main) !important;
-    margin-bottom: 7px;
+    margin-bottom: 5px;
 }
 
 .form-control {
     width: 100%;
-    padding: 11px 14px;
-    font-size: 14px;
+    padding: 8px 12px;
+    font-size: 13px;
     font-family: inherit;
     font-weight: 600;
     color: var(--text-main) !important;
     background: #ffffff !important;
     border: 1.5px solid #fed7aa !important;
-    border-radius: 14px;
+    border-radius: 11px;
     transition: all 0.2s ease;
 }
 
@@ -935,7 +966,7 @@ body {
     outline: none;
     border-color: #ea580c !important;
     background: #ffffff !important;
-    box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.2) !important;
+    box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.2) !important;
 }
 
 /* Đảm bảo chữ trong mọi dropdown select luôn sắc nét, rõ ràng trên nền trắng */
@@ -945,8 +976,8 @@ select.form-control option,
 select.form-control optgroup {
     background-color: #ffffff !important;
     color: var(--text-main) !important;
-    padding: 10px 14px;
-    font-size: 14px;
+    padding: 8px 12px;
+    font-size: 13px;
     font-weight: 600;
 }
 
@@ -955,7 +986,7 @@ select.form-control optgroup {
     color: #ea580c !important;
     font-weight: 800;
     background-color: #fff7ed !important;
-    padding-top: 8px;
+    padding-top: 6px;
 }
 
 input[type="date"].form-control,
@@ -972,22 +1003,22 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .form-error {
     color: #dc2626;
-    font-size: 12.5px;
-    margin-top: 4px;
+    font-size: 12px;
+    margin-top: 3px;
     font-weight: 500;
 }
 
 .grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 18px;
     align-items: start;
 }
 
 .grid-3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    gap: 12px;
 }
 
 @media (max-width: 900px) {
@@ -1002,23 +1033,23 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
    ========================================================================== */
 .table-wrap {
     overflow-x: auto;
-    border-radius: 14px;
+    border-radius: 12px;
     background: #ffffff;
     border: 1px solid var(--border);
-    box-shadow: 0 4px 18px rgba(180, 100, 60, 0.05);
+    box-shadow: 0 4px 16px rgba(180, 100, 60, 0.05);
 }
 
 .clean-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 13px;
     background: #ffffff;
     color: var(--text-main);
 }
 
 .clean-table th,
 .clean-table td {
-    padding: 12px 14px;
+    padding: 9px 11px;
     border-bottom: 1px solid var(--border);
     text-align: left;
     vertical-align: middle;
@@ -1028,9 +1059,9 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     background-color: #fff7ed !important;
     color: #ea580c !important;
     font-weight: 800;
-    font-size: 13px;
+    font-size: 11.5px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
 }
 
 .clean-table tbody tr {
@@ -1462,8 +1493,8 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .admin-kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 18px;
+    gap: 12px;
+    margin-bottom: 14px;
 }
 
 @media (max-width: 1100px) {
@@ -1482,7 +1513,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
-    padding: 18px 20px;
+    padding: 13px 15px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
@@ -1490,18 +1521,18 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .kpi-label {
-    font-size: 13.5px;
+    font-size: 12px;
     color: #64748b;
     font-weight: 500;
 }
 
 .kpi-icon-box {
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -1529,14 +1560,14 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 .kpi-value {
-    font-size: 25px;
+    font-size: 20px;
     font-weight: 800;
     line-height: 1.2;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .kpi-sub {
-    font-size: 12px;
+    font-size: 11px;
     color: #64748b;
 }
 
@@ -1544,8 +1575,8 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .admin-status-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 15px;
 }
 
 @media (max-width: 1100px) {
@@ -1557,7 +1588,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .admin-status-card {
     background-color: #ffffff;
     border-radius: 10px;
-    padding: 18px 20px;
+    padding: 13px 15px;
     border: 2px solid #cbd5e1;
 }
 
@@ -1578,20 +1609,20 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 .status-card-title {
-    font-size: 13.5px;
+    font-size: 12px;
     font-weight: 600;
     color: #334155;
-    margin-bottom: 8px;
-}
-
-.status-card-num {
-    font-size: 24px;
-    font-weight: 800;
     margin-bottom: 6px;
 }
 
+.status-card-num {
+    font-size: 19px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
 .status-card-link {
-    font-size: 12.5px;
+    font-size: 11.5px;
     font-weight: 600;
     text-decoration: none;
 }
@@ -1604,8 +1635,8 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .admin-charts-grid {
     display: grid;
     grid-template-columns: 1.6fr 1fr;
-    gap: 18px;
-    margin-bottom: 22px;
+    gap: 14px;
+    margin-bottom: 16px;
 }
 
 @media (max-width: 1024px) {
@@ -1639,7 +1670,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .mega-nav-container {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     flex-wrap: wrap;
 }
 
@@ -1650,16 +1681,16 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .mega-trigger {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 10px 18px;
+    gap: 5px;
+    padding: 6px 12px;
     color: var(--text-body);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: none;
     text-decoration: none;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.1px;
     cursor: pointer;
-    border-radius: 12px;
+    border-radius: 10px;
     transition: all 0.2s ease;
 }
 
@@ -1678,8 +1709,8 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     top: 100%;
     background: #ffffff;
     color: var(--text-main);
-    padding: 26px 0 30px;
-    box-shadow: 0 16px 40px rgba(180, 100, 60, 0.12);
+    padding: 18px 0 22px;
+    box-shadow: 0 16px 36px rgba(180, 100, 60, 0.12);
     z-index: 120;
     border-top: 1px solid var(--border);
     border-bottom: 2px solid #fb923c;
@@ -1693,7 +1724,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .mega-grid-3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px 24px;
+    gap: 8px 18px;
 }
 
 @media (max-width: 768px) {
@@ -1705,14 +1736,14 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .mega-breed-link {
     color: #503829;
     text-decoration: none;
-    font-size: 13.5px;
+    font-size: 12.5px;
     font-weight: 600;
     text-transform: none;
-    padding: 8px 14px;
-    border-radius: 10px;
+    padding: 6px 11px;
+    border-radius: 9px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
     background: #fffbf8;
     border: 1px solid var(--border);
     transition: all 0.2s ease;
@@ -1743,7 +1774,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .product-visual.has-photo {
     padding: 0;
-    height: 210px;
+    height: 174px;
     overflow: hidden;
 }
 
@@ -2449,13 +2480,13 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .admin-content-area {
     flex: 1;
-    padding: 24px 28px 48px;
+    padding: 16px 22px 32px;
     background: transparent !important;
 }
 
 /* ---------- Sidebar Đẹp Tông Cam Đào & Trắng Ấm ---------- */
 .admin-sidebar {
-    width: 268px !important;
+    width: 228px !important;
     background: #ffffff !important;
     border-right: 1.5px solid #fae4d4 !important;
     box-shadow: 4px 0 24px rgba(180, 100, 60, 0.05) !important;
@@ -2471,39 +2502,41 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 .admin-brand-box {
-    padding: 22px 20px;
+    padding: 14px 16px;
     border-bottom: 1.5px solid #fae4d4 !important;
     background: transparent !important;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     text-decoration: none;
 }
 .admin-brand-name {
     color: var(--adm-ink) !important;
     font-weight: 900 !important;
-    letter-spacing: 0.5px;
+    font-size: 14.5px !important;
+    letter-spacing: 0.3px;
 }
 .admin-brand-sub {
     color: #ea580c !important;
     font-weight: 700 !important;
-    font-size: 11px;
+    font-size: 10.5px;
 }
 .admin-nav-group-title {
     color: #a58978 !important;
     font-weight: 800 !important;
-    font-size: 11px;
-    letter-spacing: 0.5px;
+    font-size: 10px;
+    letter-spacing: 0.4px;
 }
 
 .admin-nav-link {
     color: #503829 !important;
     border: 1px solid transparent;
-    border-radius: 12px;
-    padding: 10px 14px;
+    border-radius: 10px;
+    padding: 8px 11px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    font-size: 12.5px;
     font-weight: 600;
     transition: all 0.2s ease;
 }
@@ -2528,7 +2561,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .admin-sidebar-footer {
     background: #fff7ed !important;
     border-top: 1.5px solid #fae4d4 !important;
-    padding: 14px 18px;
+    padding: 10px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -2536,6 +2569,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .admin-user-name {
     color: var(--adm-ink) !important;
     font-weight: 700;
+    font-size: 12.5px;
 }
 
 /* ---------- Topbar Tông Cam Đào & Kính Mờ ---------- */
@@ -2544,7 +2578,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
     border-bottom: 1.5px solid #fae4d4 !important;
-    padding: 16px 28px;
+    padding: 11px 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2555,7 +2589,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .admin-page-heading {
     color: var(--adm-ink) !important;
-    font-size: 20px;
+    font-size: 17px !important;
     font-weight: 800;
     margin: 0;
 }
@@ -2565,7 +2599,8 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     border: 1.5px solid #fed7aa !important;
     color: #ea580c !important;
     border-radius: 99px;
-    padding: 8px 16px;
+    padding: 6px 13px;
+    font-size: 12.5px;
     font-weight: 700;
     text-decoration: none;
     transition: all 0.2s ease;
@@ -2582,8 +2617,9 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     background: linear-gradient(90deg, #fff7ed 0%, #fef3c7 100%) !important;
     border: 1.5px solid #fed7aa !important;
     color: #78350f !important;
-    border-radius: 16px;
-    padding: 14px 20px;
+    border-radius: 14px;
+    padding: 10px 16px;
+    font-size: 13px;
 }
 
 .admin-welcome-close { color: #78350f !important; }
@@ -2592,22 +2628,23 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     background: #ffffff !important;
     border: 1.5px solid #fae4d4 !important;
     box-shadow: 0 4px 18px rgba(180, 100, 60, 0.05) !important;
-    border-radius: 16px;
-    padding: 12px 18px;
+    border-radius: 14px;
+    padding: 9px 14px;
 }
 
 .admin-period-bar span { color: var(--adm-muted) !important; }
 
 .period-btn-group {
     background: #fff7ed !important;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 3px;
 }
 .period-btn {
     color: #503829 !important;
     border: none;
-    border-radius: 9px;
-    padding: 6px 14px;
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
     font-weight: 700;
 }
 .period-btn:hover { color: #ea580c !important; background: #ffedd5 !important; }
@@ -2960,19 +2997,19 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .spa-hero-banner {
     background: linear-gradient(135deg, #fff7ed 0%, #fff1f2 50%, #fef3c7 100%);
     border: 1.5px solid #fed7aa;
-    border-radius: 26px;
-    padding: 28px 32px;
-    margin-bottom: 28px;
-    box-shadow: 0 16px 40px rgba(251, 146, 60, 0.08);
+    border-radius: 20px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 12px 30px rgba(251, 146, 60, 0.08);
 }
 
 .spa-service-item {
     background: #ffffff;
     border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 16px 20px;
-    margin-bottom: 14px;
-    box-shadow: 0 4px 14px rgba(180, 100, 60, 0.04);
+    border-radius: 15px;
+    padding: 13px 16px;
+    margin-bottom: 11px;
+    box-shadow: 0 4px 12px rgba(180, 100, 60, 0.04);
     transition: all 0.25s ease;
 }
 
@@ -2988,30 +3025,30 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 6px;
 }
 
 .spa-service-name {
-    font-size: 15.5px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--text-main);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
 }
 
 .spa-price-tiers {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .spa-tier-pill {
-    padding: 5px 12px;
+    padding: 4px 10px;
     border-radius: 99px;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
     background: #fff7ed;
     border: 1px solid #fed7aa;
@@ -3038,17 +3075,17 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .spa-step-journey {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-top: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
 }
 
 .spa-step-card {
     background: #ffffff;
     border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 18px;
-    box-shadow: 0 4px 14px rgba(180, 100, 60, 0.04);
+    border-radius: 15px;
+    padding: 14px;
+    box-shadow: 0 4px 12px rgba(180, 100, 60, 0.04);
     transition: transform 0.25s ease, border-color 0.25s ease;
 }
 
@@ -3060,21 +3097,21 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .spa-step-badge {
     display: inline-block;
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 7px;
+    font-size: 10.5px;
     font-weight: 800;
     background: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%);
     color: #ffffff;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     box-shadow: 0 4px 10px rgba(251, 146, 60, 0.3);
 }
 
 /* Thẻ Bách Khoa Toàn Thư Giống Chó Mèo (Compact Rectangular Card & Grid) */
 .breed-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(252px, 1fr));
+    gap: 15px;
     align-items: stretch;
 }
 
@@ -3087,12 +3124,12 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .breed-card-modern {
     background: #ffffff;
     border: 1.5px solid #f5d0b5;
-    border-radius: 20px;
+    border-radius: 18px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 6px 18px rgba(180, 100, 60, 0.06);
+    box-shadow: 0 5px 15px rgba(180, 100, 60, 0.06);
     transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
     height: 100%;
 }
@@ -3100,14 +3137,14 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .breed-card-modern:hover {
     transform: translateY(-4px);
     border-color: #fb923c;
-    box-shadow: 0 14px 30px rgba(249, 115, 22, 0.15);
+    box-shadow: 0 12px 26px rgba(249, 115, 22, 0.15);
     background: #ffffff;
 }
 
 .breed-photo-wrap {
     position: relative;
     width: 100%;
-    height: 182px;
+    height: 156px;
     overflow: hidden;
     background: linear-gradient(135deg, #fff7ed 0%, #ffe4e6 100%);
     border-bottom: 1px solid #fde2c8;
@@ -3713,14 +3750,14 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
    HOMEPAGE BREED SHOWCASE & INTERACTIVE CATEGORY TABS (PASTEL PEACH & HONEY)
    ========================================================================== */
 .breed-showcase-section {
-    margin: 36px 0 44px;
+    margin: 22px 0 28px;
 }
 
 .breed-scroll-wrap {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 14px;
-    margin-top: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 11px;
+    margin-top: 12px;
 }
 
 @media (max-width: 640px) {
@@ -3733,15 +3770,15 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .breed-card-mini {
     background: #ffffff;
     border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 14px 12px;
+    border-radius: 15px;
+    padding: 11px 9px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     text-decoration: none;
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 4px 14px rgba(180, 100, 60, 0.05);
+    box-shadow: 0 4px 12px rgba(180, 100, 60, 0.05);
     position: relative;
     overflow: hidden;
 }
@@ -3759,10 +3796,10 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 .breed-card-mini:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     border-color: #fb923c;
     background: #ffffff;
-    box-shadow: 0 14px 30px rgba(249, 115, 22, 0.15);
+    box-shadow: 0 12px 24px rgba(249, 115, 22, 0.15);
 }
 
 .breed-card-mini:hover::before {
@@ -3770,13 +3807,13 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 .breed-avatar-wrap {
-    width: 68px;
-    height: 68px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
-    margin-bottom: 10px;
-    padding: 2.5px;
+    margin-bottom: 8px;
+    padding: 2px;
     background: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%);
-    box-shadow: 0 4px 14px rgba(251, 146, 60, 0.25);
+    box-shadow: 0 4px 12px rgba(251, 146, 60, 0.25);
 }
 
 .breed-avatar-img {
@@ -3788,15 +3825,15 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 .breed-name-title {
-    font-size: 13.5px;
+    font-size: 12.5px;
     font-weight: 800;
     color: var(--text-main);
-    margin-bottom: 4px;
-    line-height: 1.3;
+    margin-bottom: 3px;
+    line-height: 1.28;
 }
 
 .breed-desc-tag {
-    font-size: 11px;
+    font-size: 10.5px;
     color: var(--text-muted);
     font-weight: 600;
 }
@@ -3805,10 +3842,10 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .home-filter-nav {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     overflow-x: auto;
-    padding-bottom: 8px;
-    margin: 18px 0 24px;
+    padding-bottom: 6px;
+    margin: 12px 0 16px;
     scrollbar-width: none;
 }
 
@@ -3820,16 +3857,16 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     background: #fffbf8;
     border: 1px solid var(--border);
     color: var(--text-body);
-    font-size: 13.5px;
+    font-size: 12.5px;
     font-weight: 700;
-    padding: 8px 18px;
+    padding: 6px 14px;
     border-radius: 99px;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
 .home-filter-tab:hover {
@@ -3842,19 +3879,19 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     background: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%) !important;
     border-color: transparent !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 16px rgba(251, 146, 60, 0.35) !important;
+    box-shadow: 0 4px 14px rgba(251, 146, 60, 0.35) !important;
 }
 
 /* ==========================================================================
    SPA BOUTIQUE VIP BOOKING FLOW (PASTEL PEACH & HONEY)
    ========================================================================== */
 .spa-time-chip {
-    padding: 7px 12px;
-    border-radius: 10px;
+    padding: 6px 10px;
+    border-radius: 9px;
     background: #fff7ed;
     border: 1px solid #fed7aa;
     color: var(--text-body);
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.18s ease;
@@ -3877,9 +3914,9 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .spa-ticket-luxury {
     background: #ffffff;
     border: 1.5px solid #fed7aa;
-    border-radius: 22px;
-    padding: 24px;
-    box-shadow: 0 16px 40px rgba(180, 100, 60, 0.08);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 12px 30px rgba(180, 100, 60, 0.08);
     position: relative;
     overflow: hidden;
 }
@@ -3888,15 +3925,15 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 18px -24px;
+    margin: 14px -18px;
     position: relative;
 }
 
 .spa-ticket-perforation::before,
 .spa-ticket-perforation::after {
     content: "";
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: var(--bg-page);
     box-shadow: inset 0 0 6px rgba(180, 100, 60, 0.12);
@@ -3923,7 +3960,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
@@ -3937,11 +3974,11 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .success-popup-card {
     background: #ffffff;
     border: 1.5px solid #10b981;
-    box-shadow: 0 25px 70px rgba(180, 100, 60, 0.2);
-    border-radius: 26px;
-    max-width: 540px;
+    box-shadow: 0 20px 55px rgba(180, 100, 60, 0.2);
+    border-radius: 22px;
+    max-width: 460px;
     width: 100%;
-    padding: 32px 28px;
+    padding: 24px 22px;
     text-align: center;
     position: relative;
     transform: scale(0.9) translateY(20px);
@@ -3954,18 +3991,18 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .success-popup-close {
     position: absolute;
-    top: 16px;
-    right: 18px;
+    top: 14px;
+    right: 16px;
     background: #fff7ed;
     border: 1px solid #fed7aa;
     color: #503829;
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -3978,16 +4015,16 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 .success-popup-icon-wrap {
-    width: 76px;
-    height: 76px;
-    margin: 0 auto 18px;
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 14px;
     border-radius: 50%;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 38px;
-    box-shadow: 0 0 30px rgba(16, 185, 129, 0.35);
+    font-size: 28px;
+    box-shadow: 0 0 24px rgba(16, 185, 129, 0.35);
     animation: successPulse 2s infinite ease-in-out;
 }
 
@@ -3998,34 +4035,34 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .success-popup-title {
     color: var(--text-main);
-    font-size: 23px;
+    font-size: 19px;
     font-weight: 900;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     letter-spacing: -0.3px;
 }
 
 .success-popup-sub {
     color: #6e5444;
-    font-size: 14px;
-    line-height: 1.55;
-    margin-bottom: 22px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
 }
 
 .success-popup-msg-box {
     background: #ecfdf5;
     border: 1px dashed #10b981;
-    border-radius: 14px;
-    padding: 14px 18px;
+    border-radius: 12px;
+    padding: 12px 14px;
     color: #065f46;
-    font-size: 13.5px;
-    line-height: 1.6;
-    margin-bottom: 24px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    margin-bottom: 18px;
     text-align: left;
 }
 
 .success-popup-actions {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     justify-content: center;
     flex-wrap: wrap;
 }
@@ -4036,20 +4073,20 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .cart-items-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 11px;
 }
 
 .cart-item-row {
     background: #ffffff !important;
     border: 1.5px solid var(--border) !important;
-    border-radius: 16px;
-    padding: 16px 18px;
+    border-radius: 14px;
+    padding: 12px 15px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
     flex-wrap: wrap;
-    box-shadow: 0 4px 18px rgba(180, 100, 60, 0.05);
+    box-shadow: 0 4px 14px rgba(180, 100, 60, 0.05);
     transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -4062,21 +4099,21 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .cart-item-main {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     flex: 1;
-    min-width: 240px;
+    min-width: 220px;
 }
 
 .cart-item-avatar {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
     background: linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%);
     border: 1px solid #fed7aa;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
+    font-size: 21px;
     flex-shrink: 0;
 }
 
@@ -4086,43 +4123,43 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 
 .cart-item-name {
     color: var(--text-main) !important;
-    font-size: 15.5px !important;
+    font-size: 14px !important;
     font-weight: 800 !important;
-    line-height: 1.35;
-    margin-bottom: 4px;
+    line-height: 1.32;
+    margin-bottom: 3px;
     display: block;
 }
 
 .cart-item-meta {
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--text-muted);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
 .cart-item-pricing {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
 }
 
 .cart-qty-box {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     background: #fff7ed;
     border: 1px solid #fed7aa;
-    padding: 3px 6px;
-    border-radius: 10px;
+    padding: 3px 5px;
+    border-radius: 9px;
 }
 
 .cart-qty-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
     background: #ffffff;
     border: 1px solid #fed7aa;
     color: var(--text-main);
@@ -4141,18 +4178,18 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 .cart-qty-num {
-    min-width: 24px;
+    min-width: 22px;
     text-align: center;
     color: var(--text-main);
     font-weight: 800;
-    font-size: 14.5px;
+    font-size: 13.5px;
 }
 
 .cart-item-subtotal {
     color: #ea580c !important;
-    font-size: 17px !important;
+    font-size: 15px !important;
     font-weight: 900 !important;
-    min-width: 100px;
+    min-width: 90px;
     text-align: right;
 }
 
@@ -4162,7 +4199,7 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .site-footer {
     background: #ffffff;
     border-top: 1.5px solid var(--border);
-    padding: 48px 0 24px;
+    padding: 28px 0 16px;
     margin-top: auto;
     color: var(--text-body);
 }
@@ -4170,54 +4207,54 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .footer-grid {
     display: grid;
     grid-template-columns: 1.8fr 1.2fr 1.4fr;
-    gap: 40px;
+    gap: 28px;
     align-items: flex-start;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
 }
 
 .footer-brand {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .footer-brand-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%);
     border: 1px solid #fed7aa;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 17px;
     color: #ea580c;
 }
 
 .footer-title {
-    font-size: 16px;
+    font-size: 14.5px;
     font-weight: 800;
     color: var(--text-main);
-    margin: 0 0 14px 0;
+    margin: 0 0 10px 0;
     letter-spacing: -0.2px;
 }
 
 .footer-desc {
-    font-size: 13.5px;
-    line-height: 1.65;
+    font-size: 12.5px;
+    line-height: 1.55;
     color: #6e5444;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
 
 .footer-info-item {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    font-size: 13px;
+    gap: 7px;
+    font-size: 12px;
     color: #503829;
-    margin-bottom: 8px;
-    line-height: 1.5;
+    margin-bottom: 6px;
+    line-height: 1.45;
 }
 
 .footer-links {
@@ -4226,16 +4263,16 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .footer-links li {
-    font-size: 13.5px;
+    font-size: 12.5px;
     color: #6e5444;
-    line-height: 1.5;
+    line-height: 1.45;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
 }
 
 .footer-links a {
@@ -4254,20 +4291,20 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 .footer-hotline-box {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     background: #fff7ed;
     border: 1.5px solid #fed7aa;
-    border-radius: 14px;
-    padding: 10px 14px;
+    border-radius: 12px;
+    padding: 8px 12px;
     margin-top: 6px;
 }
 
 .hotline-icon {
-    font-size: 22px;
+    font-size: 19px;
 }
 
 .hotline-label {
-    font-size: 11px;
+    font-size: 10.5px;
     color: #8c7161;
     font-weight: 700;
     text-transform: uppercase;
@@ -4275,17 +4312,17 @@ input[type="time"].form-control::-webkit-calendar-picker-indicator {
 }
 
 .hotline-number {
-    font-size: 16px;
+    font-size: 14.5px;
     font-weight: 900;
     color: #ea580c;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
 }
 
 .footer-bottom {
     border-top: 1px solid var(--border);
-    padding-top: 20px;
+    padding-top: 14px;
     text-align: center;
-    font-size: 12.5px;
+    font-size: 11.5px;
     color: var(--text-muted);
 }
 
@@ -4798,17 +4835,17 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
 .pet-detail-shell {
     background: #ffffff;
     border: 1.5px solid #fed7aa;
-    border-radius: 28px;
-    padding: 32px;
-    margin-bottom: 34px;
-    box-shadow: 0 14px 40px rgba(180, 100, 60, 0.08);
+    border-radius: 22px;
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 12px 32px rgba(180, 100, 60, 0.08);
     color-scheme: light;
 }
 
 .pet-detail-layout {
     display: grid;
     grid-template-columns: 1fr 1.18fr;
-    gap: 34px;
+    gap: 24px;
     align-items: start;
 }
 
@@ -4817,22 +4854,22 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
         grid-template-columns: 1fr;
     }
     .pet-detail-shell {
-        padding: 20px;
+        padding: 16px;
     }
 }
 
 .pet-gallery-frame {
     position: relative;
-    border-radius: 24px;
+    border-radius: 18px;
     overflow: hidden;
     border: 2px solid #fed7aa;
     background: linear-gradient(135deg, #fff7ed 0%, #ffe4e6 100%);
-    box-shadow: 0 12px 30px rgba(234, 88, 12, 0.1);
+    box-shadow: 0 10px 24px rgba(234, 88, 12, 0.1);
 }
 
 .pet-gallery-frame img {
     width: 100%;
-    height: 410px;
+    height: 330px;
     object-fit: cover;
     display: block;
     transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
@@ -4844,9 +4881,9 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
 
 .pet-gallery-float-top {
     position: absolute;
-    top: 14px;
-    left: 14px;
-    right: 14px;
+    top: 12px;
+    left: 12px;
+    right: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -4856,9 +4893,9 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
 
 .pet-gallery-float-bottom {
     position: absolute;
-    bottom: 14px;
-    left: 14px;
-    right: 14px;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -4869,18 +4906,18 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
 .pet-passport-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-top: 16px;
+    gap: 8px;
+    margin-top: 12px;
 }
 
 .pet-passport-badge {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 9px;
     background: #fffaf5;
     border: 1.5px solid #fde2c8;
-    border-radius: 16px;
-    padding: 11px 13px;
+    border-radius: 13px;
+    padding: 9px 11px;
     transition: all 0.2s ease;
 }
 
@@ -4891,37 +4928,37 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
 }
 
 .pet-passport-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%);
     border: 1px solid #fdba74;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 15px;
     flex-shrink: 0;
 }
 
 .pet-price-banner {
     background: linear-gradient(135deg, #fff7ed 0%, #fff1f2 60%, #fef3c7 100%);
     border: 1.5px solid #fdba74;
-    border-radius: 20px;
-    padding: 18px 22px;
-    margin: 16px 0 20px;
+    border-radius: 16px;
+    padding: 13px 16px;
+    margin: 12px 0 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 14px;
-    box-shadow: 0 8px 22px rgba(251, 146, 60, 0.09);
+    gap: 10px;
+    box-shadow: 0 6px 18px rgba(251, 146, 60, 0.09);
 }
 
 .pet-spec-bento {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 11px;
-    margin-bottom: 22px;
+    gap: 9px;
+    margin-bottom: 16px;
 }
 
 @media (max-width: 580px) {
@@ -4934,11 +4971,11 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
 .pet-spec-item {
     background: #fffaf5;
     border: 1.5px solid #fde2c8;
-    border-radius: 16px;
-    padding: 12px 15px;
+    border-radius: 13px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
 
 .pet-spec-item.full-span {
@@ -4948,21 +4985,21 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
 }
 
 .pet-spec-label {
-    font-size: 11.5px;
+    font-size: 10.5px;
     font-weight: 800;
     color: #9a5b3c;
     text-transform: uppercase;
     letter-spacing: 0.3px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
 .pet-spec-value {
-    font-size: 13.8px;
+    font-size: 12.8px;
     font-weight: 800;
     color: #2b180d;
-    line-height: 1.45;
+    line-height: 1.4;
 }
 
 .pet-qty-stepper {
@@ -4970,18 +5007,18 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
     align-items: center;
     background: #fffaf5;
     border: 1.5px solid #fdba74;
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
-    height: 48px;
+    height: 40px;
 }
 
 .pet-qty-btn {
-    width: 40px;
+    width: 34px;
     height: 100%;
     border: none;
     background: transparent;
     color: #c2410c;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 900;
     cursor: pointer;
     transition: background 0.15s ease;
@@ -4992,12 +5029,12 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
 }
 
 .pet-qty-input {
-    width: 48px;
+    width: 42px;
     height: 100%;
     border: none;
     background: #ffffff;
     text-align: center;
-    font-size: 15px;
+    font-size: 13.5px;
     font-weight: 800;
     color: #2b180d;
     outline: none;
@@ -5006,15 +5043,15 @@ label[style*="color:#ffffff"], label[style*="color: #ffffff"] {
 .pet-care-banner {
     background: linear-gradient(135deg, #fffdf9 0%, #fff7ed 100%);
     border: 1.5px solid #fed7aa;
-    border-radius: 24px;
-    padding: 26px 28px;
-    margin-bottom: 36px;
-    box-shadow: 0 10px 28px rgba(180, 100, 60, 0.06);
+    border-radius: 18px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 22px rgba(180, 100, 60, 0.06);
 }
 
 .pet-care-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-    margin-top: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
 }

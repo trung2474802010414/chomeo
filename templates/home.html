@@ -17,15 +17,15 @@
                 <a href="{{ url_for('shop_page', pet_type='Mèo', category='Mèo cảnh') }}" class="btn btn-teal btn-lg">🐱 Chọn Boss Mèo (12 giống)</a>
                 <a href="{{ url_for('spa_page') }}" class="btn btn-outline btn-lg">🛁 Đặt lịch Spa 5 Sao</a>
             </div>
-            <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:24px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.08);">
-                <div style="display:flex; align-items:center; gap:6px; font-size:13px; color:#6e5444; font-weight:600;">
+            <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-top:14px; padding-top:12px; border-top:1px solid rgba(180,100,60,0.12);">
+                <div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#6e5444; font-weight:600;">
                     <span style="color:#fbbf24;">⭐⭐⭐⭐⭐</span>
                     <span><strong>4.9/5</strong> (1,500+ Sen tin chọn)</span>
                 </div>
-                <div style="font-size:13px; color:#6e5444; font-weight:600;">
+                <div style="font-size:12px; color:#6e5444; font-weight:600;">
                     🐾 <strong>32 Giống</strong> thuần chủng
                 </div>
-                <div style="font-size:13px; color:#6e5444; font-weight:600;">
+                <div style="font-size:12px; color:#6e5444; font-weight:600;">
                     ⚡ Giao hỏa tốc <strong>2 Giờ</strong>
                 </div>
             </div>
@@ -384,23 +384,23 @@ function filterHomeProducts(cat, btnEl) {
 </script>
 
 <!-- TRA CỨU NHANH ĐƠN HÀNG & LỊCH HẸN SPA (THIẾT KẾ GỌN GÀNG, CÂN ĐỐI, DỄ NHÌN) -->
-<section class="card" id="lookupSection" style="padding:20px 24px; border:1.5px solid #fed7aa; background:linear-gradient(135deg, #ffffff 0%, #fffaf5 100%);">
+<section class="card" id="lookupSection" style="padding:16px 20px; border:1.5px solid #fed7aa; background:linear-gradient(135deg, #ffffff 0%, #fffaf5 100%);">
     <!-- Thanh tiêu đề + Ô nhập SĐT nằm gọn trên cùng 1 hàng -->
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
-        <div style="flex:1; min-width:260px;">
-            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                <h2 class="card-title" style="margin:0; font-size:19px; color:#2b180d;">🔍 Tra Cứu Nhanh Đơn Hàng &amp; Lịch Hẹn Spa</h2>
-                <span style="font-size:11.5px; font-weight:800; color:#c2410c; background:#fff7ed; border:1px solid #fdba74; padding:2px 10px; border-radius:99px;">Thời gian thực</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div style="flex:1; min-width:240px;">
+            <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap;">
+                <h2 class="card-title" style="margin:0; font-size:16.5px; color:#2b180d;">🔍 Tra Cứu Nhanh Đơn Hàng &amp; Lịch Hẹn Spa</h2>
+                <span style="font-size:11px; font-weight:800; color:#c2410c; background:#fff7ed; border:1px solid #fdba74; padding:2px 9px; border-radius:99px;">Thời gian thực</span>
             </div>
-            <p class="section-subtitle" style="margin:3px 0 0; font-size:12.8px; color:#7c5a46;">
+            <p class="section-subtitle" style="margin:2px 0 0; font-size:12px; color:#7c5a46;">
                 Nhập SĐT đặt hàng để xem ngay trạng thái đơn hoặc lịch Spa (SĐT mẫu: <code>0905123456</code>)
             </p>
         </div>
 
-        <form method="GET" action="{{ url_for('home_page') }}#lookupSection" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <input type="tel" name="lookup_phone" value="{{ lookup_phone }}" pattern="^0[0-9]{8,10}$" minlength="9" maxlength="11" title="Số điện thoại bắt đầu bằng số 0 và gồm 9-11 chữ số" class="form-control" style="width:220px; height:40px; font-size:13.5px; font-weight:700;" placeholder="Nhập SĐT (VD: 0905123456)..." required>
-            <button type="submit" class="btn btn-teal btn-sm" style="height:40px; padding:0 18px; font-weight:800;">🔍 Tra cứu</button>
-            <a href="{{ url_for('order_history_page', phone=lookup_phone) if lookup_phone else url_for('order_history_page') }}" class="btn btn-outline btn-sm" style="height:40px; display:inline-flex; align-items:center; padding:0 14px; font-weight:800;">
+        <form method="GET" action="{{ url_for('home_page') }}#lookupSection" style="display:flex; align-items:center; gap:7px; flex-wrap:wrap;">
+            <input type="tel" name="lookup_phone" value="{{ lookup_phone }}" pattern="^0[0-9]{8,10}$" minlength="9" maxlength="11" title="Số điện thoại bắt đầu bằng số 0 và gồm 9-11 chữ số" class="form-control" style="width:195px; height:36px; font-size:12.8px; font-weight:700;" placeholder="Nhập SĐT (VD: 0905123456)..." required>
+            <button type="submit" class="btn btn-teal btn-sm" style="height:36px; padding:0 15px; font-weight:800;">🔍 Tra cứu</button>
+            <a href="{{ url_for('order_history_page', phone=lookup_phone) if lookup_phone else url_for('order_history_page') }}" class="btn btn-outline btn-sm" style="height:36px; display:inline-flex; align-items:center; padding:0 12px; font-weight:800;">
                 📋 Xem Hồ Sơ Đầy Đủ &rarr;
             </a>
         </form>

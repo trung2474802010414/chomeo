@@ -261,17 +261,17 @@
                 <a href="{{ url_for('spa_page') }}" class="nav-item {% if active_page == 'spa' %}active{% endif %}">Đặt lịch Spa</a>
                 <a href="{{ url_for('network_page') }}" class="nav-item {% if active_page == 'network' %}active{% endif %}">Cẩm nang Giống</a>
                 {% if is_admin %}
-                    <a href="{{ url_for('order_history_page') }}" class="nav-item {% if active_page == 'orders' %}active{% endif %}">👤 Hồ sơ &amp; Đơn mua</a>
-                    <a href="{{ url_for('admin_page') }}" class="nav-item {% if active_page == 'admin' %}active{% endif %}">Dashboard Quản trị</a>
-                    <a href="{{ url_for('logout_page') }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="nav-item" style="color:#dc2626;">Đăng xuất (admin)</a>
+                    <a href="{{ url_for('order_history_page') }}" class="nav-item {% if active_page == 'orders' %}active{% endif %}">👤 Hồ sơ</a>
+                    <a href="{{ url_for('admin_page') }}" class="nav-item {% if active_page == 'admin' %}active{% endif %}">Quản trị</a>
+                    <a href="{{ url_for('logout_page') }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="nav-item" style="color:#dc2626;">Đăng xuất</a>
                 {% elif customer_logged_in %}
-                    <a href="{{ url_for('order_history_page') }}" class="nav-item {% if active_page == 'orders' %}active{% endif %}" style="display:inline-flex; align-items:center; gap:7px; padding:6px 16px; border-radius:99px; background:#fff7ed; border:1.5px solid #fed7aa; font-size:13px; font-weight:700; color:#503829; text-decoration:none; box-shadow:0 2px 8px rgba(180,100,60,0.06);">
-                        <span>👤 Hồ sơ: <strong style="color:#ea580c; font-weight:900;">{{ customer_name }}</strong> <span style="font-size:11.5px; color:#8c7161;">(Đơn mua)</span></span>
+                    <a href="{{ url_for('order_history_page') }}" class="nav-item nav-profile-pill {% if active_page == 'orders' %}active{% endif %}">
+                        <span>👤 <strong style="color:#ea580c; font-weight:800;">{{ customer_name }}</strong></span>
                     </a>
-                    <a href="{{ url_for('logout_page') }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="nav-item" style="color:#e11d48; font-weight:700; font-size:13px;">Đăng xuất</a>
+                    <a href="{{ url_for('logout_page') }}" onclick="try{sessionStorage.removeItem('mw_tab_auth_alive');}catch(e){}" class="nav-item" style="color:#e11d48; font-weight:700;">Đăng xuất</a>
                 {% else %}
-                    <a href="{{ url_for('order_history_page') }}" class="nav-item {% if active_page == 'orders' %}active{% endif %}">👤 Hồ sơ &amp; Đơn mua</a>
-                    <a href="{{ url_for('login_page') }}" class="nav-item {% if active_page == 'login' %}active{% endif %}">🔑 Đăng nhập / Đăng ký</a>
+                    <a href="{{ url_for('order_history_page') }}" class="nav-item {% if active_page == 'orders' %}active{% endif %}">👤 Hồ sơ</a>
+                    <a href="{{ url_for('login_page') }}" class="nav-item {% if active_page == 'login' %}active{% endif %}">🔑 Đăng nhập</a>
                 {% endif %}
                 <a href="{{ url_for('cart_page') }}" class="nav-cart-btn">
                     <span>🛒 Giỏ hàng</span>
@@ -613,8 +613,8 @@
     <style>
     #mwAiWidgetContainer {
         position: fixed;
-        bottom: 24px;
-        right: 24px;
+        bottom: 18px;
+        right: 18px;
         z-index: 99999;
         font-family: inherit;
     }
@@ -623,14 +623,14 @@
         color: #1a0f00;
         border: none;
         border-radius: 50px;
-        padding: 11px 18px;
+        padding: 8px 14px;
         font-weight: 700;
-        font-size: 13.5px;
+        font-size: 12.5px;
         cursor: pointer;
-        box-shadow: 0 8px 24px rgba(217, 119, 6, 0.45);
+        box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 7px;
         transition: all 0.25s ease;
     }
     #mwAiTriggerBtn:hover {
@@ -652,12 +652,12 @@
     }
     #mwAiChatModal {
         position: fixed;
-        bottom: 82px;
-        right: 24px;
-        width: 380px;
-        max-width: calc(100vw - 32px);
-        height: 500px;
-        max-height: calc(100vh - 105px);
+        bottom: 68px;
+        right: 18px;
+        width: 340px;
+        max-width: calc(100vw - 28px);
+        height: 430px;
+        max-height: calc(100vh - 90px);
         background: #181512;
         border: 1px solid #3d342a;
         border-radius: 20px;
